@@ -30,3 +30,5 @@ I specialize in:
 
 ## 📂 Folder Structure
 
+📦my-portfolio ┣ 📁public ┣ 📁src ┃ ┣ 📁components ┃ ┣ 📁pages ┃ ┣ 📁styles ┃ ┗ 📄index.tsx ┣ 📄package.json ┣ 📄tailwind.config.js ┗ 📄README.md
+
