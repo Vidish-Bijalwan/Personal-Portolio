@@ -8,7 +8,7 @@ Welcome to my personal portfolio website! This project showcases who I am, what 
 
 ## 📸 Preview
 
-![Portfolio Preview](public/profile_photo.png)
+![Portfolio Preview](public/image.png)
 
 ---
 
