@@ -2,20 +2,29 @@
 
 import { useEffect, useState } from "react"
 import { motion } from "framer-motion"
-import { useTheme } from "next-themes"
 
 export default function AnimatedCursor() {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
   const [cursorVariant, setCursorVariant] = useState("default")
-  const { theme } = useTheme()
   const [mounted, setMounted] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
     setMounted(true)
-  }, [])
 
-  useEffect(() => {
-    if (!mounted) return
+    // Check if mobile on mount
+    const checkMobile = () => {
+      if (typeof window !== "undefined") {
+        setIsMobile(window.matchMedia("(max-width: 768px)").matches)
+      }
+    }
+
+    checkMobile()
+
+    // Return early if mobile - no need to set up event listeners
+    if (typeof window !== "undefined" && window.matchMedia("(max-width: 768px)").matches) {
+      return
+    }
 
     const mouseMove = (e: MouseEvent) => {
       setMousePosition({
@@ -35,28 +44,37 @@ export default function AnimatedCursor() {
     window.addEventListener("mousedown", mouseDown)
     window.addEventListener("mouseup", mouseUp)
 
-    const links = document.querySelectorAll("a, button")
-    links.forEach((link) => {
-      link.addEventListener("mouseenter", mouseEnterLink)
-      link.addEventListener("mouseleave", mouseLeaveLink)
-    })
+    // Only add these listeners after component is mounted
+    setTimeout(() => {
+      const links = document.querySelectorAll("a, button")
+      links.forEach((link) => {
+        link.addEventListener("mouseenter", mouseEnterLink)
+        link.addEventListener("mouseleave", mouseLeaveLink)
+      })
 
-    const buttons = document.querySelectorAll(".btn-hover")
-    buttons.forEach((button) => {
-      button.addEventListener("mouseenter", mouseEnterButton)
-      button.addEventListener("mouseleave", mouseLeaveButton)
-    })
+      const buttons = document.querySelectorAll(".btn-hover")
+      buttons.forEach((button) => {
+        button.addEventListener("mouseenter", mouseEnterButton)
+        button.addEventListener("mouseleave", mouseLeaveButton)
+      })
+    }, 1000)
+
+    window.addEventListener("resize", checkMobile)
 
     return () => {
       window.removeEventListener("mousemove", mouseMove)
       window.removeEventListener("mousedown", mouseDown)
       window.removeEventListener("mouseup", mouseUp)
+      window.removeEventListener("resize", checkMobile)
 
+      // Clean up link listeners
+      const links = document.querySelectorAll("a, button")
       links.forEach((link) => {
         link.removeEventListener("mouseenter", mouseEnterLink)
         link.removeEventListener("mouseleave", mouseLeaveLink)
       })
 
+      const buttons = document.querySelectorAll(".btn-hover")
       buttons.forEach((button) => {
         button.removeEventListener("mouseenter", mouseEnterButton)
         button.removeEventListener("mouseleave", mouseLeaveButton)
@@ -104,20 +122,6 @@ export default function AnimatedCursor() {
       mixBlendMode: "difference",
     },
   }
-
-  // Hide cursor on mobile/touch devices
-  const [isMobile, setIsMobile] = useState(false)
-
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.matchMedia("(max-width: 768px)").matches)
-    }
-
-    checkMobile()
-    window.addEventListener("resize", checkMobile)
-
-    return () => window.removeEventListener("resize", checkMobile)
-  }, [])
 
   if (isMobile || !mounted) return null
 

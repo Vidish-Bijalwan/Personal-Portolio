@@ -1,7 +1,6 @@
 "use client"
 
 import { useState } from "react"
-import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { FileText, Check } from "lucide-react"
 
@@ -12,7 +11,22 @@ export default function ResumeButton() {
   const handleDownload = () => {
     setIsDownloading(true)
 
-    // Simulate download delay
+    // Create a dummy PDF file for download
+    const pdfBlob = new Blob(["Vidish Bijalwan - Resume"], { type: "application/pdf" })
+    const url = URL.createObjectURL(pdfBlob)
+
+    // Create a link element and trigger download
+    const link = document.createElement("a")
+    link.href = url
+    link.download = "vidish_bijalwan_resume.pdf"
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+
+    // Clean up the URL
+    URL.revokeObjectURL(url)
+
+    // Show success state
     setTimeout(() => {
       setIsDownloading(false)
       setIsDownloaded(true)
@@ -21,32 +35,20 @@ export default function ResumeButton() {
       setTimeout(() => {
         setIsDownloaded(false)
       }, 2000)
-
-      // In a real implementation, you would trigger the actual download here
-      // window.open('/path-to-resume.pdf', '_blank')
     }, 1500)
   }
 
   return (
-    <Button
-      variant="outline"
-      className="relative group btn-hover overflow-hidden"
-      onClick={handleDownload}
-      disabled={isDownloading}
-    >
-      <span className="relative z-10 flex items-center">
+    <Button variant="outline" className="border border-primary/50" onClick={handleDownload} disabled={isDownloading}>
+      <span className="flex items-center">
         {isDownloaded ? (
           <>
-            <Check className="mr-2 h-4 w-4 text-green-500" />
+            <Check className="mr-2 h-4 w-4 text-blue-500" />
             Resume Downloaded
           </>
         ) : isDownloading ? (
           <>
-            <motion.div
-              className="mr-2 h-4 w-4 border-2 border-primary border-t-transparent rounded-full"
-              animate={{ rotate: 360 }}
-              transition={{ duration: 1, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
-            />
+            <div className="mr-2 h-4 w-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
             Downloading...
           </>
         ) : (
@@ -56,12 +58,6 @@ export default function ResumeButton() {
           </>
         )}
       </span>
-      <motion.span
-        className="absolute inset-0 bg-primary/20"
-        initial={{ x: "-100%" }}
-        whileHover={{ x: 0 }}
-        transition={{ duration: 0.3, ease: "easeInOut" }}
-      />
     </Button>
   )
 }

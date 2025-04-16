@@ -4,6 +4,10 @@ import { useEffect, useState } from "react"
 import { motion, useScroll, useSpring } from "framer-motion"
 
 export default function ScrollProgress() {
+  const [isVisible, setIsVisible] = useState(false)
+  const [mounted, setMounted] = useState(false)
+  const [scrollPercentage, setScrollPercentage] = useState(0)
+
   const { scrollYProgress } = useScroll()
   const scaleX = useSpring(scrollYProgress, {
     stiffness: 100,
@@ -11,9 +15,14 @@ export default function ScrollProgress() {
     restDelta: 0.001,
   })
 
-  const [isVisible, setIsVisible] = useState(false)
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   useEffect(() => {
+    if (!mounted) return
+
+    // Update visibility based on scroll position
     const handleScroll = () => {
       if (window.scrollY > 100) {
         setIsVisible(true)
@@ -22,9 +31,32 @@ export default function ScrollProgress() {
       }
     }
 
+    // Update scroll percentage
+    const updateScrollPercentage = () => {
+      try {
+        const currentProgress = scrollYProgress.get()
+        if (currentProgress !== undefined) {
+          setScrollPercentage(Math.round(currentProgress * 100))
+        }
+      } catch (error) {
+        console.warn("Error updating scroll percentage:", error)
+      }
+    }
+
     window.addEventListener("scroll", handleScroll)
-    return () => window.removeEventListener("scroll", handleScroll)
-  }, [])
+
+    // Set up an interval to safely update the percentage
+    const intervalId = setInterval(updateScrollPercentage, 100)
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll)
+      clearInterval(intervalId)
+    }
+  }, [mounted, scrollYProgress])
+
+  if (!mounted) return null
+
+  // Create a spring animation based on scrollYProgress
 
   return (
     <>
@@ -39,7 +71,7 @@ export default function ScrollProgress() {
         style={{ opacity: isVisible ? 1 : 0 }}
         transition={{ opacity: { duration: 0.3 } }}
       >
-        <motion.span>{Math.round(scrollYProgress.get() * 100)}% scrolled</motion.span>
+        <motion.span>{scrollPercentage}% scrolled</motion.span>
       </motion.div>
     </>
   )

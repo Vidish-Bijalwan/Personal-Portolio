@@ -1,7 +1,6 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { motion, AnimatePresence } from "framer-motion"
 import { ArrowUp } from "lucide-react"
 
 export default function ScrollToTop() {
@@ -28,21 +27,14 @@ export default function ScrollToTop() {
   }
 
   return (
-    <AnimatePresence>
-      {isVisible && (
-        <motion.button
-          initial={{ opacity: 0, scale: 0.5 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.5 }}
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
-          onClick={scrollToTop}
-          className="fixed bottom-8 right-8 p-3 rounded-full bg-primary text-white shadow-lg z-50 neon-button"
-          aria-label="Scroll to top"
-        >
-          <ArrowUp className="h-6 w-6" />
-        </motion.button>
-      )}
-    </AnimatePresence>
+    <button
+      className={`fixed bottom-8 right-8 p-3 rounded-full bg-primary text-white shadow-lg z-50 transition-all duration-300 ${
+        isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10 pointer-events-none"
+      }`}
+      onClick={scrollToTop}
+      aria-label="Scroll to top"
+    >
+      <ArrowUp className="h-6 w-6" />
+    </button>
   )
 }

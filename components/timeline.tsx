@@ -1,6 +1,7 @@
 "use client"
 
-import { motion } from "framer-motion"
+import { motion, useInView } from "framer-motion"
+import { useRef } from "react"
 
 interface TimelineItemProps {
   year: string
@@ -26,14 +27,16 @@ export default function Timeline({ items }: { items: Omit<TimelineItemProps, "in
 }
 
 function TimelineItem({ year, title, description, isLeft = true, index }: TimelineItemProps) {
+  const itemRef = useRef(null)
+  const isInView = useInView(itemRef, { once: true, amount: 0.3 })
+
   return (
-    <div className={`flex items-center ${isLeft ? "flex-row" : "flex-row-reverse"}`}>
+    <div className={`flex items-center ${isLeft ? "flex-row" : "flex-row-reverse"}`} ref={itemRef}>
       <motion.div
         className={`w-5/12 ${isLeft ? "text-right pr-8" : "text-left pl-8"}`}
         initial={{ opacity: 0, x: isLeft ? -50 : 50 }}
-        whileInView={{ opacity: 1, x: 0 }}
+        animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: isLeft ? -50 : 50 }}
         transition={{ duration: 0.5, delay: index * 0.1 }}
-        viewport={{ once: true }}
       >
         <div className="text-primary font-bold">{year}</div>
         <h3 className="text-xl font-semibold mb-2">{title}</h3>
@@ -44,9 +47,8 @@ function TimelineItem({ year, title, description, isLeft = true, index }: Timeli
         <motion.div
           className="w-6 h-6 rounded-full bg-primary relative z-10"
           initial={{ scale: 0 }}
-          whileInView={{ scale: 1 }}
+          animate={isInView ? { scale: 1 } : { scale: 0 }}
           transition={{ duration: 0.5, delay: index * 0.1 + 0.2 }}
-          viewport={{ once: true }}
         >
           <motion.div
             className="absolute inset-0 rounded-full bg-primary/30"
@@ -59,9 +61,8 @@ function TimelineItem({ year, title, description, isLeft = true, index }: Timeli
       <motion.div
         className="w-5/12"
         initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
+        animate={isInView ? { opacity: 1 } : { opacity: 0 }}
         transition={{ duration: 0.5, delay: index * 0.1 + 0.3 }}
-        viewport={{ once: true }}
       />
     </div>
   )

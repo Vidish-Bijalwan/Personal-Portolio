@@ -4,18 +4,17 @@ import { useState, useEffect } from "react"
 import Link from "next/link"
 import { Menu, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import ThemeToggle from "@/components/theme-toggle"
 import { cn } from "@/lib/utils"
-import { motion } from "framer-motion"
 import Logo from "@/components/logo"
+import AnimatedThemeToggle from "@/components/animated-theme-toggle"
+import { smoothScrollTo } from "@/utils/smooth-scroll"
 
 const navItems = [
-  { name: "About", href: "#about" },
-  { name: "Skills", href: "#skills" },
-  { name: "AI/ML", href: "#ai-projects" },
-  { name: "Frontend", href: "#frontend-projects" },
-  { name: "Experience", href: "#experience" },
-  { name: "Contact", href: "#contact" },
+  { name: "About", href: "about" },
+  { name: "Skills", href: "skills" },
+  { name: "Projects", href: "projects" },
+  { name: "Experience", href: "experience" },
+  { name: "Contact", href: "contact" },
 ]
 
 export default function Navbar() {
@@ -28,7 +27,7 @@ export default function Navbar() {
       setScrolled(window.scrollY > 10)
 
       // Determine active section
-      const sections = navItems.map((item) => item.href.substring(1))
+      const sections = navItems.map((item) => item.href)
       const scrollPosition = window.scrollY + 100
 
       for (let i = sections.length - 1; i >= 0; i--) {
@@ -39,30 +38,28 @@ export default function Navbar() {
         }
       }
     }
+
     window.addEventListener("scroll", handleScroll)
+    // Initial call to set the active section on mount
+    handleScroll()
+
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
   const scrollToSection = (href: string) => {
     setIsOpen(false)
-    const element = document.querySelector(href)
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth" })
-    }
+    smoothScrollTo(href)
   }
 
   return (
-    <motion.header
-      initial={{ y: -100 }}
-      animate={{ y: 0 }}
-      transition={{ duration: 0.5, ease: "easeOut" }}
+    <header
       className={cn(
         "fixed top-0 w-full z-50 transition-all duration-300 backdrop-blur-md",
         scrolled ? "bg-background/80 shadow-md" : "bg-transparent",
       )}
     >
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-        <Link href="/" className="text-2xl font-bold relative group z-10">
+        <Link href="/" className="text-2xl font-bold relative group z-10" onClick={() => scrollToSection("hero")}>
           <Logo />
         </Link>
 
@@ -74,20 +71,19 @@ export default function Navbar() {
               onClick={() => scrollToSection(item.href)}
               className={cn(
                 "text-foreground/80 hover:text-primary transition-colors relative",
-                activeSection === item.href.substring(1) &&
+                activeSection === item.href &&
                   "text-primary font-medium after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:bg-primary",
               )}
             >
               <span className="relative z-10">{item.name}</span>
-              <span className="absolute inset-0 rounded-lg bg-primary/10 scale-0 transition-all duration-300 group-hover:scale-100"></span>
             </button>
           ))}
-          <ThemeToggle />
+          <AnimatedThemeToggle />
         </nav>
 
         {/* Mobile Navigation Toggle */}
         <div className="flex items-center md:hidden space-x-4">
-          <ThemeToggle />
+          <AnimatedThemeToggle />
           <Button variant="ghost" size="icon" onClick={() => setIsOpen(!isOpen)} aria-label="Toggle Menu">
             {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </Button>
@@ -95,27 +91,22 @@ export default function Navbar() {
       </div>
 
       {/* Mobile Navigation Menu */}
-      <motion.div
-        initial={false}
-        animate={isOpen ? { opacity: 1, height: "auto" } : { opacity: 0, height: 0 }}
-        transition={{ duration: 0.3 }}
+      <div
         className={cn(
-          "fixed inset-0 top-16 bg-background/95 z-40 flex flex-col items-center justify-center space-y-8 overflow-hidden md:hidden",
+          "fixed inset-0 top-16 bg-background/95 z-40 flex flex-col items-center justify-center space-y-8 overflow-hidden md:hidden transition-all duration-300",
+          isOpen ? "opacity-100 h-[calc(100vh-4rem)]" : "opacity-0 h-0 pointer-events-none",
         )}
       >
         {navItems.map((item, index) => (
-          <motion.button
+          <button
             key={item.name}
-            initial={{ opacity: 0, y: 20 }}
-            animate={isOpen ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-            transition={{ duration: 0.3, delay: index * 0.1 }}
             onClick={() => scrollToSection(item.href)}
             className="text-2xl font-medium hover:text-primary transition-colors"
           >
             {item.name}
-          </motion.button>
+          </button>
         ))}
-      </motion.div>
-    </motion.header>
+      </div>
+    </header>
   )
 }

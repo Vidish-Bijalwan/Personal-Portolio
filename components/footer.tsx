@@ -5,7 +5,7 @@ import { Github, Linkedin, Mail } from "lucide-react"
 
 export default function Footer() {
   return (
-    <footer className="py-8 border-t">
+    <footer className="py-8 border-t border-border/50">
       <div className="container mx-auto px-4">
         <div className="flex flex-col md:flex-row items-center justify-between">
           <motion.div
@@ -28,7 +28,7 @@ export default function Footer() {
             viewport={{ once: true }}
           >
             <motion.a
-              href="https://github.com/Vidish-Bijalwan"
+              href="https://github.com/vidishbijalwan"
               target="_blank"
               rel="noopener noreferrer"
               className="p-2 rounded-full hover:bg-muted transition-colors relative group"
