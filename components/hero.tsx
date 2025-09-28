@@ -57,9 +57,8 @@ export default function Hero() {
 
           <div className="max-w-2xl text-center mb-8">
             <p className="body-lg text-foreground/70">
-              I am an AI/ML enthusiast and an aspiring AI Security Specialist currently in my second year of B.Tech,
-              specializing in Artificial Intelligence and Machine Learning. My passion lies in developing innovative AI
-              systems that can enhance security and functionality. I thrive in collaborative environments like
+              I am an ML/DL freak currently in my Third year of B.Tech,
+              specializing in Artificial Intelligence and Machine Learning . I thrive in collaborative environments like
               hackathons, where I blend creativity with technology to deliver impactful solutions.
             </p>
           </div>
