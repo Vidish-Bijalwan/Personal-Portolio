@@ -75,20 +75,20 @@ export default function About() {
             className="space-y-6"
           >
             <p className="text-lg">
-              I am an AI/ML enthusiast and an aspiring AI Security Specialist currently in my second year of B.Tech,
-              specializing in Artificial Intelligence and Machine Learning at a university in Dehradun.
+              I am an ML/DL freak  currently in my Third year of B.Tech,
+              specializing in Artificial Intelligence and Machine Learning at Graphic Era Hill University.
             </p>
 
             <p className="text-lg">
-              My passion lies in developing innovative AI systems that can enhance security and functionality. I thrive
+              My passion lies in developing innovative AI systems . I thrive
               in collaborative environments like hackathons, where I blend creativity with technology to deliver
               impactful solutions.
             </p>
 
             <p className="text-lg">
-              I have represented my college at the North Zone Innovation Competition, showcasing my innovation and
-              problem-solving capabilities. I regularly participate in hackathons and engage with tech communities to
-              explore innovative solutions.
+              Loves To work on end-to-end machine learning and AI projects across domains like predictive analytics,
+              computer vision, and optimization systems. My areas of focus include Generative AI, LLMs and applied AI solutions that
+              bridge research with real-world applications..
             </p>
 
             <div className="pt-4">
@@ -99,13 +99,16 @@ export default function About() {
                     <span className="font-medium">B.Tech in AI & Machine Learning</span>
                     <span className="text-sm text-foreground/70">2023 - 2027</span>
                   </div>
-                  <p className="text-foreground/70">University in Dehradun</p>
+                  <p className="text-foreground/70">Grapgic Era Hill University</p>
                 </div>
 
                 <div className="p-4 rounded-lg bg-secondary/30 border border-secondary">
                   <div className="flex justify-between items-center">
                     <span className="font-medium">School Education</span>
                     <span className="text-sm text-foreground/70">2016 - 2022</span>
+                    </div>
+                  <p className="text-foreground/70">Kendriya Vidyalaya Sangathan</p>
+                </div>
                   </div>
                 </div>
               </div>
