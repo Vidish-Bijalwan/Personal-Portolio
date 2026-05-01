@@ -1,66 +1,131 @@
-# 🌐 Personal Portfolio - Vidish Bijalwan
+# 🚀 Vidish Bijalwan — AI/ML Portfolio
 
-Welcome to my personal portfolio website! This project showcases who I am, what I do, and the work I’ve done. Built with cutting-edge web technologies and deployed on **Vercel**, it's designed to be fast, responsive, and interactive.
+<div align="center">
 
-🔗 **Live Site**: [vidish-bijalwan.vercel.app](https://vidish-bijalwan.vercel.app/)
+![Next.js](https://img.shields.io/badge/Next.js-15-black?style=for-the-badge&logo=next.js)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?style=for-the-badge&logo=typescript)
+![TailwindCSS](https://img.shields.io/badge/TailwindCSS-3-38bdf8?style=for-the-badge&logo=tailwindcss)
+![Framer Motion](https://img.shields.io/badge/Framer_Motion-latest-ff0055?style=for-the-badge&logo=framer)
+![Vercel](https://img.shields.io/badge/Deployed_on-Vercel-black?style=for-the-badge&logo=vercel)
 
----
+**🌐 Live Site: [vidish-bijalwan.vercel.app](https://vidish-bijalwan.vercel.app)**
 
-## 📸 Preview
-
-![Portfolio Preview](public/image.png)
-
----
-
-## 🚀 Features
-
-- 💻 Modern Tech Stack (Next.js, TailwindCSS, TypeScript)
-- 🎨 Smooth animations and transitions
-- 🌙 Light/Dark mode toggle
-- 📱 Fully responsive design
-- 🧠 Showcases projects, skills, testimonials, and more
-- 💬 Contact form and social links
+</div>
 
 ---
 
-## 📁 Folder Structure
+## 👨‍💻 About
 
-├── components/ # Reusable UI components ├── pages/ # Route-based pages ├── public/ # Static assets ├── styles/ # Custom styles (if any) ├── utils/ # Helper functions ├── .gitignore ├── README.md └── ...
+A modern, premium AI/ML portfolio for **Vidish Bijalwan**, a Machine Learning and Data Science enthusiast specializing in production-ready predictive systems, computer vision, and analytical pipelines. Built with cutting-edge web technologies, featuring a custom Neural Network background animation and deployed on Vercel.
 
+---
 
+## ✨ Features
+
+- **🧠 Neural Network Background** — Custom HTML5 Canvas animation simulating a deep learning model training in real-time (forward pass signal propagation across layered nodes)
+- **🌗 Dark / Light Mode** — Seamless theme switching powered by `next-themes`
+- **📸 Premium Profile Photos** — Glassmorphism hero frame with grayscale-to-color hover, 3D floating card on the about page
+- **🎓 PESE600 Assessment Section** — Dedicated section for exam submissions including:
+  - Live e-portfolio link
+  - Handwritten essay (PDF) on *Remote Work – Future of Employment*
+  - Recorded self-introduction video placeholder
+- **📢 Assessment Banner** — Animated slide-down notification for evaluators visiting the site
+- **⚡ Smooth Scroll Navigation** — Accessible keyboard & mouse navigation across all sections
+- **📱 Fully Responsive** — Optimized for mobile, tablet, and desktop
+- **🎞️ Framer Motion Animations** — Scroll-triggered transitions and micro-animations throughout
+- **📬 Contact Form** — Functional contact section with form validation
+
+---
+
+## 🗂️ Sections
+
+| Section | Description |
+|---|---|
+| **Hero** | Animated intro with profile photo, typewriter effect, and social links |
+| **About** | Background, skills breakdown, education timeline |
+| **Skills** | Visual skill showcase with progress bars |
+| **Projects** | Filterable project cards with live demo and GitHub links |
+| **Experience** | Work experience timeline |
+| **Assessment** | PESE600 Sessional Assessment submission (essay + self-intro video) |
+| **Contact** | Contact form + social links |
 
 ---
 
 ## 🛠️ Tech Stack
 
-- **Framework**: Next.js
-- **Styling**: Tailwind CSS
-- **Language**: TypeScript
-- **Deployment**: Vercel
-- **Animations**: Framer Motion
+| Technology | Usage |
+|---|---|
+| **Next.js 15** | React framework with App Router |
+| **TypeScript** | Type-safe development |
+| **Tailwind CSS** | Utility-first styling |
+| **Framer Motion** | Animations and transitions |
+| **HTML5 Canvas** | Custom neural network background |
+| **next-themes** | Dark/light mode |
+| **Lucide React** | Icon library |
+| **Radix UI** | Accessible headless UI components |
+| **Vercel** | Hosting and deployment |
 
 ---
 
-## 🧑‍💻 Getting Started (Local Setup)
+## 🚀 Getting Started
 
-1. **Clone the repo**
-   ```bash
-   git clone https://github.com/Vidish-Bijalwan/Personal-Portolio.git
-   cd Personal-Portolio
+### Prerequisites
+- Node.js 18+
+- npm or pnpm
 
+### Installation
 
-Install dependencies : npm install
+```bash
+# Clone the repository
+git clone https://github.com/Vidish-Bijalwan/Personal-Portolio.git
+cd Personal-Portolio
 
-Run the development server : Open http://localhost:3000 in your browser.
+# Install dependencies (use legacy-peer-deps due to date-fns peer conflict)
+npm install --legacy-peer-deps
 
-📬 Contact Me
+# Start the development server
+npm run dev
+```
 
-Feel free to connect with me:
+Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 
-    LinkedIn : https://www.linkedin.com/in/vidish-bijalwan/
+---
 
+## 📁 Project Structure
 
-    GitHub : https://github.com/Vidish-Bijalwan
+```
+├── app/
+│   ├── page.tsx          # Main page composition
+│   ├── layout.tsx        # Root layout with theme provider
+│   └── globals.css       # Global styles
+├── components/
+│   ├── hero.tsx               # Hero section with profile photo
+│   ├── about.tsx              # About section with 3D photo card
+│   ├── skills.tsx             # Skills visualization
+│   ├── projects.tsx           # Filterable projects grid
+│   ├── experience.tsx         # Experience timeline
+│   ├── assessment.tsx         # PESE600 assessment section
+│   ├── assessment-banner.tsx  # Alert banner for evaluators
+│   ├── particle-background.tsx # Neural network canvas animation
+│   ├── contact.tsx            # Contact form
+│   └── navbar.tsx             # Sticky navigation bar
+├── public/
+│   ├── profile.png            # Hero profile photo
+│   ├── profile_photo.png      # About section photo
+│   ├── essay.pdf              # PESE600 handwritten essay
+│   └── vidish_resume6sem.pdf  # Resume PDF
+└── utils/
+    └── smooth-scroll.ts       # Custom smooth scroll utility
+```
 
-    Email : vidishofficial@gmail.com
+---
 
+## 📄 License
+
+This project is open source and available under the [MIT License](LICENSE).
+
+---
+
+<div align="center">
+  Made with ❤️ by <a href="https://github.com/Vidish-Bijalwan">Vidish Bijalwan</a>
+</div>
