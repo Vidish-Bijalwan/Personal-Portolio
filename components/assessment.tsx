@@ -65,16 +65,8 @@ export default function Assessment() {
               A 1-minute recorded self introduction video summarizing my background and aspirations.
             </p>
             
-            <div className="w-full aspect-video bg-black/80 rounded-md flex flex-col items-center justify-center relative overflow-hidden group/video border border-primary/20">
-              <div className="absolute inset-0 bg-gradient-to-tr from-primary/10 to-transparent pointer-events-none"></div>
-              
-              <Video className="h-10 w-10 text-primary/50 mb-2 animate-pulse" />
-              <span className="text-sm font-medium animate-pulse text-primary/80 z-10 px-4">
-                Video Placeholder
-              </span>
-              
-              {/* NOTE: Update the src property below when video is ready */}
-              {/* <video src="/self-intro.mp4" controls className="absolute inset-0 w-full h-full object-cover z-20"></video> */}
+            <div className="w-full aspect-video bg-black rounded-md flex flex-col items-center justify-center relative overflow-hidden group/video border border-primary/20 hover:border-primary/50 transition-all shadow-lg">
+              <video src="/self-intro.mp4" controls preload="metadata" className="absolute inset-0 w-full h-full object-cover z-20 rounded-md"></video>
             </div>
           </Card>
         </div>
