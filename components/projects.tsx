@@ -1,235 +1,416 @@
 "use client"
 
-import { useState } from "react"
-import { Github, ExternalLink, X } from "lucide-react"
-import Image from "next/image"
-import EnhancedProjectCard from "@/components/enhanced-project-card"
-import AnimatedProjectFilter from "@/components/animated-project-filter"
-import AnimatedButton from "@/components/animated-button"
+import { useState, useRef } from "react"
+import { motion, useInView, AnimatePresence } from "framer-motion"
 
-const projects = [
+const systems = [
   {
-    title: "Saarthi -- Assistive AI Device",
-    description:
-      "Developed an ESP32-CAM based assistive device to support visually, hearing, and physically impaired users. Features real-time obstacle detection, voice commands, and LLM-based automation.",
-    image: "/saarthi.png",
-    tags: ["IoT", "Computer Vision", "LLM Integration", "ESP32-CAM"],
+    id: "SYS-001",
+    status: "DEPLOYED",
+    title: "Saarthi — Assistive AI Device",
+    domain: "ACCESSIBILITY · IOT · VISION",
+    year: "2025",
+    problem:
+      "Visually and hearing impaired users lack affordable, portable assistive technology that operates in real-time without cloud dependency.",
+    approach:
+      "Built an edge-computed IoT solution using ESP32-CAM with onboard inference. Integrated LLM-based HCI for natural language interaction without latency.",
+    stack: ["ESP32-CAM", "Computer Vision", "LLM Integration", "Python", "IoT"],
+    architecture: [
+      "INPUT   :: Camera feed (30fps) + Microphone",
+      "PROC    :: ESP32-CAM onboard inference",
+      "MODULE  :: Obstacle detection model",
+      "MODULE  :: Voice command recognition",
+      "LLM     :: Human-computer interaction layer",
+      "OUTPUT  :: Audio feedback + haptic signal",
+    ],
+    results: "Won 1st place — SAARTHI Hackathon 2025, IEEE. Prototype demonstrated to 200+ attendees.",
     github: "https://github.com/Vidish-Bijalwan",
-    demo: "#",
-    category: "AI/ML",
+    live: null,
   },
   {
-    title: "Traffic Flow Optimization",
-    description:
-      "Developed a web app to optimize traffic flow using graph algorithms deployed on Streamlit. Created visualization tools to analyze traffic patterns and suggest optimal routes.",
-    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR1xTLrlwTQV7jMcFw-KlUyQ4tw09uYLvScrQ&s",
-    tags: ["Graph Algorithms", "Streamlit", "Python", "Data Visualization"],
-    github: "https://github.com/Vidish-Bijalwan/SMART-TRAFFIC-OPTIMIZER",
-    demo: "https://smart-traffic-optimizer-vidish-bijalwan.streamlit.app/",
-    category: "Web",
-  },
-  {
-    title: "Customer Churn Prediction",
-    description:
-      "Built an AI model to forecast customer churn and revenue trends for smarter business decisions. Implemented machine learning algorithms to analyze customer behavior patterns.",
-    image: "/churn.png",
-    tags: ["Python", "Machine Learning", "Data Analysis", "Predictive Modeling"],
+    id: "SYS-002",
+    status: "DEPLOYED",
+    title: "Customer Churn Prediction Engine",
+    domain: "ML SYSTEMS · FORECASTING · ANALYTICS",
+    year: "2025",
+    problem:
+      "Businesses lose revenue to preventable customer churn because attrition signals aren't identified early enough for intervention.",
+    approach:
+      "Ensemble ML pipeline combining XGBoost and LightGBM with SHAP-based explainability. Business-oriented output: probability scores + actionable retention signals.",
+    stack: ["Python", "XGBoost", "LightGBM", "SHAP", "Pandas", "Scikit-learn"],
+    architecture: [
+      "INPUT   :: Customer behavioral + transaction data",
+      "PROC    :: Feature engineering pipeline",
+      "MODEL   :: XGBoost + LightGBM ensemble",
+      "EXPLAIN :: SHAP value attribution",
+      "OUTPUT  :: Churn probability + retention signals",
+      "DEPLOY  :: FastAPI endpoint + Streamlit dashboard",
+    ],
+    results: "High-accuracy churn prediction. SHAP explanations surfaced top behavioral churn drivers.",
     github: "https://github.com/Vidish-Bijalwan/Churn-And-Revenue-Forecaster",
-    demo: "#",
-    category: "AI/ML",
+    live: null,
   },
   {
-    title: "Stone-Mine Classification",
-    description:
-      "Developed a system to classify stones and mines using machine learning. Used sonar data to train models that can accurately distinguish between rocks and mines underwater.",
-    image: "https://navymuseum.co.nz/wp-content/uploads/OC-143.jpg",
-    tags: ["Classification", "Python", "Scikit-Learn", "Data Processing"],
-    github: "https://github.com/Vidish-Bijalwan/Sonarr-Ml--Model---Stone-V-s-Mine",
-    demo: "#",
-    category: "AI/ML",
+    id: "SYS-003",
+    status: "LIVE",
+    title: "Traffic Flow Optimizer",
+    domain: "GRAPH ALGORITHMS · VISUALIZATION · WEB",
+    year: "2024",
+    problem:
+      "Urban traffic congestion is poorly modeled by static route systems that don't account for real-time flow or graph topology.",
+    approach:
+      "Graph-based traffic simulation with Dijkstra + A* pathfinding. Interactive visualization built on Streamlit for real-time flow analysis and route optimization suggestions.",
+    stack: ["Python", "Graph Algorithms", "Dijkstra", "A*", "Streamlit", "NetworkX"],
+    architecture: [
+      "INPUT   :: Road network graph (nodes + edges)",
+      "PROC    :: Weighted graph construction",
+      "ALGO    :: Dijkstra + A* pathfinding",
+      "VIZ     :: NetworkX + Plotly render",
+      "OUTPUT  :: Optimal routes + congestion map",
+      "DEPLOY  :: Streamlit Cloud",
+    ],
+    results: "Live deployment on Streamlit. Handles large road networks with real-time re-routing.",
+    github: "https://github.com/Vidish-Bijalwan/SMART-TRAFFIC-OPTIMIZER",
+    live: "https://smart-traffic-optimizer-vidish-bijalwan.streamlit.app/",
   },
   {
-    title: "AI-Powered Social Platform",
-    description:
-      "Created a smarter, AI-powered social platform with dynamic user interactions. Implemented recommendation systems and content moderation using machine learning.",
-    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQM__Xqaqn_jnYSB43H3S4dKvKUU9aH_7EsFA&s",
-    tags: ["Python", "NLP", "Recommendation Systems", "Web Development"],
-    github: "https://github.com/vidishbijalwan",
-    demo: "#",
-    category: "Web",
-  },
-  {
-    title: "House Price Prediction",
-    description:
-      "This is an interactive web application that predicts house prices based on user inputs like area, number of bedrooms, bathrooms, and other house features. It uses a Random Forest Regressor model trained on a housing dataset and is deployed using Streamlit for an interactive user interface.",
-    image:
-      "https://images.pexels.com/photos/31597537/pexels-photo-31597537/free-photo-of-woman-in-quiet-courtyard-in-yancheng-china.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
-    tags: ["Python", "Algorithms", "Streamlit", "Dataset"],
-    github: "https://github.com/Vidish-Bijalwan/House-Price-Prediction",
-    demo: "#",
-    category: "Finance",
-  },
-  {
+    id: "SYS-004",
+    status: "EXPERIMENTAL",
     title: "Sign Language Translator",
-    description:
-      "Used Computer Vision and NLP to translate sign language into speech for better accessibility. Developed models that can recognize hand gestures and convert them to text and speech.",
-    image:
-      "https://images.pexels.com/photos/7516363/pexels-photo-7516363.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
-    tags: ["Computer Vision", "NLP", "Python", "Accessibility"],
-    github: "https://github.com/vidishbijalwan",
-    demo: "#",
-    category: "AI/ML",
+    domain: "COMPUTER VISION · NLP · ACCESSIBILITY",
+    year: "2025",
+    problem:
+      "Sign language creates a communication barrier for hearing individuals interacting with deaf/hard-of-hearing communities.",
+    approach:
+      "Real-time hand gesture recognition via MediaPipe landmark detection fed into a classification model. NLP pipeline converts classified gestures to text and TTS speech output.",
+    stack: ["Python", "MediaPipe", "Computer Vision", "NLP", "TTS", "OpenCV"],
+    architecture: [
+      "INPUT   :: Camera feed (real-time)",
+      "PROC    :: MediaPipe hand landmark detection",
+      "MODEL   :: Gesture classification (21 landmarks)",
+      "NLP     :: Gesture-to-text mapping",
+      "TTS     :: Text-to-speech synthesis",
+      "OUTPUT  :: Spoken language output",
+    ],
+    results: "Achieved reliable gesture classification for ASL alphabet. Exploring continuous sign language recognition.",
+    github: "https://github.com/Vidish-Bijalwan",
+    live: null,
   },
   {
-    title: "Blood Donation Platform",
-    description:
-      "Built an intelligent platform to streamline blood donation processes. Implemented matching algorithms to connect donors with recipients efficiently.",
-    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSnJmjP9fSEBLaNd-l07hJEjwF6CCgea-NiVA&s",
-    tags: ["Python", "Algorithms", "Web Development", "Database"],
-    github: "https://github.com/vidishbijalwan",
-    demo: "#",
-    category: "Healthcare",
-  },
-  {
+    id: "SYS-005",
+    status: "DEPLOYED",
     title: "Healthcare Disease Prediction",
-    description:
-      "Designed a healthcare tool to provide early disease prediction using ML models. Analyzed medical data to identify patterns and risk factors for various health conditions.",
-    image: "https://dasarpai.com/assets/images/dspost/cv/Medical-Imaing-x-ray-chest.jpg",
-    tags: ["Machine Learning", "Healthcare", "Python", "Data Analysis"],
-    github: "https://github.com/vidishbijalwan",
-    demo: "#",
-    category: "Healthcare",
+    domain: "ML · HEALTHCARE · RISK ANALYSIS",
+    year: "2025",
+    problem:
+      "Early disease detection is limited by access to specialist analysis. ML can surface risk signals from standard medical data.",
+    approach:
+      "Multi-condition classification pipeline trained on medical datasets. Features engineered from vitals, lab values, and demographic factors. Calibrated probability outputs for clinical interpretability.",
+    stack: ["Python", "Scikit-learn", "Pandas", "Feature Engineering", "Calibration"],
+    architecture: [
+      "INPUT   :: Patient vitals + lab values + demographics",
+      "PROC    :: Medical feature engineering",
+      "MODEL   :: Calibrated ensemble classifier",
+      "OUTPUT  :: Disease risk probability scores",
+      "INTERP  :: Feature importance + risk factors",
+    ],
+    results: "Multi-disease prediction with calibrated probabilities. Validated on held-out medical datasets.",
+    github: "https://github.com/Vidish-Bijalwan",
+    live: null,
+  },
+  {
+    id: "SYS-006",
+    status: "DEPLOYED",
+    title: "House Price Prediction Engine",
+    domain: "REGRESSION · REAL ESTATE · STREAMLIT",
+    year: "2024",
+    problem:
+      "Real estate pricing is opaque. Buyers and sellers lack data-driven tools for fair market price estimation.",
+    approach:
+      "Random Forest Regressor trained on housing dataset features: area, rooms, location attributes. Interactive Streamlit UI for instant price estimation with feature sensitivity analysis.",
+    stack: ["Python", "Random Forest", "Scikit-learn", "Streamlit", "Pandas"],
+    architecture: [
+      "INPUT   :: Area, bedrooms, bathrooms, features",
+      "PROC    :: Feature normalization + encoding",
+      "MODEL   :: Random Forest Regressor",
+      "OUTPUT  :: Estimated price + confidence range",
+      "DEPLOY  :: Streamlit interactive UI",
+    ],
+    results: "Live Streamlit deployment. Users interact with sliders for instant price estimation.",
+    github: "https://github.com/Vidish-Bijalwan/House-Price-Prediction",
+    live: null,
   },
 ]
 
-export default function Projects() {
-  const [activeCategory, setActiveCategory] = useState("All")
-  const [isModalOpen, setIsModalOpen] = useState(false)
-  const [selectedProject, setSelectedProject] = useState<any>(null)
+const statusConfig: Record<string, { color: string; class: string }> = {
+  LIVE:         { color: "hsl(145,50%,38%)", class: "status-active" },
+  DEPLOYED:     { color: "hsl(38,90%,52%)",  class: "status-deployed" },
+  EXPERIMENTAL: { color: "hsl(210,5%,48%)",  class: "status-experimental" },
+}
 
-  const categories = Array.from(new Set(projects.map((project) => project.category)))
-
-  const filteredProjects =
-    activeCategory === "All" ? projects : projects.filter((project) => project.category === activeCategory)
-
-  const handleCategoryChange = (category: string) => {
-    setActiveCategory(category)
-  }
-
-  const openProjectDetails = (project: any) => {
-    setSelectedProject(project)
-    setIsModalOpen(true)
-  }
-
-  const openLink = (url: string, e: any) => {
-    e.stopPropagation()
-    if (url !== "#") {
-      window.open(url, "_blank", "noopener,noreferrer")
-    }
-  }
+function SystemPanel({ system, index }: { system: typeof systems[0]; index: number }) {
+  const [expanded, setExpanded] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+  const inView = useInView(ref, { once: true, margin: "-60px" })
+  const cfg = statusConfig[system.status]
 
   return (
-    <section id="projects" className="py-20 md:py-32 bg-muted/30">
-      <div className="container mx-auto px-4">
-        <div className="text-center mb-16">
-          <h2 className="heading-lg font-serif mb-4 relative inline-block">
-            Projects
-            <span className="absolute -bottom-2 left-0 w-full h-1 bg-primary rounded-full"></span>
-          </h2>
-          <p className="body-lg text-foreground/70 max-w-2xl mx-auto">
-            A series of projects focused on applying AI and ML technologies across various domains
+    <motion.div
+      ref={ref}
+      initial={{ opacity: 0, y: 24 }}
+      animate={inView ? { opacity: 1, y: 0 } : {}}
+      transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1], delay: index * 0.08 }}
+      className="border-t border-[hsl(210,5%,14%)] group"
+    >
+      {/* Panel header — always visible */}
+      <div
+        className="grid grid-cols-[auto_1fr_auto] md:grid-cols-[80px_1fr_auto_auto] gap-0 cursor-pointer hover:bg-[hsl(0,0%,7%)] transition-colors duration-250"
+        onClick={() => setExpanded(!expanded)}
+      >
+        {/* System ID */}
+        <div className="hidden md:flex items-start px-6 py-6 border-r border-[hsl(210,5%,12%)]">
+          <span className="font-mono text-[10px] tracking-[0.1em] text-[hsl(210,5%,28%)] mt-0.5">
+            {system.id}
+          </span>
+        </div>
+
+        {/* Title block */}
+        <div className="px-6 py-6">
+          <div className="flex flex-wrap items-center gap-3 mb-1">
+            <span className={cfg.class} style={{ color: cfg.color }}>
+              {system.status}
+            </span>
+            <span className="font-mono text-[10px] text-[hsl(210,5%,28%)]">
+              · {system.year}
+            </span>
+            <span className="font-mono text-[9px] text-[hsl(210,5%,22%)] md:hidden">
+              {system.id}
+            </span>
+          </div>
+          <h3 className="text-[20px] md:text-[22px] font-semibold text-[hsl(40,10%,88%)] tracking-tight leading-snug mb-1 group-hover:text-white transition-colors duration-250">
+            {system.title}
+          </h3>
+          <p className="font-mono text-[10px] tracking-[0.1em] text-[hsl(210,5%,38%)]">
+            {system.domain}
           </p>
         </div>
 
-        <AnimatedProjectFilter
-          categories={categories}
-          activeCategory={activeCategory}
-          onFilterChange={handleCategoryChange}
-        />
-
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {filteredProjects.map((project, index) => (
-            <div
-              key={project.title}
-              className="transition-all duration-500"
-              style={{
-                transitionDelay: `${index * 50}ms`,
-              }}
-            >
-              <EnhancedProjectCard
-                project={project}
-                onClick={() => openProjectDetails(project)}
-                onLinkClick={openLink}
-              />
-            </div>
+        {/* Stack tags — desktop */}
+        <div className="hidden md:flex flex-wrap items-start content-start gap-1.5 px-6 py-6 max-w-[240px]">
+          {system.stack.slice(0, 4).map((tag) => (
+            <span key={tag} className="sys-tag">{tag}</span>
           ))}
+        </div>
+
+        {/* Expand toggle */}
+        <div className="flex items-center px-6 py-6">
+          <motion.div
+            animate={{ rotate: expanded ? 45 : 0 }}
+            transition={{ duration: 0.25 }}
+            className="w-4 h-4 flex items-center justify-center text-[hsl(210,5%,38%)] group-hover:text-[hsl(38,90%,52%)] transition-colors duration-250"
+          >
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <line x1="8" y1="2" x2="8" y2="14" />
+              <line x1="2" y1="8" x2="14" y2="8" />
+            </svg>
+          </motion.div>
         </div>
       </div>
 
-      {/* Project Details Modal */}
-      {isModalOpen && selectedProject && (
-        <div
-          className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 backdrop-blur-sm"
-          onClick={() => setIsModalOpen(false)}
-        >
-          <div
-            className="relative max-w-4xl w-full bg-background rounded-lg overflow-hidden shadow-2xl"
-            onClick={(e) => e.stopPropagation()}
+      {/* Expanded panel — architecture deep-dive */}
+      <AnimatePresence>
+        {expanded && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+            className="overflow-hidden"
           >
-            <button
-              className="absolute top-4 right-4 z-10 p-2 rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors"
-              onClick={() => setIsModalOpen(false)}
+            <div
+              className="border-t border-[hsl(210,5%,14%)]"
+              style={{ background: "hsl(0,0%,2%)" }}
             >
-              <X className="h-6 w-6" />
-            </button>
+              <div className="grid grid-cols-1 md:grid-cols-[1fr_1px_380px] gap-0">
 
-            <div className="relative aspect-video">
-              <Image
-                src={selectedProject.image || "/placeholder.svg"}
-                alt={selectedProject.title}
-                fill
-                className="object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-background to-transparent"></div>
-            </div>
+                {/* Left — Narrative */}
+                <div className="p-8 md:p-10 space-y-8">
+                  <div>
+                    <p className="mono-label mb-3">PROBLEM SPACE</p>
+                    <p className="text-sm text-[hsl(210,5%,65%)] leading-relaxed">
+                      {system.problem}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="mono-label mb-3">ENGINEERING APPROACH</p>
+                    <p className="text-sm text-[hsl(210,5%,65%)] leading-relaxed">
+                      {system.approach}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="mono-label mb-3">RESULTS</p>
+                    <p className="text-sm text-[hsl(40,10%,88%)] leading-relaxed">
+                      {system.results}
+                    </p>
+                  </div>
 
-            <div className="p-6">
-              <h3 className="text-2xl font-bold mb-2 font-serif">{selectedProject.title}</h3>
-              <p className="text-foreground/70 mb-4">{selectedProject.description}</p>
+                  {/* Links */}
+                  <div className="flex items-center gap-6 pt-2">
+                    <a
+                      href={system.github}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-mono text-[11px] tracking-[0.1em] text-[hsl(210,5%,48%)] hover:text-[hsl(38,90%,52%)] transition-colors duration-250"
+                    >
+                      → SOURCE CODE
+                    </a>
+                    {system.live && (
+                      <a
+                        href={system.live}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="font-mono text-[11px] tracking-[0.1em] text-[hsl(145,50%,38%)] hover:text-[hsl(40,10%,88%)] transition-colors duration-250"
+                      >
+                        → LIVE SYSTEM
+                      </a>
+                    )}
+                  </div>
+                </div>
 
-              <div className="flex flex-wrap gap-2 mb-4">
-                {selectedProject.tags.map((tag: string, index: number) => (
-                  <span key={index} className="px-3 py-1 text-xs rounded-full bg-primary/10 text-primary">
-                    {tag}
-                  </span>
-                ))}
+                {/* Divider */}
+                <div className="hidden md:block bg-[hsl(210,5%,12%)]" />
+
+                {/* Right — Architecture diagram */}
+                <div className="p-8 md:p-10">
+                  <p className="mono-label mb-4">SYSTEM ARCHITECTURE</p>
+                  <div
+                    className="rounded-sm p-4"
+                    style={{ background: "hsl(0,0%,5%)", border: "1px solid hsl(210,5%,12%)" }}
+                  >
+                    <div className="space-y-2">
+                      {system.architecture.map((line, i) => {
+                        const [key, ...rest] = line.split("::")
+                        const value = rest.join("::").trim()
+                        const isHighlighted = key.trim() === "MODEL" || key.trim() === "LLM"
+                        return (
+                          <div key={i} className="flex gap-2">
+                            <span
+                              className="font-mono text-[10px] tracking-[0.06em] shrink-0 w-12"
+                              style={{
+                                color: isHighlighted ? "hsl(38,90%,52%)" : "hsl(210,5%,36%)",
+                              }}
+                            >
+                              {key.trim()}
+                            </span>
+                            <span className="font-mono text-[10px] text-[hsl(210,5%,26%)]">::</span>
+                            <span
+                              className="font-mono text-[10px] leading-relaxed"
+                              style={{
+                                color: isHighlighted ? "hsl(40,10%,72%)" : "hsl(210,5%,58%)",
+                              }}
+                            >
+                              {value}
+                            </span>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Stack tags */}
+                  <p className="mono-label mt-6 mb-3">REQUIRES</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {system.stack.map((tag) => (
+                      <span key={tag} className="sys-tag">{tag}</span>
+                    ))}
+                  </div>
+                </div>
               </div>
-
-              <div className="flex gap-4 mt-4">
-                <AnimatedButton
-                  effect="ripple"
-                  onClick={(e) => openLink(selectedProject.github, e)}
-                  className="flex items-center gap-2"
-                >
-                  <Github className="h-4 w-4" />
-                  View Code
-                </AnimatedButton>
-
-                <AnimatedButton
-                  variant="outline"
-                  effect="shine"
-                  onClick={(e) => openLink(selectedProject.demo, e)}
-                  className="flex items-center gap-2"
-                  disabled={selectedProject.demo === "#"}
-                >
-                  <ExternalLink className="h-4 w-4" />
-                  Live Demo
-                </AnimatedButton>
-              </div>
             </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  )
+}
+
+export default function Projects() {
+  const headerRef = useRef<HTMLDivElement>(null)
+  const headerInView = useInView(headerRef, { once: true })
+
+  return (
+    <section
+      id="systems"
+      className="relative py-24 overflow-hidden"
+      style={{ background: "hsl(0,0%,4%)" }}
+    >
+      {/* Environment — dense technical feel */}
+      <div className="absolute inset-0 grid-overlay-fine opacity-40 pointer-events-none" />
+
+      {/* Structural vertical line — right */}
+      <div className="absolute right-0 top-0 bottom-0 w-px bg-[hsl(210,5%,10%)] pointer-events-none" />
+
+      <div className="relative z-10 max-w-[1400px] mx-auto px-8 md:px-16">
+        {/* Section header */}
+        <div ref={headerRef} className="mb-16">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-6 h-px bg-[hsl(38,90%,52%)]" />
+            <span className="mono-label text-[10px]">ACT 03 · SYSTEMS ARCHITECTURE</span>
           </div>
+          <motion.h2
+            initial={{ opacity: 0, y: 16 }}
+            animate={headerInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+            className="heading-editorial text-[hsl(40,10%,88%)] max-w-xl"
+          >
+            Deployed intelligence systems.
+          </motion.h2>
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={headerInView ? { opacity: 1 } : {}}
+            transition={{ delay: 0.3, duration: 0.6 }}
+            className="mt-4 text-sm text-[hsl(210,5%,48%)] max-w-md font-light"
+          >
+            Each system includes problem framing, engineering approach, architecture diagram, and deployment state. Click any row to expand.
+          </motion.p>
         </div>
-      )}
+
+        {/* Column headers */}
+        <div className="hidden md:grid grid-cols-[80px_1fr_240px_48px] border-b border-[hsl(210,5%,18%)] pb-3 mb-0">
+          <span className="mono-label px-6">ID</span>
+          <span className="mono-label px-6">SYSTEM</span>
+          <span className="mono-label px-6">STACK</span>
+          <span className="mono-label px-6"> </span>
+        </div>
+
+        {/* System panels */}
+        <div>
+          {systems.map((sys, i) => (
+            <SystemPanel key={sys.id} system={sys} index={i} />
+          ))}
+          <div className="border-t border-[hsl(210,5%,14%)]" />
+        </div>
+
+        {/* Bottom legend */}
+        <div className="mt-12 flex items-center gap-8">
+          <div className="flex items-center gap-2">
+            <div className="w-1.5 h-1.5 rounded-full bg-[hsl(145,50%,38%)]" />
+            <span className="font-mono text-[10px] tracking-[0.08em] text-[hsl(210,5%,38%)]">LIVE</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-1.5 h-1.5 rounded-full bg-[hsl(38,90%,52%)]" />
+            <span className="font-mono text-[10px] tracking-[0.08em] text-[hsl(210,5%,38%)]">DEPLOYED</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-1.5 h-1.5 rounded-full bg-[hsl(210,5%,48%)]" />
+            <span className="font-mono text-[10px] tracking-[0.08em] text-[hsl(210,5%,38%)]">EXPERIMENTAL</span>
+          </div>
+          <div className="flex-1 h-px bg-[hsl(210,5%,12%)] ml-4" />
+          <span className="font-mono text-[9px] tracking-[0.1em] text-[hsl(210,5%,24%)]">
+            REF–003 / SYSTEMS
+          </span>
+        </div>
+      </div>
     </section>
   )
 }

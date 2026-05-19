@@ -2,60 +2,67 @@
 
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { X, GraduationCap, ChevronRight } from "lucide-react"
-import { smoothScrollTo } from "@/utils/smooth-scroll"
+import { X } from "lucide-react"
 
 export default function AssessmentBanner() {
   const [isVisible, setIsVisible] = useState(false)
 
   useEffect(() => {
-    // Show banner after a short delay so it catches attention
-    const timer = setTimeout(() => {
-      setIsVisible(true)
-    }, 1500)
-    
+    const timer = setTimeout(() => setIsVisible(true), 1800)
     return () => clearTimeout(timer)
   }, [])
+
+  const scrollToAssessment = () => {
+    const el = document.getElementById("assessment")
+    if (el) el.scrollIntoView({ behavior: "smooth" })
+    setIsVisible(false)
+  }
 
   return (
     <AnimatePresence>
       {isVisible && (
         <motion.div
-          initial={{ y: -100, opacity: 0 }}
+          initial={{ y: -80, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          exit={{ y: -100, opacity: 0 }}
-          transition={{ type: "spring", stiffness: 300, damping: 25 }}
-          className="fixed top-24 left-1/2 transform -translate-x-1/2 z-[60] w-[95%] max-w-lg"
+          exit={{ y: -80, opacity: 0 }}
+          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+          className="fixed top-[64px] left-1/2 z-[150] w-[calc(100%-64px)] max-w-lg"
+          style={{ transform: "translateX(-50%)" }}
         >
-          <div className="bg-primary text-primary-foreground backdrop-blur-md shadow-2xl rounded-lg p-4 border border-primary-foreground/20 flex items-center gap-4 relative">
-            <div className="bg-primary-foreground/20 p-2 rounded-full hidden sm:flex items-center justify-center">
-              <GraduationCap className="h-6 w-6 text-primary-foreground" />
+          <div
+            className="flex items-center justify-between px-5 py-3 gap-4"
+            style={{
+              background: "hsl(0,0%,8%)",
+              border: "1px solid hsl(210,5%,18%)",
+              borderLeft: "2px solid hsl(38,90%,52%)",
+            }}
+          >
+            <div className="flex items-center gap-3 min-w-0">
+              <span className="w-1.5 h-1.5 rounded-full bg-[hsl(38,90%,52%)] shrink-0 animate-pulse-amber" />
+              <div className="min-w-0">
+                <p className="font-mono text-[11px] tracking-[0.08em] text-[hsl(40,10%,80%)]">
+                  PESE600 SESSIONAL ASSESSMENT
+                </p>
+                <p className="font-mono text-[10px] text-[hsl(210,5%,42%)] truncate">
+                  Evaluating this portfolio? View submission materials.
+                </p>
+              </div>
             </div>
-            
-            <div className="flex-grow">
-              <h4 className="font-bold text-sm sm:text-base leading-tight">PESE600 Sessional Assessment</h4>
-              <p className="text-xs sm:text-sm text-primary-foreground/80 mt-1">
-                Evaluating my portfolio? Click here to view the submission form!
-              </p>
+            <div className="flex items-center gap-3 shrink-0">
+              <button
+                onClick={scrollToAssessment}
+                className="font-mono text-[10px] tracking-[0.1em] text-[hsl(38,90%,52%)] hover:text-[hsl(40,10%,88%)] transition-colors duration-250 whitespace-nowrap"
+              >
+                → VIEW
+              </button>
+              <button
+                onClick={() => setIsVisible(false)}
+                className="text-[hsl(210,5%,36%)] hover:text-[hsl(210,5%,60%)] transition-colors duration-250"
+                aria-label="Close"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
             </div>
-            
-            <button 
-              onClick={() => {
-                smoothScrollTo("assessment")
-                setIsVisible(false) // Hide after clicking
-              }}
-              className="flex items-center justify-center py-2 px-3 rounded-md bg-primary-foreground/20 hover:bg-primary-foreground/30 transition-colors whitespace-nowrap text-xs font-semibold shadow-sm"
-            >
-              Go to Form <ChevronRight className="h-4 w-4 ml-1" />
-            </button>
-            
-            <button 
-              onClick={() => setIsVisible(false)}
-              className="absolute -top-2 -right-2 bg-background text-foreground rounded-full p-1 shadow-md hover:bg-muted transition-colors border border-border"
-              aria-label="Close"
-            >
-              <X className="h-4 w-4" />
-            </button>
           </div>
         </motion.div>
       )}

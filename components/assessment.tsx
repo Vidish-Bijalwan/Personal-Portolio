@@ -1,74 +1,97 @@
 "use client"
 
-import { Card } from "@/components/ui/card"
 import { FileText, Link as LinkIcon, Video, ExternalLink } from "lucide-react"
 
 export default function Assessment() {
   return (
-    <section id="assessment" className="py-20 md:py-32 bg-muted/50">
-      <div className="container mx-auto px-4">
-        <div className="text-center mb-16">
-          <h2 className="heading-lg font-serif mb-4 relative inline-block">
-            PESE600 Sessional Assessment
-            <span className="absolute -bottom-2 left-0 w-full h-1 bg-primary rounded-full"></span>
-          </h2>
-          <p className="body-lg text-foreground/70 max-w-2xl mx-auto">
-            Submission Form for updated e-portfolio link, handwritten essay, and recorded self-introduction.
-          </p>
+    <section
+      id="assessment"
+      className="relative py-20"
+      style={{ background: "hsl(0,0%,3%)", borderTop: "1px solid hsl(210,5%,12%)" }}
+    >
+      <div className="max-w-[1400px] mx-auto px-8 md:px-16">
+        {/* Header */}
+        <div className="flex items-center gap-3 mb-12">
+          <div className="w-6 h-px bg-[hsl(38,90%,52%)]" />
+          <span className="mono-label text-[10px]">PESE600 · SESSIONAL ASSESSMENT</span>
+          <div className="flex-1 h-px bg-[hsl(210,5%,12%)]" />
+          <span className="font-mono text-[9px] tracking-[0.1em] text-[hsl(210,5%,24%)]">EVALUATOR ACCESS</span>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-          {/* Card 1: E-Portfolio Link */}
-          <Card className="p-6 border border-secondary/50 hover:shadow-lg transition-all duration-300 group hover:-translate-y-2 flex flex-col items-center text-center bg-card">
-            <div className="p-4 rounded-full bg-primary/10 mb-6 group-hover:bg-primary/20 transition-colors">
-              <LinkIcon className="h-8 w-8 text-primary" />
-            </div>
-            <h3 className="text-xl font-bold mb-3">E-Portfolio Link</h3>
-            <p className="text-foreground/70 mb-6 flex-grow">
-              The live, updated version of this interactive portfolio website containing all projects and assignments.
-            </p>
-            <a 
-              href="#" 
-              onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-              className="w-full py-3 px-4 rounded-md bg-primary text-primary-foreground font-medium flex items-center justify-center hover:opacity-90 transition-opacity shadow"
-            >
-              You Are Here
-            </a>
-          </Card>
+        <p className="text-sm text-[hsl(210,5%,50%)] mb-12 font-light max-w-xl">
+          Submission materials for the PESE600 Sessional Assessment — e-portfolio, handwritten essay, and recorded self-introduction.
+        </p>
 
-          {/* Card 2: Handwritten Essay */}
-          <Card className="p-6 border border-secondary/50 hover:shadow-lg transition-all duration-300 group hover:-translate-y-2 flex flex-col items-center text-center bg-card">
-            <div className="p-4 rounded-full bg-primary/10 mb-6 group-hover:bg-primary/20 transition-colors">
-              <FileText className="h-8 w-8 text-primary" />
+        {/* Assessment panels */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-[hsl(210,5%,12%)]">
+          {/* Panel 1 */}
+          <div
+            className="p-8 group hover:bg-[hsl(0,0%,7%)] transition-colors duration-250"
+            style={{ background: "hsl(0,0%,4%)" }}
+          >
+            <div className="flex items-center gap-2 mb-6">
+              <LinkIcon className="w-4 h-4 text-[hsl(38,90%,52%)]" />
+              <span className="mono-label text-[10px]">E-PORTFOLIO</span>
             </div>
-            <h3 className="text-xl font-bold mb-3">Handwritten Essay</h3>
-            <p className="text-foreground/70 mb-6 flex-grow">
-              Topic: <strong>Remote Work – Future of Employment</strong>.<br /> Scanned PDF copy attached.
+            <p className="text-sm text-[hsl(210,5%,55%)] leading-relaxed mb-8">
+              The live, updated interactive portfolio. You are currently viewing it.
             </p>
-            <a 
-              href="/essay.pdf" 
-              target="_blank" 
+            <button
+              onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+              className="font-mono text-[11px] tracking-[0.1em] text-[hsl(38,90%,52%)] hover:text-[hsl(40,10%,88%)] transition-colors duration-250"
+            >
+              → YOU ARE HERE
+            </button>
+          </div>
+
+          {/* Panel 2 */}
+          <div
+            className="p-8 group hover:bg-[hsl(0,0%,7%)] transition-colors duration-250"
+            style={{ background: "hsl(0,0%,4%)" }}
+          >
+            <div className="flex items-center gap-2 mb-6">
+              <FileText className="w-4 h-4 text-[hsl(38,90%,52%)]" />
+              <span className="mono-label text-[10px]">HANDWRITTEN ESSAY</span>
+            </div>
+            <p className="text-sm text-[hsl(210,5%,55%)] leading-relaxed mb-2">
+              Topic:{" "}
+              <span className="text-[hsl(40,10%,78%)]">Remote Work — Future of Employment</span>
+            </p>
+            <p className="text-xs text-[hsl(210,5%,40%)] mb-8">Scanned PDF submission.</p>
+            <a
+              href="/essay.pdf"
+              target="_blank"
               rel="noopener noreferrer"
-              className="w-full py-3 px-4 rounded-md bg-secondary text-secondary-foreground font-medium flex items-center justify-center hover:bg-secondary/80 transition-colors border shadow-sm"
+              className="font-mono text-[11px] tracking-[0.1em] text-[hsl(210,5%,48%)] hover:text-[hsl(38,90%,52%)] transition-colors duration-250 flex items-center gap-2"
             >
-              View Document <ExternalLink className="h-4 w-4 ml-2" />
+              → VIEW DOCUMENT
             </a>
-          </Card>
+          </div>
 
-          {/* Card 3: Self Introduction Video */}
-          <Card className="p-6 border border-secondary/50 hover:shadow-lg transition-all duration-300 group hover:-translate-y-2 flex flex-col items-center text-center bg-card md:col-span-1 sm:col-span-2 col-span-1">
-            <div className="p-4 rounded-full bg-primary/10 mb-6 group-hover:bg-primary/20 transition-colors">
-              <Video className="h-8 w-8 text-primary" />
+          {/* Panel 3 */}
+          <div
+            className="p-8 group"
+            style={{ background: "hsl(0,0%,4%)" }}
+          >
+            <div className="flex items-center gap-2 mb-6">
+              <Video className="w-4 h-4 text-[hsl(38,90%,52%)]" />
+              <span className="mono-label text-[10px]">SELF INTRODUCTION</span>
             </div>
-            <h3 className="text-xl font-bold mb-3">Self Introduction</h3>
-            <p className="text-foreground/70 mb-4 flex-grow">
-              A 1-minute recorded self introduction video summarizing my background and aspirations.
+            <p className="text-sm text-[hsl(210,5%,55%)] leading-relaxed mb-4">
+              1-minute recorded self-introduction — background, skills, and aspirations.
             </p>
-            
-            <div className="w-full aspect-video bg-black rounded-md flex flex-col items-center justify-center relative overflow-hidden group/video border border-primary/20 hover:border-primary/50 transition-all shadow-lg">
-              <video src="/self-intro.mp4" controls preload="metadata" className="absolute inset-0 w-full h-full object-cover z-20 rounded-md"></video>
+            <div
+              className="w-full aspect-video overflow-hidden"
+              style={{ border: "1px solid hsl(210,5%,14%)" }}
+            >
+              <video
+                src="/self-intro.mp4"
+                controls
+                preload="metadata"
+                className="w-full h-full object-cover"
+              />
             </div>
-          </Card>
+          </div>
         </div>
       </div>
     </section>

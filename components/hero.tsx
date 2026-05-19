@@ -1,140 +1,283 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { ArrowDown, Github, Linkedin, Code } from "lucide-react"
-import Image from "next/image"
-import { TypeAnimation } from "react-type-animation"
+import { useEffect, useRef, useState } from "react"
+import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion"
 
-function LeetCodeIcon({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
-      <path d="M16.102 17.93l-2.697 2.607c-.466.467-1.111.662-1.823.662s-1.357-.195-1.824-.662l-4.332-4.363c-.467-.467-.705-1.089-.705-1.767s.238-1.3.705-1.767L9.823 8.31c.467-.467 1.111-.662 1.824-.662s1.357.195 1.823.662l1.045 1.05-1.411 1.413-.9Z" fill="#ffa116"/>
-      <path d="M16.102 17.93l-2.697 2.607c-.466.467-1.111.662-1.823.662s-1.357-.195-1.824-.662l-4.332-4.363c-.467-.467-.705-1.089-.705-1.767s.238-1.3.705-1.767L9.823 8.31c.467-.467 1.111-.662 1.824-.662s1.357.195 1.823.662l1.045 1.05-1.411 1.413-1.045-1.05c-.156-.156-.37-.248-.59-.248-.22 0-.435.092-.591.248L5.452 12.64c-.155.156-.24.37-.24.59 0 .221.085.435.24.59l4.332 4.363c.156.155.37.248.591.248.22 0 .435-.093.59-.248l2.697-2.607 2.44 2.354Z"/>
-      <path d="M20.25 10.362l-5.69-5.748c-.467-.467-1.111-.662-1.824-.662s-1.357.195-1.823.662L9.823 5.05l1.411 1.413 1.09-1.094c.156-.156.37-.248.59-.248s.435.092.591.248l5.69 5.748c.156.155.156.408 0 .563L16.29 14.8l1.41 1.413 2.55-2.585c.466-.467.705-1.089.705-1.767s-.239-1.3-.705-1.767Z"/>
-    </svg>
-  )
-}
-import AnimatedButton from "@/components/animated-button"
-import { smoothScrollTo } from "@/utils/smooth-scroll"
+const SYSTEM_LINES = [
+  { label: "SYSTEM", value: "INTELLIGENCE INFRASTRUCTURE" },
+  { label: "ENGINEER", value: "VIDISH BIJALWAN" },
+  { label: "VERSION", value: "2026.05" },
+  { label: "FOCUS", value: "RAG · RETRIEVAL · AI AGENTS" },
+  { label: "STATUS", value: "ACTIVELY BUILDING" },
+]
 
-import ParticleBackground from "@/components/particle-background"
+const BOOT_SEQUENCE = [
+  "SYS > Initializing intelligence archive...",
+  "SYS > Loading engineering context...",
+  "SYS > Mapping retrieval systems...",
+  "SYS > Mounting project infrastructure...",
+  "SYS > Archive ready. Begin scroll to enter.",
+]
 
 export default function Hero() {
-  const [isMounted, setIsMounted] = useState(false)
+  const [bootIndex, setBootIndex] = useState(0)
+  const [bootComplete, setBootComplete] = useState(false)
+  const [scanDone, setScanDone] = useState(false)
+  const [revealed, setRevealed] = useState(false)
+  const containerRef = useRef<HTMLElement>(null)
 
+  const { scrollY } = useScroll()
+  const opacity = useTransform(scrollY, [0, 400], [1, 0])
+  const translateY = useTransform(scrollY, [0, 400], [0, -40])
+
+  // Boot sequence
   useEffect(() => {
-    setIsMounted(true)
-  }, [])
+    if (bootIndex < BOOT_SEQUENCE.length) {
+      const delay = bootIndex === 0 ? 200 : 340
+      const t = setTimeout(() => setBootIndex((i) => i + 1), delay)
+      return () => clearTimeout(t)
+    } else {
+      const t = setTimeout(() => {
+        setBootComplete(true)
+        const t2 = setTimeout(() => setScanDone(true), 800)
+        const t3 = setTimeout(() => setRevealed(true), 1000)
+        return () => { clearTimeout(t2); clearTimeout(t3) }
+      }, 200)
+      return () => clearTimeout(t)
+    }
+  }, [bootIndex])
 
-  const openLink = (url: string) => {
-    window.open(url, "_blank", "noopener,noreferrer")
+  const scrollToNext = () => {
+    const el = document.getElementById("evolution")
+    if (el) el.scrollIntoView({ behavior: "smooth" })
   }
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-background">
-      <ParticleBackground />
-      <div className="container mx-auto px-4 z-10 py-20 md:py-0 pointer-events-none mb-10 mt-10">
-        <div className="flex flex-col items-center text-center pointer-events-auto">
-          <div className="mb-10 relative group">
-            <div className="w-44 h-44 md:w-56 md:h-56 relative rounded-full overflow-hidden border border-primary/50 shadow-[0_0_40px_rgba(var(--primary),0.3)] transition-all duration-700 group-hover:scale-105 group-hover:shadow-[0_0_60px_rgba(var(--primary),0.5)]">
-              {/* Animated glass pane */}
-              <div className="absolute inset-0 bg-primary/10 mix-blend-overlay z-10 transition-opacity duration-500 group-hover:opacity-0"></div>
-              
-              <Image 
-                src="/profile.png" 
-                alt="Vidish Bijalwan" 
-                fill 
-                className="object-cover grayscale group-hover:grayscale-0 transition-all duration-700 ease-in-out scale-105 group-hover:scale-100 z-0" 
-                priority 
-              />
-              <div className="absolute bottom-0 inset-x-0 h-1/3 bg-gradient-to-t from-background/90 to-transparent z-20"></div>
+    <section
+      id="signal"
+      ref={containerRef}
+      className="relative min-h-screen overflow-hidden grid-overlay"
+      style={{ paddingTop: "52px" }}
+    >
+      {/* Deep atmospheric gradient — spatial depth */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background:
+            "radial-gradient(ellipse 80% 60% at 70% 50%, hsl(210 5% 9% / 0.6) 0%, transparent 70%), radial-gradient(ellipse 50% 80% at 10% 80%, hsl(38 90% 52% / 0.04) 0%, transparent 60%)",
+        }}
+      />
+
+      {/* Vertical rule — left anchor */}
+      <div className="absolute left-8 top-0 bottom-0 w-px bg-[hsl(210,5%,14%)] pointer-events-none" />
+
+      {/* Coordinate system — top right */}
+      <div className="absolute top-[72px] right-8 pointer-events-none">
+        <p className="font-mono text-[10px] tracking-[0.1em] text-[hsl(210,5%,28%)]">
+          28.67°N 77.41°E
+        </p>
+        <p className="font-mono text-[10px] tracking-[0.1em] text-[hsl(210,5%,22%)] mt-1">
+          {new Date().toISOString().split("T")[0]}
+        </p>
+      </div>
+
+      {/* Main layout — asymmetric */}
+      <motion.div
+        style={{ opacity, y: translateY }}
+        className="relative z-10 min-h-screen flex flex-col justify-center"
+      >
+        <div className="max-w-[1400px] mx-auto w-full px-8 md:px-16 py-24">
+          <div className="grid grid-cols-1 md:grid-cols-[1fr_380px] gap-16 md:gap-24 items-center">
+
+            {/* LEFT — Editorial display typography */}
+            <div className="relative">
+              {/* Section marker */}
+              <div className="flex items-center gap-3 mb-12">
+                <div className="w-6 h-px bg-[hsl(38,90%,52%)]" />
+                <span className="mono-label text-[10px]">ACT 01 · SIGNAL DETECTED</span>
+              </div>
+
+              {/* Giant display name — the signature element */}
+              <div className="overflow-hidden mb-2">
+                <motion.div
+                  initial={{ y: "100%" }}
+                  animate={{ y: bootComplete ? "0%" : "100%" }}
+                  transition={{ duration: 1.0, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
+                >
+                  <h1 className="display-xl text-[hsl(40,10%,88%)] leading-none">
+                    VIDISH
+                  </h1>
+                </motion.div>
+              </div>
+
+              <div className="overflow-hidden mb-8">
+                <motion.div
+                  initial={{ y: "100%" }}
+                  animate={{ y: bootComplete ? "0%" : "100%" }}
+                  transition={{ duration: 1.0, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
+                >
+                  <h1
+                    className="display-xl leading-none"
+                    style={{
+                      color: "transparent",
+                      WebkitTextStroke: "1px hsl(40 10% 50%)",
+                    }}
+                  >
+                    BIJALWAN
+                  </h1>
+                </motion.div>
+              </div>
+
+              {/* Amber scan line — appears after name reveal */}
+              <div className="relative h-px mb-8 overflow-hidden">
+                <motion.div
+                  initial={{ scaleX: 0, originX: 0 }}
+                  animate={{ scaleX: bootComplete ? 1 : 0 }}
+                  transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.5 }}
+                  className="h-px bg-gradient-to-r from-[hsl(38,90%,52%)] via-[hsl(38,90%,52%/0.6)] to-transparent"
+                />
+              </div>
+
+              {/* Role statement */}
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: bootComplete ? 1 : 0 }}
+                transition={{ duration: 0.8, delay: 0.7 }}
+                className="text-[hsl(210,5%,58%)] text-lg leading-relaxed max-w-[520px] mb-12 font-light"
+              >
+                Building retrieval systems, autonomous agents, and{" "}
+                <span className="text-[hsl(40,10%,88%)]">intelligence infrastructure</span>{" "}
+                that bridges research and production.
+              </motion.p>
+
+              {/* CTA row */}
+              <motion.div
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: bootComplete ? 1 : 0, y: bootComplete ? 0 : 12 }}
+                transition={{ duration: 0.6, delay: 0.9, ease: [0.16, 1, 0.3, 1] }}
+                className="flex items-center gap-8"
+              >
+                <button
+                  onClick={scrollToNext}
+                  className="group flex items-center gap-3 font-mono text-xs tracking-[0.12em] text-[hsl(40,10%,88%)] hover:text-[hsl(38,90%,52%)] transition-colors duration-250"
+                >
+                  <span className="w-8 h-px bg-current transition-all duration-400 group-hover:w-16" />
+                  ENTER ARCHIVE
+                </button>
+
+                <button
+                  onClick={() => window.open("https://github.com/Vidish-Bijalwan", "_blank", "noopener,noreferrer")}
+                  className="font-mono text-xs tracking-[0.12em] text-[hsl(210,5%,48%)] hover:text-[hsl(40,10%,88%)] transition-colors duration-250"
+                >
+                  → GITHUB
+                </button>
+
+                <button
+                  onClick={() => window.open("https://www.linkedin.com/in/vidish-bijalwan", "_blank", "noopener,noreferrer")}
+                  className="font-mono text-xs tracking-[0.12em] text-[hsl(210,5%,48%)] hover:text-[hsl(40,10%,88%)] transition-colors duration-250"
+                >
+                  → LINKEDIN
+                </button>
+              </motion.div>
             </div>
-            
-            {/* Outer pulsating rings */}
-            <div className="absolute -inset-4 rounded-full border border-primary/20 scale-105 animate-ping opacity-20 -z-10" style={{ animationDuration: '3s' }}></div>
-            <div className="absolute -inset-8 rounded-full bg-primary/10 blur-3xl -z-20 transition-all group-hover:bg-primary/20 duration-700"></div>
-          </div>
 
-          <div>
-            <h1 className="heading-xl bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/70 font-serif mb-6">
-              Vidish Bijalwan
-            </h1>
-          </div>
-
-          <div className="mb-8 h-16 md:h-24">
-            {isMounted && (
-              <TypeAnimation
-                sequence={[
-                  "Machine Learning Engineer",
-                  1000,
-                  "Data Science Intern",
-                  1000,
-                  "Passionate about building production-ready ML solutions",
-                  1000,
-                ]}
-                wrapper="h2"
-                speed={50}
-                repeat={Number.POSITIVE_INFINITY}
-                className="text-xl md:text-3xl font-medium text-foreground/80"
-              />
-            )}
-          </div>
-
-          <div className="max-w-2xl text-center mb-8">
-            <p className="body-lg text-foreground/70">
-              I am an ML/DL Enthusiast with hands-on experience building predictive ML systems for churn prediction, revenue forecasting, computer vision, and optimization. I focus on analytical pipelines and business-oriented AI applications.
-            </p>
-          </div>
-
-          <div className="flex flex-wrap justify-center gap-4 mb-12">
-            <AnimatedButton effect="ripple" onClick={() => smoothScrollTo("contact")}>
-              Get in Touch
-            </AnimatedButton>
-
-            <AnimatedButton variant="outline" effect="shine" onClick={() => smoothScrollTo("projects")}>
-              View Projects
-            </AnimatedButton>
-          </div>
-
-          <div className="flex gap-4">
-            <button
-              onClick={() => openLink("https://github.com/Vidish-Bijalwan")}
-              className="p-2 rounded-full bg-background hover:bg-primary/10 transition-colors relative group"
-              aria-label="GitHub"
+            {/* RIGHT — System annotation panel */}
+            <motion.div
+              initial={{ opacity: 0, x: 24 }}
+              animate={{ opacity: bootComplete ? 1 : 0, x: bootComplete ? 0 : 24 }}
+              transition={{ duration: 0.8, delay: 0.6, ease: [0.16, 1, 0.3, 1] }}
+              className="relative"
             >
-              <Github className="h-6 w-6" />
-              <span className="absolute inset-0 rounded-full bg-primary/10 scale-0 group-hover:scale-100 transition-transform duration-300"></span>
-            </button>
+              {/* Boot terminal */}
+              <div
+                className="surface-elevated p-6 mb-4"
+                style={{ borderLeft: "2px solid hsl(38 90% 52% / 0.5)" }}
+              >
+                <div className="flex items-center gap-2 mb-4 pb-3 border-b border-[hsl(210,5%,14%)]">
+                  <div className="w-2 h-2 rounded-full bg-[hsl(38,90%,52%)] animate-pulse-amber" />
+                  <span className="font-mono text-[10px] tracking-[0.15em] text-[hsl(210,5%,48%)]">
+                    SYSTEM BOOT LOG
+                  </span>
+                </div>
+                <div className="space-y-1.5">
+                  {BOOT_SEQUENCE.slice(0, bootIndex).map((line, i) => (
+                    <motion.p
+                      key={i}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="font-mono text-[11px] text-[hsl(210,5%,48%)] leading-relaxed"
+                    >
+                      <span className="text-[hsl(38,90%,52%/0.7)]">›</span> {line.replace("SYS > ", "")}
+                    </motion.p>
+                  ))}
+                  {bootIndex < BOOT_SEQUENCE.length && (
+                    <span className="inline-block w-1.5 h-3 bg-[hsl(38,90%,52%)] animate-blink ml-1" />
+                  )}
+                </div>
+              </div>
 
-            <button
-              onClick={() => openLink("https://www.linkedin.com/in/vidish-bijalwan")}
-              className="p-2 rounded-full bg-background hover:bg-primary/10 transition-colors relative group"
-              aria-label="LinkedIn"
-            >
-              <Linkedin className="h-6 w-6" />
-              <span className="absolute inset-0 rounded-full bg-primary/10 scale-0 group-hover:scale-100 transition-transform duration-300"></span>
-            </button>
-            <button
-              onClick={() => openLink("https://leetcode.com/u/vidishofficial")}
-              className="p-2 rounded-full bg-background hover:bg-primary/10 transition-colors relative group"
-              aria-label="LeetCode"
-            >
-              <LeetCodeIcon className="h-6 w-6" />
-              <span className="absolute inset-0 rounded-full bg-primary/10 scale-0 group-hover:scale-100 transition-transform duration-300"></span>
-            </button>
+              {/* System specification table */}
+              <div className="surface-panel py-0">
+                {SYSTEM_LINES.map((line, i) => (
+                  <motion.div
+                    key={line.label}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: bootComplete ? 1 : 0 }}
+                    transition={{ delay: 0.8 + i * 0.08 }}
+                    className="flex items-baseline justify-between px-6 py-3 border-b border-[hsl(210,5%,12%)] last:border-b-0"
+                  >
+                    <span className="mono-label text-[10px]">{line.label}</span>
+                    <span className={`font-mono text-[11px] tracking-[0.05em] ${
+                      line.label === "STATUS"
+                        ? "text-[hsl(145,50%,38%)]"
+                        : line.label === "ENGINEER"
+                        ? "text-[hsl(40,10%,88%)]"
+                        : "text-[hsl(210,5%,68%)]"
+                    }`}>
+                      {line.value}
+                    </span>
+                  </motion.div>
+                ))}
+              </div>
+
+              {/* Floating coordinate label */}
+              <p className="mt-4 text-right font-mono text-[10px] text-[hsl(210,5%,24%)]">
+                REF–001 / SIGNAL
+              </p>
+            </motion.div>
           </div>
         </div>
-      </div>
 
-      <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2">
-        <button
-          onClick={() => smoothScrollTo("about")}
-          aria-label="Scroll down"
-          className="p-2 rounded-full bg-background hover:bg-primary/10 transition-colors relative animate-bounce"
+        {/* Bottom — scroll indicator */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: bootComplete ? 1 : 0 }}
+          transition={{ delay: 1.4, duration: 0.6 }}
+          className="absolute bottom-8 left-8 flex items-center gap-4"
         >
-          <ArrowDown className="h-6 w-6" />
-        </button>
-      </div>
+          <button
+            onClick={scrollToNext}
+            className="group flex items-center gap-3 font-mono text-[10px] tracking-[0.18em] text-[hsl(210,5%,38%)] hover:text-[hsl(210,5%,58%)] transition-colors duration-400"
+          >
+            <motion.div
+              animate={{ y: [0, 4, 0] }}
+              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+              className="w-px h-8 bg-[hsl(210,5%,28%)] group-hover:bg-[hsl(38,90%,52%)] transition-colors duration-400"
+            />
+            SCROLL TO ENTER SYSTEM
+          </button>
+        </motion.div>
+
+        {/* Right edge — vertical system ID */}
+        <div
+          className="absolute right-8 bottom-24 pointer-events-none"
+          style={{ writingMode: "vertical-rl" }}
+        >
+          <span className="font-mono text-[9px] tracking-[0.25em] text-[hsl(210,5%,20%)]">
+            INTELLIGENCE ARCHIVE · v2026
+          </span>
+        </div>
+      </motion.div>
     </section>
   )
 }

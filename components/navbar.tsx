@@ -1,113 +1,148 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import Link from "next/link"
-import { Menu, X } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { cn } from "@/lib/utils"
-import Logo from "@/components/logo"
-import AnimatedThemeToggle from "@/components/animated-theme-toggle"
-import { smoothScrollTo } from "@/utils/smooth-scroll"
+import { useEffect, useState } from "react"
+import { motion, useScroll } from "framer-motion"
 
 const navItems = [
-  { name: "About", href: "about" },
-  { name: "Skills", href: "skills" },
-  { name: "Projects", href: "projects" },
-  { name: "Experience", href: "experience" },
-  { name: "Assessment", href: "assessment" },
-  { name: "Contact", href: "contact" },
+  { label: "SIGNAL", href: "#signal" },
+  { label: "EVOLUTION", href: "#evolution" },
+  { label: "SYSTEMS", href: "#systems" },
+  { label: "LAB", href: "#lab" },
+  { label: "FUTURE", href: "#future" },
 ]
 
 export default function Navbar() {
-  const [isOpen, setIsOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const [activeSection, setActiveSection] = useState("")
+  const [mobileOpen, setMobileOpen] = useState(false)
 
   useEffect(() => {
     const handleScroll = () => {
-      setScrolled(window.scrollY > 10)
+      setScrolled(window.scrollY > 24)
 
       // Determine active section
-      const sections = navItems.map((item) => item.href)
-      const scrollPosition = window.scrollY + 100
-
-      for (let i = sections.length - 1; i >= 0; i--) {
-        const section = document.getElementById(sections[i])
-        if (section && section.offsetTop <= scrollPosition) {
-          setActiveSection(sections[i])
-          break
+      const sections = navItems.map((item) => item.href.slice(1))
+      for (const section of sections.reverse()) {
+        const el = document.getElementById(section)
+        if (el) {
+          const rect = el.getBoundingClientRect()
+          if (rect.top <= 120) {
+            setActiveSection(section)
+            return
+          }
         }
       }
+      setActiveSection("")
     }
 
-    window.addEventListener("scroll", handleScroll)
-    // Initial call to set the active section on mount
-    handleScroll()
-
+    window.addEventListener("scroll", handleScroll, { passive: true })
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
-  const scrollToSection = (href: string) => {
-    setIsOpen(false)
-    smoothScrollTo(href)
+  const scrollTo = (href: string) => {
+    const id = href.slice(1)
+    const el = document.getElementById(id)
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth" })
+      setMobileOpen(false)
+    }
   }
 
   return (
-    <header
-      className={cn(
-        "fixed top-0 w-full z-50 transition-all duration-300 backdrop-blur-md",
-        scrolled ? "bg-background/80 shadow-md" : "bg-transparent",
-      )}
-    >
-      <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-        <Link href="/" className="text-2xl font-bold relative group z-10" onClick={() => scrollToSection("hero")}>
-          <Logo />
-        </Link>
-
-        {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center space-x-6">
-          {navItems.map((item) => (
-            <button
-              key={item.name}
-              onClick={() => scrollToSection(item.href)}
-              className={cn(
-                "text-foreground/80 hover:text-primary transition-colors relative",
-                activeSection === item.href &&
-                  "text-primary font-medium after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:bg-primary",
-              )}
-            >
-              <span className="relative z-10">{item.name}</span>
-            </button>
-          ))}
-          <AnimatedThemeToggle />
-        </nav>
-
-        {/* Mobile Navigation Toggle */}
-        <div className="flex items-center md:hidden space-x-4">
-          <AnimatedThemeToggle />
-          <Button variant="ghost" size="icon" onClick={() => setIsOpen(!isOpen)} aria-label="Toggle Menu">
-            {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-          </Button>
-        </div>
-      </div>
-
-      {/* Mobile Navigation Menu */}
-      <div
-        className={cn(
-          "fixed inset-0 top-16 bg-background/95 z-40 flex flex-col items-center justify-center space-y-8 overflow-hidden md:hidden transition-all duration-300",
-          isOpen ? "opacity-100 h-[calc(100vh-4rem)]" : "opacity-0 h-0 pointer-events-none",
-        )}
+    <>
+      <motion.nav
+        initial={{ opacity: 0, y: -8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+        className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-400 ${
+          scrolled
+            ? "bg-[hsl(0,0%,4%/0.92)] backdrop-blur-sm border-b border-[hsl(210,5%,14%)]"
+            : "bg-transparent"
+        }`}
+        style={{ height: "52px" }}
       >
-        {navItems.map((item, index) => (
+        <div className="max-w-[1400px] mx-auto px-8 h-full flex items-center justify-between">
+          {/* Monogram */}
           <button
-            key={item.name}
-            onClick={() => scrollToSection(item.href)}
-            className="text-2xl font-medium hover:text-primary transition-colors"
+            onClick={() => scrollTo("#signal")}
+            className="font-mono text-xs tracking-[0.2em] text-[hsl(40,10%,88%)] hover:text-[hsl(38,90%,52%)] transition-colors duration-250 uppercase"
           >
-            {item.name}
+            VB
           </button>
-        ))}
-      </div>
-    </header>
+
+          {/* Desktop nav */}
+          <div className="hidden md:flex items-center gap-8">
+            {navItems.map((item) => {
+              const isActive = activeSection === item.href.slice(1)
+              return (
+                <button
+                  key={item.href}
+                  onClick={() => scrollTo(item.href)}
+                  className="relative group"
+                >
+                  <span
+                    className={`font-mono text-[11px] tracking-[0.15em] transition-colors duration-250 ${
+                      isActive
+                        ? "text-[hsl(38,90%,52%)]"
+                        : "text-[hsl(210,5%,58%)] hover:text-[hsl(40,10%,88%)]"
+                    }`}
+                  >
+                    {item.label}
+                  </span>
+                  {isActive && (
+                    <motion.div
+                      layoutId="nav-indicator"
+                      className="absolute -bottom-[2px] left-0 right-0 h-px bg-[hsl(38,90%,52%)]"
+                      transition={{ type: "spring", stiffness: 400, damping: 35 }}
+                    />
+                  )}
+                </button>
+              )
+            })}
+          </div>
+
+          {/* System status */}
+          <div className="hidden md:flex items-center gap-2">
+            <span className="status-active text-[10px]">ONLINE</span>
+          </div>
+
+          {/* Mobile toggle */}
+          <button
+            className="md:hidden font-mono text-[11px] tracking-[0.1em] text-[hsl(210,5%,58%)] hover:text-[hsl(40,10%,88%)] transition-colors"
+            onClick={() => setMobileOpen(!mobileOpen)}
+            aria-label="Toggle navigation"
+          >
+            {mobileOpen ? "CLOSE" : "MENU"}
+          </button>
+        </div>
+      </motion.nav>
+
+      {/* Mobile drawer */}
+      {mobileOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          className="fixed inset-0 z-[90] bg-[hsl(0,0%,4%)] pt-[52px] flex flex-col"
+        >
+          <div className="border-b border-[hsl(210,5%,14%)]" />
+          <div className="px-8 py-12 flex flex-col gap-8">
+            {navItems.map((item, i) => (
+              <motion.button
+                key={item.href}
+                initial={{ opacity: 0, x: -16 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: i * 0.06, duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                onClick={() => scrollTo(item.href)}
+                className="text-left font-mono text-[13px] tracking-[0.15em] text-[hsl(210,5%,58%)] hover:text-[hsl(38,90%,52%)] transition-colors duration-250"
+              >
+                {item.label}
+              </motion.button>
+            ))}
+          </div>
+        </motion.div>
+      )}
+    </>
   )
 }
