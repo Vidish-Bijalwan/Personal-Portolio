@@ -121,14 +121,14 @@ const timelineEvents = [
 ]
 
 const signalColors: Record<string, string> = {
-  CURIOSITY:      "hsl(210,5%,48%)",
-  UPGRADE:        "hsl(38,90%,52%)",
-  MILESTONE:      "hsl(38,90%,52%)",
-  EXPAND:         "hsl(210,5%,58%)",
-  INFRASTRUCTURE: "hsl(38,90%,52%)",
-  WIN:            "hsl(40,10%,88%)",
-  ACTIVE:         "hsl(145,50%,38%)",
-  INIT:           "hsl(210,5%,58%)",
+  CURIOSITY:      "hsl(220,8%,60%)",
+  UPGRADE:        "hsl(38,95%,56%)",
+  MILESTONE:      "hsl(38,95%,56%)",
+  EXPAND:         "hsl(220,8%,70%)",
+  INFRASTRUCTURE: "hsl(38,95%,56%)",
+  WIN:            "hsl(40,12%,94%)",
+  ACTIVE:         "hsl(145,55%,45%)",
+  INIT:           "hsl(220,8%,70%)",
 }
 
 const typeLabels: Record<string, string> = {
@@ -161,25 +161,25 @@ function TimelineNode({ event, index }: { event: typeof timelineEvents[0]; index
 
       {/* Spine + Node */}
       <div className="flex flex-col items-center">
-        <div className="h-full w-px bg-[hsl(210,5%,14%)]" />
+        <div className="h-full w-px bg-[hsl(220,10%,24%)]" />
         <motion.div
           initial={{ scale: 0 }}
           animate={inView ? { scale: 1 } : {}}
           transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1], delay: index * 0.06 + 0.1 }}
           className="shrink-0 w-3 h-3 rounded-full border-2 z-10 my-2"
           style={{
-            borderColor: signalColors[event.signal] ?? "hsl(210,5%,28%)",
+            borderColor: signalColors[event.signal] ?? "hsl(220,8%,40%)",
             backgroundColor:
               event.signal === "ACTIVE"
-                ? "hsl(145,50%,38%)"
+                ? "hsl(145,55%,45%)"
                 : event.type === "WIN"
-                ? "hsl(40,10%,88%)"
-                : "hsl(0,0%,4%)",
+                ? "hsl(40,12%,94%)"
+                : "hsl(222,14%,10%)",
             boxShadow:
               event.signal === "ACTIVE"
-                ? "0 0 8px hsl(145 50% 38% / 0.5)"
+                ? "0 0 8px hsl(145 55% 45% / 0.5)"
                 : event.type === "WIN"
-                ? "0 0 8px hsl(40 10% 88% / 0.3)"
+                ? "0 0 8px hsl(40 12% 94% / 0.3)"
                 : "none",
           }}
         />
@@ -209,7 +209,7 @@ function NodeContent({ event, align }: { event: typeof timelineEvents[0]; align:
     <div className={`${align === "right" ? "text-right" : "text-left"}`}>
       {/* Year / timestamp */}
       <div className={`flex items-center gap-2 mb-2 ${align === "right" ? "justify-end" : "justify-start"}`}>
-        <span className="font-mono text-[10px] tracking-[0.15em] text-[hsl(210,5%,28%)]">
+        <span className="font-mono text-[10px] tracking-[0.15em] text-[hsl(220,8%,40%)]">
           {event.month} {event.year}
         </span>
         <span className="mono-label text-[9px]">·</span>
@@ -222,31 +222,31 @@ function NodeContent({ event, align }: { event: typeof timelineEvents[0]; align:
       </div>
 
       {/* Event ID */}
-      <span className="font-mono text-[9px] tracking-[0.1em] text-[hsl(210,5%,22%)] block mb-1">
+      <span className="font-mono text-[9px] tracking-[0.1em] text-[hsl(220,8%,33%)] block mb-1">
         {event.id}
       </span>
 
       {/* Title */}
-      <h3 className="text-[18px] font-semibold leading-snug text-[hsl(40,10%,88%)] mb-1 tracking-tight">
+      <h3 className="text-[18px] font-semibold leading-snug text-[hsl(40,12%,94%)] mb-1 tracking-tight">
         {event.title}
       </h3>
 
       {/* Subtitle */}
-      <p className="font-mono text-[11px] tracking-[0.05em] text-[hsl(210,5%,48%)] mb-3">
+      <p className="font-mono text-[11px] tracking-[0.05em] text-[hsl(220,8%,60%)] mb-3">
         {event.subtitle}
       </p>
 
       {/* Profile photo at init node */}
       {hasPhoto && (
         <div className={`mb-3 ${align === "right" ? "flex justify-end" : ""}`}>
-          <div className="w-14 h-14 rounded-full overflow-hidden border border-[hsl(210,5%,18%)] grayscale">
+          <div className="w-14 h-14 rounded-full overflow-hidden border border-[hsl(220,8%,30%)] grayscale">
             <Image src="/profile.png" alt="Vidish Bijalwan" width={56} height={56} className="object-cover" />
           </div>
         </div>
       )}
 
       {/* Body */}
-      <p className="text-sm text-[hsl(210,5%,58%)] leading-relaxed mb-3">
+      <p className="text-sm text-[hsl(220,8%,70%)] leading-relaxed mb-3">
         {event.body}
       </p>
 
@@ -263,7 +263,7 @@ function NodeContent({ event, align }: { event: typeof timelineEvents[0]; align:
           href={event.proof as string}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 font-mono text-[10px] tracking-[0.1em] text-[hsl(38,90%,52%)] hover:text-[hsl(40,10%,88%)] transition-colors duration-250 mt-1"
+          className="inline-flex items-center gap-1.5 font-mono text-[10px] tracking-[0.1em] text-[hsl(38,95%,56%)] hover:text-[hsl(40,12%,94%)] transition-colors duration-250 mt-1"
         >
           → VIEW PROOF
         </a>
@@ -281,14 +281,14 @@ export default function Experience() {
       id="evolution"
       className="relative py-24 overflow-hidden"
       style={{
-        background: "linear-gradient(180deg, hsl(0,0%,4%) 0%, hsl(0,0%,6%) 40%, hsl(0,0%,4%) 100%)",
+        background: "linear-gradient(180deg, hsl(222,14%,10%) 0%, hsl(222,14%,12%) 40%, hsl(222,14%,10%) 100%)",
       }}
     >
       {/* Environment — archival texture */}
       <div
         className="absolute inset-0 pointer-events-none opacity-30"
         style={{
-          backgroundImage: "repeating-linear-gradient(0deg, transparent, transparent 47px, hsl(210 5% 14% / 0.3) 47px, hsl(210 5% 14% / 0.3) 48px)",
+          backgroundImage: "repeating-linear-gradient(0deg, transparent, transparent 47px, hsl(220 10% 24% / 0.3) 47px, hsl(220 10% 24% / 0.3) 48px)",
         }}
       />
 
@@ -296,14 +296,14 @@ export default function Experience() {
         {/* Section header */}
         <div ref={headerRef} className="mb-24">
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-6 h-px bg-[hsl(38,90%,52%)]" />
+            <div className="w-6 h-px bg-[hsl(38,95%,56%)]" />
             <span className="mono-label text-[10px]">ACT 02 · EVOLUTION OF A BUILDER</span>
           </div>
           <motion.h2
             initial={{ opacity: 0, y: 16 }}
             animate={headerInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-            className="heading-editorial text-[hsl(40,10%,88%)] max-w-lg"
+            className="heading-editorial text-[hsl(40,12%,94%)] max-w-lg"
           >
             A documentary of engineering evolution.
           </motion.h2>
@@ -311,7 +311,7 @@ export default function Experience() {
             initial={{ opacity: 0 }}
             animate={headerInView ? { opacity: 1 } : {}}
             transition={{ duration: 0.6, delay: 0.3 }}
-            className="mt-4 text-sm text-[hsl(210,5%,48%)] max-w-md font-light"
+            className="mt-4 text-sm text-[hsl(220,8%,60%)] max-w-md font-light"
           >
             From early curiosity to active infrastructure building. Each node is a system checkpoint.
           </motion.p>
@@ -325,20 +325,20 @@ export default function Experience() {
 
           {/* End cap */}
           <div className="flex flex-col items-center" style={{ marginLeft: "calc(50% - 20px)", width: "40px" }}>
-            <div className="w-px h-8 bg-[hsl(210,5%,14%)]" />
-            <div className="font-mono text-[9px] tracking-[0.15em] text-[hsl(210,5%,22%)] mt-2">
+            <div className="w-px h-8 bg-[hsl(220,10%,24%)]" />
+            <div className="font-mono text-[9px] tracking-[0.15em] text-[hsl(220,8%,33%)] mt-2">
               ONGOING
             </div>
           </div>
         </div>
 
         {/* Certifications row */}
-        <div className="mt-24 pt-16 border-t border-[hsl(210,5%,14%)]">
+        <div className="mt-24 pt-16 border-t border-[hsl(220,10%,24%)]">
           <div className="flex items-center gap-3 mb-10">
             <span className="mono-label text-[10px]">CERTIFICATION REGISTRY</span>
-            <div className="flex-1 h-px bg-[hsl(210,5%,14%)]" />
+            <div className="flex-1 h-px bg-[hsl(220,10%,24%)]" />
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px bg-[hsl(210,5%,14%)]">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px bg-[hsl(220,10%,24%)]">
             {[
               { title: "Generative AI & LangChain", issuer: "Udemy", date: "May 2024" },
               { title: "Innovation & Business Models", issuer: "NPTEL · IIT Roorkee", date: "Oct 2024" },
@@ -346,12 +346,12 @@ export default function Experience() {
               { title: "DevOps on AWS", issuer: "AWS Training & Certification", date: "Aug 2025" },
               { title: "Robotics & Controls Job Simulation", issuer: "Johnson & Johnson · Forage", date: "Mar 2026" },
             ].map((cert) => (
-              <div key={cert.title} className="bg-[hsl(0,0%,4%)] p-6 hover:bg-[hsl(0,0%,7%)] transition-colors duration-250 group">
-                <p className="font-mono text-[10px] tracking-[0.1em] text-[hsl(210,5%,32%)] mb-2">{cert.date}</p>
-                <p className="text-sm text-[hsl(40,10%,88%)] font-medium leading-snug mb-1 group-hover:text-[hsl(38,90%,52%)] transition-colors duration-250">
+              <div key={cert.title} className="bg-[hsl(222,14%,10%)] p-6 hover:bg-[hsl(222,12%,13%)] transition-colors duration-250 group">
+                <p className="font-mono text-[10px] tracking-[0.1em] text-[hsl(220,8%,44%)] mb-2">{cert.date}</p>
+                <p className="text-sm text-[hsl(40,12%,94%)] font-medium leading-snug mb-1 group-hover:text-[hsl(38,95%,56%)] transition-colors duration-250">
                   {cert.title}
                 </p>
-                <p className="font-mono text-[11px] text-[hsl(210,5%,42%)]">{cert.issuer}</p>
+                <p className="font-mono text-[11px] text-[hsl(220,8%,54%)]">{cert.issuer}</p>
               </div>
             ))}
           </div>

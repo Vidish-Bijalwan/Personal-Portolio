@@ -64,19 +64,19 @@ export default function Hero() {
         className="absolute inset-0 pointer-events-none"
         style={{
           background:
-            "radial-gradient(ellipse 80% 60% at 70% 50%, hsl(210 5% 9% / 0.6) 0%, transparent 70%), radial-gradient(ellipse 50% 80% at 10% 80%, hsl(38 90% 52% / 0.04) 0%, transparent 60%)",
+            "radial-gradient(ellipse 80% 60% at 70% 50%, hsl(220 10% 24% / 0.55) 0%, transparent 70%), radial-gradient(ellipse 50% 80% at 10% 80%, hsl(38 95% 56% / 0.10) 0%, transparent 60%), radial-gradient(ellipse 60% 40% at 50% 0%, hsl(38 95% 56% / 0.05) 0%, transparent 60%)",
         }}
       />
 
       {/* Vertical rule — left anchor */}
-      <div className="absolute left-8 top-0 bottom-0 w-px bg-[hsl(210,5%,14%)] pointer-events-none" />
+      <div className="absolute left-8 top-0 bottom-0 w-px bg-[hsl(220,10%,24%)] pointer-events-none" />
 
       {/* Coordinate system — top right */}
       <div className="absolute top-[72px] right-8 pointer-events-none">
-        <p className="font-mono text-[10px] tracking-[0.1em] text-[hsl(210,5%,28%)]">
+        <p className="font-mono text-[10px] tracking-[0.1em] text-[hsl(220,8%,40%)]">
           28.67°N 77.41°E
         </p>
-        <p className="font-mono text-[10px] tracking-[0.1em] text-[hsl(210,5%,22%)] mt-1">
+        <p className="font-mono text-[10px] tracking-[0.1em] text-[hsl(220,8%,33%)] mt-1">
           {new Date().toISOString().split("T")[0]}
         </p>
       </div>
@@ -93,7 +93,7 @@ export default function Hero() {
             <div className="relative">
               {/* Section marker */}
               <div className="flex items-center gap-3 mb-12">
-                <div className="w-6 h-px bg-[hsl(38,90%,52%)]" />
+                <div className="w-6 h-px bg-[hsl(38,95%,56%)]" />
                 <span className="mono-label text-[10px]">ACT 01 · SIGNAL DETECTED</span>
               </div>
 
@@ -104,7 +104,7 @@ export default function Hero() {
                   animate={{ y: bootComplete ? "0%" : "100%" }}
                   transition={{ duration: 1.0, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
                 >
-                  <h1 className="display-xl text-[hsl(40,10%,88%)] leading-none">
+                  <h1 className="display-xl text-[hsl(40,12%,94%)] leading-none">
                     VIDISH
                   </h1>
                 </motion.div>
@@ -120,7 +120,7 @@ export default function Hero() {
                     className="display-xl leading-none"
                     style={{
                       color: "transparent",
-                      WebkitTextStroke: "1px hsl(40 10% 50%)",
+                      WebkitTextStroke: "1px hsl(40 12% 58%)",
                     }}
                   >
                     BIJALWAN
@@ -134,7 +134,7 @@ export default function Hero() {
                   initial={{ scaleX: 0, originX: 0 }}
                   animate={{ scaleX: bootComplete ? 1 : 0 }}
                   transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.5 }}
-                  className="h-px bg-gradient-to-r from-[hsl(38,90%,52%)] via-[hsl(38,90%,52%/0.6)] to-transparent"
+                  className="h-px bg-gradient-to-r from-[hsl(38,95%,56%)] via-[hsl(38,95%,56%/0.6)] to-transparent"
                 />
               </div>
 
@@ -143,10 +143,10 @@ export default function Hero() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: bootComplete ? 1 : 0 }}
                 transition={{ duration: 0.8, delay: 0.7 }}
-                className="text-[hsl(210,5%,58%)] text-lg leading-relaxed max-w-[520px] mb-12 font-light"
+                className="text-[hsl(220,8%,70%)] text-lg leading-relaxed max-w-[520px] mb-12 font-light"
               >
                 Building retrieval systems, autonomous agents, and{" "}
-                <span className="text-[hsl(40,10%,88%)]">intelligence infrastructure</span>{" "}
+                <span className="text-[hsl(40,12%,94%)]">intelligence infrastructure</span>{" "}
                 that bridges research and production.
               </motion.p>
 
@@ -159,7 +159,7 @@ export default function Hero() {
               >
                 <button
                   onClick={scrollToNext}
-                  className="group flex items-center gap-3 font-mono text-xs tracking-[0.12em] text-[hsl(40,10%,88%)] hover:text-[hsl(38,90%,52%)] transition-colors duration-250"
+                  className="group flex items-center gap-3 font-mono text-xs tracking-[0.12em] text-[hsl(40,12%,94%)] hover:text-[hsl(38,95%,56%)] transition-colors duration-250"
                 >
                   <span className="w-8 h-px bg-current transition-all duration-400 group-hover:w-16" />
                   ENTER ARCHIVE
@@ -167,14 +167,14 @@ export default function Hero() {
 
                 <button
                   onClick={() => window.open("https://github.com/Vidish-Bijalwan", "_blank", "noopener,noreferrer")}
-                  className="font-mono text-xs tracking-[0.12em] text-[hsl(210,5%,48%)] hover:text-[hsl(40,10%,88%)] transition-colors duration-250"
+                  className="font-mono text-xs tracking-[0.12em] text-[hsl(220,8%,60%)] hover:text-[hsl(40,12%,94%)] transition-colors duration-250"
                 >
                   → GITHUB
                 </button>
 
                 <button
                   onClick={() => window.open("https://www.linkedin.com/in/vidish-bijalwan", "_blank", "noopener,noreferrer")}
-                  className="font-mono text-xs tracking-[0.12em] text-[hsl(210,5%,48%)] hover:text-[hsl(40,10%,88%)] transition-colors duration-250"
+                  className="font-mono text-xs tracking-[0.12em] text-[hsl(220,8%,60%)] hover:text-[hsl(40,12%,94%)] transition-colors duration-250"
                 >
                   → LINKEDIN
                 </button>
@@ -191,11 +191,11 @@ export default function Hero() {
               {/* Boot terminal */}
               <div
                 className="surface-elevated p-6 mb-4"
-                style={{ borderLeft: "2px solid hsl(38 90% 52% / 0.5)" }}
+                style={{ borderLeft: "2px solid hsl(38 95% 56% / 0.5)" }}
               >
-                <div className="flex items-center gap-2 mb-4 pb-3 border-b border-[hsl(210,5%,14%)]">
-                  <div className="w-2 h-2 rounded-full bg-[hsl(38,90%,52%)] animate-pulse-amber" />
-                  <span className="font-mono text-[10px] tracking-[0.15em] text-[hsl(210,5%,48%)]">
+                <div className="flex items-center gap-2 mb-4 pb-3 border-b border-[hsl(220,10%,24%)]">
+                  <div className="w-2 h-2 rounded-full bg-[hsl(38,95%,56%)] animate-pulse-amber" />
+                  <span className="font-mono text-[10px] tracking-[0.15em] text-[hsl(220,8%,60%)]">
                     SYSTEM BOOT LOG
                   </span>
                 </div>
@@ -205,13 +205,13 @@ export default function Hero() {
                       key={i}
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
-                      className="font-mono text-[11px] text-[hsl(210,5%,48%)] leading-relaxed"
+                      className="font-mono text-[11px] text-[hsl(220,8%,60%)] leading-relaxed"
                     >
-                      <span className="text-[hsl(38,90%,52%/0.7)]">›</span> {line.replace("SYS > ", "")}
+                      <span className="text-[hsl(38,95%,56%/0.7)]">›</span> {line.replace("SYS > ", "")}
                     </motion.p>
                   ))}
                   {bootIndex < BOOT_SEQUENCE.length && (
-                    <span className="inline-block w-1.5 h-3 bg-[hsl(38,90%,52%)] animate-blink ml-1" />
+                    <span className="inline-block w-1.5 h-3 bg-[hsl(38,95%,56%)] animate-blink ml-1" />
                   )}
                 </div>
               </div>
@@ -224,15 +224,15 @@ export default function Hero() {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: bootComplete ? 1 : 0 }}
                     transition={{ delay: 0.8 + i * 0.08 }}
-                    className="flex items-baseline justify-between px-6 py-3 border-b border-[hsl(210,5%,12%)] last:border-b-0"
+                    className="flex items-baseline justify-between px-6 py-3 border-b border-[hsl(220,10%,22%)] last:border-b-0"
                   >
                     <span className="mono-label text-[10px]">{line.label}</span>
                     <span className={`font-mono text-[11px] tracking-[0.05em] ${
                       line.label === "STATUS"
-                        ? "text-[hsl(145,50%,38%)]"
+                        ? "text-[hsl(145,55%,45%)]"
                         : line.label === "ENGINEER"
-                        ? "text-[hsl(40,10%,88%)]"
-                        : "text-[hsl(210,5%,68%)]"
+                        ? "text-[hsl(40,12%,94%)]"
+                        : "text-[hsl(220,8%,78%)]"
                     }`}>
                       {line.value}
                     </span>
@@ -241,7 +241,7 @@ export default function Hero() {
               </div>
 
               {/* Floating coordinate label */}
-              <p className="mt-4 text-right font-mono text-[10px] text-[hsl(210,5%,24%)]">
+              <p className="mt-4 text-right font-mono text-[10px] text-[hsl(220,8%,36%)]">
                 REF–001 / SIGNAL
               </p>
             </motion.div>
@@ -257,12 +257,12 @@ export default function Hero() {
         >
           <button
             onClick={scrollToNext}
-            className="group flex items-center gap-3 font-mono text-[10px] tracking-[0.18em] text-[hsl(210,5%,38%)] hover:text-[hsl(210,5%,58%)] transition-colors duration-400"
+            className="group flex items-center gap-3 font-mono text-[10px] tracking-[0.18em] text-[hsl(220,8%,50%)] hover:text-[hsl(220,8%,70%)] transition-colors duration-400"
           >
             <motion.div
               animate={{ y: [0, 4, 0] }}
               transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-              className="w-px h-8 bg-[hsl(210,5%,28%)] group-hover:bg-[hsl(38,90%,52%)] transition-colors duration-400"
+              className="w-px h-8 bg-[hsl(220,8%,40%)] group-hover:bg-[hsl(38,95%,56%)] transition-colors duration-400"
             />
             SCROLL TO ENTER SYSTEM
           </button>
@@ -273,7 +273,7 @@ export default function Hero() {
           className="absolute right-8 bottom-24 pointer-events-none"
           style={{ writingMode: "vertical-rl" }}
         >
-          <span className="font-mono text-[9px] tracking-[0.25em] text-[hsl(210,5%,20%)]">
+          <span className="font-mono text-[9px] tracking-[0.25em] text-[hsl(220,8%,30%)]">
             INTELLIGENCE ARCHIVE · v2026
           </span>
         </div>

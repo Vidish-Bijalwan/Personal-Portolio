@@ -47,15 +47,15 @@ const FUTURE_SYSTEMS = [
 ]
 
 const horizonColors: Record<string, string> = {
-  NEAR: "hsl(145,50%,38%)",
-  MID: "hsl(38,90%,52%)",
-  FAR: "hsl(210,5%,48%)",
+  NEAR: "hsl(145,55%,45%)",
+  MID: "hsl(38,95%,56%)",
+  FAR: "hsl(220,8%,60%)",
 }
 
 const statusColors: Record<string, string> = {
-  PLANNED: "hsl(210,5%,48%)",
-  RESEARCHING: "hsl(38,90%,52%)",
-  EXPLORING: "hsl(210,5%,38%)",
+  PLANNED: "hsl(220,8%,60%)",
+  RESEARCHING: "hsl(38,95%,56%)",
+  EXPLORING: "hsl(220,8%,50%)",
 }
 
 function FutureSystemRow({ sys, index }: { sys: typeof FUTURE_SYSTEMS[0]; index: number }) {
@@ -67,11 +67,11 @@ function FutureSystemRow({ sys, index }: { sys: typeof FUTURE_SYSTEMS[0]; index:
       initial={{ opacity: 0, y: 16 }}
       animate={inView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: index * 0.07 }}
-      className="border-t border-[hsl(210,5%,14%)] py-8 grid grid-cols-1 md:grid-cols-[100px_1fr_auto] gap-4 md:gap-8 group hover:bg-[hsl(0,0%,5%)] transition-colors duration-250 -mx-8 md:-mx-16 px-8 md:px-16"
+      className="border-t border-[hsl(220,10%,24%)] py-8 grid grid-cols-1 md:grid-cols-[100px_1fr_auto] gap-4 md:gap-8 group hover:bg-[hsl(222,14%,11%)] transition-colors duration-250 -mx-8 md:-mx-16 px-8 md:px-16"
     >
       {/* ID + horizon */}
       <div className="flex md:flex-col items-start gap-3 md:gap-1">
-        <span className="font-mono text-[9px] tracking-[0.1em] text-[hsl(210,5%,24%)]">{sys.id}</span>
+        <span className="font-mono text-[9px] tracking-[0.1em] text-[hsl(220,8%,36%)]">{sys.id}</span>
         <div className="flex items-center gap-1.5">
           <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: horizonColors[sys.horizon] }} />
           <span className="font-mono text-[9px] tracking-[0.08em]" style={{ color: horizonColors[sys.horizon] }}>
@@ -86,13 +86,13 @@ function FutureSystemRow({ sys, index }: { sys: typeof FUTURE_SYSTEMS[0]; index:
             {sys.status}
           </span>
         </div>
-        <h3 className="text-[18px] font-semibold text-[hsl(40,10%,78%)] group-hover:text-[hsl(40,10%,92%)] transition-colors duration-250 leading-snug mb-2 tracking-tight">
+        <h3 className="text-[18px] font-semibold text-[hsl(40,12%,84%)] group-hover:text-[hsl(40,12%,96%)] transition-colors duration-250 leading-snug mb-2 tracking-tight">
           {sys.title}
         </h3>
-        <p className="text-sm text-[hsl(210,5%,50%)] leading-relaxed max-w-xl">{sys.description}</p>
+        <p className="text-sm text-[hsl(220,8%,62%)] leading-relaxed max-w-xl">{sys.description}</p>
       </div>
       {/* Arrow */}
-      <div className="hidden md:flex items-center text-[hsl(210,5%,24%)] group-hover:text-[hsl(38,90%,52%)] transition-colors duration-400">
+      <div className="hidden md:flex items-center text-[hsl(220,8%,36%)] group-hover:text-[hsl(38,95%,56%)] transition-colors duration-400">
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1">
           <path d="M2 8h12M9 4l4 4-4 4" />
         </svg>
@@ -122,18 +122,18 @@ export default function Contact() {
       className="relative py-24 overflow-hidden"
       style={{
         background:
-          "linear-gradient(180deg, hsl(0,0%,4%) 0%, hsl(0,0%,3%) 60%, hsl(0,0%,2%) 100%)",
+          "linear-gradient(180deg, hsl(222,14%,10%) 0%, hsl(222,14%,8%) 60%, hsl(222,14%,7%) 100%)",
       }}
     >
       {/* Environment — minimal, philosophical, open-ended */}
       <div
         className="absolute top-0 left-0 right-0 h-px pointer-events-none"
-        style={{ background: "linear-gradient(90deg, transparent, hsl(38 90% 52% / 0.2), transparent)" }}
+        style={{ background: "linear-gradient(90deg, transparent, hsl(38 95% 56% / 0.2), transparent)" }}
       />
       <div
         className="absolute bottom-0 left-0 w-64 h-64 pointer-events-none opacity-30"
         style={{
-          background: "radial-gradient(circle at bottom left, hsl(38 90% 52% / 0.04) 0%, transparent 70%)",
+          background: "radial-gradient(circle at bottom left, hsl(38 95% 56% / 0.04) 0%, transparent 70%)",
         }}
       />
 
@@ -141,14 +141,14 @@ export default function Contact() {
         {/* Section header */}
         <div ref={headerRef} className="mb-20">
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-6 h-px bg-[hsl(38,90%,52%)]" />
+            <div className="w-6 h-px bg-[hsl(38,95%,56%)]" />
             <span className="mono-label text-[10px]">ACT 05 · FUTURE SYSTEMS</span>
           </div>
           <motion.h2
             initial={{ opacity: 0, y: 16 }}
             animate={headerInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-            className="heading-editorial text-[hsl(40,10%,88%)] max-w-2xl leading-tight"
+            className="heading-editorial text-[hsl(40,12%,94%)] max-w-2xl leading-tight"
           >
             Engineering the next layer of intelligence.
           </motion.h2>
@@ -156,7 +156,7 @@ export default function Contact() {
             initial={{ opacity: 0 }}
             animate={headerInView ? { opacity: 1 } : {}}
             transition={{ delay: 0.3, duration: 0.6 }}
-            className="mt-5 text-base text-[hsl(210,5%,48%)] max-w-lg font-light leading-relaxed"
+            className="mt-5 text-base text-[hsl(220,8%,60%)] max-w-lg font-light leading-relaxed"
           >
             These are not products. These are systems on the build list — a map of where engineering intent is pointing.
           </motion.p>
@@ -164,7 +164,7 @@ export default function Contact() {
 
         {/* Future systems list */}
         <div className="mb-24">
-          <div className="border-b border-[hsl(210,5%,14%)]">
+          <div className="border-b border-[hsl(220,10%,24%)]">
             {FUTURE_SYSTEMS.map((sys, i) => (
               <FutureSystemRow key={sys.id} sys={sys} index={i} />
             ))}
@@ -176,13 +176,13 @@ export default function Contact() {
           {[{ label: "NEAR · 0–12mo", key: "NEAR" }, { label: "MID · 1–3yr", key: "MID" }, { label: "FAR · 3yr+", key: "FAR" }].map(({ label, key }) => (
             <div key={key} className="flex items-center gap-2">
               <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: horizonColors[key] }} />
-              <span className="font-mono text-[10px] tracking-[0.08em] text-[hsl(210,5%,38%)]">{label}</span>
+              <span className="font-mono text-[10px] tracking-[0.08em] text-[hsl(220,8%,50%)]">{label}</span>
             </div>
           ))}
         </div>
 
         {/* Divider */}
-        <div className="h-px bg-[hsl(210,5%,12%)] mb-20" />
+        <div className="h-px bg-[hsl(220,10%,22%)] mb-20" />
 
         {/* Contact section */}
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-16 lg:gap-24">
@@ -201,10 +201,10 @@ export default function Contact() {
                   href={ch.href}
                   target={ch.href.startsWith("mailto") ? undefined : "_blank"}
                   rel="noopener noreferrer"
-                  className="flex items-center justify-between py-4 border-b border-[hsl(210,5%,12%)] group hover:border-[hsl(38,90%,52%,0.3)] transition-colors duration-250"
+                  className="flex items-center justify-between py-4 border-b border-[hsl(220,10%,22%)] group hover:border-[hsl(38,95%,56%,0.3)] transition-colors duration-250"
                 >
                   <span className="mono-label text-[10px]">{ch.label}</span>
-                  <span className="font-mono text-[12px] text-[hsl(210,5%,52%)] group-hover:text-[hsl(38,90%,52%)] transition-colors duration-250">
+                  <span className="font-mono text-[12px] text-[hsl(220,8%,64%)] group-hover:text-[hsl(38,95%,56%)] transition-colors duration-250">
                     → {ch.value}
                   </span>
                 </a>
@@ -216,7 +216,7 @@ export default function Contact() {
               href="/vidish_resume6sem.pdf"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-3 font-mono text-[11px] tracking-[0.12em] text-[hsl(40,10%,78%)] hover:text-[hsl(38,90%,52%)] transition-colors duration-250 border border-[hsl(210,5%,18%)] hover:border-[hsl(38,90%,52%,0.4)] px-6 py-3 transition-colors duration-250"
+              className="inline-flex items-center gap-3 font-mono text-[11px] tracking-[0.12em] text-[hsl(40,12%,84%)] hover:text-[hsl(38,95%,56%)] transition-colors duration-250 border border-[hsl(220,8%,30%)] hover:border-[hsl(38,95%,56%,0.4)] px-6 py-3 transition-colors duration-250"
             >
               <span>↓ DOWNLOAD RESUME</span>
             </a>
@@ -229,11 +229,11 @@ export default function Contact() {
               <div
                 className="p-8 text-center"
                 style={{
-                  border: "1px solid hsl(145,50%,38%,0.3)",
-                  background: "hsl(145,50%,38%,0.04)",
+                  border: "1px solid hsl(145,55%,45%,0.3)",
+                  background: "hsl(145,55%,45%,0.04)",
                 }}
               >
-                <p className="font-mono text-sm text-[hsl(145,50%,38%)]">Message transmitted.</p>
+                <p className="font-mono text-sm text-[hsl(145,55%,45%)]">Message transmitted.</p>
                 <p className="mono-label mt-2">CHANNEL OPEN</p>
               </div>
             ) : (
@@ -252,10 +252,10 @@ export default function Contact() {
                       onChange={(e) =>
                         setFormState((s) => ({ ...s, [field.key]: e.target.value }))
                       }
-                      className="w-full px-4 py-3 font-mono text-sm text-[hsl(40,10%,80%)] placeholder:text-[hsl(210,5%,30%)] outline-none focus:border-[hsl(38,90%,52%,0.5)] transition-colors duration-250"
+                      className="w-full px-4 py-3 font-mono text-sm text-[hsl(40,12%,86%)] placeholder:text-[hsl(220,8%,42%)] outline-none focus:border-[hsl(38,95%,56%,0.5)] transition-colors duration-250"
                       style={{
-                        background: "hsl(0,0%,6%)",
-                        border: "1px solid hsl(210,5%,14%)",
+                        background: "hsl(222,14%,12%)",
+                        border: "1px solid hsl(220,10%,24%)",
                       }}
                     />
                   </div>
@@ -268,16 +268,16 @@ export default function Contact() {
                     placeholder="Your message..."
                     value={formState.message}
                     onChange={(e) => setFormState((s) => ({ ...s, message: e.target.value }))}
-                    className="w-full px-4 py-3 font-mono text-sm text-[hsl(40,10%,80%)] placeholder:text-[hsl(210,5%,30%)] outline-none resize-none focus:border-[hsl(38,90%,52%,0.5)] transition-colors duration-250"
+                    className="w-full px-4 py-3 font-mono text-sm text-[hsl(40,12%,86%)] placeholder:text-[hsl(220,8%,42%)] outline-none resize-none focus:border-[hsl(38,95%,56%,0.5)] transition-colors duration-250"
                     style={{
-                      background: "hsl(0,0%,6%)",
-                      border: "1px solid hsl(210,5%,14%)",
+                      background: "hsl(222,14%,12%)",
+                      border: "1px solid hsl(220,10%,24%)",
                     }}
                   />
                 </div>
                 <button
                   type="submit"
-                  className="w-full py-3 font-mono text-[12px] tracking-[0.15em] text-[hsl(0,0%,4%)] bg-[hsl(38,90%,52%)] hover:bg-[hsl(38,90%,45%)] transition-colors duration-250"
+                  className="w-full py-3 font-mono text-[12px] tracking-[0.15em] text-[hsl(222,14%,10%)] bg-[hsl(38,95%,56%)] hover:bg-[hsl(38,95%,49%)] transition-colors duration-250"
                 >
                   TRANSMIT →
                 </button>
@@ -286,7 +286,7 @@ export default function Contact() {
           </div>
         </div>
 
-        <p className="mt-16 font-mono text-[9px] tracking-[0.1em] text-[hsl(210,5%,20%)] text-right">
+        <p className="mt-16 font-mono text-[9px] tracking-[0.1em] text-[hsl(220,8%,30%)] text-right">
           REF–005 / FUTURE
         </p>
       </div>

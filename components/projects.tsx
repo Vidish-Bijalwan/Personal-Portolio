@@ -143,9 +143,9 @@ const systems = [
 ]
 
 const statusConfig: Record<string, { color: string; class: string }> = {
-  LIVE:         { color: "hsl(145,50%,38%)", class: "status-active" },
-  DEPLOYED:     { color: "hsl(38,90%,52%)",  class: "status-deployed" },
-  EXPERIMENTAL: { color: "hsl(210,5%,48%)",  class: "status-experimental" },
+  LIVE:         { color: "hsl(145,55%,45%)", class: "status-active" },
+  DEPLOYED:     { color: "hsl(38,95%,56%)",  class: "status-deployed" },
+  EXPERIMENTAL: { color: "hsl(220,8%,60%)",  class: "status-experimental" },
 }
 
 function SystemPanel({ system, index }: { system: typeof systems[0]; index: number }) {
@@ -160,16 +160,16 @@ function SystemPanel({ system, index }: { system: typeof systems[0]; index: numb
       initial={{ opacity: 0, y: 24 }}
       animate={inView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1], delay: index * 0.08 }}
-      className="border-t border-[hsl(210,5%,14%)] group"
+      className="border-t border-[hsl(220,10%,24%)] group"
     >
       {/* Panel header — always visible */}
       <div
-        className="grid grid-cols-[auto_1fr_auto] md:grid-cols-[80px_1fr_auto_auto] gap-0 cursor-pointer hover:bg-[hsl(0,0%,7%)] transition-colors duration-250"
+        className="grid grid-cols-[auto_1fr_auto] md:grid-cols-[80px_1fr_auto_auto] gap-0 cursor-pointer hover:bg-[hsl(222,12%,13%)] transition-colors duration-250"
         onClick={() => setExpanded(!expanded)}
       >
         {/* System ID */}
-        <div className="hidden md:flex items-start px-6 py-6 border-r border-[hsl(210,5%,12%)]">
-          <span className="font-mono text-[10px] tracking-[0.1em] text-[hsl(210,5%,28%)] mt-0.5">
+        <div className="hidden md:flex items-start px-6 py-6 border-r border-[hsl(220,10%,22%)]">
+          <span className="font-mono text-[10px] tracking-[0.1em] text-[hsl(220,8%,40%)] mt-0.5">
             {system.id}
           </span>
         </div>
@@ -180,17 +180,17 @@ function SystemPanel({ system, index }: { system: typeof systems[0]; index: numb
             <span className={cfg.class} style={{ color: cfg.color }}>
               {system.status}
             </span>
-            <span className="font-mono text-[10px] text-[hsl(210,5%,28%)]">
+            <span className="font-mono text-[10px] text-[hsl(220,8%,40%)]">
               · {system.year}
             </span>
-            <span className="font-mono text-[9px] text-[hsl(210,5%,22%)] md:hidden">
+            <span className="font-mono text-[9px] text-[hsl(220,8%,33%)] md:hidden">
               {system.id}
             </span>
           </div>
-          <h3 className="text-[20px] md:text-[22px] font-semibold text-[hsl(40,10%,88%)] tracking-tight leading-snug mb-1 group-hover:text-white transition-colors duration-250">
+          <h3 className="text-[20px] md:text-[22px] font-semibold text-[hsl(40,12%,94%)] tracking-tight leading-snug mb-1 group-hover:text-white transition-colors duration-250">
             {system.title}
           </h3>
-          <p className="font-mono text-[10px] tracking-[0.1em] text-[hsl(210,5%,38%)]">
+          <p className="font-mono text-[10px] tracking-[0.1em] text-[hsl(220,8%,50%)]">
             {system.domain}
           </p>
         </div>
@@ -207,7 +207,7 @@ function SystemPanel({ system, index }: { system: typeof systems[0]; index: numb
           <motion.div
             animate={{ rotate: expanded ? 45 : 0 }}
             transition={{ duration: 0.25 }}
-            className="w-4 h-4 flex items-center justify-center text-[hsl(210,5%,38%)] group-hover:text-[hsl(38,90%,52%)] transition-colors duration-250"
+            className="w-4 h-4 flex items-center justify-center text-[hsl(220,8%,50%)] group-hover:text-[hsl(38,95%,56%)] transition-colors duration-250"
           >
             <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
               <line x1="8" y1="2" x2="8" y2="14" />
@@ -228,8 +228,8 @@ function SystemPanel({ system, index }: { system: typeof systems[0]; index: numb
             className="overflow-hidden"
           >
             <div
-              className="border-t border-[hsl(210,5%,14%)]"
-              style={{ background: "hsl(0,0%,2%)" }}
+              className="border-t border-[hsl(220,10%,24%)]"
+              style={{ background: "hsl(222,14%,7%)" }}
             >
               <div className="grid grid-cols-1 md:grid-cols-[1fr_1px_380px] gap-0">
 
@@ -237,19 +237,19 @@ function SystemPanel({ system, index }: { system: typeof systems[0]; index: numb
                 <div className="p-8 md:p-10 space-y-8">
                   <div>
                     <p className="mono-label mb-3">PROBLEM SPACE</p>
-                    <p className="text-sm text-[hsl(210,5%,65%)] leading-relaxed">
+                    <p className="text-sm text-[hsl(220,8%,77%)] leading-relaxed">
                       {system.problem}
                     </p>
                   </div>
                   <div>
                     <p className="mono-label mb-3">ENGINEERING APPROACH</p>
-                    <p className="text-sm text-[hsl(210,5%,65%)] leading-relaxed">
+                    <p className="text-sm text-[hsl(220,8%,77%)] leading-relaxed">
                       {system.approach}
                     </p>
                   </div>
                   <div>
                     <p className="mono-label mb-3">RESULTS</p>
-                    <p className="text-sm text-[hsl(40,10%,88%)] leading-relaxed">
+                    <p className="text-sm text-[hsl(40,12%,94%)] leading-relaxed">
                       {system.results}
                     </p>
                   </div>
@@ -260,7 +260,7 @@ function SystemPanel({ system, index }: { system: typeof systems[0]; index: numb
                       href={system.github}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="font-mono text-[11px] tracking-[0.1em] text-[hsl(210,5%,48%)] hover:text-[hsl(38,90%,52%)] transition-colors duration-250"
+                      className="font-mono text-[11px] tracking-[0.1em] text-[hsl(220,8%,60%)] hover:text-[hsl(38,95%,56%)] transition-colors duration-250"
                     >
                       → SOURCE CODE
                     </a>
@@ -269,7 +269,7 @@ function SystemPanel({ system, index }: { system: typeof systems[0]; index: numb
                         href={system.live}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="font-mono text-[11px] tracking-[0.1em] text-[hsl(145,50%,38%)] hover:text-[hsl(40,10%,88%)] transition-colors duration-250"
+                        className="font-mono text-[11px] tracking-[0.1em] text-[hsl(145,55%,45%)] hover:text-[hsl(40,12%,94%)] transition-colors duration-250"
                       >
                         → LIVE SYSTEM
                       </a>
@@ -278,14 +278,14 @@ function SystemPanel({ system, index }: { system: typeof systems[0]; index: numb
                 </div>
 
                 {/* Divider */}
-                <div className="hidden md:block bg-[hsl(210,5%,12%)]" />
+                <div className="hidden md:block bg-[hsl(220,10%,22%)]" />
 
                 {/* Right — Architecture diagram */}
                 <div className="p-8 md:p-10">
                   <p className="mono-label mb-4">SYSTEM ARCHITECTURE</p>
                   <div
                     className="rounded-sm p-4"
-                    style={{ background: "hsl(0,0%,5%)", border: "1px solid hsl(210,5%,12%)" }}
+                    style={{ background: "hsl(222,14%,11%)", border: "1px solid hsl(220,10%,22%)" }}
                   >
                     <div className="space-y-2">
                       {system.architecture.map((line, i) => {
@@ -297,16 +297,16 @@ function SystemPanel({ system, index }: { system: typeof systems[0]; index: numb
                             <span
                               className="font-mono text-[10px] tracking-[0.06em] shrink-0 w-12"
                               style={{
-                                color: isHighlighted ? "hsl(38,90%,52%)" : "hsl(210,5%,36%)",
+                                color: isHighlighted ? "hsl(38,95%,56%)" : "hsl(220,8%,48%)",
                               }}
                             >
                               {key.trim()}
                             </span>
-                            <span className="font-mono text-[10px] text-[hsl(210,5%,26%)]">::</span>
+                            <span className="font-mono text-[10px] text-[hsl(220,8%,38%)]">::</span>
                             <span
                               className="font-mono text-[10px] leading-relaxed"
                               style={{
-                                color: isHighlighted ? "hsl(40,10%,72%)" : "hsl(210,5%,58%)",
+                                color: isHighlighted ? "hsl(40,12%,78%)" : "hsl(220,8%,70%)",
                               }}
                             >
                               {value}
@@ -342,26 +342,26 @@ export default function Projects() {
     <section
       id="systems"
       className="relative py-24 overflow-hidden"
-      style={{ background: "hsl(0,0%,4%)" }}
+      style={{ background: "hsl(222,14%,10%)" }}
     >
       {/* Environment — dense technical feel */}
       <div className="absolute inset-0 grid-overlay-fine opacity-40 pointer-events-none" />
 
       {/* Structural vertical line — right */}
-      <div className="absolute right-0 top-0 bottom-0 w-px bg-[hsl(210,5%,10%)] pointer-events-none" />
+      <div className="absolute right-0 top-0 bottom-0 w-px bg-[hsl(220,8%,22%)] pointer-events-none" />
 
       <div className="relative z-10 max-w-[1400px] mx-auto px-8 md:px-16">
         {/* Section header */}
         <div ref={headerRef} className="mb-16">
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-6 h-px bg-[hsl(38,90%,52%)]" />
+            <div className="w-6 h-px bg-[hsl(38,95%,56%)]" />
             <span className="mono-label text-[10px]">ACT 03 · SYSTEMS ARCHITECTURE</span>
           </div>
           <motion.h2
             initial={{ opacity: 0, y: 16 }}
             animate={headerInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-            className="heading-editorial text-[hsl(40,10%,88%)] max-w-xl"
+            className="heading-editorial text-[hsl(40,12%,94%)] max-w-xl"
           >
             Deployed intelligence systems.
           </motion.h2>
@@ -369,14 +369,14 @@ export default function Projects() {
             initial={{ opacity: 0 }}
             animate={headerInView ? { opacity: 1 } : {}}
             transition={{ delay: 0.3, duration: 0.6 }}
-            className="mt-4 text-sm text-[hsl(210,5%,48%)] max-w-md font-light"
+            className="mt-4 text-sm text-[hsl(220,8%,60%)] max-w-md font-light"
           >
             Each system includes problem framing, engineering approach, architecture diagram, and deployment state. Click any row to expand.
           </motion.p>
         </div>
 
         {/* Column headers */}
-        <div className="hidden md:grid grid-cols-[80px_1fr_240px_48px] border-b border-[hsl(210,5%,18%)] pb-3 mb-0">
+        <div className="hidden md:grid grid-cols-[80px_1fr_240px_48px] border-b border-[hsl(220,8%,30%)] pb-3 mb-0">
           <span className="mono-label px-6">ID</span>
           <span className="mono-label px-6">SYSTEM</span>
           <span className="mono-label px-6">STACK</span>
@@ -388,25 +388,25 @@ export default function Projects() {
           {systems.map((sys, i) => (
             <SystemPanel key={sys.id} system={sys} index={i} />
           ))}
-          <div className="border-t border-[hsl(210,5%,14%)]" />
+          <div className="border-t border-[hsl(220,10%,24%)]" />
         </div>
 
         {/* Bottom legend */}
         <div className="mt-12 flex items-center gap-8">
           <div className="flex items-center gap-2">
-            <div className="w-1.5 h-1.5 rounded-full bg-[hsl(145,50%,38%)]" />
-            <span className="font-mono text-[10px] tracking-[0.08em] text-[hsl(210,5%,38%)]">LIVE</span>
+            <div className="w-1.5 h-1.5 rounded-full bg-[hsl(145,55%,45%)]" />
+            <span className="font-mono text-[10px] tracking-[0.08em] text-[hsl(220,8%,50%)]">LIVE</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-1.5 h-1.5 rounded-full bg-[hsl(38,90%,52%)]" />
-            <span className="font-mono text-[10px] tracking-[0.08em] text-[hsl(210,5%,38%)]">DEPLOYED</span>
+            <div className="w-1.5 h-1.5 rounded-full bg-[hsl(38,95%,56%)]" />
+            <span className="font-mono text-[10px] tracking-[0.08em] text-[hsl(220,8%,50%)]">DEPLOYED</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-1.5 h-1.5 rounded-full bg-[hsl(210,5%,48%)]" />
-            <span className="font-mono text-[10px] tracking-[0.08em] text-[hsl(210,5%,38%)]">EXPERIMENTAL</span>
+            <div className="w-1.5 h-1.5 rounded-full bg-[hsl(220,8%,60%)]" />
+            <span className="font-mono text-[10px] tracking-[0.08em] text-[hsl(220,8%,50%)]">EXPERIMENTAL</span>
           </div>
-          <div className="flex-1 h-px bg-[hsl(210,5%,12%)] ml-4" />
-          <span className="font-mono text-[9px] tracking-[0.1em] text-[hsl(210,5%,24%)]">
+          <div className="flex-1 h-px bg-[hsl(220,10%,22%)] ml-4" />
+          <span className="font-mono text-[9px] tracking-[0.1em] text-[hsl(220,8%,36%)]">
             REF–003 / SYSTEMS
           </span>
         </div>
