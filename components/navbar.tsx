@@ -56,7 +56,7 @@ export default function Navbar() {
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
         className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-400 ${
           scrolled
-            ? "bg-[hsl(0,0%,4%/0.92)] backdrop-blur-sm border-b border-[hsl(210,5%,14%)]"
+            ? "bg-[hsl(222,14%,10%/0.92)] backdrop-blur-sm border-b border-[hsl(220,10%,24%)]"
             : "bg-transparent"
         }`}
         style={{ height: "52px" }}
@@ -65,7 +65,7 @@ export default function Navbar() {
           {/* Monogram */}
           <button
             onClick={() => scrollTo("#signal")}
-            className="font-mono text-xs tracking-[0.2em] text-[hsl(40,10%,88%)] hover:text-[hsl(38,90%,52%)] transition-colors duration-250 uppercase"
+            className="font-mono text-xs tracking-[0.2em] text-[hsl(40,12%,94%)] hover:text-[hsl(38,95%,56%)] transition-colors duration-250 uppercase"
           >
             VB
           </button>
@@ -83,8 +83,8 @@ export default function Navbar() {
                   <span
                     className={`font-mono text-[11px] tracking-[0.15em] transition-colors duration-250 ${
                       isActive
-                        ? "text-[hsl(38,90%,52%)]"
-                        : "text-[hsl(210,5%,58%)] hover:text-[hsl(40,10%,88%)]"
+                        ? "text-[hsl(38,95%,56%)]"
+                        : "text-[hsl(220,8%,70%)] hover:text-[hsl(40,12%,94%)]"
                     }`}
                   >
                     {item.label}
@@ -92,7 +92,7 @@ export default function Navbar() {
                   {isActive && (
                     <motion.div
                       layoutId="nav-indicator"
-                      className="absolute -bottom-[2px] left-0 right-0 h-px bg-[hsl(38,90%,52%)]"
+                      className="absolute -bottom-[2px] left-0 right-0 h-px bg-[hsl(38,95%,56%)]"
                       transition={{ type: "spring", stiffness: 400, damping: 35 }}
                     />
                   )}
@@ -108,7 +108,7 @@ export default function Navbar() {
 
           {/* Mobile toggle */}
           <button
-            className="md:hidden font-mono text-[11px] tracking-[0.1em] text-[hsl(210,5%,58%)] hover:text-[hsl(40,10%,88%)] transition-colors"
+            className="md:hidden font-mono text-[11px] tracking-[0.1em] text-[hsl(220,8%,70%)] hover:text-[hsl(40,12%,94%)] transition-colors"
             onClick={() => setMobileOpen(!mobileOpen)}
             aria-label="Toggle navigation"
           >
@@ -124,9 +124,9 @@ export default function Navbar() {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
-          className="fixed inset-0 z-[90] bg-[hsl(0,0%,4%)] pt-[52px] flex flex-col"
+          className="fixed inset-0 z-[90] bg-[hsl(222,14%,10%)] pt-[52px] flex flex-col"
         >
-          <div className="border-b border-[hsl(210,5%,14%)]" />
+          <div className="border-b border-[hsl(220,10%,24%)]" />
           <div className="px-8 py-12 flex flex-col gap-8">
             {navItems.map((item, i) => (
               <motion.button
@@ -135,7 +135,7 @@ export default function Navbar() {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: i * 0.06, duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
                 onClick={() => scrollTo(item.href)}
-                className="text-left font-mono text-[13px] tracking-[0.15em] text-[hsl(210,5%,58%)] hover:text-[hsl(38,90%,52%)] transition-colors duration-250"
+                className="text-left font-mono text-[13px] tracking-[0.15em] text-[hsl(220,8%,70%)] hover:text-[hsl(38,95%,56%)] transition-colors duration-250"
               >
                 {item.label}
               </motion.button>

@@ -8,39 +8,39 @@
 @layer base {
   :root {
     /* Industrial color system */
-    --ink:               0 0% 4%;
-    --ink-deep:          0 0% 2%;
-    --charcoal:          0 0% 9%;
-    --graphite:          210 5% 14%;
-    --steel:             210 5% 28%;
-    --silver:            210 5% 58%;
-    --ivory:             40 10% 88%;
-    --amber:             38 90% 52%;
+    --ink:               222 14% 10%;
+    --ink-deep:          222 14% 7%;
+    --charcoal:          222 12% 15%;
+    --graphite:          220 10% 24%;
+    --steel:             220 8% 40%;
+    --silver:            220 8% 70%;
+    --ivory:             40 12% 94%;
+    --amber:             38 95% 56%;
     --amber-dim:         38 60% 32%;
-    --signal-green:      145 50% 38%;
-    --signal-amber:      38 90% 52%;
+    --signal-green:      145 55% 45%;
+    --signal-amber:      38 95% 56%;
     --signal-warning:    0 70% 50%;
 
     /* ShadCN semantic mappings */
-    --background:        0 0% 4%;
-    --foreground:        40 10% 88%;
-    --card:              0 0% 7%;
-    --card-foreground:   40 10% 88%;
-    --popover:           0 0% 7%;
-    --popover-foreground: 40 10% 88%;
-    --primary:           38 90% 52%;
-    --primary-foreground: 0 0% 4%;
-    --secondary:         210 5% 14%;
-    --secondary-foreground: 210 5% 58%;
-    --muted:             0 0% 9%;
-    --muted-foreground:  210 5% 48%;
-    --accent:            210 5% 14%;
-    --accent-foreground: 40 10% 88%;
+    --background:        222 14% 10%;
+    --foreground:        40 12% 94%;
+    --card:              222 14% 13%;
+    --card-foreground:   40 12% 94%;
+    --popover:           222 14% 13%;
+    --popover-foreground: 40 12% 94%;
+    --primary:           38 95% 56%;
+    --primary-foreground: 222 14% 10%;
+    --secondary:         220 10% 24%;
+    --secondary-foreground: 220 8% 70%;
+    --muted:             222 12% 15%;
+    --muted-foreground:  220 8% 60%;
+    --accent:            220 10% 24%;
+    --accent-foreground: 40 12% 94%;
     --destructive:       0 70% 50%;
-    --destructive-foreground: 40 10% 88%;
-    --border:            210 5% 14%;
-    --input:             210 5% 14%;
-    --ring:              38 90% 52%;
+    --destructive-foreground: 40 12% 94%;
+    --border:            220 10% 24%;
+    --input:             220 10% 24%;
+    --ring:              38 95% 56%;
     --radius:            4px;
 
     /* Z-index scale */

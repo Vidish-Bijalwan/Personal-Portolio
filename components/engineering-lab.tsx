@@ -32,7 +32,7 @@ interface GitHubData {
 // Fully deterministic fallback — no Date.now(), no Math.random()
 // Dates are hardcoded; relative labels computed client-side only after mount
 const STATIC_FALLBACK: GitHubData = {
-  profile: { login: "Vidish-Bijalwan", public_repos: 20, followers: 42, following: 361, created_at: "2024-01-01T00:00:00Z", bio: null },
+  profile: { login: "Vidish-Bijalwan", public_repos: 19, followers: 45, following: 367, created_at: "2024-01-01T00:00:00Z", bio: null },
   pushEvents: [
     { repo: "portfolio",                 date: "2026-05-18T12:00:00Z", message: "Redesign: cinematic intelligence archive", commits: 14 },
     { repo: "Churn-And-Revenue-Forecaster", date: "2026-05-17T10:00:00Z", message: "Add SHAP explainability module",         commits: 3  },
@@ -107,9 +107,9 @@ function ActivityCell({ count, date }: { count: number; date: string }) {
       style={{
         backgroundColor:
           count === 0
-            ? "hsl(210,5%,10%)"
-            : `hsl(38,90%,52%,${intensity})`,
-        border: "1px solid hsl(210,5%,12%)",
+            ? "hsl(220,8%,22%)"
+            : `hsl(38,95%,56%,${intensity})`,
+        border: "1px solid hsl(220,10%,22%)",
       }}
     />
   )
@@ -145,7 +145,7 @@ export default function EngineeringLab() {
       className="relative py-24 overflow-hidden"
       style={{
         background:
-          "linear-gradient(180deg, hsl(0,0%,4%) 0%, hsl(0,0%,5%) 100%)",
+          "linear-gradient(180deg, hsl(222,14%,10%) 0%, hsl(222,14%,11%) 100%)",
       }}
     >
       {/* Environment — alive, machine-driven feel */}
@@ -162,7 +162,7 @@ export default function EngineeringLab() {
         className="absolute right-0 top-0 bottom-0 w-96 pointer-events-none"
         style={{
           background:
-            "linear-gradient(270deg, hsl(38 90% 52% / 0.025) 0%, transparent 100%)",
+            "linear-gradient(270deg, hsl(38 95% 56% / 0.025) 0%, transparent 100%)",
         }}
       />
 
@@ -170,20 +170,20 @@ export default function EngineeringLab() {
         {/* Section header */}
         <div ref={headerRef} className="mb-16">
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-6 h-px bg-[hsl(38,90%,52%)]" />
+            <div className="w-6 h-px bg-[hsl(38,95%,56%)]" />
             <span className="mono-label text-[10px]">ACT 04 · LIVE ENGINEERING LAB</span>
             {!loading && (
               <span className="status-active text-[9px] ml-2">TELEMETRY LIVE</span>
             )}
             {loading && (
-              <span className="font-mono text-[9px] text-[hsl(210,5%,32%)] ml-2 animate-pulse">SYNCING...</span>
+              <span className="font-mono text-[9px] text-[hsl(220,8%,44%)] ml-2 animate-pulse">SYNCING...</span>
             )}
           </div>
           <motion.h2
             initial={{ opacity: 0, y: 16 }}
             animate={headerInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-            className="heading-editorial text-[hsl(40,10%,88%)] max-w-lg"
+            className="heading-editorial text-[hsl(40,12%,94%)] max-w-lg"
           >
             Engineering telemetry. Live.
           </motion.h2>
@@ -199,28 +199,28 @@ export default function EngineeringLab() {
             <div>
               <div className="flex items-center gap-3 mb-4">
                 <p className="mono-label">COMMIT FEED</p>
-                <div className="flex-1 h-px bg-[hsl(210,5%,14%)]" />
+                <div className="flex-1 h-px bg-[hsl(220,10%,24%)]" />
               </div>
               <div
                 className="rounded-sm overflow-hidden"
                 style={{
-                  background: "hsl(0,0%,3%)",
-                  border: "1px solid hsl(210,5%,12%)",
+                  background: "hsl(222,14%,8%)",
+                  border: "1px solid hsl(220,10%,22%)",
                 }}
               >
                 {/* Terminal header */}
                 <div
-                  className="px-4 py-2 flex items-center gap-2 border-b border-[hsl(210,5%,10%)]"
-                  style={{ background: "hsl(0,0%,6%)" }}
+                  className="px-4 py-2 flex items-center gap-2 border-b border-[hsl(220,8%,22%)]"
+                  style={{ background: "hsl(222,14%,12%)" }}
                 >
-                  <div className="w-2 h-2 rounded-full bg-[hsl(145,50%,38%)] animate-pulse-amber" />
-                  <span className="font-mono text-[10px] tracking-[0.15em] text-[hsl(210,5%,36%)]">
+                  <div className="w-2 h-2 rounded-full bg-[hsl(145,55%,45%)] animate-pulse-amber" />
+                  <span className="font-mono text-[10px] tracking-[0.15em] text-[hsl(220,8%,48%)]">
                     github.com/Vidish-Bijalwan · push log
                   </span>
                 </div>
                 <div className="p-4 space-y-3">
                   {github.pushEvents.length === 0 ? (
-                    <p className="font-mono text-[11px] text-[hsl(210,5%,36%)]">No recent push events.</p>
+                    <p className="font-mono text-[11px] text-[hsl(220,8%,48%)]">No recent push events.</p>
                   ) : (
                     github.pushEvents.map((ev, i) => (
                       <motion.div
@@ -228,20 +228,20 @@ export default function EngineeringLab() {
                         initial={{ opacity: 0, x: -8 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: i * 0.08, duration: 0.4 }}
-                        className="flex flex-col gap-0.5 border-b border-[hsl(210,5%,8%)] pb-3 last:border-b-0 last:pb-0"
+                        className="flex flex-col gap-0.5 border-b border-[hsl(220,8%,20%)] pb-3 last:border-b-0 last:pb-0"
                       >
                         <div className="flex items-center justify-between">
-                          <span className="font-mono text-[11px] text-[hsl(38,90%,52%/0.8)]">
+                          <span className="font-mono text-[11px] text-[hsl(38,95%,56%/0.8)]">
                             → push · {ev.repo}
                           </span>
-                          <span className="font-mono text-[10px] text-[hsl(210,5%,32%)]" suppressHydrationWarning>
+                          <span className="font-mono text-[10px] text-[hsl(220,8%,44%)]" suppressHydrationWarning>
                             {mounted ? formatRelativeTime(ev.date) : "–"}
                           </span>
                         </div>
-                        <span className="font-mono text-[11px] text-[hsl(210,5%,58%)] pl-4 truncate">
+                        <span className="font-mono text-[11px] text-[hsl(220,8%,70%)] pl-4 truncate">
                           {ev.message}
                         </span>
-                        <span className="font-mono text-[10px] text-[hsl(210,5%,30%)] pl-4">
+                        <span className="font-mono text-[10px] text-[hsl(220,8%,42%)] pl-4">
                           {ev.commits} commit{ev.commits !== 1 ? "s" : ""}
                         </span>
                       </motion.div>
@@ -255,31 +255,31 @@ export default function EngineeringLab() {
             <div>
               <div className="flex items-center gap-3 mb-4">
                 <p className="mono-label">REPOSITORIES</p>
-                <div className="flex-1 h-px bg-[hsl(210,5%,14%)]" />
+                <div className="flex-1 h-px bg-[hsl(220,10%,24%)]" />
               </div>
-              <div className="border border-[hsl(210,5%,12%)]">
+              <div className="border border-[hsl(220,10%,22%)]">
                 {github.topRepos.map((repo, i) => (
                   <a
                     key={repo.name}
                     href={repo.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="grid grid-cols-[1fr_80px_60px] gap-4 px-6 py-4 border-b border-[hsl(210,5%,10%)] last:border-b-0 hover:bg-[hsl(0,0%,7%)] transition-colors duration-250 group"
+                    className="grid grid-cols-[1fr_80px_60px] gap-4 px-6 py-4 border-b border-[hsl(220,8%,22%)] last:border-b-0 hover:bg-[hsl(222,12%,13%)] transition-colors duration-250 group"
                   >
                     <div>
-                      <p className="font-mono text-[12px] text-[hsl(40,10%,80%)] group-hover:text-[hsl(38,90%,52%)] transition-colors duration-250 leading-snug">
+                      <p className="font-mono text-[12px] text-[hsl(40,12%,86%)] group-hover:text-[hsl(38,95%,56%)] transition-colors duration-250 leading-snug">
                         {repo.name}
                       </p>
                       {repo.description && (
-                        <p className="font-mono text-[10px] text-[hsl(210,5%,38%)] mt-0.5 truncate">
+                        <p className="font-mono text-[10px] text-[hsl(220,8%,50%)] mt-0.5 truncate">
                           {repo.description}
                         </p>
                       )}
                     </div>
-                    <span className="font-mono text-[10px] text-[hsl(210,5%,36%)] self-center">
+                    <span className="font-mono text-[10px] text-[hsl(220,8%,48%)] self-center">
                       {repo.language ?? "–"}
                     </span>
-                    <span className="font-mono text-[10px] text-[hsl(210,5%,30%)] self-center text-right" suppressHydrationWarning>
+                    <span className="font-mono text-[10px] text-[hsl(220,8%,42%)] self-center text-right" suppressHydrationWarning>
                       {mounted ? formatRelativeTime(repo.pushed) : "–"}
                     </span>
                   </a>
@@ -291,7 +291,7 @@ export default function EngineeringLab() {
             <div>
               <div className="flex items-center gap-3 mb-4">
                 <p className="mono-label">28-DAY VELOCITY</p>
-                <div className="flex-1 h-px bg-[hsl(210,5%,14%)]" />
+                <div className="flex-1 h-px bg-[hsl(220,10%,24%)]" />
               </div>
               <div className="flex flex-wrap gap-1">
                 {github.activityGrid.map((cell) => (
@@ -299,19 +299,19 @@ export default function EngineeringLab() {
                 ))}
               </div>
               <div className="flex items-center gap-3 mt-2">
-                <span className="font-mono text-[9px] text-[hsl(210,5%,24%)]">LESS</span>
+                <span className="font-mono text-[9px] text-[hsl(220,8%,36%)]">LESS</span>
                 <div className="flex gap-1">
                   {[0, 1, 2, 3].map((v) => (
                     <ActivityCell key={v} count={v} date="" />
                   ))}
                 </div>
-                <span className="font-mono text-[9px] text-[hsl(210,5%,24%)]">MORE</span>
+                <span className="font-mono text-[9px] text-[hsl(220,8%,36%)]">MORE</span>
               </div>
             </div>
           </div>
 
           {/* Divider */}
-          <div className="hidden lg:block bg-[hsl(210,5%,12%)]" />
+          <div className="hidden lg:block bg-[hsl(220,10%,22%)]" />
 
           {/* RIGHT — profile stats + active systems */}
           <div className="lg:pl-12 mt-12 lg:mt-0 space-y-10">
@@ -320,9 +320,9 @@ export default function EngineeringLab() {
             <div>
               <div className="flex items-center gap-3 mb-4">
                 <p className="mono-label">GITHUB COMPUTE</p>
-                <div className="flex-1 h-px bg-[hsl(210,5%,14%)]" />
+                <div className="flex-1 h-px bg-[hsl(220,10%,24%)]" />
               </div>
-              <div className="space-y-0 border border-[hsl(210,5%,12%)]">
+              <div className="space-y-0 border border-[hsl(220,10%,22%)]">
                 {[
                   { label: "HANDLE", value: `@${github.profile.login}` },
                   { label: "REPOSITORIES", value: github.profile.public_repos.toString() },
@@ -333,10 +333,10 @@ export default function EngineeringLab() {
                 ].map((item) => (
                   <div
                     key={item.label}
-                    className="flex items-center justify-between px-5 py-3 border-b border-[hsl(210,5%,10%)] last:border-b-0"
+                    className="flex items-center justify-between px-5 py-3 border-b border-[hsl(220,8%,22%)] last:border-b-0"
                   >
                     <span className="mono-label text-[10px]">{item.label}</span>
-                    <span className="font-mono text-[12px] text-[hsl(40,10%,80%)]">{item.value}</span>
+                    <span className="font-mono text-[12px] text-[hsl(40,12%,86%)]">{item.value}</span>
                   </div>
                 ))}
               </div>
@@ -346,30 +346,30 @@ export default function EngineeringLab() {
             <div>
               <div className="flex items-center gap-3 mb-4">
                 <p className="mono-label">ALGORITHMIC TELEMETRY</p>
-                <div className="flex-1 h-px bg-[hsl(210,5%,14%)]" />
+                <div className="flex-1 h-px bg-[hsl(220,10%,24%)]" />
               </div>
-              <div className="space-y-0 border border-[hsl(210,5%,12%)]">
-                <div className="flex items-center justify-between px-5 py-3 border-b border-[hsl(210,5%,10%)]">
+              <div className="space-y-0 border border-[hsl(220,10%,22%)]">
+                <div className="flex items-center justify-between px-5 py-3 border-b border-[hsl(220,8%,22%)]">
                   <span className="mono-label text-[10px]">SOLVED</span>
-                  <span className="font-mono text-[12px] text-[hsl(40,10%,80%)]">
-                    {LEETCODE_STATS.solved} <span className="text-[hsl(210,5%,40%)]">/ {LEETCODE_STATS.total}</span>
+                  <span className="font-mono text-[12px] text-[hsl(40,12%,86%)]">
+                    {LEETCODE_STATS.solved} <span className="text-[hsl(220,8%,52%)]">/ {LEETCODE_STATS.total}</span>
                   </span>
                 </div>
-                <div className="flex items-center justify-between px-5 py-3 border-b border-[hsl(210,5%,10%)]">
+                <div className="flex items-center justify-between px-5 py-3 border-b border-[hsl(220,8%,22%)]">
                   <span className="mono-label text-[10px]">BREAKDOWN</span>
                   <div className="flex gap-3 font-mono text-[11px]">
-                    <span className="text-[hsl(145,50%,38%)]">{LEETCODE_STATS.easy.solved}E</span>
-                    <span className="text-[hsl(38,90%,52%)]">{LEETCODE_STATS.medium.solved}M</span>
+                    <span className="text-[hsl(145,55%,45%)]">{LEETCODE_STATS.easy.solved}E</span>
+                    <span className="text-[hsl(38,95%,56%)]">{LEETCODE_STATS.medium.solved}M</span>
                     <span className="text-[hsl(0,80%,55%)]">{LEETCODE_STATS.hard.solved}H</span>
                   </div>
                 </div>
-                <div className="flex items-center justify-between px-5 py-3 border-b border-[hsl(210,5%,10%)]">
+                <div className="flex items-center justify-between px-5 py-3 border-b border-[hsl(220,8%,22%)]">
                   <span className="mono-label text-[10px]">GLOBAL RANK</span>
-                  <span className="font-mono text-[12px] text-[hsl(40,10%,80%)]">{LEETCODE_STATS.rank.toLocaleString()}</span>
+                  <span className="font-mono text-[12px] text-[hsl(40,12%,86%)]">{LEETCODE_STATS.rank.toLocaleString()}</span>
                 </div>
                 <div className="flex items-center justify-between px-5 py-3">
                   <span className="mono-label text-[10px]">PRIMARY LANG</span>
-                  <span className="font-mono text-[12px] text-[hsl(40,10%,80%)]">Python</span>
+                  <span className="font-mono text-[12px] text-[hsl(40,12%,86%)]">Python</span>
                 </div>
               </div>
             </div>
@@ -378,27 +378,27 @@ export default function EngineeringLab() {
             <div>
               <div className="flex items-center gap-3 mb-4">
                 <p className="mono-label">ACTIVE SYSTEMS</p>
-                <div className="flex-1 h-px bg-[hsl(210,5%,14%)]" />
+                <div className="flex-1 h-px bg-[hsl(220,10%,24%)]" />
               </div>
               <div
                 className="p-5 rounded-none space-y-3"
                 style={{
-                  background: "hsl(0,0%,3%)",
-                  border: "1px solid hsl(210,5%,12%)",
-                  borderLeft: "2px solid hsl(145,50%,38%,0.5)",
+                  background: "hsl(222,14%,8%)",
+                  border: "1px solid hsl(220,10%,22%)",
+                  borderLeft: "2px solid hsl(145,55%,45%,0.5)",
                 }}
               >
                 {ACTIVE_FOCUS.map((item, i) => (
                   <div key={i} className="flex items-start gap-2">
                     <span
                       className="font-mono text-[11px] mt-0.5"
-                      style={{ color: item.active ? "hsl(145,50%,38%)" : "hsl(210,5%,32%)" }}
+                      style={{ color: item.active ? "hsl(145,55%,45%)" : "hsl(220,8%,44%)" }}
                     >
                       {item.active ? "├──" : "└──"}
                     </span>
                     <span
                       className="font-mono text-[11px] leading-relaxed"
-                      style={{ color: item.active ? "hsl(210,5%,65%)" : "hsl(210,5%,32%)" }}
+                      style={{ color: item.active ? "hsl(220,8%,77%)" : "hsl(220,8%,44%)" }}
                     >
                       {item.label}
                     </span>
@@ -413,7 +413,7 @@ export default function EngineeringLab() {
                 href="https://github.com/Vidish-Bijalwan"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="block font-mono text-[11px] tracking-[0.1em] text-[hsl(210,5%,38%)] hover:text-[hsl(38,90%,52%)] transition-colors duration-250"
+                className="block font-mono text-[11px] tracking-[0.1em] text-[hsl(220,8%,50%)] hover:text-[hsl(38,95%,56%)] transition-colors duration-250"
               >
                 → GITHUB
               </a>
@@ -421,13 +421,13 @@ export default function EngineeringLab() {
                 href="https://leetcode.com/u/vidishofficial/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="block font-mono text-[11px] tracking-[0.1em] text-[hsl(210,5%,38%)] hover:text-[hsl(38,90%,52%)] transition-colors duration-250"
+                className="block font-mono text-[11px] tracking-[0.1em] text-[hsl(220,8%,50%)] hover:text-[hsl(38,95%,56%)] transition-colors duration-250"
               >
                 → LEETCODE
               </a>
             </div>
 
-            <p className="font-mono text-[9px] tracking-[0.1em] text-[hsl(210,5%,20%)] text-right">
+            <p className="font-mono text-[9px] tracking-[0.1em] text-[hsl(220,8%,30%)] text-right">
               REF–004 / LAB · REVALIDATES 30m
             </p>
           </div>

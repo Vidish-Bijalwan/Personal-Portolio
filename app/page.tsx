@@ -25,7 +25,7 @@ export default function Home() {
     <>
       {mounted && <SkipToContent />}
       <Navbar />
-      <main id="main-content" className="min-h-screen bg-[hsl(0,0%,4%)] overflow-hidden">
+      <main id="main-content" className="min-h-screen bg-[hsl(222,14%,10%)] overflow-hidden">
         {/* ACT 1 — Signal Detected */}
         <Hero />
 
