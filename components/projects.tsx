@@ -235,6 +235,24 @@ function SystemPanel({ system, index }: { system: typeof systems[0]; index: numb
 
                 {/* Left — Narrative */}
                 <div className="p-8 md:p-10 space-y-8">
+                  {/* Model card spec strip */}
+                  <div className="grid grid-cols-2 gap-px bg-[hsl(220,10%,22%)] border border-[hsl(220,10%,22%)]">
+                    {[
+                      { label: "MODEL ID", value: system.id },
+                      { label: "STATUS", value: system.status },
+                      { label: "TASK", value: system.domain },
+                      { label: "YEAR", value: system.year },
+                    ].map((row) => (
+                      <div key={row.label} className="bg-[hsl(222,14%,9%)] px-4 py-2.5">
+                        <p className="font-mono text-[9px] tracking-[0.12em] text-[hsl(220,8%,44%)] mb-1">
+                          {row.label}
+                        </p>
+                        <p className="font-mono text-[11px] text-[hsl(40,12%,86%)] truncate">
+                          {row.value}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
                   <div>
                     <p className="mono-label mb-3">PROBLEM SPACE</p>
                     <p className="text-sm text-[hsl(220,8%,77%)] leading-relaxed">
@@ -355,7 +373,7 @@ export default function Projects() {
         <div ref={headerRef} className="mb-16">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-6 h-px bg-[hsl(38,95%,56%)]" />
-            <span className="mono-label text-[10px]">ACT 03 · SYSTEMS ARCHITECTURE</span>
+            <span className="mono-label text-[10px]">ACT 03 · MODEL CARDS</span>
           </div>
           <motion.h2
             initial={{ opacity: 0, y: 16 }}
@@ -363,7 +381,7 @@ export default function Projects() {
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
             className="heading-editorial text-[hsl(40,12%,94%)] max-w-xl"
           >
-            Deployed intelligence systems.
+            Trained systems. Deployed models.
           </motion.h2>
           <motion.p
             initial={{ opacity: 0 }}
@@ -371,14 +389,14 @@ export default function Projects() {
             transition={{ delay: 0.3, duration: 0.6 }}
             className="mt-4 text-sm text-[hsl(220,8%,60%)] max-w-md font-light"
           >
-            Each system includes problem framing, engineering approach, architecture diagram, and deployment state. Click any row to expand.
+            Each model card covers the problem space, engineering approach, architecture, and deployment state. Click any row to open the card.
           </motion.p>
         </div>
 
         {/* Column headers */}
         <div className="hidden md:grid grid-cols-[80px_1fr_240px_48px] border-b border-[hsl(220,8%,30%)] pb-3 mb-0">
           <span className="mono-label px-6">ID</span>
-          <span className="mono-label px-6">SYSTEM</span>
+          <span className="mono-label px-6">MODEL</span>
           <span className="mono-label px-6">STACK</span>
           <span className="mono-label px-6"> </span>
         </div>
