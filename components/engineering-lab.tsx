@@ -29,6 +29,20 @@ interface GitHubData {
   }[]
 }
 
+interface LeetCodeData {
+  solved: number
+  easy: number
+  medium: number
+  hard: number
+  ranking: number | null
+}
+
+// Days elapsed since the 365-day Deep-ML challenge began (2026-09-23)
+function deepmlDay(): number {
+  const start = Date.UTC(2026, 8, 23)
+  const day = Math.floor((Date.now() - start) / 86400000) + 1
+  return Math.min(365, Math.max(1, day))
+}
 // Fully deterministic fallback — no Date.now(), no Math.random()
 // Dates are hardcoded; relative labels computed client-side only after mount
 const STATIC_FALLBACK: GitHubData = {
@@ -117,6 +131,7 @@ function ActivityCell({ count, date }: { count: number; date: string }) {
 
 export default function EngineeringLab() {
   const [data, setData] = useState<GitHubData | null>(null)
+  const [leetcode, setLeetcode] = useState<LeetCodeData | null>(null)
   const [loading, setLoading] = useState(true)
   // mounted guard: prevents SSR from rendering dynamic data that differs on client
   const [mounted, setMounted] = useState(false)
@@ -133,11 +148,34 @@ export default function EngineeringLab() {
       })
       .catch(() => setData(STATIC_FALLBACK))
       .finally(() => setLoading(false))
+    fetch("/api/leetcode")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (d && typeof d.solved === "number") {
+          setLeetcode({
+            solved: d.solved,
+            easy: d.easy ?? 0,
+            medium: d.medium ?? 0,
+            hard: d.hard ?? 0,
+            ranking: typeof d.ranking === "number" ? d.ranking : null,
+          })
+        }
+      })
+      .catch(() => {})
   }, [])
 
   // Use STATIC_FALLBACK as the initial server-rendered shell (deterministic data)
   // After mount, switch to live data from the API
   const github = data ?? STATIC_FALLBACK
+
+  // Live LeetCode data when available, static snapshot as fallback
+  const lc = leetcode ?? {
+    solved: LEETCODE_STATS.solved,
+    easy: LEETCODE_STATS.easy.solved,
+    medium: LEETCODE_STATS.medium.solved,
+    hard: LEETCODE_STATS.hard.solved,
+    ranking: LEETCODE_STATS.rank,
+  }
 
   return (
     <section
@@ -347,30 +385,75 @@ export default function EngineeringLab() {
               <div className="flex items-center gap-3 mb-4">
                 <p className="mono-label">ALGORITHMIC TELEMETRY</p>
                 <div className="flex-1 h-px bg-[hsl(220,10%,24%)]" />
+                {leetcode && (
+                  <span className="status-active text-[9px]">LIVE</span>
+                )}
               </div>
               <div className="space-y-0 border border-[hsl(220,10%,22%)]">
                 <div className="flex items-center justify-between px-5 py-3 border-b border-[hsl(220,8%,22%)]">
                   <span className="mono-label text-[10px]">SOLVED</span>
                   <span className="font-mono text-[12px] text-[hsl(40,12%,86%)]">
-                    {LEETCODE_STATS.solved} <span className="text-[hsl(220,8%,52%)]">/ {LEETCODE_STATS.total}</span>
+                    {lc.solved} <span className="text-[hsl(220,8%,52%)]">/ {LEETCODE_STATS.total}</span>
                   </span>
                 </div>
                 <div className="flex items-center justify-between px-5 py-3 border-b border-[hsl(220,8%,22%)]">
                   <span className="mono-label text-[10px]">BREAKDOWN</span>
                   <div className="flex gap-3 font-mono text-[11px]">
-                    <span className="text-[hsl(145,55%,45%)]">{LEETCODE_STATS.easy.solved}E</span>
-                    <span className="text-[hsl(38,95%,56%)]">{LEETCODE_STATS.medium.solved}M</span>
-                    <span className="text-[hsl(0,80%,55%)]">{LEETCODE_STATS.hard.solved}H</span>
+                    <span className="text-[hsl(145,55%,45%)]">{lc.easy}E</span>
+                    <span className="text-[hsl(38,95%,56%)]">{lc.medium}M</span>
+                    <span className="text-[hsl(0,80%,55%)]">{lc.hard}H</span>
                   </div>
                 </div>
                 <div className="flex items-center justify-between px-5 py-3 border-b border-[hsl(220,8%,22%)]">
                   <span className="mono-label text-[10px]">GLOBAL RANK</span>
-                  <span className="font-mono text-[12px] text-[hsl(40,12%,86%)]">{LEETCODE_STATS.rank.toLocaleString()}</span>
+                  <span className="font-mono text-[12px] text-[hsl(40,12%,86%)]">
+                    {lc.ranking !== null ? lc.ranking.toLocaleString() : "–"}
+                  </span>
                 </div>
                 <div className="flex items-center justify-between px-5 py-3">
                   <span className="mono-label text-[10px]">PRIMARY LANG</span>
                   <span className="font-mono text-[12px] text-[hsl(40,12%,86%)]">Python</span>
                 </div>
+              </div>
+            </div>
+
+            {/* Deep-ML 365-day streak */}
+            <div>
+              <div className="flex items-center gap-3 mb-4">
+                <p className="mono-label">DEEP-ML STREAK</p>
+                <div className="flex-1 h-px bg-[hsl(220,10%,24%)]" />
+                <span className="status-active text-[9px]">EPOCH {deepmlDay()}/365</span>
+              </div>
+              <div
+                className="p-5 space-y-4"
+                style={{
+                  background: "hsl(222,14%,8%)",
+                  border: "1px solid hsl(220,10%,22%)",
+                  borderLeft: "2px solid hsl(38 95% 56% / 0.5)",
+                }}
+              >
+                <div className="flex items-baseline justify-between">
+                  <span className="font-mono text-[26px] text-[hsl(40,12%,94%)]">
+                    {deepmlDay()}
+                  </span>
+                  <span className="font-mono text-[10px] text-[hsl(220,8%,52%)] tracking-[0.1em]">
+                    / 365 DAYS · ONE PROBLEM / DAY
+                  </span>
+                </div>
+                {/* Progress bar */}
+                <div className="h-1.5 bg-[hsl(220,10%,20%)] overflow-hidden">
+                  <div
+                    className="h-full transition-all duration-1000"
+                    style={{
+                      width: `${(deepmlDay() / 365) * 100}%`,
+                      background: "linear-gradient(90deg, hsl(38,95%,45%), hsl(38,95%,56%))",
+                    }}
+                  />
+                </div>
+                <p className="font-mono text-[10px] leading-relaxed text-[hsl(220,8%,52%)]">
+                  Daily deep-learning problem. Streak target: Deep-ML Premium for a year.
+                  Progress posted daily on X.
+                </p>
               </div>
             </div>
 
@@ -408,7 +491,7 @@ export default function EngineeringLab() {
             </div>
 
             {/* External Links */}
-            <div className="flex items-center justify-between">
+            <div className="flex flex-wrap items-center gap-x-8 gap-y-3">
               <a
                 href="https://github.com/Vidish-Bijalwan"
                 target="_blank"
@@ -424,6 +507,22 @@ export default function EngineeringLab() {
                 className="block font-mono text-[11px] tracking-[0.1em] text-[hsl(220,8%,50%)] hover:text-[hsl(38,95%,56%)] transition-colors duration-250"
               >
                 → LEETCODE
+              </a>
+              <a
+                href="https://x.com/vidish_sirus"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block font-mono text-[11px] tracking-[0.1em] text-[hsl(220,8%,50%)] hover:text-[hsl(38,95%,56%)] transition-colors duration-250"
+              >
+                → X / TWITTER
+              </a>
+              <a
+                href="https://www.linkedin.com/in/vidish-bijalwan"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block font-mono text-[11px] tracking-[0.1em] text-[hsl(220,8%,50%)] hover:text-[hsl(38,95%,56%)] transition-colors duration-250"
+              >
+                → LINKEDIN
               </a>
             </div>
 

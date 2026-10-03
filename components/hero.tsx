@@ -4,19 +4,26 @@ import { useEffect, useRef, useState } from "react"
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion"
 
 const SYSTEM_LINES = [
-  { label: "SYSTEM", value: "INTELLIGENCE INFRASTRUCTURE" },
+  { label: "SYSTEM", value: "ML RESEARCH & ENGINEERING" },
   { label: "ENGINEER", value: "VIDISH BIJALWAN" },
   { label: "VERSION", value: "2026.05" },
-  { label: "FOCUS", value: "RAG · RETRIEVAL · AI AGENTS" },
-  { label: "STATUS", value: "ACTIVELY BUILDING" },
+  { label: "FOCUS", value: "ML · DEEP LEARNING · GENAI" },
+  { label: "STATUS", value: "TRAINING IN PROGRESS" },
 ]
 
+// Days elapsed since the 365-day Deep-ML challenge began (2026-09-23)
+function deepmlDay(): number {
+  const start = Date.UTC(2026, 8, 23)
+  const day = Math.floor((Date.now() - start) / 86400000) + 1
+  return Math.min(365, Math.max(1, day))
+}
+
 const BOOT_SEQUENCE = [
-  "SYS > Initializing intelligence archive...",
-  "SYS > Loading engineering context...",
-  "SYS > Mapping retrieval systems...",
-  "SYS > Mounting project infrastructure...",
-  "SYS > Archive ready. Begin scroll to enter.",
+  "SYS > Loading model weights...",
+  "SYS > Restoring optimizer state...",
+  `SYS > Deep-ML streak: epoch ${deepmlDay()}/365 active`,
+  "SYS > Syncing platform telemetry...",
+  "SYS > All systems nominal. Begin scroll to enter.",
 ]
 
 export default function Hero() {
@@ -24,6 +31,10 @@ export default function Hero() {
   const [bootComplete, setBootComplete] = useState(false)
   const [scanDone, setScanDone] = useState(false)
   const [revealed, setRevealed] = useState(false)
+  const [liveStats, setLiveStats] = useState<{ leetcode: number | null; ghEvents: number | null }>({
+    leetcode: null,
+    ghEvents: null,
+  })
   const containerRef = useRef<HTMLElement>(null)
 
   const { scrollY } = useScroll()
@@ -46,6 +57,25 @@ export default function Hero() {
       return () => clearTimeout(t)
     }
   }, [bootIndex])
+
+  // Live platform telemetry — best-effort, silent fallback
+  useEffect(() => {
+    fetch("/api/leetcode")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (d && typeof d.solved === "number") {
+          setLiveStats((s) => ({ ...s, leetcode: d.solved }))
+        }
+      })
+      .catch(() => {})
+    fetch("/api/github")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        const n = d?.activityGrid?.reduce((a: number, c: { count: number }) => a + c.count, 0)
+        if (typeof n === "number") setLiveStats((s) => ({ ...s, ghEvents: n }))
+      })
+      .catch(() => {})
+  }, [])
 
   const scrollToNext = () => {
     const el = document.getElementById("evolution")
@@ -145,8 +175,8 @@ export default function Hero() {
                 transition={{ duration: 0.8, delay: 0.7 }}
                 className="text-[hsl(220,8%,70%)] text-lg leading-relaxed max-w-[520px] mb-12 font-light"
               >
-                Building retrieval systems, autonomous agents, and{" "}
-                <span className="text-[hsl(40,12%,94%)]">intelligence infrastructure</span>{" "}
+                Building neural systems — deep learning, GenAI agents, and{" "}
+                <span className="text-[hsl(40,12%,94%)]">retrieval infrastructure</span>{" "}
                 that bridges research and production.
               </motion.p>
 
@@ -178,6 +208,39 @@ export default function Hero() {
                 >
                   → LINKEDIN
                 </button>
+              </motion.div>
+
+              {/* Live telemetry chips */}
+              <motion.div
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: bootComplete ? 1 : 0, y: bootComplete ? 0 : 12 }}
+                transition={{ duration: 0.6, delay: 1.1, ease: [0.16, 1, 0.3, 1] }}
+                className="flex flex-wrap items-center gap-2.5 mt-10"
+              >
+                {[
+                  { label: "DEEP-ML", value: `DAY ${deepmlDay()}/365`, live: true },
+                  { label: "LEETCODE", value: liveStats.leetcode !== null ? `${liveStats.leetcode} SOLVED` : "···", live: liveStats.leetcode !== null },
+                  { label: "GITHUB", value: liveStats.ghEvents !== null ? `${liveStats.ghEvents} EVENTS / 28D` : "···", live: liveStats.ghEvents !== null },
+                ].map((chip) => (
+                  <div
+                    key={chip.label}
+                    className="flex items-center gap-2 px-3 py-1.5 border border-[hsl(220,10%,24%)] bg-[hsl(222,14%,9%)]"
+                  >
+                    <span
+                      className="w-1.5 h-1.5 rounded-full"
+                      style={{
+                        backgroundColor: chip.live ? "hsl(145,55%,45%)" : "hsl(220,8%,40%)",
+                        boxShadow: chip.live ? "0 0 6px hsl(145,55%,45%,0.7)" : "none",
+                      }}
+                    />
+                    <span className="font-mono text-[10px] tracking-[0.12em] text-[hsl(220,8%,52%)]">
+                      {chip.label}
+                    </span>
+                    <span className="font-mono text-[10px] tracking-[0.12em] text-[hsl(38,95%,56%)]">
+                      {chip.value}
+                    </span>
+                  </div>
+                ))}
               </motion.div>
             </div>
 
@@ -274,7 +337,7 @@ export default function Hero() {
           style={{ writingMode: "vertical-rl" }}
         >
           <span className="font-mono text-[9px] tracking-[0.25em] text-[hsl(220,8%,30%)]">
-            INTELLIGENCE ARCHIVE · v2026
+            ML · DL · GENAI — v2026
           </span>
         </div>
       </motion.div>
