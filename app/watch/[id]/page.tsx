@@ -29,6 +29,9 @@ interface GenStatus {
   stage: string | null;
   unlocked: boolean;
   error?: string;
+  error_code?: "content_refused" | "technical";
+  stuck?: boolean;
+  suggested_prompt?: string;
 }
 
 const IMAGE_CAPTIONS = [
@@ -63,6 +66,43 @@ export default function WatchRoomPage() {
   const [authNeeded, setAuthNeeded] = useState(false);
   const [pendingUnlock, setPendingUnlock] = useState(false);
   const [noStoredPayment, setNoStoredPayment] = useState(false);
+
+  // retry flow: mint a fresh attempt (same prompt, or the safer rephrase)
+  const [retrying, setRetrying] = useState<null | "same" | "safe">(null);
+  const [retryError, setRetryError] = useState("");
+
+  const handleRetry = async (safer: boolean) => {
+    setRetryError("");
+    setRetrying(safer ? "safe" : "same");
+    try {
+      const body =
+        safer && dataRef.current?.suggested_prompt
+          ? { prompt: dataRef.current.suggested_prompt }
+          : {};
+      const r = await fetch(`/api/gen/${encodeURIComponent(id)}/retry`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      const b = (await r.json().catch(() => null)) as {
+        id?: string;
+        error?: string;
+      } | null;
+      if (!r.ok || !b?.id) {
+        setRetryError(
+          typeof b?.error === "string" && b.error
+            ? b.error
+            : "Could not start a new attempt. Please try again."
+        );
+        return;
+      }
+      router.push(`/watch/${b.id}`);
+    } catch {
+      setRetryError("Could not start a new attempt. Please try again.");
+    } finally {
+      setRetrying(null);
+    }
+  };
 
   const fetchStatus = async () => {
     try {
@@ -156,6 +196,7 @@ export default function WatchRoomPage() {
   const cleanUrl = `/api/gen/${encodeURIComponent(id)}/clean`;
 
   const isVideo = data?.media_type === "video";
+  const refused = data?.error_code === "content_refused";
   const captions = isVideo ? VIDEO_CAPTIONS : IMAGE_CAPTIONS;
   const caption = captions[captionIdx % captions.length];
   const stageText =
@@ -201,12 +242,18 @@ export default function WatchRoomPage() {
         {data && data.status === "failed" && (
           <section className="flex flex-1 flex-col items-center py-12 text-center">
             <h1 className="font-display text-[26px] font-semibold tracking-[-0.02em] sm:text-[32px]">
-              {isVideo ? "The projector jammed" : "The grill flared up"}
+              {refused
+                ? "The model declined this prompt"
+                : isVideo
+                  ? "The projector jammed"
+                  : "The grill flared up"}
             </h1>
             <p className="mt-3 max-w-md text-[14px] leading-6 text-white/60">
-              {isVideo
-                ? "Your clip didn't make it this time — nothing was charged."
-                : "Try again — it's still free."}
+              {refused
+                ? "The image model refused this one — usually a word like “fire” or “blood” trips the safety filter. Try a gentler rephrase instead."
+                : isVideo
+                  ? "Your clip didn't make it this time — nothing was charged."
+                  : "Try again — it's still free."}
             </p>
             {data.tier === "free" && (
               <p className="mt-2 max-w-md text-[13px] leading-6 text-white/40">
@@ -217,12 +264,70 @@ export default function WatchRoomPage() {
             {data.error && (
               <p className="mt-3 max-w-md text-[13px] text-white/40">{data.error}</p>
             )}
+
+            {refused && data.suggested_prompt && (
+              <div className="mt-6 w-full max-w-md rounded-[14px] border border-[#00F0FF]/25 bg-[#00F0FF]/[0.06] px-5 py-4 text-left">
+                <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-[#00F0FF]">
+                  Pixaura&apos;s safer suggestion
+                </p>
+                <p className="mt-2 text-[14px] leading-6 text-white/80">
+                  &ldquo;{data.suggested_prompt}&rdquo;
+                </p>
+              </div>
+            )}
+
+            {refused && data.suggested_prompt ? (
+              <button
+                type="button"
+                onClick={() => void handleRetry(true)}
+                disabled={retrying !== null}
+                className="mt-6 inline-flex items-center gap-2 rounded-[10px] bg-[#D7FF3F] px-5 py-2.5 text-[14px] font-semibold text-[#080808] hover:opacity-95 disabled:cursor-wait disabled:opacity-60"
+              >
+                {retrying === "safe" ? (
+                  <Loader2 className="h-4 w-4 animate-spin motion-reduce:animate-none" />
+                ) : (
+                  <Sparkles className="h-4 w-4" />
+                )}
+                Try a safer rephrase
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => void handleRetry(false)}
+                disabled={retrying !== null}
+                className="mt-7 inline-flex items-center gap-2 rounded-[10px] bg-[#D7FF3F] px-5 py-2.5 text-[14px] font-semibold text-[#080808] hover:opacity-95 disabled:cursor-wait disabled:opacity-60"
+              >
+                {retrying === "same" ? (
+                  <Loader2 className="h-4 w-4 animate-spin motion-reduce:animate-none" />
+                ) : (
+                  <RefreshCcw className="h-4 w-4" />
+                )}
+                Start a new attempt
+              </button>
+            )}
+
+            {refused && data.suggested_prompt && (
+              <button
+                type="button"
+                onClick={() => void handleRetry(false)}
+                disabled={retrying !== null}
+                className="mt-3 text-[13px] text-white/50 underline underline-offset-4 hover:text-white/85 disabled:opacity-50"
+              >
+                Retry the original anyway
+              </button>
+            )}
+
+            {retryError && (
+              <p className="mt-3 max-w-md text-[13px] text-red-300/80" role="alert">
+                {retryError}
+              </p>
+            )}
+
             <Link
               href={isVideo ? "/create?media=video" : "/create"}
-              className="mt-7 inline-flex items-center gap-2 rounded-[10px] bg-[#D7FF3F] px-5 py-2.5 text-[14px] font-semibold text-[#080808] hover:opacity-95"
+              className="mt-4 text-[13px] text-white/50 hover:text-white/85"
             >
-              <RefreshCcw className="h-4 w-4" />
-              Try again
+              Or write a brand-new prompt
             </Link>
           </section>
         )}
@@ -309,6 +414,32 @@ export default function WatchRoomPage() {
               </div>
               {fetchError && (
                 <p className="mt-3 text-[12px] text-white/40">{fetchError}</p>
+              )}
+              {data.stuck && (
+                <div className="mt-5 w-full max-w-[420px] rounded-[14px] border border-amber-200/25 bg-amber-200/[0.06] px-5 py-4">
+                  <p className="text-[13px] leading-6 text-amber-100/90">
+                    Pixaura&apos;s kitchen looks backed up — this one&apos;s taking
+                    longer than usual.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => void handleRetry(false)}
+                    disabled={retrying !== null}
+                    className="mt-3 inline-flex items-center gap-2 rounded-[10px] border border-white/[0.12] bg-[#18181B] px-4 py-2.5 text-[13px] font-medium hover:border-white/30 disabled:opacity-60"
+                  >
+                    {retrying === "same" ? (
+                      <Loader2 className="h-4 w-4 animate-spin motion-reduce:animate-none" />
+                    ) : (
+                      <RefreshCcw className="h-4 w-4" />
+                    )}
+                    Re-queue this request
+                  </button>
+                  {retryError && (
+                    <p className="mt-2 text-[12px] text-red-300/80" role="alert">
+                      {retryError}
+                    </p>
+                  )}
+                </div>
               )}
             </section>
           )}

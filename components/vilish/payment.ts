@@ -1,5 +1,5 @@
 /**
- * Vidish — Manual UPI payment flow.
+ * Pixaura — Manual UPI payment flow.
  * No payment gateway: the user pays to our VPA manually, then taps
  * "I've paid" — the owner gets a phone ping and confirms. No UTR,
  * no screenshot required.
@@ -26,6 +26,7 @@ export type StartError =
   | { kind: 'unauthorized' }
   | { kind: 'intl' }
   | { kind: 'paused' }
+  | { kind: 'too_large' }
   | { kind: 'failed'; message: string };
 
 export interface StartOptions {
@@ -34,6 +35,15 @@ export interface StartOptions {
   /** Upload progress 0..1 — only called when files are present. */
   onProgress?: (fraction: number) => void;
 }
+
+/**
+ * Serverless-edge request-body ceiling (Vercel: ~4.5MB). The product caps
+ * (8MB/file, 20MB total) can exceed what the edge accepts in one POST, so
+ * the composer pre-flights the total payload against this and the client
+ * maps an edge 413 to the 'too_large' error kind. Kept conservative
+ * (4MB) to leave room for multipart framing overhead.
+ */
+export const UPLOAD_EDGE_LIMIT_BYTES = 4 * 1024 * 1024;
 
 /**
  * Upload the multipart body via XHR so we can report real upload progress
@@ -96,6 +106,13 @@ export async function startManualPayment(
   }
 
   if (res.status === 401) return { ok: false, error: { kind: 'unauthorized' } };
+
+  // 413: the request body exceeded the serverless edge's size ceiling
+  // (Vercel rejects bodies > ~4.5MB before our route ever runs). The
+  // advertised per-file/total caps can exceed that ceiling, so map it to
+  // a dedicated kind — the generic 'failed' message ("Could not create
+  // the payment order") misleads the user about what went wrong.
+  if (res.status === 413) return { ok: false, error: { kind: 'too_large' } };
 
   const body = await res.json().catch(() => null);
   if (res.status === 403 && (body?.error === 'ORDERS_PAUSED' || body?.code === 'ORDERS_PAUSED')) {

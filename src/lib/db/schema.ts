@@ -1,5 +1,5 @@
 /**
- * Vidish Studio — Drizzle schema (Postgres).
+ * Pixaura — Drizzle schema (Postgres).
  * LAW: table/column names are fixed; API/payments/auth agents code against these.
  * Money: INTEGER PAISE everywhere.
  */
@@ -238,6 +238,31 @@ export const generationAttachments = pgTable('generation_attachments', {
   createdAt: createdAt(),
 });
 
+/**
+ * Customer-uploaded reference files attached to a FREE-tier generation at
+ * /api/free/generate time (multipart). Same caps as the paid flow
+ * (8MB/file, 20MB total, 5 max — see @/src/lib/vilish/attachments).
+ * Separate table from generation_attachments because the FK target is
+ * generations.id, not generation_jobs.id. The generation watcher (which
+ * cannot reach Postgres directly) fetches these via
+ * GET /api/admin/fulfillment/generations/[id]/attachments (x-admin-token).
+ */
+export const freeGenerationAttachments = pgTable(
+  'free_generation_attachments',
+  {
+    id: id(),
+    generationId: uuid('generation_id')
+      .notNull()
+      .references(() => generations.id, { onDelete: 'cascade' }),
+    filename: text('filename').notNull(),
+    mimeType: text('mime_type').notNull(),
+    byteSize: integer('byte_size').notNull(),
+    data: bytea('data').notNull(),
+    createdAt: createdAt(),
+  }
+);
+
+/* ---------------- free-tier images + paid video clips ---------------- */
 /* ---------------- free-tier images + paid video clips ---------------- */
 
 /**
@@ -269,6 +294,9 @@ export const generations = pgTable('generations', {
   clean: bytea('clean'),
   mime: text('mime').notNull().default('image/jpeg'),
   error: text('error'),
+  /** advisory failure class: 'content_refused' (provider safety filter)
+   *  vs 'technical'. status stays 'failed'; never consumes quota. */
+  errorCode: text('error_code'),
   unlocked: boolean('unlocked').notNull().default(false),
   createdAt: createdAt(),
   updatedAt: updatedAt(),
@@ -291,6 +319,64 @@ export const generationOrders = pgTable('generation_orders', {
   purpose: text('purpose').notNull(),
   createdAt: createdAt(),
 });
+
+/**
+ * Pixaura — Video Studio tools.
+ *
+ * Queue-backed video processing jobs (voice-over/TTS, captions,
+ * trim & text). Mirrors the `generations` queue pattern: rows move
+ * queued → processing → done | failed, a watcher (which cannot reach
+ * Postgres directly) claims work over the HTTPS admin API, and
+ * delivers watermarked + clean mp4 bytea via the deliver endpoint.
+ * Money: integer PAISE everywhere (price_cents stores paise despite
+ * the name — 4900 paise = ₹49).
+ */
+export const videoJobs = pgTable('video_jobs', {
+  id: id(),
+  userId: text('user_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  /** tts | caption | trim */
+  tool: text('tool').notNull(),
+  /** queued | processing | done | failed */
+  status: text('status').notNull().default('queued'),
+  /** watcher progress label for the waiting room */
+  stage: text('stage'),
+  /** tool-specific params (see src/lib/video/validate.ts) */
+  params: jsonb('params'),
+  /** uploaded source video bytes (tool input) */
+  input: bytea('input'),
+  inputMime: text('input_mime'),
+  attempts: integer('attempts').notNull().default(0),
+  watermarked: bytea('watermarked'),
+  clean: bytea('clean'),
+  mime: text('mime').notNull().default('video/mp4'),
+  /** integer paise; 4900 = ₹49 */
+  priceCents: integer('price_cents').notNull().default(4900),
+  unlocked: boolean('unlocked').notNull().default(false),
+  error: text('error'),
+  createdAt: createdAt(),
+  updatedAt: updatedAt(),
+});
+
+/**
+ * Links a manual-UPI order to a video_jobs row. purpose
+ * 'video_studio': ₹49 clean-video unlock. The payment-verify hook flips
+ * video_jobs.unlocked from this link (mirrors generation_orders).
+ */
+export const videoJobOrders = pgTable('video_job_orders', {
+  orderId: uuid('order_id')
+    .primaryKey()
+    .references(() => orders.id, { onDelete: 'cascade' }),
+  videoJobId: uuid('video_job_id')
+    .notNull()
+    .references(() => videoJobs.id, { onDelete: 'cascade' }),
+  /** video_studio */
+  purpose: text('purpose').notNull(),
+  createdAt: createdAt(),
+});
+
+/* ---------------- providers & pricing ---------------- */
 
 /* ---------------- providers & pricing ---------------- */
 

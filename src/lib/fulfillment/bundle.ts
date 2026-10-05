@@ -1,5 +1,5 @@
 /**
- * Vidish Studio — reference bundle builder (Phase 2 contract §5).
+ * Pixaura — reference bundle builder (Phase 2 contract §5).
  *
  * Produces the operator download ZIP:
  *   <orderCode>/order.json

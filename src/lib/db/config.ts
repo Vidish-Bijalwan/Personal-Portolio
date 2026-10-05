@@ -1,5 +1,5 @@
 /**
- * Vidish Studio — fulfillment config (phase 2, OPERATOR FULFILLMENT MODE).
+ * Pixaura — fulfillment config (phase 2, OPERATOR FULFILLMENT MODE).
  *
  * LAW (contract §4): precedence is adminConfig DB row > env var > hardcoded
  * default. Keys:

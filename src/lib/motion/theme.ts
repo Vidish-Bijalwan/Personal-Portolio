@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 
 /**
- * Vidish Studio — motion theme.
+ * Pixaura — motion theme.
  *
  * One file owns every timing, spring, stagger and travel value used across
  * the motion system so animation feels like a single instrument, not a bag

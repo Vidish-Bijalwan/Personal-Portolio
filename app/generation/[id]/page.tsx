@@ -225,6 +225,8 @@ export default function GenerationPage() {
           setRemakeStatus("New generation orders are temporarily paused.");
         } else if (startRes.error.kind === "intl") {
           setRemakeStatus("International payments coming soon — India (UPI) only for now.");
+        } else if (startRes.error.kind === "too_large") {
+          setRemakeStatus("The request was too large. Please try again.");
         } else {
           setRemakeStatus(startRes.error.message);
         }
@@ -314,7 +316,7 @@ export default function GenerationPage() {
       <div className="mx-auto w-full max-w-3xl flex-1 px-4 pb-16 pt-6 sm:pt-10">
         <Link
           href="/create"
-          className="inline-flex items-center gap-1.5 text-[13px] text-white/55 hover:text-white/90"
+          className="inline-flex items-center gap-1.5 text-[13px] font-medium text-white/60 underline decoration-white/25 underline-offset-4 hover:decoration-white/60"
         >
           <ArrowLeft className="h-4 w-4" strokeWidth={1.8} /> Back to create
         </Link>

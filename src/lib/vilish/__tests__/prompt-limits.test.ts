@@ -1,5 +1,5 @@
 /**
- * Vidish Studio — prompt length policy tests (client helper).
+ * Pixaura — prompt length policy tests (client helper).
  * Server-side enforcement is covered by the interpret tests
  * (interpretCreative throws on >2000 chars).
  */

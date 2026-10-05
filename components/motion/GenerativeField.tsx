@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react"
 import { usePrefersReducedMotion } from "@/src/lib/motion/theme"
 
 /**
- * "The Generative Field" — Vidish Studio's signature ambient hero canvas.
+ * "The Generative Field" — Pixaura's signature ambient hero canvas.
  *
  * A slow-drifting field of ~90 luminous motes in white and iris tints at low
  * alpha, with faint connecting lines when motes are near, and a subtle

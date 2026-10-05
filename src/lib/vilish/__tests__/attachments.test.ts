@@ -1,5 +1,5 @@
 /**
- * Vidish Studio — attachment upload policy tests.
+ * Pixaura — attachment upload policy tests.
  * The same validateUploads() gates the composer UI and
  * POST /api/generation/start server-side.
  */

@@ -1,5 +1,5 @@
 /**
- * Vidish Studio — unit tests for the free-tier / paid-video policy.
+ * Pixaura — unit tests for the free-tier / paid-video policy.
  * Pure logic: no DB, no network.
  */
 import { describe, it, expect } from 'vitest';
@@ -11,15 +11,21 @@ import {
   VIDEO_PRICE_PAISE,
   IMAGE_MAX_BYTES,
   VIDEO_MAX_BYTES,
+  STUCK_AFTER_MINUTES,
+  canRetryFromStatus,
   canTransition,
   countsTowardCap,
+  failureMessageFor,
   isFreeTier,
+  isGenerationErrorCode,
   isKnownStage,
+  isStuck,
   isValidPrompt,
   isVideo,
   istDayStart,
   maxBytesForMime,
   mimeForMagic,
+  suggestSaferPrompt,
 } from '../policy';
 
 describe('constants', () => {
@@ -167,5 +173,95 @@ describe('isKnownStage', () => {
     expect(isKnownStage('zzz')).toBe(false);
     expect(isKnownStage(null)).toBe(false);
     expect(isKnownStage(undefined)).toBe(false);
+  });
+});
+
+describe('failure classes', () => {
+  it('recognizes the advisory error codes', () => {
+    expect(isGenerationErrorCode('content_refused')).toBe(true);
+    expect(isGenerationErrorCode('technical')).toBe(true);
+    expect(isGenerationErrorCode('other')).toBe(false);
+    expect(isGenerationErrorCode(null)).toBe(false);
+    expect(isGenerationErrorCode(undefined)).toBe(false);
+  });
+
+  it('maps each class to fixed user-safe copy, never raw text', () => {
+    const refused = failureMessageFor('content_refused');
+    expect(refused).toContain('declined');
+    expect(refused).toContain('free tries are untouched');
+    expect(failureMessageFor('technical')).toContain('grill flared up');
+    // unknown / missing codes fall back to the technical message
+    expect(failureMessageFor('traceback: foo')).toBe(failureMessageFor('technical'));
+    expect(failureMessageFor(undefined)).toBe(failureMessageFor('technical'));
+  });
+
+  it('never consumes quota: failed rows excluded whatever the class', () => {
+    expect(countsTowardCap({ status: 'failed' })).toBe(false);
+    // countsTowardCap is status-driven; the DB counter must match
+    expect(STUCK_AFTER_MINUTES).toBe(15);
+  });
+});
+
+describe('suggestSaferPrompt', () => {
+  it('rephrases common safety triggers, preserving the rest', () => {
+    expect(suggestSaferPrompt('a dragon on fire')).toBe(
+      'a dragon lit by warm dramatic light'
+    );
+    expect(suggestSaferPrompt('portrait with blood on the floor')).toBe(
+      'portrait with red paint on the floor'
+    );
+    expect(suggestSaferPrompt('BURNING city at night')).toBe(
+      'glowing with warm light city at night'
+    );
+  });
+
+  it('only replaces whole words (firefly is safe)', () => {
+    expect(suggestSaferPrompt('a firefly in a jar')).toBeNull();
+  });
+
+  it('returns null when nothing matches or input is not a string', () => {
+    expect(suggestSaferPrompt('a calm lake at dawn')).toBeNull();
+    expect(suggestSaferPrompt(null)).toBeNull();
+    expect(suggestSaferPrompt(undefined)).toBeNull();
+    expect(suggestSaferPrompt('')).toBeNull();
+  });
+});
+
+describe('isStuck', () => {
+  const now = Date.UTC(2026, 9, 5, 12, 0, 0);
+
+  it('flags queued/generating rows idle past the threshold', () => {
+    const old = new Date(now - 16 * 60 * 1000);
+    expect(isStuck('queued', old, now)).toBe(true);
+    expect(isStuck('generating', old, now)).toBe(true);
+  });
+
+  it('does not flag fresh rows or terminal rows', () => {
+    const fresh = new Date(now - 5 * 60 * 1000);
+    expect(isStuck('queued', fresh, now)).toBe(false);
+    expect(isStuck('generating', fresh, now)).toBe(false);
+    const old = new Date(now - 60 * 60 * 1000);
+    expect(isStuck('done', old, now)).toBe(false);
+    expect(isStuck('failed', old, now)).toBe(false);
+  });
+
+  it('handles string timestamps and bad input', () => {
+    const old = new Date(now - 20 * 60 * 1000).toISOString();
+    expect(isStuck('queued', old, now)).toBe(true);
+    expect(isStuck('queued', null, now)).toBe(false);
+    expect(isStuck('queued', 'not-a-date', now)).toBe(false);
+  });
+});
+
+describe('canRetryFromStatus', () => {
+  it('allows retries from failed and still-open rows', () => {
+    expect(canRetryFromStatus('failed')).toBe(true);
+    expect(canRetryFromStatus('queued')).toBe(true);
+    expect(canRetryFromStatus('generating')).toBe(true);
+  });
+
+  it('never retries finished or unknown rows', () => {
+    expect(canRetryFromStatus('done')).toBe(false);
+    expect(canRetryFromStatus('nope')).toBe(false);
   });
 });

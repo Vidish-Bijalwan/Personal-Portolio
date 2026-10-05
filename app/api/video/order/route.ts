@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic';
 import { NextResponse, type NextRequest } from 'next/server';
 import { db } from '@/lib/db/client';
 import { generations } from '@/lib/db/schema';
+import { eq } from 'drizzle-orm';
 import { requireSession } from '@/lib/auth';
 import { PROMPT_MAX, VIDEO_PRICE_PAISE, isValidPrompt } from '@/lib/free/policy';
 import { createGenerationOrder } from '@/lib/free/orders';
@@ -64,6 +65,12 @@ export async function POST(req: NextRequest) {
       quality: 'studio',
     });
   } catch {
+    // Order creation failed: remove the queued generation row so the
+    // watcher doesn't produce a video the user can never unlock.
+    await db
+      .delete(generations)
+      .where(eq(generations.id, gen.id))
+      .catch(() => {});
     return NextResponse.json(
       { code: 'PAYMENT_ORDER_FAILED', error: 'Failed to create payment order' },
       { status: 502 }

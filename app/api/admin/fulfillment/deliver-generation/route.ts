@@ -45,6 +45,20 @@ export async function POST(req: NextRequest) {
   const authFail = adminAuthFail(req);
   if (authFail) return authFail;
 
+  // Unexpected failures (DB outages, driver errors) must never leak
+  // raw internals to the caller — generic 500, details stay server-side.
+  try {
+    return await handleDeliver(req);
+  } catch (e) {
+    console.error('deliver-generation unexpected failure', e);
+    return NextResponse.json(
+      { code: 'INTERNAL', error: 'Could not store the deliverables' },
+      { status: 500 }
+    );
+  }
+}
+
+async function handleDeliver(req: NextRequest) {
   const body = await req.json().catch(() => null);
   const id = body?.id;
   if (typeof id !== 'string' || !id) {

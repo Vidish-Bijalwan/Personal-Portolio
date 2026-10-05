@@ -22,6 +22,7 @@ import {
 } from "@/src/lib/vilish/prompt-limits";
 import {
   startManualPayment,
+  UPLOAD_EDGE_LIMIT_BYTES,
   type ManualPayment,
 } from "./payment";
 import PaymentModal from "./payment-modal";
@@ -250,6 +251,17 @@ export default function Composer({ variant = "hero", className, initialMedia = "
         return;
       }
       if (files.length > 0) setUploadProgress(0);
+      // Pre-flight: the serverless edge rejects bodies over
+      // UPLOAD_EDGE_LIMIT_BYTES before our route runs. Fail fast with a
+      // truthful message instead of attempting a doomed upload.
+      const totalBytes = files.reduce((sum, f) => sum + f.size, 0);
+      if (totalBytes > UPLOAD_EDGE_LIMIT_BYTES) {
+        setUploadProgress(null);
+        setStatus(
+          "Those files are too large to upload in one go — try fewer or smaller files (keep the total under 4 MB)."
+        );
+        return;
+      }
       const res = await startManualPayment(quote.quoteId, "IN", {
         files,
         onProgress: (f) => setUploadProgress(f),
@@ -263,6 +275,10 @@ export default function Composer({ variant = "hero", className, initialMedia = "
           setStatus("New generation orders are temporarily paused.");
         } else if (res.error.kind === "intl") {
           setStatus("International payments coming soon — India (UPI) only for now.");
+        } else if (res.error.kind === "too_large") {
+          setStatus(
+            "Those files are too large to upload in one go — try fewer or smaller files (keep the total under 4 MB)."
+          );
         } else {
           setStatus(res.error.message);
         }
@@ -284,15 +300,36 @@ export default function Composer({ variant = "hero", className, initialMedia = "
       );
       return;
     }
+    // Pre-flight: the serverless edge rejects bodies over
+    // UPLOAD_EDGE_LIMIT_BYTES before our route runs.
+    if (files.length > 0) {
+      const totalBytes = files.reduce((sum, f) => sum + f.size, 0);
+      if (totalBytes > UPLOAD_EDGE_LIMIT_BYTES) {
+        setStatus(
+          "Those files are too large to upload in one go — try fewer or smaller files (keep the total under 4 MB)."
+        );
+        return;
+      }
+    }
     setFreeSending(true);
     setStatus("");
     setAuthNeeded(false);
     try {
-      const res = await fetch("/api/free/generate", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ prompt: prompt.trim(), quality, aspectRatio }),
-      });
+      let res: Response;
+      if (files.length > 0) {
+        const form = new FormData();
+        form.append("prompt", prompt.trim());
+        form.append("quality", quality);
+        form.append("aspectRatio", aspectRatio);
+        for (const f of files) form.append("files", f);
+        res = await fetch("/api/free/generate", { method: "POST", body: form });
+      } else {
+        res = await fetch("/api/free/generate", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ prompt: prompt.trim(), quality, aspectRatio }),
+        });
+      }
       if (res.status === 401) {
         setPendingAuth("free");
         setAuthNeeded(true);
@@ -303,6 +340,20 @@ export default function Composer({ variant = "hero", className, initialMedia = "
         setFreeLeft(0);
         setStatus(
           `That's all ${freeCap} free previews for today — back tomorrow. The paid route is open whenever you want it.`
+        );
+        return;
+      }
+      if (res.status === 413) {
+        setStatus(
+          "Those files are too large to upload in one go — try fewer or smaller files (keep the total under 4 MB)."
+        );
+        return;
+      }
+      if (res.status === 400 && body?.code === "INVALID_ATTACHMENTS") {
+        setStatus(
+          typeof body?.error === "string" && body.error
+            ? body.error
+            : "Those files couldn't be attached. Please try different files."
         );
         return;
       }
@@ -391,7 +442,11 @@ export default function Composer({ variant = "hero", className, initialMedia = "
   };
 
   const aspects = mediaMode === "video" ? VIDEO_ASPECTS : IMAGE_ASPECTS;
-  const showAttachments = mediaMode === "image" && billingMode === "paid";
+  // Reference attachments are supported for image generations in both
+  // billing modes: paid orders store them on generation_attachments for the
+  // operator; free trials store them on free_generation_attachments for
+  // the generation watcher.
+  const showAttachments = mediaMode === "image";
 
   return (
     <div
@@ -471,7 +526,7 @@ export default function Composer({ variant = "hero", className, initialMedia = "
       </div>
       {mediaMode === "image" && billingMode === "free" && (
         <p className="mb-4 text-[12px] leading-5 text-white/40">
-          Free previews carry a Vidish watermark. Unlock the clean HD file for ₹29.
+          Free previews carry a Pixaura watermark. Unlock the clean HD file for ₹29.
         </p>
       )}
       {mediaMode === "video" && (
@@ -513,7 +568,7 @@ export default function Composer({ variant = "hero", className, initialMedia = "
         </p>
       )}
 
-      {/* reference attachments — paid image flow only */}
+      {/* reference attachments — image flows (paid + free trial) */}
       {showAttachments && (
         <div className="mt-3">
           <input

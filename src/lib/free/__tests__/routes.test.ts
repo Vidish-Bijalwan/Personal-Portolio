@@ -1,5 +1,5 @@
 /**
- * Vidish Studio — route tests for the free-tier image + paid video
+ * Pixaura — route tests for the free-tier image + paid video
  * generations pipeline. Runs against in-process PGlite (DATABASE_URL
  * unset), with @/lib/auth mocked to a switchable test user.
  */
@@ -7,7 +7,7 @@ import { describe, it, expect, beforeAll, vi } from 'vitest';
 import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { NextRequest } from 'next/server';
-import { eq } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 
 const mockAuth = vi.hoisted(() => ({ userId: 'user-1' as string | null }));
 
@@ -107,6 +107,8 @@ beforeAll(async () => {
     'app/api/gen/[id]/payment/route.ts',
     'app/api/gen/[id]/unlock/route.ts',
     'app/api/admin/fulfillment/deliver-generation/route.ts',
+    'app/api/admin/fulfillment/generations/claim/route.ts',
+    'app/api/gen/[id]/retry/route.ts',
   ];
   for (const f of files) {
     const mod = (await import(pathToFileURL(resolve(process.cwd(), f)).href)) as Record<
@@ -734,5 +736,223 @@ describe('POST /api/admin/fulfillment/deliver-generation', () => {
       await call({ id: row.id, watermarked_b64: b64(MP4), clean_b64: b64(MP4), mime: 'video/mp4' })
     );
     expect(ok.status).toBe(200);
+  });
+});
+
+describe('POST /api/admin/fulfillment/generations/claim fail action', () => {
+  const FILE = 'app/api/admin/fulfillment/generations/claim/route.ts';
+  const admin = { 'x-admin-token': 'test-admin-token' };
+  const call = (body: unknown, headers: Record<string, string> = admin) =>
+    h('POST', FILE)(
+      req('POST', '/api/admin/fulfillment/generations/claim', body, headers),
+      { params: Promise.resolve({}) }
+    );
+  const stored = async (id: string) => {
+    const db = client.getDb();
+    const [row] = await db
+      .select()
+      .from(schema.generations)
+      .where(eq(schema.generations.id, id));
+    return row;
+  };
+
+  it('401s without the admin token', async () => {
+    const res = await h('POST', FILE)(
+      req('POST', '/api/admin/fulfillment/generations/claim', { action: 'fail', id: 'x' }),
+      { params: Promise.resolve({}) }
+    );
+    expect(res.status).toBe(401);
+  });
+
+  it('classifies content_refused: stores the code + fixed copy, not raw text', async () => {
+    const row = await insertGeneration('user-1', { status: 'generating' });
+    const { status, body } = await json(
+      await call({
+        action: 'fail',
+        id: row.id,
+        error_code: 'content_refused',
+        error: 'Traceback (most recent call last): provider.SafetyError: BLOOD detected',
+      })
+    );
+    expect(status).toBe(200);
+    expect(body.error_code).toBe('content_refused');
+
+    const after = await stored(row.id);
+    expect(after.status).toBe('failed');
+    expect(after.errorCode).toBe('content_refused');
+    // fixed user-safe copy — the raw traceback must NOT be stored
+    expect(after.error).toContain('declined');
+    expect(after.error).not.toContain('Traceback');
+    expect(after.error).not.toContain('SafetyError');
+  });
+
+  it('defaults unknown error_code to technical with the technical copy', async () => {
+    const row = await insertGeneration('user-1', { status: 'queued' });
+    const { status, body } = await json(
+      await call({ action: 'fail', id: row.id, error_code: 'nope', error: 'boom' })
+    );
+    expect(status).toBe(200);
+    expect(body.error_code).toBe('technical');
+    const after = await stored(row.id);
+    expect(after.errorCode).toBe('technical');
+    expect(after.error).toContain('grill flared up');
+  });
+
+  it('400s without an id and only fails open rows', async () => {
+    expect((await json(await call({ action: 'fail' }))).status).toBe(400);
+    const done = await insertGeneration('user-1', { status: 'done' });
+    const { status } = await json(
+      await call({ action: 'fail', id: done.id, error_code: 'technical' })
+    );
+    expect(status).toBe(200); // idempotent: done rows are left untouched
+    const after = await stored(done.id);
+    expect(after.status).toBe('done');
+  });
+});
+
+describe('POST /api/gen/[id]/retry', () => {
+  const FILE = 'app/api/gen/[id]/retry/route.ts';
+  const call = (id: string, body?: unknown) =>
+    h('POST', FILE)(req('POST', `/api/gen/${id}/retry`, body), {
+      params: Promise.resolve({ id }),
+    });
+  const stored = async (id: string) => {
+    const db = client.getDb();
+    const [row] = await db
+      .select()
+      .from(schema.generations)
+      .where(eq(schema.generations.id, id));
+    return row;
+  };
+
+  it('is owner-gated and 401s when unauthenticated', async () => {
+    const row = await insertGeneration('user-1', { status: 'failed' });
+    mockAuth.userId = 'user-2';
+    expect((await call(row.id)).status).toBe(403);
+    mockAuth.userId = null;
+    expect((await call(row.id)).status).toBe(401);
+    mockAuth.userId = 'user-1';
+    expect((await call('00000000-0000-0000-0000-000000000000')).status).toBe(404);
+  });
+
+  it('mints a fresh queued row with the same prompt from a failed row', async () => {
+    mockAuth.userId = 'retry-user-1';
+    await seedUser('retry-user-1');
+    const row = await insertGeneration('retry-user-1', {
+      status: 'failed',
+      errorCode: 'content_refused',
+      prompt: 'a dragon on fire',
+      quality: 'hd',
+      aspectRatio: '16:9',
+    });
+    const { status, body } = await json(await call(row.id));
+    expect(status).toBe(201);
+    expect(body.id).toBeTruthy();
+    expect(body.id).not.toBe(row.id);
+
+    const fresh = await stored(body.id);
+    expect(fresh).toMatchObject({
+      userId: 'retry-user-1',
+      prompt: 'a dragon on fire',
+      quality: 'hd',
+      aspectRatio: '16:9',
+      mediaType: 'image',
+      tier: 'free',
+      status: 'queued',
+    });
+    // the source row keeps its terminal history
+    const source = await stored(row.id);
+    expect(source.status).toBe('failed');
+  });
+
+  it('accepts a safer rephrase prompt in the body', async () => {
+    mockAuth.userId = 'retry-user-2';
+    await seedUser('retry-user-2');
+    const row = await insertGeneration('retry-user-2', {
+      status: 'failed',
+      errorCode: 'content_refused',
+      prompt: 'a dragon on fire',
+    });
+    const safer = 'a dragon lit by warm dramatic light';
+    const { status, body } = await json(await call(row.id, { prompt: safer }));
+    expect(status).toBe(201);
+    const fresh = await stored(body.id);
+    expect(fresh.prompt).toBe(safer);
+  });
+
+  it('rejects invalid rephrase prompts and finished rows', async () => {
+    mockAuth.userId = 'retry-user-3';
+    await seedUser('retry-user-3');
+    const row = await insertGeneration('retry-user-3', { status: 'failed' });
+    expect((await json(await call(row.id, { prompt: '   ' }))).status).toBe(400);
+
+    const done = await insertGeneration('retry-user-3', { status: 'done' });
+    const { status, body } = await json(await call(done.id));
+    expect(status).toBe(409);
+    expect(body.code).toBe('NOT_RETRYABLE');
+  });
+
+  it('re-queues a stuck open row: old row failed, new row queued', async () => {
+    mockAuth.userId = 'retry-user-4';
+    await seedUser('retry-user-4');
+    const db = client.getDb();
+    const row = await insertGeneration('retry-user-4', { status: 'generating' });
+    // simulate a 20-minute stall
+    await db.execute(
+      sql`UPDATE generations SET updated_at = now() - interval '20 minutes' WHERE id = ${row.id}::uuid`
+    );
+    const { status, body } = await json(await call(row.id));
+    expect(status).toBe(201);
+
+    const old = await stored(row.id);
+    expect(old.status).toBe('failed');
+    expect(old.errorCode).toBe('technical');
+    const fresh = await stored(body.id);
+    expect(fresh.status).toBe('queued');
+  });
+
+  it('429s when the free cap is exhausted (failures never consumed it)', async () => {
+    mockAuth.userId = 'retry-cap-user';
+    await seedUser('retry-cap-user');
+    const failed = await insertGeneration('retry-cap-user', { status: 'failed' });
+    // 3 finished previews exhaust the cap; the failed one must not count
+    for (let i = 0; i < 3; i++) {
+      await insertGeneration('retry-cap-user', { status: 'done' });
+    }
+    const { status, body } = await json(await call(failed.id));
+    expect(status).toBe(429);
+    expect(body.code).toBe('FREE_CAP_REACHED');
+    mockAuth.userId = 'user-1';
+  });
+});
+
+describe('GET /api/gen/[id]/status failure-class surface', () => {
+  const FILE = 'app/api/gen/[id]/status/route.ts';
+  const call = (id: string) =>
+    h('GET', FILE)(req('GET', `/api/gen/${id}/status`), {
+      params: Promise.resolve({ id }),
+    });
+
+  it('exposes error_code and a suggested rephrase for refusals', async () => {
+    mockAuth.userId = 'user-1';
+    const row = await insertGeneration('user-1', {
+      status: 'failed',
+      errorCode: 'content_refused',
+      error: 'fixed copy',
+      prompt: 'a dragon on fire',
+    });
+    const { status, body } = await json(await call(row.id));
+    expect(status).toBe(200);
+    expect(body.error_code).toBe('content_refused');
+    expect(body.suggested_prompt).toBe('a dragon lit by warm dramatic light');
+    expect(body.error).toBe('fixed copy');
+  });
+
+  it('omits error_code for unclassified failures and flags stuck rows', async () => {
+    mockAuth.userId = 'user-1';
+    const row = await insertGeneration('user-1', { status: 'failed' });
+    const { body } = await json(await call(row.id));
+    expect(body).not.toHaveProperty('error_code');
+    expect(body).not.toHaveProperty('suggested_prompt');
   });
 });
