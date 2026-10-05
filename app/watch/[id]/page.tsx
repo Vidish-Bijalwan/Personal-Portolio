@@ -17,6 +17,7 @@ import VilishNav from "@/components/vilish/nav";
 import VilishFooter from "@/components/vilish/footer";
 import BurgerGrill, { burgerFrameForStage } from "@/components/vilish/burger-grill";
 import PopcornReel, { reelFrameForStage } from "@/components/vilish/popcorn-reel";
+import { progressForStage } from "@/src/lib/vilish/progress";
 import PaymentModal from "@/components/vilish/payment-modal";
 import AuthModal from "@/components/vilish/auth-modal";
 import { videoPaymentStorageKey } from "@/components/vilish/free-tier";
@@ -202,6 +203,8 @@ export default function WatchRoomPage() {
   const stageText =
     data?.stage ??
     (isVideo ? "Setting up the projector…" : "Warming up the grill…");
+  // Real progress from the pipeline stage + status.
+  const progress = data ? progressForStage(data.stage, data.status) : 8;
 
   return (
     <div className="flex min-h-screen flex-col bg-[#080808] font-sans text-[#F5F5F3] antialiased">
@@ -281,7 +284,7 @@ export default function WatchRoomPage() {
                 type="button"
                 onClick={() => void handleRetry(true)}
                 disabled={retrying !== null}
-                className="mt-6 inline-flex items-center gap-2 rounded-[10px] bg-[#D7FF3F] px-5 py-2.5 text-[14px] font-semibold text-[#080808] hover:opacity-95 disabled:cursor-wait disabled:opacity-60"
+                className="mt-6 inline-flex items-center gap-2 min-h-[44px] rounded-[10px] bg-[#D7FF3F] px-5 py-2.5 text-[14px] font-semibold text-[#080808] hover:opacity-95 disabled:cursor-wait disabled:opacity-60"
               >
                 {retrying === "safe" ? (
                   <Loader2 className="h-4 w-4 animate-spin motion-reduce:animate-none" />
@@ -295,7 +298,7 @@ export default function WatchRoomPage() {
                 type="button"
                 onClick={() => void handleRetry(false)}
                 disabled={retrying !== null}
-                className="mt-7 inline-flex items-center gap-2 rounded-[10px] bg-[#D7FF3F] px-5 py-2.5 text-[14px] font-semibold text-[#080808] hover:opacity-95 disabled:cursor-wait disabled:opacity-60"
+                className="mt-7 inline-flex items-center gap-2 min-h-[44px] rounded-[10px] bg-[#D7FF3F] px-5 py-2.5 text-[14px] font-semibold text-[#080808] hover:opacity-95 disabled:cursor-wait disabled:opacity-60"
               >
                 {retrying === "same" ? (
                   <Loader2 className="h-4 w-4 animate-spin motion-reduce:animate-none" />
@@ -362,7 +365,7 @@ export default function WatchRoomPage() {
             <button
               type="button"
               onClick={openStoredPayment}
-              className="mt-6 inline-flex items-center gap-2 rounded-[10px] bg-[#D7FF3F] px-5 py-2.5 text-[14px] font-semibold text-[#080808] hover:opacity-95"
+              className="mt-6 inline-flex items-center gap-2 min-h-[44px] rounded-[10px] bg-[#D7FF3F] px-5 py-2.5 text-[14px] font-semibold text-[#080808] hover:opacity-95"
             >
               <Sparkles className="h-4 w-4" />
               Open payment
@@ -408,9 +411,24 @@ export default function WatchRoomPage() {
                 {caption}
               </p>
 
-              {/* playful indeterminate progress */}
-              <div className="mt-6 h-1.5 w-full max-w-[320px] overflow-hidden rounded-full bg-white/[0.08]">
-                <div className="fg-bar h-full w-1/3 rounded-full bg-gradient-to-r from-[#D7FF3F] via-[#00F0FF] to-[#FF2D78] motion-reduce:animate-none" />
+              {/* real progress: reflects the pipeline stage, not a fixed width */}
+              <div
+                className="mt-6 w-full max-w-[320px]"
+                role="progressbar"
+                aria-label="Generation progress"
+                aria-valuenow={progress}
+                aria-valuemin={0}
+                aria-valuemax={100}
+              >
+                <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/[0.08]">
+                  <div
+                    className="h-full rounded-full bg-gradient-to-r from-[#D7FF3F] via-[#00F0FF] to-[#FF2D78] transition-[width] duration-700 ease-out motion-reduce:transition-none"
+                    style={{ width: `${progress}%` }}
+                  />
+                </div>
+                <p className="mt-2 text-[12px] font-medium tabular-nums text-white/45">
+                  {progress}% · {stageText}
+                </p>
               </div>
               {fetchError && (
                 <p className="mt-3 text-[12px] text-white/40">{fetchError}</p>

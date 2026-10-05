@@ -20,6 +20,7 @@ import { cn } from "@/lib/utils";
 import VilishNav from "@/components/vilish/nav";
 import VilishFooter from "@/components/vilish/footer";
 import PopcornReel, { reelFrameForStage } from "@/components/vilish/popcorn-reel";
+import { progressForStage } from "@/src/lib/vilish/progress";
 import PaymentModal from "@/components/vilish/payment-modal";
 import AuthModal from "@/components/vilish/auth-modal";
 import type { ManualPayment } from "@/components/vilish/payment";
@@ -183,6 +184,9 @@ export default function VideoStudioWatchPage() {
   const captions = meta.captions;
   const caption = captions[captionIdx % captions.length];
   const stageText = data?.stage ?? "Getting your video ready…";
+  // Real progress from the watcher's stage + status — the bar below
+  // reflects actual pipeline position, not a fixed indeterminate width.
+  const progress = data ? progressForStage(data.stage, data.status) : 8;
 
   return (
     <div className="flex min-h-screen flex-col bg-[#080808] font-sans text-[#F5F5F3] antialiased">
@@ -235,7 +239,7 @@ export default function VideoStudioWatchPage() {
             )}
             <Link
               href="/video-studio"
-              className="mt-7 inline-flex items-center gap-2 rounded-[10px] bg-[#D7FF3F] px-5 py-2.5 text-[14px] font-semibold text-[#080808] hover:opacity-95"
+              className="mt-7 inline-flex items-center gap-2 min-h-[44px] rounded-[10px] bg-[#D7FF3F] px-5 py-2.5 text-[14px] font-semibold text-[#080808] hover:opacity-95"
             >
               <RefreshCcw className="h-4 w-4" />
               Try again
@@ -265,8 +269,23 @@ export default function VideoStudioWatchPage() {
               {caption}
             </p>
 
-            <div className="mt-6 h-1.5 w-full max-w-[320px] overflow-hidden rounded-full bg-white/[0.08]">
-              <div className="fg-bar h-full w-1/3 rounded-full bg-gradient-to-r from-[#D7FF3F] via-[#00F0FF] to-[#FF2D78] motion-reduce:animate-none" />
+            <div
+              className="mt-6 w-full max-w-[320px]"
+              role="progressbar"
+              aria-label="Video progress"
+              aria-valuenow={progress}
+              aria-valuemin={0}
+              aria-valuemax={100}
+            >
+              <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/[0.08]">
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-[#D7FF3F] via-[#00F0FF] to-[#FF2D78] transition-[width] duration-700 ease-out motion-reduce:transition-none"
+                  style={{ width: `${progress}%` }}
+                />
+              </div>
+              <p className="mt-2 text-[12px] font-medium tabular-nums text-white/45">
+                {progress}% · {stageText}
+              </p>
             </div>
 
             {/* pay-ping: payment can be completed while the job runs */}
@@ -284,7 +303,7 @@ export default function VideoStudioWatchPage() {
                 onClick={openPayment}
                 disabled={payBusy}
                 className={cn(
-                  "v-iris-bg mt-3 flex w-full items-center justify-center gap-2 rounded-[10px] px-5 py-2.5 text-[14px] font-semibold text-[#080808]",
+                  "v-iris-bg mt-3 flex min-h-[44px] w-full items-center justify-center gap-2 rounded-[10px] px-5 py-2.5 text-[14px] font-semibold text-[#080808]",
                   payBusy ? "cursor-wait opacity-70" : "hover:opacity-95",
                 )}
               >

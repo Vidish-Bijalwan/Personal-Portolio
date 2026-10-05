@@ -80,6 +80,8 @@ interface JobDetail {
   negativePrompt?: string;
   seed?: number | null;
   jobKind?: string;
+  /** Catalog product id: 'single-image' | 'pack-4' | 'product-photo'. */
+  product?: string;
   parentJobId?: string;
   parentPrompt?: string;
   revision?: string;
@@ -120,6 +122,20 @@ function humanizeTask(task?: string, jobKind?: string) {
         ? "Text to image"
         : (task ?? "—");
   return jobKind === "edit" ? `EDIT — ${t}` : jobKind === "remake" ? `Remake — ${t}` : t;
+}
+
+/** Human label for the catalog product tag on a job. */
+function humanizeProduct(product?: string) {
+  switch (product) {
+    case "pack-4":
+      return "4-pack — deliver 4 takes";
+    case "product-photo":
+      return "Product photo — studio-grade brief";
+    case "single-image":
+      return "Single image";
+    default:
+      return product || "Single image";
+  }
 }
 
 function isVideoUrl(url?: string) {
@@ -776,6 +792,7 @@ function Workspace({ token, id }: { token: string; id: string }) {
             </p>
             <dl className="mt-4 border-t border-white/[0.06]">
               <Kv k="Type" v={humanizeTask(job.task, job.jobKind)} />
+              <Kv k="Product" v={humanizeProduct(job.product)} />
               <Kv k="Output" v={job.task === "text_to_image" || job.task === "image_to_image" ? "Image" : (job.task ?? "—")} />
               <Kv k="Duration" v={job.durationSeconds != null ? `${job.durationSeconds}s` : "n/a"} />
               <Kv k="Aspect" v={job.aspectRatio ?? "—"} />

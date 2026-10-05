@@ -107,7 +107,16 @@ function getShared(): SharedDb {
       g.__vilishDb = { db, pglite: raw, ready };
       (async () => {
         try {
-          for (const sql of MIGRATION_SQL) await raw.exec(sql);
+          for (const sql of MIGRATION_SQL) {
+            try {
+              await raw.exec(sql);
+            } catch (err) {
+              // Same tolerance as migratePg: duplicate table/column/constraint
+              // are safe to skip (e.g. legacy duplicate migration files).
+              const code = (err as { code?: string }).code;
+              if (code !== "42P07" && code !== "42701" && code !== "42710") throw err;
+            }
+          }
           resolveReady();
         } catch (err) {
           rejectReady(err);

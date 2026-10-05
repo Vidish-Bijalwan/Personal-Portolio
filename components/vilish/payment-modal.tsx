@@ -162,7 +162,7 @@ export default function PaymentModal({ jobId, initialPayment, onClose, navigate,
       onClick={onClose}
     >
       <div
-        className="w-full max-w-md rounded-t-[20px] border border-white/[0.1] bg-[#121214] p-6 sm:rounded-[20px]"
+        className="max-h-[92dvh] w-full max-w-md overflow-y-auto rounded-t-[20px] border border-white/[0.1] bg-[#121214] p-6 sm:rounded-[20px]"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-start justify-between">
@@ -174,7 +174,7 @@ export default function PaymentModal({ jobId, initialPayment, onClose, navigate,
             type="button"
             onClick={onClose}
             aria-label="Close payment dialog"
-            className="rounded-[8px] p-1.5 text-white/50 hover:bg-white/[0.06] hover:text-white/85"
+            className="rounded-[8px] p-2.5 text-white/50 hover:bg-white/[0.06] hover:text-white/85"
           >
             <X className="h-5 w-5" />
           </button>
@@ -285,7 +285,7 @@ export default function PaymentModal({ jobId, initialPayment, onClose, navigate,
                   onClick={handleClaimPaid}
                   disabled={claiming}
                   className={cn(
-                    "mt-3 flex w-full items-center justify-center gap-2 rounded-[10px] bg-[#D7FF3F] px-4 py-2.5 text-[14px] font-semibold text-[#080808]",
+                    "mt-3 flex min-h-[44px] w-full items-center justify-center gap-2 rounded-[10px] bg-[#D7FF3F] px-4 py-2.5 text-[14px] font-semibold text-[#080808]",
                     claiming ? "cursor-wait opacity-70" : "hover:opacity-95",
                   )}
                 >
