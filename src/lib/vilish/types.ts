@@ -152,6 +152,7 @@ export function formatINR(paise: number): string {
 export type PaymentOrderState =
   | 'PAYMENT_PENDING'
   | 'PAYMENT_SUBMITTED'
+  | 'PAYMENT_AWAITING_OWNER'
   | 'PAYMENT_VERIFIED'
   | 'GENERATION_QUEUED'
   | 'PAYMENT_REJECTED'
@@ -189,6 +190,19 @@ export function newOrderCode(): string {
   for (const b of bytes)
     s += ORDER_CODE_ALPHABET[b % ORDER_CODE_ALPHABET.length];
   return `VLSH-${s}`;
+}
+
+/**
+ * Generate a 4-char human code (e.g. A3F9) shown in the owner's phone ping.
+ * The owner replies YES <code> / NO <code>; 31^4 ≈ 923k combos, and
+ * createManualPaymentOrder retries on the (rare) collision.
+ */
+export function newShortCode(): string {
+  let s = '';
+  const bytes = crypto.getRandomValues(new Uint8Array(4));
+  for (const b of bytes)
+    s += ORDER_CODE_ALPHABET[b % ORDER_CODE_ALPHABET.length];
+  return s;
 }
 
 /** Standard UPI payment URI. Never invent a proprietary UPI API. */

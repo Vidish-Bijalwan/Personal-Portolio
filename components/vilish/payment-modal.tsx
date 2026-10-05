@@ -1,18 +1,18 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Check, Copy, Loader2, RefreshCcw, Upload, X } from "lucide-react";
+import { Check, Copy, Loader2, RefreshCcw, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatINR } from "@/src/lib/vilish/types";
+import BurgerGrill from "./burger-grill";
 import {
   checkManualPayment,
+  claimPaymentPaid,
   reorderManualPayment,
-  submitManualPayment,
-  uploadScreenshot,
   type ManualPayment,
 } from "./payment";
 
-type ModalPhase = "pay" | "paid-form" | "submitted" | "expired";
+type ModalPhase = "pay" | "processing" | "expired";
 
 interface PaymentModalProps {
   jobId: string;
@@ -38,17 +38,20 @@ function useCountdown(expiresAt: string, active: boolean) {
   };
 }
 
+/** Gentle notice threshold while waiting for the owner: 10 minutes. */
+const LONG_WAIT_MS = 10 * 60 * 1000;
+
 export default function PaymentModal({ jobId, initialPayment, onClose, navigate, onPaymentVerified }: PaymentModalProps) {
   const [payment, setPayment] = useState<ManualPayment>(initialPayment);
   const [phase, setPhase] = useState<ModalPhase>("pay");
   const [vpaCopied, setVpaCopied] = useState(false);
-  const [utr, setUtr] = useState("");
-  const [screenshot, setScreenshot] = useState<File | null>(null);
-  const [submitting, setSubmitting] = useState(false);
+  const [claiming, setClaiming] = useState(false);
   const [formError, setFormError] = useState("");
   const [statusMsg, setStatusMsg] = useState("");
+  const [notConfirmed, setNotConfirmed] = useState(false);
+  const [longWait, setLongWait] = useState(false);
   const [reordering, setReordering] = useState(false);
-  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const claimStartRef = useRef(0);
   const countdown = useCountdown(payment.expiresAt, phase === "pay");
 
   // esc to close
@@ -63,36 +66,44 @@ export default function PaymentModal({ jobId, initialPayment, onClose, navigate,
     if (phase === "pay" && countdown.expired) setPhase("expired");
   }, [phase, countdown.expired]);
 
-  // poll for verification after the user submits
+  const handleVerified = () => {
+    if (onPaymentVerified) {
+      onPaymentVerified(jobId);
+    } else {
+      navigate(`/generation/${jobId}`);
+    }
+  };
+
+  // poll for the owner's confirmation after the user taps "I've paid"
   useEffect(() => {
-    if (phase !== "submitted") return;
+    if (phase !== "processing") return;
+    let stopped = false;
     const tick = async () => {
       const status = await checkManualPayment(payment.code);
-      if (!status) return;
+      if (!status || stopped) return;
       if (status === "PAYMENT_VERIFIED" || status === "GENERATION_QUEUED") {
-        if (pollRef.current) clearInterval(pollRef.current);
-        if (onPaymentVerified) {
-          onPaymentVerified(jobId);
-        } else {
-          navigate(`/generation/${jobId}`);
-        }
+        handleVerified();
+      } else if (status === "PAYMENT_PENDING") {
+        // The owner didn't see the payment: back to pending, let them retry.
+        setNotConfirmed(true);
       } else if (status === "PAYMENT_REJECTED") {
-        if (pollRef.current) clearInterval(pollRef.current);
         setStatusMsg("Payment rejected — contact support");
       } else if (status === "AMOUNT_MISMATCH") {
-        if (pollRef.current) clearInterval(pollRef.current);
         setStatusMsg("Amount mismatch — our team will resolve it");
       } else if (status === "PAYMENT_EXPIRED") {
-        if (pollRef.current) clearInterval(pollRef.current);
         setPhase("expired");
       }
+      // PAYMENT_AWAITING_OWNER / PAYMENT_SUBMITTED → keep waiting
+      if (Date.now() - claimStartRef.current > LONG_WAIT_MS) setLongWait(true);
     };
     tick();
-    pollRef.current = setInterval(tick, 3000);
+    const id = setInterval(tick, 5000);
     return () => {
-      if (pollRef.current) clearInterval(pollRef.current);
+      stopped = true;
+      clearInterval(id);
     };
-  }, [phase, payment.code, jobId, navigate, onPaymentVerified]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase, payment.code, jobId]);
 
   const copyVpa = async () => {
     try {
@@ -104,33 +115,21 @@ export default function PaymentModal({ jobId, initialPayment, onClose, navigate,
     }
   };
 
-  const handleSubmitPaid = async () => {
+  const handleClaimPaid = async () => {
     setFormError("");
-    const ref = utr.trim();
-    if (ref.length < 6) {
-      setFormError("Enter the UTR / reference number from your UPI payment (12 digits usually).");
-      return;
-    }
-    setSubmitting(true);
+    setNotConfirmed(false);
+    setLongWait(false);
+    setClaiming(true);
     try {
-      let screenshotAssetId: string | undefined;
-      if (screenshot) {
-        const up = await uploadScreenshot(screenshot);
-        if (!up) {
-          setFormError("Screenshot upload failed — try again or submit without it.");
-          setSubmitting(false);
-          return;
-        }
-        screenshotAssetId = up.assetId;
-      }
-      const ok = await submitManualPayment({ code: payment.code, utrReference: ref, screenshotAssetId });
-      if (!ok) {
-        setFormError("Could not submit your payment. Please try again.");
+      const res = await claimPaymentPaid(payment.code);
+      if (!res.ok) {
+        setFormError(res.message);
         return;
       }
-      setPhase("submitted");
+      claimStartRef.current = Date.now();
+      setPhase("processing");
     } finally {
-      setSubmitting(false);
+      setClaiming(false);
     }
   };
 
@@ -144,8 +143,8 @@ export default function PaymentModal({ jobId, initialPayment, onClose, navigate,
       }
       setPayment(next.payment);
       setPhase("pay");
-      setUtr("");
-      setScreenshot(null);
+      setNotConfirmed(false);
+      setLongWait(false);
       setStatusMsg("");
     } finally {
       setReordering(false);
@@ -223,15 +222,24 @@ export default function PaymentModal({ jobId, initialPayment, onClose, navigate,
               </p>
             </div>
 
+            {formError && <p className="mt-3 text-[13px] text-red-300/80">{formError}</p>}
+
             <button
               type="button"
-              onClick={() => setPhase("paid-form")}
-              className="mt-4 w-full rounded-[10px] bg-[#D7FF3F] px-4 py-3 text-[14px] font-semibold text-[#080808] hover:opacity-95"
+              onClick={handleClaimPaid}
+              disabled={claiming}
+              className={cn(
+                "mt-4 flex w-full items-center justify-center gap-2 rounded-[10px] bg-[#D7FF3F] px-4 py-3 text-[14px] font-semibold text-[#080808]",
+                claiming ? "cursor-wait opacity-70" : "hover:opacity-95",
+              )}
             >
-              I&apos;ve paid
+              {claiming && <Loader2 className="h-4 w-4 animate-spin" />}
+              I&apos;ve paid {formatINR(payment.amountPaise)}
             </button>
             <p className="mt-3 text-center text-[12px] text-white/35">
-              Pay the exact amount, then tap &ldquo;I&apos;ve paid&rdquo;.
+              Pay the exact amount in your UPI app, then tap &ldquo;I&apos;ve
+              paid&rdquo; — no UTR, no screenshot needed. The studio confirms it
+              directly.
             </p>
             <p className="mt-2 text-center text-[12px] leading-5 text-white/35">
               AI generation with human quality review — every paid generation is
@@ -240,74 +248,52 @@ export default function PaymentModal({ jobId, initialPayment, onClose, navigate,
           </>
         )}
 
-        {phase === "paid-form" && (
-          <div className="mt-5">
-            <label htmlFor="utr" className="text-[13px] font-medium text-white/70">
-              UTR / reference number
-            </label>
-            <input
-              id="utr"
-              type="text"
-              value={utr}
-              onChange={(e) => setUtr(e.target.value)}
-              placeholder="e.g. 412345678901"
-              inputMode="numeric"
-              autoComplete="off"
-              className="mt-2 w-full rounded-[10px] border border-white/[0.1] bg-[#0D0D0F] px-3.5 py-2.5 text-[14px] tabular-nums text-[#F5F5F3] placeholder:text-white/30 outline-none focus:border-white/30"
-            />
-
-            <label htmlFor="screenshot" className="mt-4 block text-[13px] font-medium text-white/70">
-              Payment screenshot <span className="text-white/35">(optional)</span>
-            </label>
-            <label
-              htmlFor="screenshot"
-              className="mt-2 flex cursor-pointer items-center gap-2.5 rounded-[10px] border border-dashed border-white/[0.14] bg-[#0D0D0F] px-4 py-3 text-[13px] text-white/60 hover:border-white/30"
-            >
-              <Upload className="h-4 w-4 shrink-0" />
-              {screenshot ? screenshot.name : "Upload screenshot"}
-            </label>
-            <input
-              id="screenshot"
-              type="file"
-              accept="image/*"
-              className="sr-only"
-              onChange={(e) => setScreenshot(e.target.files?.[0] ?? null)}
-            />
-
-            {formError && <p className="mt-3 text-[13px] text-red-300/80">{formError}</p>}
-
-            <button
-              type="button"
-              onClick={handleSubmitPaid}
-              disabled={submitting}
-              className={cn(
-                "mt-5 flex w-full items-center justify-center gap-2 rounded-[10px] bg-[#D7FF3F] px-4 py-3 text-[14px] font-semibold text-[#080808]",
-                submitting ? "cursor-wait opacity-70" : "hover:opacity-95",
-              )}
-            >
-              {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
-              Submit payment
-            </button>
-            <button
-              type="button"
-              onClick={() => setPhase("pay")}
-              className="mt-2 w-full rounded-[10px] px-4 py-2.5 text-[13px] text-white/55 hover:text-white/85"
-            >
-              Back
-            </button>
-          </div>
-        )}
-
-        {phase === "submitted" && (
+        {phase === "processing" && (
           <div className="mt-6 text-center">
-            <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-full border border-white/[0.12] bg-[#18181B]">
-              <Loader2 className="h-5 w-5 animate-spin text-white/70" />
+            <div className="mx-auto max-w-[280px]">
+              <BurgerGrill frame={2} />
             </div>
-            <p className="mt-4 text-[14px] leading-6 text-[#F5F5F3]">
-              Payment submitted — waiting for confirmation. Your creation enters
-              creative review after confirmation.
+            {/* indeterminate progress */}
+            <div
+              className="mx-auto mt-2 h-[3px] w-48 overflow-hidden rounded-full bg-white/[0.08]"
+              aria-hidden="true"
+            >
+              <div className="fg-bar h-full w-1/3 rounded-full bg-[#D7FF3F]" />
+            </div>
+            <p className="mt-4 text-[15px] font-medium text-[#F5F5F3]">
+              Confirming your payment with the studio…
+            </p>
+            <p className="mt-2 text-[13px] leading-6 text-white/55">
+              The owner has been pinged and usually confirms within a couple of
+              minutes. Your order is saved — you can keep this open.
             </p>
             <p className="mt-2 text-[12px] text-white/40 tabular-nums">Order {payment.code}</p>
+            {longWait && (
+              <p className="mt-3 rounded-[10px] border border-white/[0.08] bg-white/[0.03] px-4 py-3 text-[13px] leading-6 text-white/60">
+                Still waiting — the owner has been notified. This usually takes
+                a couple of minutes; your order is saved and nothing is lost.
+              </p>
+            )}
+            {notConfirmed && (
+              <div className="mt-4 rounded-[10px] border border-amber-200/[0.14] bg-amber-200/[0.05] px-4 py-3">
+                <p className="text-[13px] leading-6 text-amber-200/90">
+                  Payment not confirmed — please check your UPI app that the
+                  exact amount went through, then try again.
+                </p>
+                <button
+                  type="button"
+                  onClick={handleClaimPaid}
+                  disabled={claiming}
+                  className={cn(
+                    "mt-3 flex w-full items-center justify-center gap-2 rounded-[10px] bg-[#D7FF3F] px-4 py-2.5 text-[14px] font-semibold text-[#080808]",
+                    claiming ? "cursor-wait opacity-70" : "hover:opacity-95",
+                  )}
+                >
+                  {claiming && <Loader2 className="h-4 w-4 animate-spin" />}
+                  I&apos;ve paid — check again
+                </button>
+              </div>
+            )}
             {statusMsg && <p className="mt-3 text-[13px] text-amber-200/80">{statusMsg}</p>}
           </div>
         )}
@@ -326,8 +312,8 @@ export default function PaymentModal({ jobId, initialPayment, onClose, navigate,
               className={cn(
                 "mt-5 inline-flex w-full items-center justify-center gap-2 rounded-[10px] bg-[#D7FF3F] px-4 py-3 text-[14px] font-semibold text-[#080808]",
                 reordering ? "cursor-wait opacity-70" : "hover:opacity-95",
-              )}
-            >
+                )}
+              >
               {reordering ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCcw className="h-4 w-4" />}
               Create a new payment order
             </button>

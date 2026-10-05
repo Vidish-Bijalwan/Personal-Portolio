@@ -1,7 +1,8 @@
 /**
  * Vidish — Manual UPI payment flow.
- * No payment gateway: the user pays to our VPA manually, then submits the
- * UTR reference (+ optional screenshot) for human verification.
+ * No payment gateway: the user pays to our VPA manually, then taps
+ * "I've paid" — the owner gets a phone ping and confirms. No UTR,
+ * no screenshot required.
  */
 
 export interface ManualPayment {
@@ -147,8 +148,38 @@ export async function submitManualPayment(opts: {
   return res.ok;
 }
 
+/**
+ * Payment-claim flow: the user paid in their UPI app and tapped "I've paid".
+ * No UTR, no screenshot — the owner gets a phone ping and confirms.
+ */
+export async function claimPaymentPaid(
+  code: string
+): Promise<{ ok: true; shortCode: string | null } | { ok: false; message: string }> {
+  let res: Response;
+  try {
+    res = await fetch(`/api/orders/${encodeURIComponent(code)}/claim-paid`, {
+      method: 'POST',
+    });
+  } catch {
+    return { ok: false, message: 'Network error. Please try again.' };
+  }
+  const body = await res.json().catch(() => null);
+  if (!res.ok) {
+    return {
+      ok: false,
+      message:
+        typeof body?.message === 'string' && body.message
+          ? body.message
+          : 'Could not claim your payment. Please try again.',
+    };
+  }
+  return { ok: true, shortCode: body?.shortCode ?? null };
+}
+
 export type PaymentCheckStatus =
   | 'PAYMENT_PENDING'
+  | 'PAYMENT_SUBMITTED'
+  | 'PAYMENT_AWAITING_OWNER'
   | 'PAYMENT_VERIFIED'
   | 'GENERATION_QUEUED'
   | 'PAYMENT_REJECTED'
