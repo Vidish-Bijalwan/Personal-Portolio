@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic';
 
 import { NextRequest, NextResponse } from 'next/server';
 import { eq } from 'drizzle-orm';
-import { getSessionUser } from '@/lib/auth';
+import { requireSession } from '@/lib/auth';
 import { db } from '@/lib/db/client';
 import { generationJobs } from '@/lib/db/schema';
 import {
@@ -13,10 +13,8 @@ import {
 /** POST {jobId} → create a PAYMENT_PENDING manual-UPI order. */
 export async function POST(req: NextRequest) {
   try {
-    const user = await getSessionUser();
-    if (!user) {
-      return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 401 });
-    }
+    const { user, response: authResponse } = await requireSession();
+    if (!user) return authResponse;
     const body = await req.json().catch(() => null);
     const jobId = body?.jobId;
     if (typeof jobId !== 'string' || !jobId) {

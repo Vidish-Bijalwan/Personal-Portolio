@@ -21,12 +21,16 @@ import { sql } from 'drizzle-orm';
 import { NextRequest } from 'next/server';
 
 vi.mock('@/lib/auth', () => ({
-  getSessionUser: () =>
+  requireSession: () =>
     Promise.resolve({
-      id: 'cap-user-1',
-      email: 'capacity@vidish.dev',
-      name: 'Capacity User',
+      user: {
+        id: 'cap-user-1',
+        email: 'capacity@vilish.dev',
+        name: 'Capacity User',
+      },
+      response: null,
     }),
+  LOGIN_REQUIRED: 'LOGIN_REQUIRED',
 }));
 
 delete process.env.DATABASE_URL;
@@ -55,7 +59,7 @@ describe.runIf(HAS_START)('POST /api/generation/start — capacity gates', () =>
       .values({
         id: 'cap-user-1',
         name: 'Capacity User',
-        email: 'capacity@vidish.dev',
+        email: 'capacity@vilish.dev',
       })
       .onConflictDoNothing();
   }, 120_000);

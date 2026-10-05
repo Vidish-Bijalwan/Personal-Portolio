@@ -1,16 +1,14 @@
 export const dynamic = 'force-dynamic';
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getSessionUser } from '@/lib/auth';
+import { requireSession } from '@/lib/auth';
 import { PaymentHttpError, submitPaymentUtr } from '@/lib/payments/manual-upi';
 
 /** POST {code, utrReference, screenshotAssetId?} → PAYMENT_SUBMITTED. */
 export async function POST(req: NextRequest) {
   try {
-    const user = await getSessionUser();
-    if (!user) {
-      return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 401 });
-    }
+    const { user, response: authResponse } = await requireSession();
+    if (!user) return authResponse;
     const body = await req.json().catch(() => null);
     const { code, utrReference, screenshotAssetId } = body ?? {};
     if (typeof code !== 'string' || !code) {

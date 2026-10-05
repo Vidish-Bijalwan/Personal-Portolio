@@ -4,7 +4,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { db } from '@/lib/db/client';
 import * as schema from '@/lib/db/schema';
 import { eq, and, isNull, asc } from 'drizzle-orm';
-import { getSessionUser } from '@/lib/auth';
+import { requireSession } from '@/lib/auth';
 import { remakePrice } from '@/lib/pricing/engine';
 import type { PriceBreakdown } from '@/lib/vilish/types';
 
@@ -20,13 +20,8 @@ export async function POST(
   req: NextRequest,
   ctx: { params: Promise<{ id: string }> }
 ) {
-  const user = await getSessionUser();
-  if (!user) {
-    return NextResponse.json(
-      { code: 'UNAUTHENTICATED', error: 'Sign in required' },
-      { status: 401 }
-    );
-  }
+  const { user, response: authResponse } = await requireSession();
+  if (!user) return authResponse;
   const { id } = await ctx.params;
 
   const jobRows = await db

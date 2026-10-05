@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic';
 
 import { NextResponse, type NextRequest } from 'next/server';
-import { getSessionUser } from '@/lib/auth';
+import { requireSession } from '@/lib/auth';
 import {
   assertTransition,
   auditAdmin,
@@ -18,10 +18,8 @@ export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const user = await getSessionUser();
-  if (!user) {
-    return NextResponse.json({ error: 'UNAUTHENTICATED' }, { status: 401 });
-  }
+  const { user, response: authResponse } = await requireSession();
+  if (!user) return authResponse;
   const { id } = await params;
   const job = await getFulfillmentJob(id);
   // 404 for missing OR not-owned (no ownership enumeration).

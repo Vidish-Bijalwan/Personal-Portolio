@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { ArrowRight, Loader2, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -15,6 +14,7 @@ import {
   type ManualPayment,
 } from "./payment";
 import PaymentModal from "./payment-modal";
+import AuthModal from "./auth-modal";
 
 const QUALITIES: { id: QualityTier; label: string; hint: string }[] = [
   { id: "quick", label: "Quick", hint: "Fast drafts" },
@@ -288,13 +288,16 @@ export default function Composer({ variant = "hero", className }: ComposerProps)
           {status}
         </p>
       )}
-      {authNeeded && (
-        <p className="mt-3 text-[13px] text-white/70">
-          <Link href="/api/auth/signin" className="underline underline-offset-4 hover:text-white">
-            Sign in to generate
-          </Link>
-        </p>
-      )}
+      {/* Lazy auth: login is required only at submit time. After sign-in the
+          pending generate action resumes automatically. */}
+      <AuthModal
+        open={authNeeded}
+        onClose={() => setAuthNeeded(false)}
+        onAuthenticated={() => {
+          setAuthNeeded(false);
+          void handleGenerate();
+        }}
+      />
       {phase === "quoted" && quote && (
         <>
           <p className="mt-3 text-[12px] text-white/35">

@@ -1,6 +1,7 @@
 import React from "react"
 import "./globals.css"
 import { IBM_Plex_Sans, IBM_Plex_Mono } from "next/font/google"
+import { AuthSessionProvider } from "@/components/vilish/session-provider"
 
 const ibmPlexSans = IBM_Plex_Sans({
   subsets: ["latin"],
@@ -46,7 +47,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         className={`${ibmPlexSans.variable} ${ibmPlexMono.variable} font-sans`}
         suppressHydrationWarning
       >
-        {children}
+        <AuthSessionProvider>{children}</AuthSessionProvider>
       </body>
     </html>
   )

@@ -17,10 +17,18 @@ import { pathToFileURL } from 'node:url';
 import { NextRequest } from 'next/server';
 
 // The real @/lib/auth boots next-auth, which cannot resolve next/server
-// under vitest. Customer routes only need getSessionUser; unauthenticated
+// under vitest. Customer routes only need requireSession; unauthenticated
 // here so the respond route's auth rejection is exercised.
 vi.mock('@/lib/auth', () => ({
-  getSessionUser: () => Promise.resolve(null),
+  requireSession: () =>
+    Promise.resolve({
+      user: null,
+      response: new Response(
+        JSON.stringify({ code: 'LOGIN_REQUIRED', error: 'Sign in required' }),
+        { status: 401, headers: { 'content-type': 'application/json' } },
+      ),
+    }),
+  LOGIN_REQUIRED: 'LOGIN_REQUIRED',
 }));
 
 delete process.env.DATABASE_URL;

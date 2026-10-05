@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic';
 
 import { NextRequest, NextResponse } from 'next/server';
 import { eq } from 'drizzle-orm';
-import { getSessionUser } from '@/lib/auth';
+import { requireSession } from '@/lib/auth';
 import { db } from '@/lib/db/client';
 import { orders } from '@/lib/db/schema';
 import { ManualUpiProvider } from '@/lib/payments/manual-upi';
@@ -12,10 +12,8 @@ export async function GET(
   _req: NextRequest,
   { params }: { params: Promise<{ code: string }> }
 ) {
-  const user = await getSessionUser();
-  if (!user) {
-    return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 401 });
-  }
+  const { user, response: authResponse } = await requireSession();
+  if (!user) return authResponse;
   const { code } = await params;
   const [order] = await db
     .select()

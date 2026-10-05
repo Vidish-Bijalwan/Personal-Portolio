@@ -3,7 +3,7 @@ export const dynamic = 'force-dynamic';
 import { NextResponse, type NextRequest } from 'next/server';
 import { db } from '@/lib/db/client';
 import * as schema from '@/lib/db/schema';
-import { getSessionUser } from '@/lib/auth';
+import { requireSession } from '@/lib/auth';
 import { getStorage } from '@/lib/storage';
 
 const MAX_BYTES = 5 * 1024 * 1024; // 5 MB
@@ -32,13 +32,8 @@ function extFromMime(mime: string): string {
  * proofs/<uuid>.<ext>, records an assets row, returns { assetId, url }.
  */
 export async function POST(req: NextRequest) {
-  const user = await getSessionUser();
-  if (!user) {
-    return NextResponse.json(
-      { code: 'UNAUTHENTICATED', error: 'Sign in required' },
-      { status: 401 }
-    );
-  }
+  const { user, response: authResponse } = await requireSession();
+  if (!user) return authResponse;
 
   let form: FormData;
   try {

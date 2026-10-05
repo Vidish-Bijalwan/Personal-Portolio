@@ -21,6 +21,7 @@ import {
   type ManualPayment,
 } from "@/components/vilish/payment";
 import PaymentModal from "@/components/vilish/payment-modal";
+import AuthModal from "@/components/vilish/auth-modal";
 
 interface JobPayload {
   id: string;
@@ -576,13 +577,16 @@ export default function GenerationPage() {
                     {remakeStatus && (
                       <p className="mt-3 text-[13px] text-white/55" role="status">{remakeStatus}</p>
                     )}
-                    {remakeAuth && (
-                      <p className="mt-3 text-[13px] text-white/70">
-                        <Link href="/api/auth/signin" className="underline underline-offset-4 hover:text-white">
-                          Sign in to generate
-                        </Link>
-                      </p>
-                    )}
+                    {/* Lazy auth: sign-in required only at pay time; the pending
+                        remake payment resumes automatically afterwards. */}
+                    <AuthModal
+                      open={remakeAuth}
+                      onClose={() => setRemakeAuth(false)}
+                      onAuthenticated={() => {
+                        setRemakeAuth(false);
+                        void handleRemake();
+                      }}
+                    />
                   </div>
                 )}
               </>

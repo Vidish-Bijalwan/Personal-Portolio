@@ -3,7 +3,7 @@ export const dynamic = 'force-dynamic';
 import { NextResponse, type NextRequest } from 'next/server';
 import { db } from '@/lib/db/client';
 import { generationJobs } from '@/lib/db/schema';
-import { getSessionUser } from '@/lib/auth';
+import { requireSession } from '@/lib/auth';
 import { auditAdmin } from '@/lib/fulfillment/guards';
 import { getFulfillmentConfig } from '@/lib/fulfillment/config';
 import { asFulfillmentJob, getFulfillmentJob } from '@/lib/fulfillment/job';
@@ -19,10 +19,8 @@ export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const user = await getSessionUser();
-  if (!user) {
-    return NextResponse.json({ error: 'UNAUTHENTICATED' }, { status: 401 });
-  }
+  const { user, response: authResponse } = await requireSession();
+  if (!user) return authResponse;
   const { id } = await params;
   const job = await getFulfillmentJob(id);
   // 404 for missing OR not-owned (no ownership enumeration).

@@ -4,7 +4,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { db } from '@/lib/db/client';
 import * as schema from '@/lib/db/schema';
 import { eq, sql } from 'drizzle-orm';
-import { getSessionUser } from '@/lib/auth';
+import { requireSession } from '@/lib/auth';
 import { createManualPaymentOrder } from '@/lib/payments/manual-upi';
 import { canTransition } from '@/lib/vilish/types';
 import { getFulfillmentConfig } from '@/lib/fulfillment/config';
@@ -42,13 +42,8 @@ async function countOperatorJobsToday(): Promise<number> {
  * queues. No Razorpay anywhere in this flow.
  */
 export async function POST(req: NextRequest) {
-  const user = await getSessionUser();
-  if (!user) {
-    return NextResponse.json(
-      { code: 'UNAUTHENTICATED', error: 'Sign in required' },
-      { status: 401 }
-    );
-  }
+  const { user, response: authResponse } = await requireSession();
+  if (!user) return authResponse;
 
   const body = await req.json().catch(() => null);
   const quoteId = typeof body?.quoteId === 'string' ? body.quoteId : null;

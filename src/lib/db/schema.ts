@@ -40,6 +40,9 @@ export const users = pgTable('users', {
   emailVerified: timestamp('email_verified', { withTimezone: true }),
   image: text('image'),
   role: text('role').default('user').notNull(), // 'user' | 'admin'
+  // bcrypt hash for email+password (credentials) login. NULL for OAuth-only
+  // or dev-bypass accounts. Never store plaintext passwords.
+  passwordHash: text('password_hash'),
   createdAt: createdAt(),
 });
 
