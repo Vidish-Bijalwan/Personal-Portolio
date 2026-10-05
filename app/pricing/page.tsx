@@ -5,25 +5,22 @@ import { motion } from "framer-motion";
 import {
   ArrowRight,
   BadgeCheck,
-  Check,
-  MousePointerClick,
-  QrCode,
+  PackageCheck,
   ShieldCheck,
   Sparkles,
-  Truck,
+  UserCheck,
 } from "lucide-react";
 import VilishNav from "@/components/vilish/nav";
 import VilishFooter from "@/components/vilish/footer";
 import Reveal from "@/components/motion/Reveal";
 import { Stagger, StaggerItem } from "@/components/motion/Stagger";
 import Counter from "@/components/motion/Counter";
-import Marquee from "@/components/motion/Marquee";
 import MagneticButton from "@/components/motion/MagneticButton";
 import { MOTION, usePrefersReducedMotion } from "@/src/lib/motion/theme";
 
 interface Tier {
   name: string;
-  price: string;
+  price?: string;
   blurb: string;
   action?: { label: string; href: string };
   comingSoon?: boolean;
@@ -51,7 +48,6 @@ const TIERS: Tier[] = [
   },
   {
     name: "5s clip",
-    price: "₹99",
     blurb: "Short AI video generation.",
     comingSoon: true,
   },
@@ -67,17 +63,8 @@ const POPULAR_TIER = "4-pack";
 
 /** Numeric amount derived from the exact price string (no data change). */
 function amountOf(t: Tier): number {
-  return Number(t.price.replace(/[^\d]/g, ""));
+  return Number((t.price ?? "0").replace(/[^\d]/g, ""));
 }
-
-const TICKER_ITEMS = [
-  "One creation. One price.",
-  "No subscription",
-  "Exact price before you pay",
-  "Failed renders refunded",
-  "Human QC on every order",
-  "No credits, no wallets",
-];
 
 const PROMISES = [
   {
@@ -97,28 +84,40 @@ const PROMISES = [
   },
 ];
 
+/* Order lifecycle — the operator model: payment verified first, then a
+   human reviews, creates, and quality-checks your piece. */
 const STEPS = [
   {
-    icon: MousePointerClick,
-    title: "Describe it",
-    text: "Write what you want on the create page. Pick a style, see the exact price.",
+    icon: ShieldCheck,
+    title: "Payment verified",
+    text: "Your UPI payment is confirmed against the order before anything else moves.",
   },
   {
-    icon: QrCode,
-    title: "Pay with UPI",
-    text: "Scan, pay the shown amount, drop your UTR. No account needed until checkout.",
+    icon: UserCheck,
+    title: "Human review",
+    text: "A human reviews your brief and references — clarifying anything unclear first.",
   },
   {
-    icon: Truck,
-    title: "Get it delivered",
-    text: "A human reviews and fulfills your order — your finished creation, delivered to you.",
+    icon: Sparkles,
+    title: "Creation",
+    text: "Your piece is created to spec, iterated until it's right.",
+  },
+  {
+    icon: BadgeCheck,
+    title: "QC",
+    text: "Quality control: every piece is checked against your brief before delivery.",
+  },
+  {
+    icon: PackageCheck,
+    title: "Delivered",
+    text: "Your finished creation is delivered to you, ready to download.",
   },
 ];
 
 function PopularBadge() {
   const reduced = usePrefersReducedMotion();
   const inner = (
-    <span className="v-iris-bg rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-[0.08em] text-[#080808]">
+    <span className="rounded-full bg-[#D7FF3F] px-3 py-1 text-[11px] font-bold uppercase tracking-[0.08em] text-[#080808]">
       Most popular
     </span>
   );
@@ -171,13 +170,11 @@ function TierCard({ tier }: { tier: Tier }) {
         )}
       </div>
 
-      <p className="mt-3 text-[34px] font-semibold tabular-nums tracking-[-0.01em]">
-        {tier.comingSoon ? (
-          tier.price
-        ) : (
+      {tier.price && (
+        <p className="mt-3 text-[34px] font-semibold tabular-nums tracking-[-0.01em]">
           <Counter to={amountOf(tier)} prefix="₹" duration={1.2} />
-        )}
-      </p>
+        </p>
+      )}
 
       <p className="mt-2 flex-1 text-[13px] leading-6 text-white/[0.58]">{tier.blurb}</p>
 
@@ -204,7 +201,7 @@ export default function PricingPage() {
       <VilishNav />
       <main className="mx-auto w-full max-w-5xl flex-1 px-4 pb-20 pt-10 sm:pt-16">
         <Reveal>
-          <p className="text-[12px] font-bold uppercase tracking-[0.24em] text-white/45">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-white/45">
             Pricing
           </p>
           <h1 className="font-display mt-3 text-[34px] font-bold leading-[1.05] tracking-[-0.02em] sm:text-[52px]">
@@ -217,22 +214,6 @@ export default function PricingPage() {
             Pay per creation. You always see the exact price before anything is
             charged, and failed renders are refunded automatically.
           </p>
-        </Reveal>
-
-        <Reveal delay={0.15} className="mt-8">
-          <div className="overflow-hidden rounded-[14px] border border-white/[0.08] bg-[#101012] py-3">
-            <Marquee speed={55} gap={48}>
-              {TICKER_ITEMS.map((t) => (
-                <span
-                  key={t}
-                  className="inline-flex items-center gap-3 whitespace-nowrap text-[13px] font-medium text-white/[0.65]"
-                >
-                  <Check className="h-3.5 w-3.5 text-emerald-300/80" />
-                  {t}
-                </span>
-              ))}
-            </Marquee>
-          </div>
         </Reveal>
 
         <Stagger className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -249,7 +230,7 @@ export default function PricingPage() {
             >
               <span
                 aria-hidden="true"
-                className="v-iris-bg pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full opacity-15 blur-3xl"
+                className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-[#00F0FF] opacity-15 blur-3xl"
               />
               <h2 className="font-display text-[17px] font-semibold">
                 Not sure yet?
@@ -292,10 +273,10 @@ export default function PricingPage() {
         <div className="mt-16">
           <Reveal>
             <h2 className="font-display text-[22px] font-semibold tracking-[-0.01em] sm:text-[26px]">
-              How it works
+              Your order&apos;s lifecycle
             </h2>
           </Reveal>
-          <Stagger className="mt-6 grid gap-4 sm:grid-cols-3">
+          <Stagger className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
             {STEPS.map((s, i) => (
               <StaggerItem key={s.title}>
                 <div className="relative h-full rounded-[16px] border border-white/[0.08] bg-[#121214] p-5">

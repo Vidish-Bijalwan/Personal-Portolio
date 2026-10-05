@@ -35,7 +35,7 @@ export default function VilishNav() {
         </nav>
         <Link
           href="/create"
-          className="v-iris-bg rounded-[10px] px-4 py-2 text-[13px] font-semibold text-white transition-opacity hover:opacity-95"
+          className="v-iris-bg rounded-[10px] px-4 py-2 text-[13px] font-semibold text-[#080808] transition-opacity hover:opacity-95"
         >
           Create
         </Link>

@@ -15,6 +15,8 @@ import {
   ShieldAlert,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import VilishNav from "@/components/vilish/nav";
+import VilishFooter from "@/components/vilish/footer";
 import { formatINR } from "@/src/lib/vilish/types";
 import {
   startManualPayment,
@@ -100,7 +102,7 @@ function statusCopy(state: string): string {
     case "REFUND_REQUIRED":
     case "REFUNDED":
     case "REFUND_PENDING":
-      return "Refunded / cancelled — contact support";
+      return "Refunded / cancelled — we'll reach out with next steps.";
     default:
       return "Processing your order.";
   }
@@ -127,23 +129,6 @@ function isTerminal(state: string): boolean {
 
 function isVideoUrl(url?: string) {
   return !!url && /\.(mp4|mov|webm)(\?|$)/i.test(url);
-}
-
-function placeholderCopy(idx: number): string {
-  switch (idx) {
-    case 0:
-      return "Awaiting payment…";
-    case 1:
-      return "Payment confirmed — preparing your order…";
-    case 2:
-      return "Creative review — checking your references…";
-    case 3:
-      return "Generating your media…";
-    case 4:
-      return "Quality check — reviewing before delivery…";
-    default:
-      return "Working on your order…";
-  }
 }
 
 export default function GenerationPage() {
@@ -324,8 +309,9 @@ export default function GenerationPage() {
   const video = isVideoUrl(job?.outputUrl);
 
   return (
-    <div className="min-h-screen bg-[#080808] font-sans text-[#F5F5F3] antialiased">
-      <div className="mx-auto w-full max-w-3xl px-4 pb-16 pt-6 sm:pt-10">
+    <div className="flex min-h-screen flex-col bg-[#080808] font-sans text-[#F5F5F3] antialiased">
+      <VilishNav />
+      <div className="mx-auto w-full max-w-3xl flex-1 px-4 pb-16 pt-6 sm:pt-10">
         <Link
           href="/create"
           className="inline-flex items-center gap-1.5 text-[13px] text-white/55 hover:text-white/90"
@@ -354,7 +340,25 @@ export default function GenerationPage() {
 
             {/* stage indicator */}
             {!failed && !refunded && idx >= 0 && (
-              <ol className="mt-4 flex items-center gap-1 sm:gap-2" aria-label="Generation progress">
+              <div className="mt-4">
+                <div className="sm:hidden">
+                  <p className="text-[12px] font-medium text-white/70" role="status">
+                    Step {idx + 1} of {PIPELINE.length}: {PIPELINE[idx]}
+                  </p>
+                  <div
+                    className="mt-2 h-1 overflow-hidden rounded-full bg-white/[0.08]"
+                    aria-hidden
+                  >
+                    <div
+                      className="h-full rounded-full bg-[#D7FF3F]"
+                      style={{ width: `${((idx + 1) / PIPELINE.length) * 100}%` }}
+                    />
+                  </div>
+                </div>
+                <ol
+                  className="hidden items-center gap-1 sm:flex sm:gap-2"
+                  aria-label="Generation progress"
+                >
                 {PIPELINE.map((s, i) => {
                   const done = i < idx;
                   const current = i === idx;
@@ -364,7 +368,7 @@ export default function GenerationPage() {
                         <div
                           className={cn(
                             "h-1 rounded-full transition-colors",
-                            done || current ? "v-iris-bg" : "bg-white/[0.08]",
+                            done || current ? "bg-[#D7FF3F]" : "bg-white/[0.08]",
                           )}
                         />
                         <span
@@ -379,7 +383,8 @@ export default function GenerationPage() {
                     </li>
                   );
                 })}
-              </ol>
+                </ol>
+              </div>
             )}
 
             {/* clarification request */}
@@ -418,7 +423,7 @@ export default function GenerationPage() {
                       type="button"
                       onClick={handleClarify}
                       disabled={clarifyBusy || !clarifyMsg.trim()}
-                      className="v-iris-bg mt-3 inline-flex items-center gap-2 rounded-[10px] px-5 py-2.5 text-[14px] font-semibold text-white hover:opacity-95 disabled:opacity-40"
+                      className="mt-3 inline-flex items-center gap-2 rounded-[10px] bg-[#D7FF3F] px-5 py-2.5 text-[14px] font-semibold text-[#080808] hover:opacity-95 disabled:opacity-40"
                     >
                       {clarifyBusy ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
@@ -480,10 +485,23 @@ export default function GenerationPage() {
                       />
                     )
                   ) : (
-                    <div className="v-gen-glow flex aspect-square items-center justify-center bg-[#0D0D0F]">
-                      <p className="px-6 text-center text-[14px] text-white/50">
-                        {placeholderCopy(idx)}
-                      </p>
+                    <div className="flex min-h-[240px] items-center justify-center bg-[#0D0D0F] p-6">
+                      <div className="w-full max-w-sm rounded-[14px] border border-white/[0.08] bg-[#121214] p-5">
+                        <p role="status" className="text-[14px] font-semibold text-[#F5F5F3]">
+                          {statusCopy(job.state)}
+                        </p>
+                        <p className="mt-2 text-[13px] leading-6 text-white/55">
+                          What happens next:{" "}
+                          <span className="text-white/80">
+                            human review → creation → quality check
+                          </span>
+                          , then your finished piece is delivered to you.
+                        </p>
+                        <p className="mt-3 text-[12px] leading-5 text-white/40">
+                          Your order is queued and safe — no need to keep this
+                          page open.
+                        </p>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -509,7 +527,7 @@ export default function GenerationPage() {
                         onClick={handleRemake}
                         disabled={remakePaying}
                         className={cn(
-                          "v-iris-bg inline-flex items-center gap-2 rounded-[10px] px-5 py-2.5 text-[14px] font-semibold text-white",
+                          "inline-flex items-center gap-2 rounded-[10px] bg-[#D7FF3F] px-5 py-2.5 text-[14px] font-semibold text-[#080808]",
                           remakePaying ? "cursor-wait opacity-70" : "hover:opacity-95",
                         )}
                       >
@@ -566,7 +584,7 @@ export default function GenerationPage() {
                           type="button"
                           onClick={handleEdit}
                           disabled={editBusy}
-                          className="v-iris-bg mt-3 inline-flex items-center gap-2 rounded-[10px] px-5 py-2.5 text-[14px] font-semibold text-white hover:opacity-95 disabled:opacity-40"
+                          className="mt-3 inline-flex items-center gap-2 rounded-[10px] bg-[#D7FF3F] px-5 py-2.5 text-[14px] font-semibold text-[#080808] hover:opacity-95 disabled:opacity-40"
                         >
                           {editBusy && <Loader2 className="h-4 w-4 animate-spin" />}
                           Start edit
@@ -603,6 +621,7 @@ export default function GenerationPage() {
           />
         )}
       </div>
+      <VilishFooter />
     </div>
   );
 }

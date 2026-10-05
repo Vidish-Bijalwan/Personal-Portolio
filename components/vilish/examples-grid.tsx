@@ -210,13 +210,13 @@ export default function ExamplesGrid({ items }: { items: ExampleItem[] }) {
                 setOpenIndex(null);
               }}
               className={`relative rounded-full px-4 py-2 text-[13px] font-medium transition-colors ${
-                selected ? "text-[#F5F5F3]" : "text-white/[0.55] hover:text-white/[0.85]"
+                selected ? "text-[#080808]" : "text-white/[0.55] hover:text-white/[0.85]"
               }`}
             >
               {selected && (
                 <motion.span
                   layoutId="examples-category-pill"
-                  className="v-iris-bg absolute inset-0 rounded-full border border-white/[0.14]"
+                  className="absolute inset-0 rounded-full border border-[#D7FF3F]/40 bg-[#D7FF3F]"
                   transition={{ type: "spring", stiffness: 500, damping: 38 }}
                 />
               )}

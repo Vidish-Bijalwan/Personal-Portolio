@@ -35,7 +35,7 @@ export default function ExamplesPage() {
     <div className="flex min-h-screen flex-col bg-[#080808] font-sans text-[#F5F5F3] antialiased">
       <VilishNav />
       <main className="mx-auto w-full max-w-5xl flex-1 px-4 pb-20 pt-10 sm:pt-16">
-        <h1 className="text-[28px] font-semibold tracking-[-0.02em] sm:text-[36px]">
+        <h1 className="font-display text-[28px] font-semibold tracking-[-0.02em] sm:text-[36px]">
           Made with Vidish
         </h1>
         <p className="mt-3 max-w-xl text-[15px] leading-7 text-white/[0.58]">
@@ -47,7 +47,7 @@ export default function ExamplesPage() {
         </div>
 
         <div className="mt-16 rounded-[20px] border border-white/[0.08] bg-[#121214] p-8 text-center sm:p-10">
-          <h2 className="text-[22px] font-semibold tracking-[-0.01em]">
+          <h2 className="font-display text-[22px] font-semibold tracking-[-0.01em]">
             Like what you see?
           </h2>
           <p className="mx-auto mt-2 max-w-md text-[14px] leading-6 text-white/[0.58]">
@@ -56,7 +56,7 @@ export default function ExamplesPage() {
           </p>
           <Link
             href="/create"
-            className="v-iris-bg mt-6 inline-flex items-center gap-2 rounded-full border border-white/[0.14] px-6 py-3 text-[14px] font-semibold text-[#F5F5F3] transition hover:brightness-110"
+            className="mt-6 inline-flex items-center gap-2 rounded-full border border-white/[0.14] bg-[#D7FF3F] px-6 py-3 text-[14px] font-semibold text-[#080808] transition hover:brightness-105"
           >
             Make yours <span aria-hidden="true">→</span>
           </Link>

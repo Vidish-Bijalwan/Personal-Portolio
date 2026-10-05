@@ -1,14 +1,12 @@
 "use client";
 
-import { useRef, type ReactNode } from "react";
+import { useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
   ArrowRight,
   BadgeCheck,
-  Clapperboard,
   Image as ImageIcon,
-  Megaphone,
   RefreshCcw,
   ShieldCheck,
   SlidersHorizontal,
@@ -52,15 +50,65 @@ const TEASER = [
   { label: "Remake", price: "₹19" },
 ];
 
-const MARQUEE_ITEMS = ["NO SUBSCRIPTION", "EXACT PRICE FIRST", "HUMAN QC", "₹29 FROM"];
+/** Showreel: 5–8 only. Showcase: 9, 10, 1, 2. Zero overlap. */
+const SHOWREEL = [
+  {
+    src: "/examples/5-watch-ad.webp",
+    width: 1920,
+    height: 1280,
+    alt: "Steel chronograph watch floating in a dark studio with dramatic rim light",
+    caption: "Floating chronograph, dramatic rim light",
+    price: "₹49",
+  },
+  {
+    src: "/examples/6-movie-poster.webp",
+    width: 1344,
+    height: 1792,
+    alt: "Lone astronaut before a colossal alien monolith, 1980s poster style",
+    caption: "Astronaut before the monolith",
+    price: "₹29",
+  },
+  {
+    src: "/examples/7-pet-portrait.webp",
+    width: 1600,
+    height: 1600,
+    alt: "Golden retriever in a dark studio with Rembrandt lighting",
+    caption: "Golden retriever, Rembrandt light",
+    price: "₹29",
+  },
+  {
+    src: "/examples/8-sportscar.webp",
+    width: 1920,
+    height: 1280,
+    alt: "Sports car on a rain-wet street at night with neon reflections",
+    caption: "Neon night, wet asphalt",
+    price: "₹29",
+  },
+];
 
-const EXAMPLES = [
+const SHOWCASE = [
+  {
+    src: "/examples/9-fashion-editorial.webp",
+    width: 1280,
+    height: 1920,
+    alt: "High-fashion model with sculptural black spiked hair in a charcoal studio",
+    caption: "Fashion editorial, sculptural hair",
+    price: "₹29",
+  },
+  {
+    src: "/examples/10-perfume-ad.webp",
+    width: 1600,
+    height: 1600,
+    alt: "Faceted glass perfume bottle with golden liquid",
+    caption: "Golden perfume, faceted glass",
+    price: "₹49",
+  },
   {
     src: "/examples/1-sneaker-ad.webp",
     width: 1920,
     height: 1280,
     alt: "Sneaker floating in a dark studio with dramatic rim lighting",
-    caption: "Cinematic studio shot of a floating sneaker",
+    caption: "Floating sneaker, studio shot",
     price: "₹29",
   },
   {
@@ -68,24 +116,8 @@ const EXAMPLES = [
     width: 1280,
     height: 1920,
     alt: "Stylized portrait with neon city lights reflected in her eyes",
-    caption: "Neon-lit portrait, city lights in her eyes",
+    caption: "Neon portrait, city lights",
     price: "₹29",
-  },
-  {
-    src: "/examples/3-travel-poster.webp",
-    width: 1344,
-    height: 1792,
-    alt: "Himalayan peaks at dawn in a vintage travel poster style",
-    caption: "Himalayan peaks at dawn, vintage travel poster",
-    price: "₹29",
-  },
-  {
-    src: "/examples/4-food-photo.webp",
-    width: 1920,
-    height: 1280,
-    alt: "Overhead shot of a gourmet burger on dark slate",
-    caption: "Overhead gourmet burger on dark slate",
-    price: "₹49",
   },
 ];
 
@@ -95,16 +127,12 @@ const STATS = [
   { to: 99, suffix: "%", prefix: "", decimals: 0, label: "QC pass rate" },
 ];
 
-type Flourish = "shimmer" | "orbit" | "pulse" | "sweep";
-
 interface Capability {
   icon: LucideIcon;
   title: string;
   desc: string;
-  price?: string;
-  badge?: string;
-  flourish: Flourish;
-  href: string | null;
+  price: string;
+  href: string;
 }
 
 const CAPABILITIES: Capability[] = [
@@ -113,7 +141,6 @@ const CAPABILITIES: Capability[] = [
     title: "Image",
     desc: "Anything you can describe — portraits, posters, concepts, scenes. Studio-grade renders, priced per piece.",
     price: "from ₹29",
-    flourish: "shimmer",
     href: "/create",
   },
   {
@@ -121,24 +148,14 @@ const CAPABILITIES: Capability[] = [
     title: "Edit",
     desc: "Retouch, restyle, recolor, remove backgrounds. Your photo, transformed exactly as you brief it.",
     price: "from ₹29",
-    flourish: "orbit",
     href: "/create",
   },
   {
-    icon: Megaphone,
+    icon: Sparkles,
     title: "Ad",
     desc: "Product shots and campaign creatives that look shot in a studio — without booking a studio.",
     price: "from ₹49",
-    flourish: "pulse",
     href: "/create",
-  },
-  {
-    icon: Clapperboard,
-    title: "Video",
-    desc: "Short motion clips are on the roadmap. Until then, every frame you see here is a single still creation.",
-    badge: "Coming soon",
-    flourish: "sweep",
-    href: null,
   },
 ];
 
@@ -149,51 +166,12 @@ const FORMATS = [
   { ratio: "16:9", w: 34, h: 20, tag: "Banners & covers" },
 ];
 
-/** Mini motion flourish per bento card — CSS-keyframed, static under reduced motion. */
-function CardFlourish({ kind }: { kind: Flourish }) {
-  const reduced = usePrefersReducedMotion();
-
-  if (kind === "shimmer") {
-    return (
-      <div
-        aria-hidden
-        className="h-[3px] w-full overflow-hidden rounded-full bg-white/[0.07]"
-      >
-        <div
-          className={`v-iris-bg h-full w-1/3 rounded-full ${reduced ? "" : "v-bento-shimmer"}`}
-        />
-      </div>
-    );
-  }
-  if (kind === "orbit") {
-    return (
-      <div aria-hidden className="relative h-9 w-9">
-        <span className="absolute inset-0 rounded-full border border-white/[0.14]" />
-        <span
-          className={`absolute left-1/2 top-1/2 h-1.5 w-1.5 rounded-full bg-[#FF2D78] ${reduced ? "ml-[-3px] mt-[-3px]" : "v-bento-orbit"}`}
-        />
-      </div>
-    );
-  }
-  if (kind === "pulse") {
-    return (
-      <span
-        aria-hidden
-        className={`inline-flex h-9 items-center gap-2 rounded-full border border-white/[0.12] px-3.5 text-[12px] font-semibold tabular-nums text-[#F5F5F3] ${reduced ? "" : "v-bento-pulse"}`}
-      >
-        <span className="v-iris-bg h-1.5 w-1.5 rounded-full" />
-        QC passed
-      </span>
-    );
-  }
-  // sweep
+/** Standard eyebrow, used on every section header. */
+function Eyebrow({ children }: { children: string }) {
   return (
-    <div aria-hidden className="relative h-9 w-full max-w-[180px]">
-      <div className="absolute inset-0 rounded-full border border-dashed border-white/[0.16]" />
-      <div
-        className={`absolute inset-y-[3px] left-[3px] w-10 rounded-full bg-gradient-to-r from-[#FF2D78]/40 to-[#00F0FF]/10 ${reduced ? "" : "v-bento-sweep"}`}
-      />
-    </div>
+    <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-white/45">
+      {children}
+    </p>
   );
 }
 
@@ -205,41 +183,24 @@ function BentoCard({ cap }: { cap: Capability }) {
         <span className="flex h-11 w-11 items-center justify-center rounded-xl border border-white/[0.1] bg-white/[0.04]">
           <cap.icon className="h-5 w-5 text-white/85" strokeWidth={1.8} aria-hidden />
         </span>
-        <CardFlourish kind={cap.flourish} />
+        <span className="text-[13px] font-semibold tabular-nums text-[#F5F5F3]">
+          {cap.price}
+        </span>
       </div>
       <div className="mt-5">
         <h3 className="text-[17px] font-semibold text-[#F5F5F3]">{cap.title}</h3>
         <p className="mt-1.5 text-[13.5px] leading-6 text-white/55">{cap.desc}</p>
       </div>
       <div className="mt-5 flex items-center justify-between">
-        {cap.price ? (
-          <span className="text-[13px] font-semibold tabular-nums text-[#F5F5F3]">
-            {cap.price}
-          </span>
-        ) : (
-          <span className="rounded-full border border-[#FF2D78]/40 bg-[#FF2D78]/10 px-2.5 py-0.5 text-[12px] font-semibold text-[#FF7AA8]">
-            {cap.badge}
-          </span>
-        )}
-        {cap.href && (
-          <span className="inline-flex items-center gap-1 text-[13px] font-medium text-white/70">
-            Create <ArrowRight className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
-          </span>
-        )}
+        <span className="inline-flex items-center gap-1 text-[13px] font-medium text-white/70">
+          Create <ArrowRight className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
+        </span>
       </div>
     </>
   );
 
   const cardClass =
     "group relative flex h-full flex-col justify-between overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.025] p-6 transition-colors hover:border-white/[0.16] hover:bg-white/[0.04]";
-
-  if (!cap.href) {
-    return (
-      <article className={`${cardClass} opacity-90`} aria-label={`${cap.title} — ${cap.badge}`}>
-        {inner}
-      </article>
-    );
-  }
 
   const linked = (
     <Link href={cap.href} className={cardClass} aria-label={`Create: ${cap.title}`}>
@@ -260,22 +221,6 @@ function BentoCard({ cap }: { cap: Capability }) {
   );
 }
 
-/** Bento keyframes (keyframes injected once; classes static under reduced motion). */
-function BentoStyles(): ReactNode {
-  return (
-    <style>{`
-      @keyframes v-bento-shimmer { 0% { transform: translateX(-110%); } 100% { transform: translateX(320%); } }
-      .v-bento-shimmer { animation: v-bento-shimmer 2.8s ease-in-out infinite; }
-      @keyframes v-bento-orbit { from { transform: rotate(0deg) translateX(14px); } to { transform: rotate(360deg) translateX(14px); } }
-      .v-bento-orbit { animation: v-bento-orbit 4s linear infinite; }
-      @keyframes v-bento-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.55; } }
-      .v-bento-pulse { animation: v-bento-pulse 2.4s ease-in-out infinite; }
-      @keyframes v-bento-sweep { 0% { transform: translateX(0); opacity: 0; } 15% { opacity: 1; } 70% { transform: translateX(120px); opacity: 1; } 100% { transform: translateX(132px); opacity: 0; } }
-      .v-bento-sweep { animation: v-bento-sweep 3.4s ease-in-out infinite; }
-    `}</style>
-  );
-}
-
 function HowItWorksProgress() {
   const ref = useRef<HTMLDivElement>(null);
   const reduced = useReducedMotion();
@@ -293,9 +238,9 @@ function HowItWorksProgress() {
         className="absolute inset-x-0 top-[26px] hidden h-px bg-white/[0.08] sm:block"
       >
         {reduced ? (
-          <div className="v-iris-bg h-full w-full" />
+          <div className="h-full w-full bg-[#D7FF3F]" />
         ) : (
-          <motion.div className="v-iris-bg h-full w-full origin-left" style={{ scaleX }} />
+          <motion.div className="h-full w-full origin-left bg-[#D7FF3F]" style={{ scaleX }} />
         )}
       </div>
       <Stagger className="grid grid-cols-1 gap-10 sm:grid-cols-4 sm:gap-6">
@@ -319,7 +264,6 @@ function HowItWorksProgress() {
 export default function VilishLanding() {
   return (
     <div className="min-h-screen bg-[#080808] font-sans text-[#F5F5F3] antialiased">
-      <BentoStyles />
       <VilishNav />
 
       <main>
@@ -332,9 +276,7 @@ export default function VilishLanding() {
           <div className="relative z-10 mx-auto flex w-full max-w-3xl flex-1 flex-col items-center justify-center px-4 pb-16 pt-28 text-center sm:pt-32">
             <Stagger className="flex flex-col items-center">
               <StaggerItem>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-white/50 sm:text-[12px]">
-                  Pay-per-creation AI studio
-                </p>
+                <Eyebrow>Pay-per-creation AI studio</Eyebrow>
               </StaggerItem>
               <StaggerItem>
                 <h1 className="font-display mt-5 text-[40px] font-semibold leading-[1.04] tracking-[-0.02em] sm:text-[64px] lg:text-[76px]">
@@ -372,20 +314,15 @@ export default function VilishLanding() {
         <section aria-label="Example showreel" className="border-b border-white/[0.08] py-10 sm:py-14">
           <div className="mx-auto max-w-5xl px-4">
             <Reveal>
-              <div className="flex items-center gap-2">
-                <Sparkles className="h-4 w-4 text-[#FF2D78]" strokeWidth={1.8} aria-hidden />
-                <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-white/45">
-                  Showreel
-                </p>
-              </div>
+              <Eyebrow>Showreel</Eyebrow>
               <h2 className="font-display mt-3 text-[26px] font-semibold tracking-[-0.01em] sm:text-[34px]">
-                Fresh out of the <span className="v-iris-text">render queue.</span>
+                Fresh out of the <span className="text-[#D7FF3F]">render queue.</span>
               </h2>
             </Reveal>
           </div>
           <Reveal delay={0.1} className="mt-8">
             <Marquee speed={44} gap={16}>
-              {EXAMPLES.map((ex) => (
+              {SHOWREEL.map((ex) => (
                 <figure key={ex.src} className="w-[200px] shrink-0 sm:w-[260px]">
                   <div className="relative h-32 overflow-hidden rounded-xl border border-white/[0.08] bg-white/[0.03] sm:h-44">
                     <Image
@@ -409,57 +346,51 @@ export default function VilishLanding() {
             </Marquee>
           </Reveal>
           <p className="mt-6 text-center text-[12px] text-white/35">
-            All images above are examples made with Vidish Studio — yours will look like yours.
+            Example creations from Vidish Studio.
           </p>
         </section>
 
-        {/* ── marquee strip ────────────────────────────────── */}
-        <section aria-label="Studio promises" className="border-b border-white/[0.08] py-4">
-          <Marquee speed={56} gap={56}>
-            {MARQUEE_ITEMS.map((item) => (
-              <span key={item} className="flex items-center gap-14">
-                <span className="text-[12px] font-semibold uppercase tracking-[0.24em] text-white/55">
-                  {item}
-                </span>
-                <span aria-hidden className="v-iris-bg h-1.5 w-1.5 rounded-full" />
-              </span>
-            ))}
-          </Marquee>
-        </section>
-
-        {/* ── how it works ─────────────────────────────────── */}
+        {/* ── how it works (editorial band) ────────────────── */}
         <section
           aria-label="How it works"
-          className="mx-auto max-w-5xl px-4 py-20 sm:py-28"
+          className="border-b border-white/[0.08] bg-[#0B0B0C]"
         >
-          <Reveal>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-white/45">
-              How it works
-            </p>
-            <h2 className="font-display mt-3 text-[26px] font-semibold tracking-[-0.01em] sm:text-[34px]">
-              Four steps. <span className="text-white/45">Zero commitment.</span>
-            </h2>
-          </Reveal>
-          <div className="mt-12">
-            <HowItWorksProgress />
+          <div className="mx-auto max-w-5xl px-4 py-20 sm:py-28">
+            <Reveal>
+              <div className="flex items-baseline gap-4">
+                <span aria-hidden className="font-display text-[13px] font-semibold tracking-[0.2em] text-white/30">
+                  01
+                </span>
+                <span aria-hidden className="h-px flex-1 bg-white/[0.08]" />
+                <Eyebrow>How it works</Eyebrow>
+              </div>
+              <h2 className="font-display mt-6 max-w-[20ch] text-[30px] font-semibold leading-[1.12] tracking-[-0.01em] sm:text-[40px]">
+                Four steps. <span className="text-[#00F0FF]">Zero commitment.</span>
+              </h2>
+            </Reveal>
+            <div className="mt-12">
+              <HowItWorksProgress />
+            </div>
           </div>
         </section>
 
         {/* ── showcase ─────────────────────────────────────── */}
-        <section aria-label="Example creations" className="py-4 sm:py-8">
+        <section aria-label="Example creations" className="border-b border-white/[0.08] py-20 sm:py-28">
           <div className="mx-auto max-w-5xl px-4">
             <Reveal>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-white/45">
-                Showcase
-              </p>
+              <Eyebrow>Showcase</Eyebrow>
               <h2 className="font-display mt-3 text-[26px] font-semibold tracking-[-0.01em] sm:text-[34px]">
-                Made here, <span className="v-iris-text">priced per piece.</span>
+                Made here, <span className="text-[#FF2D78]">priced per piece.</span>
               </h2>
+              <p className="mt-3 max-w-lg text-[14px] leading-6 text-white/50">
+                Every piece below was ordered, reviewed by a human, and delivered.
+                Yours can look like yours.
+              </p>
             </Reveal>
           </div>
           <Reveal delay={0.1} className="mt-10">
             <Carousel ariaLabel="Example creations">
-              {EXAMPLES.map((ex, i) => (
+              {SHOWCASE.map((ex, i) => (
                 <figure key={ex.src} className="w-[78vw] max-w-[420px] shrink-0 sm:w-[380px]">
                   <div className="relative aspect-[4/3] overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.03]">
                     <Image
@@ -495,14 +426,12 @@ export default function VilishLanding() {
         {/* ── capability bento ─────────────────────────────── */}
         <section aria-label="What you can create" className="mx-auto max-w-5xl px-4 py-20 sm:py-28">
           <Reveal>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-white/45">
-              Capabilities
-            </p>
+            <Eyebrow>Capabilities</Eyebrow>
             <h2 className="font-display mt-3 max-w-[22ch] text-[26px] font-semibold tracking-[-0.01em] sm:text-[34px]">
-              One studio, <span className="v-iris-text">four ways to create.</span>
+              One studio, <span className="text-[#D7FF3F]">three ways to create.</span>
             </h2>
           </Reveal>
-          <Stagger className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <Stagger className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {CAPABILITIES.map((cap) => (
               <StaggerItem key={cap.title} className="h-full">
                 <BentoCard cap={cap} />
@@ -510,7 +439,16 @@ export default function VilishLanding() {
             ))}
           </Stagger>
           <Reveal delay={0.1}>
-            <p className="mt-8 text-[12px] text-white/35">
+            <p className="mt-6 flex flex-wrap items-center gap-x-3 gap-y-1.5 rounded-2xl border border-dashed border-white/[0.12] bg-white/[0.015] px-5 py-4 text-[13.5px] text-white/55">
+              <span className="rounded-full border border-white/[0.12] px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-white/60">
+                On the roadmap
+              </span>
+              Video — short motion clips. Every frame you see here is still a
+              single creation.
+            </p>
+          </Reveal>
+          <Reveal delay={0.15}>
+            <p className="mt-6 text-[12px] text-white/35">
               Every card is a real order type — the price you see at checkout is the price you pay.
             </p>
           </Reveal>
@@ -521,35 +459,35 @@ export default function VilishLanding() {
           aria-label="Studio stats"
           className="border-y border-white/[0.08] bg-white/[0.015]"
         >
-          <Stagger className="mx-auto grid max-w-5xl grid-cols-1 gap-10 px-4 py-14 text-center sm:grid-cols-3 sm:py-20">
-            {STATS.map((s) => (
-              <StaggerItem key={s.label}>
-                <p className="text-[44px] font-semibold leading-none tracking-[-0.02em] tabular-nums sm:text-[52px]">
-                  <Counter
-                    to={s.to}
-                    prefix={s.prefix}
-                    suffix={s.suffix}
-                    decimals={s.decimals}
-                  />
-                </p>
-                <p className="mt-2.5 text-[14px] text-white/55">{s.label}</p>
-              </StaggerItem>
-            ))}
-          </Stagger>
-          <p className="-mt-6 pb-10 text-center text-[12px] text-white/35 sm:-mt-10">
-            Launch-period figures.
-          </p>
+          <div className="mx-auto max-w-5xl px-4 py-14 text-center sm:py-20">
+            <Stagger className="grid grid-cols-1 gap-10 sm:grid-cols-3">
+              {STATS.map((s) => (
+                <StaggerItem key={s.label}>
+                  <p className="text-[44px] font-semibold leading-none tracking-[-0.02em] tabular-nums sm:text-[52px]">
+                    <Counter
+                      to={s.to}
+                      prefix={s.prefix}
+                      suffix={s.suffix}
+                      decimals={s.decimals}
+                    />
+                  </p>
+                  <p className="mt-2.5 text-[14px] text-white/55">{s.label}</p>
+                </StaggerItem>
+              ))}
+            </Stagger>
+            <p className="mt-10 text-[12px] text-white/35">
+              Launch-period figures.
+            </p>
+          </div>
         </section>
 
         {/* ── format ticker ────────────────────────────────── */}
         <section aria-label="Supported formats" className="py-12 sm:py-16">
           <div className="mx-auto max-w-5xl px-4">
             <Reveal>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-white/45">
-                Formats
-              </p>
+              <Eyebrow>Formats</Eyebrow>
               <h2 className="font-display mt-3 text-[26px] font-semibold tracking-[-0.01em] sm:text-[34px]">
-                Every creation, <span className="v-iris-text">every ratio.</span>
+                Every creation, <span className="text-[#00F0FF]">every ratio.</span>
               </h2>
             </Reveal>
           </div>
@@ -566,7 +504,7 @@ export default function VilishLanding() {
                     style={{ width: f.w + 14, height: f.h + 10 }}
                   >
                     <span
-                      className="rounded-[2px] bg-gradient-to-br from-[#00F0FF] to-[#FF2D78]"
+                      className="rounded-[2px] bg-[#00F0FF]"
                       style={{ width: f.w, height: f.h }}
                     />
                   </span>
@@ -585,33 +523,33 @@ export default function VilishLanding() {
           </p>
         </section>
 
-        {/* ── pricing teaser ───────────────────────────────── */}
-        <section aria-label="Pricing teaser" className="mx-auto max-w-3xl px-4 py-16 sm:py-24">
-          <Reveal>
-            <p className="text-center text-[11px] font-semibold uppercase tracking-[0.3em] text-white/45">
-              Pricing
-            </p>
-          </Reveal>
-          <Stagger className="mt-6 flex flex-wrap items-center justify-center gap-x-10 gap-y-3">
-            {TEASER.map((t) => (
-              <StaggerItem key={t.label}>
-                <p className="text-[13px] text-white/55">
-                  {t.label}{" "}
-                  <span className="font-semibold tabular-nums text-[#F5F5F3]">
-                    {t.price}
-                  </span>
-                </p>
-              </StaggerItem>
-            ))}
-          </Stagger>
-          <Reveal delay={0.1} className="mt-7 text-center">
-            <Link
-              href="/pricing"
-              className="inline-flex items-center gap-1.5 text-[14px] font-medium text-[#F5F5F3] underline decoration-white/25 underline-offset-4 hover:decoration-white/60"
-            >
-              See full pricing <ArrowRight className="h-4 w-4" strokeWidth={1.8} />
-            </Link>
-          </Reveal>
+        {/* ── pricing teaser (tinted band) ──────────────────── */}
+        <section aria-label="Pricing teaser" className="border-y border-white/[0.08] bg-[#0B0B0C]">
+          <div className="mx-auto max-w-3xl px-4 py-16 text-center sm:py-20">
+            <Reveal>
+              <Eyebrow>Pricing</Eyebrow>
+            </Reveal>
+            <Stagger className="mt-6 flex flex-wrap items-center justify-center gap-x-10 gap-y-3">
+              {TEASER.map((t) => (
+                <StaggerItem key={t.label}>
+                  <p className="text-[13px] text-white/55">
+                    {t.label}{" "}
+                    <span className="font-semibold tabular-nums text-[#F5F5F3]">
+                      {t.price}
+                    </span>
+                  </p>
+                </StaggerItem>
+              ))}
+            </Stagger>
+            <Reveal delay={0.1} className="mt-7">
+              <Link
+                href="/pricing"
+                className="inline-flex items-center gap-1.5 text-[14px] font-medium text-[#F5F5F3] underline decoration-white/25 underline-offset-4 hover:decoration-white/60"
+              >
+                See full pricing <ArrowRight className="h-4 w-4" strokeWidth={1.8} />
+              </Link>
+            </Reveal>
+          </div>
         </section>
 
         {/* ── closing CTA ──────────────────────────────────── */}
@@ -632,7 +570,7 @@ export default function VilishLanding() {
               <MagneticButton>
                 <Link
                   href="/create"
-                  className="v-iris-bg inline-flex items-center gap-2 rounded-[12px] px-8 py-4 text-[15px] font-semibold text-white"
+                  className="v-iris-bg inline-flex items-center gap-2 rounded-[12px] px-8 py-4 text-[15px] font-semibold text-[#080808]"
                 >
                   Start creating <ArrowRight className="h-4 w-4" strokeWidth={2} />
                 </Link>

@@ -204,7 +204,7 @@ export default function Composer({ variant = "hero", className }: ComposerProps)
               className={cn(
                 "rounded-[8px] px-3 py-1.5 text-[13px] font-medium transition-colors",
                 quality === qt.id
-                  ? "v-iris-bg text-white"
+                  ? "bg-[#D7FF3F] text-[#080808]"
                   : "text-white/55 hover:text-white/85",
               )}
             >
@@ -224,7 +224,7 @@ export default function Composer({ variant = "hero", className }: ComposerProps)
               className={cn(
                 "rounded-full border px-3 py-1 text-[12px] font-medium tabular-nums transition-colors",
                 aspectRatio === ar.id
-                  ? "v-iris-border text-[#F5F5F3]"
+                  ? "border-[#D7FF3F]/60 bg-[#D7FF3F]/[0.08] text-[#F5F5F3]"
                   : "border-white/[0.08] text-white/50 hover:border-white/20 hover:text-white/80",
               )}
             >
@@ -273,8 +273,8 @@ export default function Composer({ variant = "hero", className }: ComposerProps)
           onClick={handleGenerate}
           disabled={!canGenerate}
           className={cn(
-            "v-iris-bg inline-flex shrink-0 items-center gap-2 rounded-[10px] px-5 py-2.5",
-            "text-[14px] font-semibold text-white transition-opacity",
+            "inline-flex shrink-0 items-center gap-2 rounded-[10px] bg-[#D7FF3F] px-5 py-2.5",
+            "text-[14px] font-semibold text-[#080808] transition-opacity",
             canGenerate ? "hover:opacity-95 active:opacity-90" : "cursor-not-allowed opacity-40",
           )}
         >
