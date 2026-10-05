@@ -40,6 +40,17 @@ export default function AuthModal({ open, onClose, onAuthenticated }: AuthModalP
     }
   }, [open ]);
 
+  // Escape closes the modal (unless a sign-in request is in flight),
+  // matching the payment modal and lightbox keyboard behavior.
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && !busy) onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open, busy, onClose]);
+
   if (!open) return null;
 
   async function handleSubmit(e: React.FormEvent) {

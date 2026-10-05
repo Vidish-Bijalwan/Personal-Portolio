@@ -27,15 +27,72 @@ export type StartError =
   | { kind: 'paused' }
   | { kind: 'failed'; message: string };
 
+export interface StartOptions {
+  /** Reference files to attach to the job (validated client + server). */
+  files?: File[];
+  /** Upload progress 0..1 — only called when files are present. */
+  onProgress?: (fraction: number) => void;
+}
+
+/**
+ * Upload the multipart body via XHR so we can report real upload progress
+ * (fetch has no upload-progress events). Response shape is identical to
+ * the JSON path.
+ */
+function startWithFiles(
+  quoteId: string,
+  country: string,
+  files: File[],
+  onProgress?: (fraction: number) => void,
+): Promise<Response> {
+  return new Promise((resolve, reject) => {
+    const form = new FormData();
+    form.append('quoteId', quoteId);
+    form.append('country', country);
+    for (const f of files) form.append('files', f);
+
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', '/api/generation/start');
+    xhr.upload.onprogress = (e) => {
+      if (e.lengthComputable && e.total > 0) {
+        onProgress?.(Math.min(1, e.loaded / e.total));
+      }
+    };
+    xhr.onload = () => {
+      resolve(
+        new Response(xhr.responseText, {
+          status: xhr.status,
+          headers: { 'content-type': xhr.getResponseHeader('content-type') ?? '' },
+        }),
+      );
+    };
+    xhr.onerror = () => reject(new Error('network'));
+    xhr.send(form);
+  });
+}
+
 export async function startManualPayment(
   quoteId: string,
   country: string = 'IN',
+  opts: StartOptions = {},
 ): Promise<{ ok: true; result: StartResult } | { ok: false; error: StartError }> {
-  const res = await fetch('/api/generation/start', {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ quoteId, country }),
-  });
+  let res: Response;
+  try {
+    if (opts.files && opts.files.length > 0) {
+      res = await startWithFiles(quoteId, country, opts.files, opts.onProgress);
+    } else {
+      res = await fetch('/api/generation/start', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ quoteId, country }),
+      });
+    }
+  } catch {
+    return {
+      ok: false,
+      error: { kind: 'failed', message: 'Network error. Please try again.' },
+    };
+  }
 
   if (res.status === 401) return { ok: false, error: { kind: 'unauthorized' } };
 
@@ -47,10 +104,11 @@ export async function startManualPayment(
     return { ok: false, error: { kind: 'intl' } };
   }
   if (!res.ok || !body?.jobId || !body?.payment) {
-    return {
-      ok: false,
-      error: { kind: 'failed', message: 'Could not create the payment order. Please try again.' },
-    };
+    const serverMsg =
+      typeof body?.error === 'string' && body.error
+        ? body.error
+        : 'Could not create the payment order. Please try again.';
+    return { ok: false, error: { kind: 'failed', message: serverMsg } };
   }
   return { ok: true, result: body as StartResult };
 }

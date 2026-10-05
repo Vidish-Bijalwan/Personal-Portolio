@@ -9,6 +9,7 @@ import type {
   CreativeSpec,
   QualityTier,
 } from '../vilish/types';
+import { PROMPT_MAX_LENGTH } from '../vilish/prompt-limits';
 
 export interface InterpretInput {
   prompt: string;
@@ -163,8 +164,10 @@ function detectPlatform(prompt: string): string | undefined {
 export function interpretCreative(input: InterpretInput): CreativeSpec {
   const raw = typeof input.prompt === 'string' ? input.prompt.trim() : '';
   if (!raw) invalidPrompt('prompt must be a non-empty string');
-  if (raw.length > 4000)
-    invalidPrompt('prompt must be at most 4000 characters');
+  if (raw.length > PROMPT_MAX_LENGTH)
+    invalidPrompt(
+      `prompt must be at most ${PROMPT_MAX_LENGTH} characters`
+    );
 
   checkModeration(raw);
 

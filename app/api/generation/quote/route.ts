@@ -5,6 +5,7 @@ import { db } from '@/lib/db/client';
 import * as schema from '@/lib/db/schema';
 import { quotePrice, ladderPrice } from '@/lib/pricing/engine';
 import { getGenerationService } from '@/lib/providers/registry';
+import { PROMPT_MAX_LENGTH } from '@/lib/vilish/prompt-limits';
 import type { CreativeSpec } from '@/lib/vilish/types';
 
 const TASKS = ['text_to_image', 'image_to_image'];
@@ -16,6 +17,10 @@ function validateSpec(body: any): { spec?: CreativeSpec; error?: string } {
   if (!spec || typeof spec !== 'object') return { error: 'Missing spec' };
   if (typeof spec.prompt !== 'string' || !spec.prompt.trim())
     return { error: 'spec.prompt must be a non-empty string' };
+  if (spec.prompt.trim().length > PROMPT_MAX_LENGTH)
+    return {
+      error: `spec.prompt must be at most ${PROMPT_MAX_LENGTH} characters`,
+    };
   if (!TASKS.includes(spec.task)) return { error: 'spec.task is invalid' };
   if (!ASPECTS.includes(spec.aspectRatio))
     return { error: 'spec.aspectRatio is invalid' };

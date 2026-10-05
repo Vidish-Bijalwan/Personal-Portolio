@@ -4,7 +4,14 @@
  */
 import { desc, eq, sql } from 'drizzle-orm';
 import { db } from '@/lib/db/client';
-import { assets, auditLogs, generationJobs, orders, users } from '@/lib/db/schema';
+import {
+  assets,
+  auditLogs,
+  generationAttachments,
+  generationJobs,
+  orders,
+  users,
+} from '@/lib/db/schema';
 import {
   getFulfillmentJob,
   getTakes,
@@ -21,6 +28,16 @@ export interface DetailReference {
   height: number | null;
   createdAt: Date | null;
   filename: string | null;
+}
+
+/** Customer-uploaded reference file (bytea). Bytes are NOT included — the
+ *  admin UI fetches them per-file via /api/admin/fulfillment/attachments/[id]. */
+export interface DetailAttachment {
+  id: string;
+  filename: string;
+  mimeType: string;
+  byteSize: number;
+  createdAt: Date | null;
 }
 
 export interface DetailOrder {
@@ -40,6 +57,7 @@ export interface FulfillmentDetail {
   user: { id: string; email: string | null; name: string | null } | null;
   order: DetailOrder | null;
   references: DetailReference[];
+  attachments: DetailAttachment[];
   results: FulfillmentTake[];
   clarification: { request: string | null; response: string | null };
   history: {
@@ -127,6 +145,25 @@ export async function loadFulfillmentDetail(
 
   const results = await getTakes(job.id);
 
+  const attachRows = await db
+    .select({
+      id: generationAttachments.id,
+      filename: generationAttachments.filename,
+      mimeType: generationAttachments.mimeType,
+      byteSize: generationAttachments.byteSize,
+      createdAt: generationAttachments.createdAt,
+    })
+    .from(generationAttachments)
+    .where(eq(generationAttachments.generationId, job.id))
+    .orderBy(generationAttachments.createdAt);
+  const attachments: DetailAttachment[] = attachRows.map((a) => ({
+    id: a.id,
+    filename: a.filename,
+    mimeType: a.mimeType,
+    byteSize: a.byteSize,
+    createdAt: a.createdAt,
+  }));
+
   const histRows = await db
     .select()
     .from(auditLogs)
@@ -140,6 +177,7 @@ export async function loadFulfillmentDetail(
     user: user ?? null,
     order,
     references,
+    attachments,
     results,
     clarification: {
       request: job.clarificationRequest,

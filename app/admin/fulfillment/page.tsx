@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft, Loader2, Paperclip } from "lucide-react";
 import { formatINR } from "@/src/lib/vilish/types";
 import { BUCKETS, bucketOf, type QueueBucket } from "./actions";
 import { StateBadge } from "./state-badge";
@@ -29,6 +29,7 @@ interface QueueJob {
   createdAt?: string;
   updatedAt?: string;
   refCount?: number;
+  attachCount?: number;
 }
 
 interface QueueData {
@@ -190,7 +191,17 @@ function QueueInner({ token }: { token: string }) {
                         {j.amountPaise != null ? formatINR(j.amountPaise) : "—"}
                       </td>
                       <td className={td}>{j.jobKind ?? "generation"}</td>
-                      <td className={td}>{j.refCount ?? 0}</td>
+                      <td className={td}>
+                        <span title={j.attachCount ? `${j.attachCount} uploaded reference file${j.attachCount > 1 ? "s" : ""}` : undefined}>
+                          {j.refCount ?? 0}
+                          {(j.attachCount ?? 0) > 0 && (
+                            <span className="ml-1.5 inline-flex items-center gap-1 rounded-full bg-violet-300/[0.12] px-1.5 py-0.5 text-[11px] font-semibold text-violet-200">
+                              <Paperclip className="h-3 w-3" />
+                              {j.attachCount}
+                            </span>
+                          )}
+                        </span>
+                      </td>
                       <td className={td}>
                         <StateBadge state={j.state} />
                       </td>
@@ -220,7 +231,8 @@ function QueueInner({ token }: { token: string }) {
                   </p>
                   <p className="mt-2 text-[12px] text-white/45 tabular-nums">
                     {j.userEmail ?? "—"} · {j.amountPaise != null ? formatINR(j.amountPaise) : "—"} ·{" "}
-                    {j.refCount ?? 0} refs · {age(j.createdAt)}
+                    {j.refCount ?? 0} refs
+                    {(j.attachCount ?? 0) > 0 && ` · ${(j.attachCount ?? 0)} file${(j.attachCount ?? 0) > 1 ? "s" : ""}`} · {age(j.createdAt)}
                   </p>
                 </Link>
               ))}

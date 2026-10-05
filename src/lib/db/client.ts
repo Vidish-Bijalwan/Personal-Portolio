@@ -21,7 +21,7 @@ import { drizzle as drizzlePglite } from 'drizzle-orm/pglite';
 import { PGlite } from '@electric-sql/pglite';
 import { Pool } from 'pg';
 import * as schema from './schema';
-import { MIGRATION_SQL } from './migrations-data';
+import { MIGRATION_FILES, MIGRATION_SQL } from './migrations-data';
 
 export type VilishDb = ReturnType<typeof drizzleNodePg<typeof schema>>;
 
@@ -33,21 +33,31 @@ interface SharedDb {
   ready: Promise<void>;
 }
 
-async function migratePg(rawQuery: (sql: string) => Promise<unknown>): Promise<void> {
-  // Idempotency guard: our schema marker is the `orders` table (Vidish-specific).
-  const marker = (await rawQuery(
-    `SELECT 1 FROM information_schema.tables WHERE table_schema='public' AND table_name='orders'`,
-  )) as { rowCount: number | null };
-  if ((marker.rowCount ?? 0) === 0) {
-    for (const sql of MIGRATION_SQL) {
-      try {
-        await rawQuery(sql);
-      } catch (err) {
-        // Race guard for concurrent cold starts.
-        const code = (err as { code?: string }).code;
-        if (code !== '42P07' && code !== '42701') throw err;
-      }
+/** Run embedded migrations on the node-postgres path with per-file tracking.
+ * Exported for tests (and scripts); routes use the readiness gate instead. */
+export async function migratePg(rawQuery: (sql: string, params?: unknown[]) => Promise<any>): Promise<void> {
+  // Track applied migrations per-file so NEW migrations also run on
+  // existing databases. (The old guard — "orders table exists, skip
+  // everything" — meant prod never picked up later migrations.)
+  await rawQuery(
+    `CREATE TABLE IF NOT EXISTS "schema_migrations" ("name" text PRIMARY KEY NOT NULL, "applied_at" timestamp with time zone DEFAULT now() NOT NULL)`,
+  );
+  const appliedRes = await rawQuery(`SELECT "name" FROM "schema_migrations"`);
+  const applied = new Set<string>((appliedRes.rows ?? []).map((r: { name: string }) => r.name));
+  for (let i = 0; i < MIGRATION_FILES.length; i++) {
+    const name = MIGRATION_FILES[i];
+    if (applied.has(name)) continue;
+    try {
+      await rawQuery(MIGRATION_SQL[i]);
+    } catch (err) {
+      // Race guard for concurrent cold starts, plus tolerance for objects
+      // that predate tracking (legacy DBs): duplicate table / column /
+      // constraint are all safe to skip.
+      const code = (err as { code?: string }).code;
+      if (code !== '42P07' && code !== '42701' && code !== '42710') throw err;
     }
+    // Migration names come from our own embedded list; quote-escape anyway.
+    await rawQuery(`INSERT INTO "schema_migrations" ("name") VALUES ($1) ON CONFLICT ("name") DO NOTHING`, [name]);
   }
 }
 
@@ -70,7 +80,7 @@ function getShared(): SharedDb {
       };
       const db = drizzleNodePg(pool, { schema });
       g.__vilishDb = { db, pglite: null, ready };
-      migratePg((sql) => rawQuery(sql) as Promise<unknown>).then(resolveReady, rejectReady);
+      migratePg((sql, params) => rawQuery(sql, params) as Promise<any>).then(resolveReady, rejectReady);
     } else {
       const raw = new PGlite();
       let resolveReady!: () => void;

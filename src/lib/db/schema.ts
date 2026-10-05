@@ -12,6 +12,7 @@ import {
   timestamp,
   jsonb,
   primaryKey,
+  customType,
 } from 'drizzle-orm/pg-core';
 import type {
   JobState,
@@ -205,6 +206,35 @@ export const fulfillmentResults = pgTable('fulfillment_results', {
   /** internal operator generation time */
   generationTimeSeconds: integer('generation_time_seconds'),
   uploadedBy: text('uploaded_by'),
+  createdAt: createdAt(),
+});
+
+/* ---- customer reference attachments (composer uploads) ---- */
+
+/** Postgres bytea column. drizzle-orm 0.45 has no pg `blob` builder, so we
+ *  use a custom type. Works on node-postgres (prod) and PGlite (dev/test):
+ *  both round-trip binary bytea. Stored with the row on purpose — never the
+ *  local filesystem (ephemeral on Vercel). */
+const bytea = customType<{ data: Buffer; driverData: Buffer }>({
+  dataType() {
+    return 'bytea';
+  },
+});
+
+/**
+ * Customer-uploaded reference files attached to a generation job at
+ * order-start time (multipart on /api/generation/start). The operator sees
+ * them in the fulfillment queue/detail views.
+ */
+export const generationAttachments = pgTable('generation_attachments', {
+  id: id(),
+  generationId: uuid('generation_id')
+    .notNull()
+    .references(() => generationJobs.id, { onDelete: 'cascade' }),
+  filename: text('filename').notNull(),
+  mimeType: text('mime_type').notNull(),
+  byteSize: integer('byte_size').notNull(),
+  data: bytea('data').notNull(),
   createdAt: createdAt(),
 });
 

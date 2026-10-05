@@ -1,19 +1,19 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { Stagger, StaggerItem } from "@/components/motion/Stagger";
+import Lightbox from "@/components/vilish/lightbox";
+import {
+  CATEGORY_LABEL,
+  toLightboxItem,
+  type ExampleCategory,
+  type ExampleItem,
+} from "./examples";
 
-export type ExampleCategory = "image" | "video" | "edit" | "ad";
-
-export interface ExampleItem {
-  src: string;
-  prompt: string;
-  price: string;
-  model: string;
-  category: ExampleCategory;
-}
+// Re-exported for existing importers (e.g. app/examples/page.tsx).
+export type { ExampleCategory, ExampleItem };
 
 const CATEGORY_TABS: { id: "all" | ExampleCategory; label: string }[] = [
   { id: "all", label: "All" },
@@ -22,13 +22,6 @@ const CATEGORY_TABS: { id: "all" | ExampleCategory; label: string }[] = [
   { id: "edit", label: "Edit" },
   { id: "ad", label: "Ad" },
 ];
-
-const CATEGORY_LABEL: Record<ExampleCategory, string> = {
-  image: "Image",
-  video: "Video",
-  edit: "Edit",
-  ad: "Ad",
-};
 
 function ExampleBadge() {
   return (
@@ -43,124 +36,6 @@ function CategoryChip({ category }: { category: ExampleCategory }) {
     <span className="rounded-full bg-black/60 px-2.5 py-1 text-[11px] font-medium uppercase tracking-[0.08em] text-white/[0.75] backdrop-blur-sm">
       {CATEGORY_LABEL[category]}
     </span>
-  );
-}
-
-interface LightboxProps {
-  items: ExampleItem[];
-  index: number;
-  onClose: () => void;
-  onIndex: (next: number) => void;
-}
-
-function Lightbox({ items, index, onClose, onIndex }: LightboxProps) {
-  const dialogRef = useRef<HTMLDivElement>(null);
-  const item = items[index];
-  // Return focus to the thumbnail that opened the lightbox when it closes.
-  const triggerRef = useRef<Element | null>(null);
-
-  useEffect(() => {
-    triggerRef.current = document.activeElement;
-    dialogRef.current?.focus();
-    return () => {
-      const el = triggerRef.current;
-      if (el instanceof HTMLElement) el.focus();
-    };
-  }, []);
-
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-      else if (e.key === "ArrowRight" && items.length > 1)
-        onIndex((index + 1) % items.length);
-      else if (e.key === "ArrowLeft" && items.length > 1)
-        onIndex((index - 1 + items.length) % items.length);
-    };
-    window.addEventListener("keydown", onKey);
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      window.removeEventListener("keydown", onKey);
-      document.body.style.overflow = prev;
-    };
-  }, [index, items.length, onClose, onIndex]);
-
-  return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md"
-      onClick={onClose}
-      role="presentation"
-    >
-      <div
-        ref={dialogRef}
-        role="dialog"
-        aria-modal="true"
-        aria-label={`Example: ${item.prompt}`}
-        tabIndex={-1}
-        className="flex max-h-full w-full max-w-4xl flex-col overflow-hidden outline-none sm:mx-6 sm:rounded-[20px] sm:border sm:border-white/[0.10]"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="relative bg-[#080808]">
-          <Image
-            src={item.src}
-            alt={item.prompt}
-            width={1280}
-            height={960}
-            className="max-h-[62vh] w-full object-contain"
-            priority
-          />
-          <div className="absolute left-4 top-4 flex gap-2">
-            <ExampleBadge />
-            <CategoryChip category={item.category} />
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Close"
-            className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full bg-black/70 text-[18px] text-[#F5F5F3] backdrop-blur-sm transition hover:bg-black/90"
-          >
-            ✕
-          </button>
-          {items.length > 1 && (
-            <>
-              <button
-                type="button"
-                onClick={() => onIndex((index - 1 + items.length) % items.length)}
-                aria-label="Previous example"
-                className="absolute left-3 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-black/70 text-[20px] text-[#F5F5F3] backdrop-blur-sm transition hover:bg-black/90"
-              >
-                ←
-              </button>
-              <button
-                type="button"
-                onClick={() => onIndex((index + 1) % items.length)}
-                aria-label="Next example"
-                className="absolute right-3 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-black/70 text-[20px] text-[#F5F5F3] backdrop-blur-sm transition hover:bg-black/90"
-              >
-                →
-              </button>
-            </>
-          )}
-        </div>
-        <div className="border-t border-white/[0.08] bg-[#101012] px-6 py-5 sm:px-8">
-          <p className="text-[15px] leading-7 text-white/[0.85]">{item.prompt}</p>
-          <div className="mt-4 flex flex-wrap items-center gap-3">
-            <span className="rounded-full bg-white/[0.08] px-3 py-1 text-[13px] font-semibold tabular-nums text-[#F5F5F3]">
-              {item.price}
-            </span>
-            {item.model && (
-              <span className="text-[13px] text-white/[0.5]">{item.model}</span>
-            )}
-            <span className="ml-auto text-[12px] text-white/[0.45]">
-              {items.length > 1 ? `${index + 1} / ${items.length}` : ""}
-            </span>
-          </div>
-          <p className="mt-3 text-[12px] uppercase tracking-[0.08em] text-white/[0.4]">
-            Example — not a customer order
-          </p>
-        </div>
-      </div>
-    </div>
   );
 }
 
@@ -281,7 +156,7 @@ export default function ExamplesGrid({ items }: { items: ExampleItem[] }) {
 
       {openIndex !== null && filtered[openIndex] && (
         <Lightbox
-          items={filtered}
+          items={filtered.map(toLightboxItem)}
           index={openIndex}
           onClose={() => setOpenIndex(null)}
           onIndex={(next) => setOpenIndex(next)}

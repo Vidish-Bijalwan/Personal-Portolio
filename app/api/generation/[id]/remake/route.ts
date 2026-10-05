@@ -6,6 +6,7 @@ import * as schema from '@/lib/db/schema';
 import { eq, and, isNull, asc } from 'drizzle-orm';
 import { requireSession } from '@/lib/auth';
 import { remakePrice } from '@/lib/pricing/engine';
+import { PROMPT_MAX_LENGTH } from '@/lib/vilish/prompt-limits';
 import type { PriceBreakdown } from '@/lib/vilish/types';
 
 /**
@@ -67,6 +68,15 @@ export async function POST(
     typeof body?.prompt === 'string' && body.prompt.trim()
       ? body.prompt.trim()
       : null;
+  if (promptOverride && promptOverride.length > PROMPT_MAX_LENGTH) {
+    return NextResponse.json(
+      {
+        code: 'PROMPT_TOO_LONG',
+        error: `Prompt must be at most ${PROMPT_MAX_LENGTH} characters.`,
+      },
+      { status: 400 }
+    );
+  }
 
   const price = remakePrice({
     providerCostPaise: job.estimatedCost ?? 0,

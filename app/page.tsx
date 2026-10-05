@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -18,6 +18,7 @@ import { motion, useReducedMotion, useScroll, useSpring } from "framer-motion";
 import VilishNav from "@/components/vilish/nav";
 import VilishFooter from "@/components/vilish/footer";
 import Composer from "@/components/vilish/composer";
+import Lightbox, { type LightboxItem } from "@/components/vilish/lightbox";
 import GenerativeField from "@/components/motion/GenerativeField";
 import HeroVideo from "@/components/motion/HeroVideo";
 import FlyingElements from "@/components/motion/FlyingElements";
@@ -120,6 +121,20 @@ const SHOWCASE = [
     price: "₹29",
   },
 ];
+
+/** Lightbox item shapes for the homepage sets (arrows navigate within each set). */
+const REEL_ITEMS: LightboxItem[] = SHOWREEL.map((ex) => ({
+  src: ex.src,
+  caption: ex.caption,
+  price: ex.price,
+  alt: ex.alt,
+}));
+const CASE_ITEMS: LightboxItem[] = SHOWCASE.map((ex) => ({
+  src: ex.src,
+  caption: ex.caption,
+  price: ex.price,
+  alt: ex.alt,
+}));
 
 const STATS = [
   { to: 2400, suffix: "+", prefix: "", decimals: 0, label: "creations delivered" },
@@ -262,6 +277,10 @@ function HowItWorksProgress() {
 }
 
 export default function VilishLanding() {
+  // Lightbox open indexes — one per image set so arrows navigate within the set.
+  const [reelOpen, setReelOpen] = useState<number | null>(null);
+  const [caseOpen, setCaseOpen] = useState<number | null>(null);
+
   return (
     <div className="min-h-screen bg-[#080808] font-sans text-[#F5F5F3] antialiased">
       <VilishNav />
@@ -322,19 +341,34 @@ export default function VilishLanding() {
           </div>
           <Reveal delay={0.1} className="mt-8">
             <Marquee speed={44} gap={16}>
-              {SHOWREEL.map((ex) => (
+              {SHOWREEL.map((ex, i) => (
                 <figure key={ex.src} className="w-[200px] shrink-0 sm:w-[260px]">
-                  <div className="relative h-32 overflow-hidden rounded-xl border border-white/[0.08] bg-white/[0.03] sm:h-44">
-                    <Image
-                      src={ex.src}
-                      alt={ex.alt}
-                      width={ex.width}
-                      height={ex.height}
-                      sizes="(max-width: 640px) 200px, 260px"
-                      loading="lazy"
-                      className="h-full w-full object-cover"
-                    />
-                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setReelOpen(i)}
+                    aria-label={`Open example: ${ex.caption}`}
+                    className="group block w-full cursor-pointer rounded-xl text-left outline-none focus-visible:ring-2 focus-visible:ring-[#D7FF3F] focus-visible:ring-offset-2 focus-visible:ring-offset-[#080808]"
+                  >
+                    <span className="relative block h-32 overflow-hidden rounded-xl border border-white/[0.08] bg-white/[0.03] transition-colors group-hover:border-white/[0.2] sm:h-44">
+                      <Image
+                        src={ex.src}
+                        alt={ex.alt}
+                        width={ex.width}
+                        height={ex.height}
+                        sizes="(max-width: 640px) 200px, 260px"
+                        loading="lazy"
+                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.04] motion-reduce:transition-none"
+                      />
+                      <span
+                        aria-hidden
+                        className="absolute inset-0 flex items-end justify-end p-2 opacity-0 transition-opacity duration-200 group-focus-visible:opacity-100 group-hover:opacity-100 motion-reduce:transition-none"
+                      >
+                        <span className="rounded-full bg-black/70 px-2.5 py-1 text-[11px] font-medium text-white/90 backdrop-blur-sm">
+                          ⤢ Inspect
+                        </span>
+                      </span>
+                    </span>
+                  </button>
                   <figcaption className="mt-2.5 flex items-center justify-between gap-2 px-0.5">
                     <span className="truncate text-[12px] text-white/50">{ex.caption}</span>
                     <span className="shrink-0 rounded-full border border-white/[0.12] px-2 py-px text-[11px] font-semibold tabular-nums text-[#F5F5F3]">
@@ -392,17 +426,32 @@ export default function VilishLanding() {
             <Carousel ariaLabel="Example creations">
               {SHOWCASE.map((ex, i) => (
                 <figure key={ex.src} className="w-[78vw] max-w-[420px] shrink-0 sm:w-[380px]">
-                  <div className="relative aspect-[4/3] overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.03]">
-                    <Image
-                      src={ex.src}
-                      alt={ex.alt}
-                      width={ex.width}
-                      height={ex.height}
-                      sizes="(max-width: 640px) 78vw, 380px"
-                      priority={i === 0}
-                      className="h-full w-full object-cover"
-                    />
-                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setCaseOpen(i)}
+                    aria-label={`Open example: ${ex.caption}`}
+                    className="group block w-full cursor-pointer rounded-2xl text-left outline-none focus-visible:ring-2 focus-visible:ring-[#D7FF3F] focus-visible:ring-offset-2 focus-visible:ring-offset-[#080808]"
+                  >
+                    <span className="relative block aspect-[4/3] overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.03] transition-colors group-hover:border-white/[0.2]">
+                      <Image
+                        src={ex.src}
+                        alt={ex.alt}
+                        width={ex.width}
+                        height={ex.height}
+                        sizes="(max-width: 640px) 78vw, 380px"
+                        priority={i === 0}
+                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.04] motion-reduce:transition-none"
+                      />
+                      <span
+                        aria-hidden
+                        className="absolute inset-0 flex items-end justify-end p-3 opacity-0 transition-opacity duration-200 group-focus-visible:opacity-100 group-hover:opacity-100 motion-reduce:transition-none"
+                      >
+                        <span className="rounded-full bg-black/70 px-2.5 py-1 text-[11px] font-medium text-white/90 backdrop-blur-sm">
+                          ⤢ Inspect
+                        </span>
+                      </span>
+                    </span>
+                  </button>
                   <figcaption className="mt-3 flex items-baseline justify-between gap-3 px-1">
                     <span className="truncate text-[13px] text-white/55">{ex.caption}</span>
                     <span className="shrink-0 rounded-full border border-white/[0.12] px-2.5 py-0.5 text-[12px] font-semibold tabular-nums text-[#F5F5F3]">
@@ -579,6 +628,23 @@ export default function VilishLanding() {
           </div>
         </section>
       </main>
+
+      {reelOpen !== null && REEL_ITEMS[reelOpen] && (
+        <Lightbox
+          items={REEL_ITEMS}
+          index={reelOpen}
+          onClose={() => setReelOpen(null)}
+          onIndex={setReelOpen}
+        />
+      )}
+      {caseOpen !== null && CASE_ITEMS[caseOpen] && (
+        <Lightbox
+          items={CASE_ITEMS}
+          index={caseOpen}
+          onClose={() => setCaseOpen(null)}
+          onIndex={setCaseOpen}
+        />
+      )}
 
       <VilishFooter />
     </div>

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Wordmark from "./wordmark";
 
 const SITEMAP = [
   { href: "/", label: "Home" },
@@ -14,7 +15,7 @@ export default function VilishFooter() {
       <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
         <div className="flex flex-col gap-8 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <p className="text-[15px] font-bold tracking-[0.22em] text-[#F5F5F3]">Vidish</p>
+            <Wordmark size={20} />
             <p className="mt-2 text-[13px] text-white/45">
               One creation. One price. No subscription.
             </p>

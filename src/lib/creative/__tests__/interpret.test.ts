@@ -253,4 +253,17 @@ describe('interpretCreative — input validation', () => {
     expect(() => interpretCreative({ prompt: '   ' })).toThrow();
     expect(() => interpretCreative({ prompt: '' })).toThrow();
   });
+
+  it('enforces the 2000-character prompt ceiling (token-cost guard)', () => {
+    expect(() =>
+      interpretCreative({ prompt: 'a'.repeat(2000) }),
+    ).not.toThrow();
+    try {
+      interpretCreative({ prompt: 'a'.repeat(2001) });
+      expect.unreachable('should have thrown');
+    } catch (err: any) {
+      expect(err.code).toBe('INVALID_PROMPT');
+      expect(err.message).toContain('2000');
+    }
+  });
 });
