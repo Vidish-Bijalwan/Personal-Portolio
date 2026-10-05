@@ -63,9 +63,25 @@ export async function runMigrations(): Promise<void> {
     const { Pool: PgPool } = await import('pg');
     const pool = new PgPool({ connectionString: process.env.DATABASE_URL });
     try {
-      for (const f of files) {
-        const sql = fs.readFileSync(path.join(dir, f), 'utf8');
-        await pool.query(sql);
+      // Idempotency guard: our schema marker is the `orders` table (Vidish-specific).
+      // Fresh DB -> run all migrations. Already-migrated DB -> skip entirely.
+      // (A foreign `users` table without `orders` fails loudly below instead of
+      // silently writing into the wrong table.)
+      const marker = await pool.query(
+        `SELECT 1 FROM information_schema.tables WHERE table_schema='public' AND table_name='orders'`,
+      );
+      if ((marker.rowCount ?? 0) === 0) {
+        for (const f of files) {
+          const sql = fs.readFileSync(path.join(dir, f), 'utf8');
+          try {
+            await pool.query(sql);
+          } catch (err) {
+            // Race guard: two concurrent cold starts may both attempt the
+            // migration; the loser sees "already exists" and moves on.
+            const code = (err as { code?: string }).code;
+            if (code !== '42P07' && code !== '42701') throw err;
+          }
+        }
       }
     } finally {
       await pool.end();
