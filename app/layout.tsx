@@ -1,7 +1,16 @@
 import React from "react"
 import "./globals.css"
-import { IBM_Plex_Sans, IBM_Plex_Mono } from "next/font/google"
+import { Chakra_Petch, IBM_Plex_Sans, IBM_Plex_Mono } from "next/font/google"
 import { AuthSessionProvider } from "@/components/vilish/session-provider"
+import SiteBackdrop from "@/components/motion/SiteBackdrop"
+import CyberCursor from "@/components/motion/CyberCursor"
+
+const chakraPetch = Chakra_Petch({
+  subsets: ["latin"],
+  weight: ["500", "600", "700"],
+  variable: "--font-display",
+  display: "swap",
+})
 
 const ibmPlexSans = IBM_Plex_Sans({
   subsets: ["latin"],
@@ -44,9 +53,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className="dark" suppressHydrationWarning>
       <body
-        className={`${ibmPlexSans.variable} ${ibmPlexMono.variable} font-sans`}
+        className={`${chakraPetch.variable} ${ibmPlexSans.variable} ${ibmPlexMono.variable} font-sans`}
         suppressHydrationWarning
       >
+        {/* Fixed animated backdrop behind all content; never intercepts clicks.
+            Cursor is a pointer-events-none augmentation — native cursor untouched. */}
+        <SiteBackdrop />
+        <CyberCursor />
         <AuthSessionProvider>{children}</AuthSessionProvider>
       </body>
     </html>

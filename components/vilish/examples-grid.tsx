@@ -56,9 +56,16 @@ interface LightboxProps {
 function Lightbox({ items, index, onClose, onIndex }: LightboxProps) {
   const dialogRef = useRef<HTMLDivElement>(null);
   const item = items[index];
+  // Return focus to the thumbnail that opened the lightbox when it closes.
+  const triggerRef = useRef<Element | null>(null);
 
   useEffect(() => {
+    triggerRef.current = document.activeElement;
     dialogRef.current?.focus();
+    return () => {
+      const el = triggerRef.current;
+      if (el instanceof HTMLElement) el.focus();
+    };
   }, []);
 
   useEffect(() => {
