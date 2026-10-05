@@ -449,7 +449,9 @@ export default function Composer({ variant = "hero", className, initialMedia = "
             >
               {freeLeft === 0
                 ? "Free trial (0 left — back tomorrow)"
-                : `Free trial (${freeLeft ?? "…"} left today)`}
+                : freeLeft === null
+                  ? "Free trial"
+                  : `Free trial (${freeLeft} left today)`}
             </button>
             <button
               type="button"
@@ -641,7 +643,7 @@ export default function Composer({ variant = "hero", className, initialMedia = "
             <p className="text-[13px] text-white/40">
               Free trial ·{" "}
               <span className="font-medium text-[#F5F5F3]">
-                {freeLeft === null ? "…" : freeLeft === 0 ? "none left today" : `${freeLeft} of ${freeCap} left today`}
+                {freeLeft === null ? `${freeCap} per day` : freeLeft === 0 ? "none left today" : `${freeLeft} of ${freeCap} left today`}
               </span>
             </p>
           )}
