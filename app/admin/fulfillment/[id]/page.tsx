@@ -33,6 +33,14 @@ interface RefAsset {
   mimeType?: string;
 }
 
+interface CustomerAttachment {
+  id: string;
+  filename: string;
+  mimeType: string;
+  byteSize: number;
+  createdAt?: string | null;
+}
+
 interface Take {
   id: string;
   takeLabel: string;
@@ -95,6 +103,7 @@ interface Detail {
     status?: string;
   } | null;
   references: RefAsset[];
+  attachments?: CustomerAttachment[];
   settings?: Record<string, unknown>;
   notes: (NoteEntry | string)[];
   results: Take[];
@@ -161,6 +170,107 @@ function Kv({ k, v }: { k: string; v: React.ReactNode }) {
 const inputCls =
   "w-full rounded-[10px] border border-white/[0.1] bg-[#0D0D0F] px-3.5 py-2.5 text-[14px] text-[#F5F5F3] placeholder:text-white/30 outline-none focus:border-white/30";
 const labelCls = "block text-[13px] font-medium text-white/70";
+
+/* ---------------- customer attachments (bytea, token-authed fetch) ---------------- */
+
+function formatBytes(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function AttachmentRow({
+  token,
+  att,
+}: {
+  token: string;
+  att: CustomerAttachment;
+}) {
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+
+  const fetchBlob = useCallback(async () => {
+    setBusy(true);
+    setError("");
+    try {
+      const res = await adminFetch(
+        token,
+        `/api/admin/fulfillment/attachments/${att.id}`,
+        { cache: "no-store" }
+      );
+      if (!res.ok) {
+        setError("Could not fetch the file.");
+        return null;
+      }
+      return await res.blob();
+    } catch {
+      setError("Network error fetching the file.");
+      return null;
+    } finally {
+      setBusy(false);
+    }
+  }, [token, att.id]);
+
+  const openObjectUrl = (blob: Blob, download: boolean) => {
+    const url = URL.createObjectURL(blob);
+    if (download) {
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = att.filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    } else {
+      window.open(url, "_blank", "noopener");
+    }
+    setTimeout(() => URL.revokeObjectURL(url), 60_000);
+  };
+
+  const isImage = att.mimeType.startsWith("image/");
+  const btnCls =
+    "inline-flex items-center gap-1.5 rounded-[8px] border border-white/[0.12] bg-[#18181B] px-2.5 py-1.5 text-[12px] font-medium text-white/75 hover:border-white/25 hover:text-white disabled:opacity-40";
+
+  return (
+    <li className="flex items-center justify-between gap-3 rounded-[12px] border border-white/[0.08] bg-[#0D0D0F] px-4 py-3">
+      <div className="min-w-0">
+        <p className="truncate text-[13px] font-medium text-white/85">
+          {att.filename}
+        </p>
+        <p className="mt-0.5 text-[11px] text-white/40 tabular-nums">
+          {formatBytes(att.byteSize)} · {att.mimeType}
+        </p>
+        {error && <p className="mt-1 text-[12px] text-red-300/80">{error}</p>}
+      </div>
+      <div className="flex shrink-0 gap-2">
+        <button
+          type="button"
+          onClick={async () => {
+            const blob = await fetchBlob();
+            if (blob) openObjectUrl(blob, false);
+          }}
+          disabled={busy}
+          className={btnCls}
+        >
+          {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
+          {isImage ? "View" : "Open"}
+        </button>
+        <button
+          type="button"
+          onClick={async () => {
+            const blob = await fetchBlob();
+            if (blob) openObjectUrl(blob, true);
+          }}
+          disabled={busy}
+          className={btnCls}
+          aria-label={`Download ${att.filename}`}
+        >
+          <Download className="h-3.5 w-3.5" />
+          Download
+        </button>
+      </div>
+    </li>
+  );
+}
 
 /* ---------------- workspace ---------------- */
 
@@ -397,6 +507,7 @@ function Workspace({ token, id }: { token: string; id: string }) {
   }
 
   const { job, user, order, references, settings, notes, results, history } = detail;
+  const attachments = detail.attachments ?? [];
   const actions = availableActions(job.state);
 
   const renderAction = (action: FulfillmentAction) => {
@@ -736,6 +847,20 @@ function Workspace({ token, id }: { token: string; id: string }) {
                   </div>
                 ))}
               </div>
+            )}
+          </Section>
+
+          <Section title={`Customer attachments (${attachments.length})`}>
+            {attachments.length === 0 ? (
+              <p className="text-[13px] text-white/40">
+                No files attached by the customer.
+              </p>
+            ) : (
+              <ul className="space-y-2">
+                {attachments.map((a) => (
+                  <AttachmentRow key={a.id} token={token} att={a} />
+                ))}
+              </ul>
             )}
           </Section>
 

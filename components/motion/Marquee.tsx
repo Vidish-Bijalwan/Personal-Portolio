@@ -58,7 +58,9 @@ export default function Marquee({
     >
       <div style={trackStyle} data-marquee-track>
         <div style={copyStyle}>{children}</div>
-        <div style={copyStyle} aria-hidden="true">
+        {/* inert: the duplicate is purely visual — keyboard users must not
+            tab into focusable controls (e.g. lightbox buttons) twice. */}
+        <div style={copyStyle} aria-hidden="true" inert>
           {children}
         </div>
       </div>

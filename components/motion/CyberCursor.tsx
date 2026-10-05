@@ -126,6 +126,15 @@ export default function CyberCursor() {
         p.life = p.maxLife
         p.size = 3 + Math.random() * 3
         p.color = TRAIL_COLORS[spawnCursor % TRAIL_COLORS.length]
+        // Static visuals are set once at spawn — the per-frame loop only
+        // touches transform/opacity (cheap, no style recalc).
+        if (p.el) {
+          p.el.style.width = `${p.size}px`
+          p.el.style.height = `${p.size}px`
+          p.el.style.borderRadius = "9999px"
+          p.el.style.background = p.color
+          p.el.style.boxShadow = `0 0 8px ${p.color}, 0 0 20px ${p.color}`
+        }
       }
     }
 
@@ -161,11 +170,6 @@ export default function CyberCursor() {
         p.el.style.transform =
           `translate3d(${p.x}px, ${p.y}px, 0) translate(-50%, -50%) scale(${(0.4 + 0.6 * t).toFixed(3)})`
         p.el.style.opacity = (t * 0.85).toFixed(3)
-        p.el.style.width = `${p.size}px`
-        p.el.style.height = `${p.size}px`
-        p.el.style.borderRadius = "9999px"
-        p.el.style.background = p.color
-        p.el.style.boxShadow = `0 0 8px ${p.color}, 0 0 20px ${p.color}`
       }
 
       raf = requestAnimationFrame(tick)

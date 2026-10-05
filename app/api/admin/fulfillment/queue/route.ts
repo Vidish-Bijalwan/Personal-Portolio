@@ -3,7 +3,13 @@ export const dynamic = 'force-dynamic';
 import { NextResponse, type NextRequest } from 'next/server';
 import { and, count, eq, isNotNull } from 'drizzle-orm';
 import { db } from '@/lib/db/client';
-import { assets, generationJobs, orders, users } from '@/lib/db/schema';
+import {
+  assets,
+  generationAttachments,
+  generationJobs,
+  orders,
+  users,
+} from '@/lib/db/schema';
 import { adminAuthFail } from '@/lib/fulfillment/guards';
 import { asFulfillmentJob } from '@/lib/fulfillment/job';
 
@@ -66,6 +72,15 @@ export async function GET(req: NextRequest) {
       .map((r) => [r.projectId as string, Number(r.n)])
   );
 
+  // Customer-uploaded reference files per job (bytea attachments).
+  const attachCounts = await db
+    .select({ jobId: generationAttachments.generationId, n: count() })
+    .from(generationAttachments)
+    .groupBy(generationAttachments.generationId);
+  const attachCountByJob = new Map<string, number>(
+    attachCounts.map((r) => [r.jobId as string, Number(r.n)])
+  );
+
   // One row per job; keep the most recent order for the row.
   const byJob = new Map<
     string,
@@ -119,6 +134,7 @@ export async function GET(req: NextRequest) {
       refCount: e.job.projectId
         ? (refCountByProject.get(e.job.projectId) ?? 0)
         : 0,
+      attachCount: attachCountByJob.get(e.job.id) ?? 0,
     };
   });
 

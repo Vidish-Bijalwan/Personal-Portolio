@@ -7,6 +7,10 @@ import { eq, sql } from 'drizzle-orm';
 import { requireSession } from '@/lib/auth';
 import { createManualPaymentOrder } from '@/lib/payments/manual-upi';
 import { canTransition } from '@/lib/vilish/types';
+import {
+  canonicalMimeFor,
+  validateUploads,
+} from '@/lib/vilish/attachments';
 import { getFulfillmentConfig } from '@/lib/fulfillment/config';
 import { isAdminOverride } from '@/lib/fulfillment/guards';
 
@@ -34,19 +38,51 @@ async function countOperatorJobsToday(): Promise<number> {
 
 /**
  * POST /api/generation/start
- * Body: { quoteId: string, country?: string }
+ * Body (JSON): { quoteId: string, country?: string }
+ * Body (multipart/form-data): quoteId, country?, files (0-5 reference files)
  * Auth required. India (UPI) only: any other country -> 400
  * INTL_PAYMENTS_COMING_SOON. Creates a manual-UPI payment order, persists
  * it, and moves the job QUOTED -> PAYMENT_PENDING. The customer pays in
  * their UPI app, submits the UTR, and an admin verifies it before the job
  * queues. No Razorpay anywhere in this flow.
+ *
+ * Reference files (optional): validated against the shared attachment
+ * policy (8MB/file, 20MB total, max 5, allowlisted types only) and stored
+ * as bytea on generation_attachments for the operator to download.
  */
 export async function POST(req: NextRequest) {
   const { user, response: authResponse } = await requireSession();
   if (!user) return authResponse;
 
-  const body = await req.json().catch(() => null);
-  const quoteId = typeof body?.quoteId === 'string' ? body.quoteId : null;
+  // Accept JSON (classic) or multipart (with reference files).
+  let quoteId: string | null = null;
+  let country = 'IN';
+  let files: File[] = [];
+  const contentType = req.headers.get('content-type') ?? '';
+  if (contentType.includes('multipart/form-data')) {
+    const form = await req.formData().catch(() => null);
+    if (!form) {
+      return NextResponse.json(
+        { code: 'INVALID_REQUEST', error: 'Could not read form data' },
+        { status: 400 }
+      );
+    }
+    const q = form.get('quoteId');
+    quoteId = typeof q === 'string' ? q : null;
+    const c = form.get('country');
+    if (typeof c === 'string' && c.trim()) country = c.trim().toUpperCase();
+    files = form
+      .getAll('files')
+      .filter((v): v is File => v instanceof File && v.size > 0);
+  } else {
+    const body = await req.json().catch(() => null);
+    quoteId = typeof body?.quoteId === 'string' ? body.quoteId : null;
+    country =
+      typeof body?.country === 'string' && body.country.trim()
+        ? body.country.trim().toUpperCase()
+        : 'IN';
+  }
+
   if (!quoteId) {
     return NextResponse.json(
       { code: 'INVALID_REQUEST', error: 'quoteId is required' },
@@ -54,10 +90,19 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const country =
-    typeof body?.country === 'string' && body.country.trim()
-      ? body.country.trim().toUpperCase()
-      : 'IN';
+  // Server-side attachment policy: same rules as the composer UI.
+  if (files.length > 0) {
+    const check = validateUploads(
+      files.map((f) => ({ name: f.name, size: f.size, type: f.type }))
+    );
+    if (!check.ok) {
+      return NextResponse.json(
+        { code: 'INVALID_ATTACHMENTS', error: check.message },
+        { status: 400 }
+      );
+    }
+  }
+
   if (country !== 'IN') {
     return NextResponse.json(
       {
@@ -153,6 +198,26 @@ export async function POST(req: NextRequest) {
       { status: 409 }
     );
   }
+
+  // Persist validated reference files on the job (bytea — works on both
+  // PGlite and Postgres). Stored only now that the payment order exists,
+  // so no orphan attachments survive a failed start.
+  if (files.length > 0) {
+    const rows = [];
+    for (const f of files) {
+      const data = Buffer.from(await f.arrayBuffer());
+      rows.push({
+        generationId: job.id,
+        filename: f.name,
+        // Never trust the browser-reported MIME; the extension is the gate.
+        mimeType: canonicalMimeFor(f.name) ?? 'application/octet-stream',
+        byteSize: data.byteLength,
+        data,
+      });
+    }
+    await db.insert(schema.generationAttachments).values(rows);
+  }
+
   await db
     .update(schema.generationJobs)
     // fulfillmentMode is stamped at job start (contract §5). Cast: the

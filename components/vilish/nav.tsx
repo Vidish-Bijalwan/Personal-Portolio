@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import Wordmark from "./wordmark";
 
 const LINKS = [
   { href: "/create", label: "Create" },
@@ -16,8 +17,8 @@ export default function VilishNav() {
   return (
     <header className="sticky top-0 z-40 border-b border-white/[0.08] bg-[#080808]/95 backdrop-blur">
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4 sm:px-6">
-        <Link href="/" className="text-[15px] font-bold tracking-[0.22em] text-[#F5F5F3]">
-          Vidish
+        <Link href="/" aria-label="Vidish — home">
+          <Wordmark size={22} />
         </Link>
         <nav aria-label="Primary" className="hidden items-center gap-6 sm:flex">
           {LINKS.map((l) => (
