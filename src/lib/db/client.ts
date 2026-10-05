@@ -1,5 +1,5 @@
 /**
- * Vidish Studio — DB client.
+ * Pixaura — DB client.
  *
  * Connects via `pg` Pool + drizzle node-postgres when DATABASE_URL is set,
  * otherwise uses an in-process PGlite (no external DB needed for dev/test).

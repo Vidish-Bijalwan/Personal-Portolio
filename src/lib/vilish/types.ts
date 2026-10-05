@@ -1,5 +1,5 @@
 /**
- * Vidish Studio — shared contracts.
+ * Pixaura — shared contracts.
  * LAW: every parallel agent codes against these exact names/shapes.
  * MONEY: all money fields are INTEGER PAISE (₹1 = 100). Never floats.
  */
@@ -218,7 +218,7 @@ export function buildUpiUri(input: {
     pn: input.payeeName,
     am,
     cu: 'INR',
-    tn: `Vidish-${input.orderCode}`,
+    tn: `Pixaura-${input.orderCode}`,
   });
   return `upi://pay?${p.toString()}`;
 }

@@ -1,5 +1,5 @@
 /**
- * Vidish Studio — payment-claim flow tests.
+ * Pixaura — payment-claim flow tests.
  *
  * Covers the phone-ping payment flow: user taps "I've paid" (no UTR),
  * order moves PAYMENT_PENDING → PAYMENT_AWAITING_OWNER, the owner
@@ -37,7 +37,7 @@ vi.mock('@/lib/auth', () => ({
 delete process.env.DATABASE_URL;
 process.env.UPI_PAYMENT_ENABLED = 'true';
 process.env.UPI_VPA = 'vidish@okhdfcbank';
-process.env.UPI_PAYEE_NAME = 'VidishStudio';
+process.env.UPI_PAYEE_NAME = 'PixauraStudio';
 process.env.ADMIN_TOKEN='test-admin-token'
 
 type Handler = (

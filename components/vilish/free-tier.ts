@@ -1,5 +1,5 @@
 /**
- * Vidish free-tier helpers shared between the composer and the watch room.
+ * Pixaura free-tier helpers shared between the composer and the watch room.
  */
 
 /** sessionStorage key for a just-created video order, so the watch room can reopen payment. */

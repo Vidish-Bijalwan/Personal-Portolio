@@ -60,7 +60,7 @@
     --ease-precision:   cubic-bezier(0.4, 0, 0.2, 1);
     --ease-in:          cubic-bezier(0.4, 0, 1, 1);
 
-    /* Vidish Studio — cyberpunk neon identity (replaces the old iris wash).
+    /* Pixaura — cyberpunk neon identity (replaces the old iris wash).
        Acid lime #D7FF3F / electric cyan #00F0FF / hot magenta #FF2D78
        on near-black #080808. Sharp neon, no purple-blue gradient cliché. */
     --neon-lime:       73 100% 62%;
@@ -429,7 +429,7 @@
 ::-webkit-scrollbar { display: none; }
 
 /* ─────────────────────────────────────────────
-   Vidish Studio — cyberpunk neon identity
+   Pixaura — cyberpunk neon identity
    (v-iris-* class names kept: many usages depend on them.
     Old blue→purple→pink→orange wash replaced with
     acid lime → electric cyan → hot magenta on near-black.)
@@ -447,6 +447,14 @@
 
 .v-iris-text {
   background: linear-gradient(115deg, #E7FF70 0%, #63F6FF 48%, #FF7AA8 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Pixaura aura text — same wash as .v-iris-text, scoped to the wordmark's X. */
+.px-aura-text {
+  background: linear-gradient(115deg, #D7FF3F 0%, #00F0FF 52%, #FF2D78 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -487,7 +495,7 @@
   .v-price-swap, .v-gen-glow { animation: none; }
 }
 /**
- * Vidish watch-room animations — burger grill + popcorn projector.
+ * Pixaura watch-room animations — burger grill + popcorn projector.
  * All classes are prefixed fg- and scoped to the watch room.
  * Motion theme: acid-lime #D7FF3F, cyan #00F0FF, magenta #FF2D78.
  */

@@ -1,5 +1,5 @@
 /**
- * Vidish Studio DB tests — run against in-process PGlite, no external services.
+ * Pixaura DB tests — run against in-process PGlite, no external services.
  */
 import { describe, it, expect, beforeAll } from 'vitest';
 import { eq } from 'drizzle-orm';

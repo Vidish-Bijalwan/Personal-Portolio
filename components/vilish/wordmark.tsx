@@ -10,30 +10,25 @@ type WordmarkProps = {
 };
 
 /**
- * Vidish wordmark — a custom-built brand mark, not typed text.
+ * Pixaura wordmark — a custom-built brand mark, not typed text.
  *
- * Glyph: an aperture hexagon (iris motif) cut by a signal slash, holding a
- * bold "V" whose vertex is a neon-lime signal node — cyberpunk-studio character
- * in ~32px of geometry.
+ * Glyph: a "pixel core" (rotated square, lime → cyan gradient) ringed by two
+ * broken aura arcs (cyan + magenta) — pixels with an aura, in ~32px.
  *
- * Word: "VIDISH" in tight uppercase tracking with the "I" replaced by a
- * gradient signal bar, echoing the brand's lime → cyan → magenta wash
- * (`v-iris-text` in app/globals.css).
+ * Word: "PIXAURA" in tight uppercase tracking with the "X" rendered as a
+ * gradient cross-glyph, echoing the brand's lime → cyan → magenta wash.
  *
- * Accessibility/SEO: the wrapper exposes a single accessible name ("Vidish")
- * and hides the decorative per-letter spans from assistive tech.
- *
- * Static by design — a logo should not distract. No animation, so there is
- * nothing for prefers-reduced-motion to disable.
+ * Accessibility/SEO: single accessible name ("Pixaura"), decorative
+ * per-letter spans hidden from assistive tech. Static by design.
  */
 export default function Wordmark({ size = 22, tone = "light", className }: WordmarkProps) {
   const uid = useId().replace(/[^a-zA-Z0-9]/g, "");
-  const gradId = `vwm-grad-${uid}`;
+  const gradId = `pxw-grad-${uid}`;
 
   return (
     <span
       role="img"
-      aria-label="Vidish"
+      aria-label="Pixaura"
       className={cn(
         "inline-flex select-none items-center",
         tone === "light" ? "text-[#F5F5F3]" : "text-white/70",
@@ -41,7 +36,7 @@ export default function Wordmark({ size = 22, tone = "light", className }: Wordm
       )}
       style={{ fontSize: size * 0.72, lineHeight: 1 }}
     >
-      {/* ── glyph: aperture hexagon + signal slash + V + node ── */}
+      {/* ── glyph: pixel core + aura rings ── */}
       <svg
         width={size}
         height={size}
@@ -52,52 +47,59 @@ export default function Wordmark({ size = 22, tone = "light", className }: Wordm
         className="shrink-0"
       >
         <defs>
-          <linearGradient
-            id={gradId}
-            x1="5"
-            y1="27"
-            x2="27"
-            y2="5"
-            gradientUnits="userSpaceOnUse"
-          >
-            <stop offset="0" stopColor="#D7FF3F" />
-            <stop offset="0.55" stopColor="#00F0FF" />
-            <stop offset="1" stopColor="#FF2D78" />
+          <linearGradient id={gradId} x1="8" y1="24" x2="24" y2="8" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stopColor="#D7FF3F" />
+            <stop offset="55%" stopColor="#00F0FF" />
+            <stop offset="100%" stopColor="#FF2D78" />
           </linearGradient>
         </defs>
-        {/* aperture ring */}
-        <path
-          d="M16 3.2 27.4 9.8v14.4L16 30.8 4.6 24.2V9.8L16 3.2Z"
-          stroke={`url(#${gradId})`}
-          strokeWidth="1.7"
-          opacity="0.9"
-        />
-        {/* signal slash cutting across the aperture */}
-        <path
-          d="M8.2 24.4 23.8 7.6"
-          stroke={`url(#${gradId})`}
-          strokeWidth="1.4"
+        {/* aura rings (broken) */}
+        <circle
+          cx="16"
+          cy="16"
+          r="12.5"
+          stroke="#00F0FF"
+          strokeOpacity="0.75"
+          strokeWidth="2"
           strokeLinecap="round"
-          opacity="0.5"
+          strokeDasharray="52 26.5"
+          transform="rotate(-35 16 16)"
         />
-        {/* the V */}
-        <path
-          d="M10.7 11.2 16 21.7 21.3 11.2"
-          stroke="currentColor"
-          strokeWidth="3"
+        <circle
+          cx="16"
+          cy="16"
+          r="15"
+          stroke="#FF2D78"
+          strokeOpacity="0.45"
+          strokeWidth="1.6"
           strokeLinecap="round"
-          strokeLinejoin="round"
+          strokeDasharray="30 64.2"
+          transform="rotate(70 16 16)"
         />
-        {/* signal node at the vertex */}
-        <circle cx="16" cy="21.7" r="2.1" fill="#D7FF3F" />
+        {/* pixel core */}
+        <rect
+          x="11.2"
+          y="11.2"
+          width="9.6"
+          height="9.6"
+          rx="1.6"
+          transform="rotate(45 16 16)"
+          fill={`url(#${gradId})`}
+        />
+        {/* pixel sparks on the rings */}
+        <rect x="25.4" y="6.2" width="3.4" height="3.4" rx="0.8" fill="#D7FF3F" transform="rotate(24 27.1 7.9)" />
+        <rect x="3.2" y="22.4" width="3" height="3" rx="0.8" fill="#00F0FF" transform="rotate(-18 4.7 23.9)" />
       </svg>
-      {/* ── the word: crafted spacing, signal-bar "I" ── */}
-      <span
-        aria-hidden="true"
-        className="ml-[0.55em] font-bold tracking-[0.3em]"
-        style={{ marginRight: "-0.3em" /* absorb trailing letter-spacing */ }}
-      >
-        V<span className="v-iris-text">I</span>DISH
+
+      {/* ── word: PIXAURA, X as gradient cross ── */}
+      <span aria-hidden="true" className="ml-[0.42em] font-display font-bold tracking-[0.18em]">
+        {"PIX".split("").map((ch, i) => (
+          <span key={i}>{ch}</span>
+        ))}
+        <span className="px-aura-text">X</span>
+        {"AURA".split("").map((ch, i) => (
+          <span key={`a${i}`}>{ch}</span>
+        ))}
       </span>
     </span>
   );

@@ -1,5 +1,5 @@
 /**
- * Vidish Studio — free-tier image + paid video generation policy.
+ * Pixaura — free-tier image + paid video generation policy.
  *
  * Pure logic: no JSX, no I/O, no imports from server modules.
  * Unit-testable in isolation.
@@ -65,6 +65,107 @@ const TRANSITIONS: Record<string, readonly string[]> = {
 /** queued → generating → done | failed (queued may also fail fast). */
 export function canTransition(from: string, to: string): boolean {
   return TRANSITIONS[from]?.includes(to) ?? false;
+}
+
+/* ---------------- failure classes ---------------- */
+
+/**
+ * Advisory failure class stored on generations.error_code.
+ *
+ * - 'content_refused': the provider's safety filter declined the prompt
+ *   (a word like "fire" or "blood" tripped it) — the user needs a
+ *   rephrase, not a blind retry.
+ * - 'technical': everything else (timeouts, provider errors, stalls,
+ *   reap-after-too-many-attempts).
+ *
+ * status stays 'failed' for both; neither ever consumes the free cap.
+ */
+export const GENERATION_ERROR_CODES = ['content_refused', 'technical'] as const;
+
+export type GenerationErrorCode = (typeof GENERATION_ERROR_CODES)[number];
+
+export function isGenerationErrorCode(v: unknown): v is GenerationErrorCode {
+  return (
+    typeof v === 'string' &&
+    (GENERATION_ERROR_CODES as readonly string[]).includes(v)
+  );
+}
+
+/**
+ * The ONLY user-visible messages for classified failures. Watcher and
+ * admin routes store these fixed strings — never raw provider/watcher
+ * text, so tracebacks and provider internals can't reach the client.
+ */
+export const FAILURE_COPY: Record<GenerationErrorCode, string> = {
+  content_refused:
+    'The image model declined this prompt — usually a word like "fire" or "blood" trips the safety filter. Reword it and try again; your free tries are untouched.',
+  technical: 'The grill flared up — try again. It’s still free.',
+};
+
+export function failureMessageFor(code: unknown): string {
+  return isGenerationErrorCode(code) ? FAILURE_COPY[code] : FAILURE_COPY.technical;
+}
+
+/**
+ * Heuristic rephrase hints for prompts a safety filter is likely to
+ * refuse. Word-boundary, case-insensitive; the first hit wins and the
+ * rest of the prompt is preserved verbatim. Returns null when nothing
+ * matches — callers should only offer the "safer rephrase" path when a
+ * concrete suggestion exists. Best-effort hint, not a guarantee the
+ * filter will accept it.
+ */
+const SAFETY_REPLACEMENTS: ReadonlyArray<readonly [RegExp, string]> = [
+  [/\bon fire\b/gi, 'lit by warm dramatic light'],
+  [/\bburning\b/gi, 'glowing with warm light'],
+  [/\bbloodied\b/gi, 'painted with red paint'],
+  [/\bbloody\b/gi, 'deep red'],
+  [/\bblood\b/gi, 'red paint'],
+  [/\bcorpse\b/gi, 'sleeping figure'],
+  [/\bgun\b/gi, 'camera'],
+  [/\bweapon\b/gi, 'harmless object'],
+];
+
+export function suggestSaferPrompt(prompt: unknown): string | null {
+  if (typeof prompt !== 'string') return null;
+  for (const [pattern, replacement] of SAFETY_REPLACEMENTS) {
+    const re: RegExp = pattern;
+    const sub: string = replacement;
+    const candidate: string = prompt.replace(re, sub);
+    if (candidate !== prompt) return candidate;
+  }
+  return null;
+}
+
+/* ---------------- stuck detection & retry ---------------- */
+
+/**
+ * A queued/generating row with no update for this long is treated as
+ * stuck (watcher down, provider hung). The admin reaper uses 45 min;
+ * the watch room flags it far earlier so the user can re-queue instead
+ * of staring at an animation.
+ */
+export const STUCK_AFTER_MINUTES = 15;
+
+export function isStuck(
+  status: string,
+  updatedAt: Date | string | null | undefined,
+  nowMs: number = Date.now()
+): boolean {
+  if (status !== 'queued' && status !== 'generating') return false;
+  if (!updatedAt) return false;
+  const t =
+    updatedAt instanceof Date ? updatedAt.getTime() : new Date(updatedAt).getTime();
+  if (Number.isNaN(t)) return false;
+  return nowMs - t > STUCK_AFTER_MINUTES * 60 * 1000;
+}
+
+/**
+ * Statuses a retry may launch from: a terminal failure, or a still-open
+ * row the user is re-queuing after a stall. 'done' rows are never
+ * retried (the preview/download path already exists).
+ */
+export function canRetryFromStatus(status: string): boolean {
+  return status === 'failed' || status === 'queued' || status === 'generating';
 }
 
 export function isValidPrompt(prompt: unknown): prompt is string {

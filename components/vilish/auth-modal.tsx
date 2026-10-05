@@ -124,7 +124,7 @@ export default function AuthModal({ open, onClose, onAuthenticated }: AuthModalP
       <div className="w-full max-w-md rounded-t-[20px] border border-white/[0.1] bg-[#121214] p-6 sm:rounded-[20px]">
         <div className="flex items-start justify-between">
           <div>
-            <h2 className="text-[17px] font-semibold">
+            <h2 className="font-display text-[19px] font-semibold tracking-[0.01em]">
               {mode === "login" ? "Sign in to continue" : "Create your account"}
             </h2>
             <p className="mt-1 text-[12px] text-white/45">
@@ -202,7 +202,7 @@ export default function AuthModal({ open, onClose, onAuthenticated }: AuthModalP
           <button
             type="submit"
             disabled={busy}
-            className="flex w-full items-center justify-center gap-2 rounded-[10px] bg-white px-4 py-3 text-[14px] font-semibold text-black transition-opacity hover:opacity-90 disabled:opacity-50"
+            className="v-iris-bg flex w-full items-center justify-center gap-2 rounded-[10px] px-4 py-3 text-[14px] font-semibold text-[#080808] transition-opacity hover:opacity-90 disabled:opacity-50"
           >
             {busy && <Loader2 className="h-4 w-4 animate-spin" />}
             {mode === "login" ? "Sign in" : "Create account"}

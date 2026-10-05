@@ -1,5 +1,5 @@
 /**
- * Vidish Phase 2 — contract §5 capacity gates on POST /api/generation/start.
+ * Pixaura Phase 2 — contract §5 capacity gates on POST /api/generation/start.
  *
  * The gate runs BEFORE order creation:
  * - ORDERS_ACCEPTING=false → 403 { error: 'ORDERS_PAUSED' }

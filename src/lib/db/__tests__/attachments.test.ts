@@ -1,5 +1,5 @@
 /**
- * Vidish Studio — generation_attachments bytea tests.
+ * Pixaura — generation_attachments bytea tests.
  * Runs against in-process PGlite (same migration path as dev);
  * production uses node-postgres where bytea behaves identically.
  */

@@ -167,7 +167,7 @@ export default function PaymentModal({ jobId, initialPayment, onClose, navigate,
       >
         <div className="flex items-start justify-between">
           <div>
-            <h2 className="text-[17px] font-semibold">Pay with UPI</h2>
+            <h2 className="font-display text-[18px] font-semibold tracking-[0.01em]">Pay with UPI</h2>
             <p className="mt-1 text-[12px] text-white/45 tabular-nums">Order {payment.code}</p>
           </div>
           <button

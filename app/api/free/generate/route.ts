@@ -1,8 +1,9 @@
 export const dynamic = 'force-dynamic';
 
 import { NextResponse, type NextRequest } from 'next/server';
+import { eq } from 'drizzle-orm';
 import { db } from '@/lib/db/client';
-import { generations } from '@/lib/db/schema';
+import { freeGenerationAttachments, generations } from '@/lib/db/schema';
 import { requireSession } from '@/lib/auth';
 import {
   FREE_DAILY_CAP,
@@ -10,20 +11,70 @@ import {
   isValidPrompt,
 } from '@/lib/free/policy';
 import { countFreeImagesToday } from '@/lib/free/access';
+import {
+  canonicalMimeFor,
+  validateUploads,
+} from '@/lib/vilish/attachments';
 
 /**
  * POST /api/free/generate
- * Body: { prompt, quality?, aspectRatio?, media_type? }
+ * Body (JSON): { prompt, quality?, aspectRatio?, media_type? }
+ * Body (multipart/form-data): prompt, quality?, aspectRatio?,
+ *   media_type?/mediaType?, files (0-5 reference files)
  * Free-tier IMAGES only — media_type=video is rejected (use /api/video/order).
  * Auth required. Prompt 1..2000 chars. 3 free images / user / IST day
  * (failed rows don't consume cap) → 429 FREE_CAP_REACHED beyond that.
+ *
+ * Reference files (optional, multipart only): validated against the shared
+ * attachment policy (8MB/file, 20MB total, max 5, allowlisted types only) —
+ * the same caps as the paid flow — and stored as bytea on
+ * free_generation_attachments linked to the generations row. The
+ * generation watcher fetches them via
+ * GET /api/admin/fulfillment/generations/[id]/attachments (x-admin-token).
  */
 export async function POST(req: NextRequest) {
   const { user, response: authResponse } = await requireSession();
   if (!user) return authResponse;
 
-  const body = await req.json().catch(() => null);
-  const prompt = body?.prompt;
+  // Accept JSON (classic) or multipart (with reference files).
+  let prompt: unknown;
+  let quality = 'studio';
+  let aspectRatio = '1:1';
+  let mediaType = 'image';
+  let files: File[] = [];
+  const contentType = req.headers.get('content-type') ?? '';
+  if (contentType.includes('multipart/form-data')) {
+    const form = await req.formData().catch(() => null);
+    if (!form) {
+      return NextResponse.json(
+        { code: 'INVALID_REQUEST', error: 'Could not read form data' },
+        { status: 400 }
+      );
+    }
+    const p = form.get('prompt');
+    prompt = typeof p === 'string' ? p : null;
+    const q = form.get('quality');
+    if (typeof q === 'string' && q.length > 0 && q.length <= 32) quality = q;
+    const ar = form.get('aspectRatio');
+    if (typeof ar === 'string' && ar.length > 0 && ar.length <= 16)
+      aspectRatio = ar;
+    const mt = form.get('media_type') ?? form.get('mediaType');
+    if (typeof mt === 'string' && mt.trim()) mediaType = mt.trim();
+    files = form
+      .getAll('files')
+      .filter((v): v is File => v instanceof File && v.size > 0);
+  } else {
+    const body = await req.json().catch(() => null);
+    prompt = body?.prompt;
+    if (typeof body?.quality === 'string' && body.quality.length <= 32) {
+      quality = body.quality;
+    }
+    if (typeof body?.aspectRatio === 'string' && body.aspectRatio.length <= 16) {
+      aspectRatio = body.aspectRatio;
+    }
+    mediaType = body?.media_type ?? body?.mediaType ?? 'image';
+  }
+
   if (!isValidPrompt(prompt)) {
     return NextResponse.json(
       {
@@ -34,7 +85,6 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const mediaType = body?.media_type ?? body?.mediaType ?? 'image';
   if (mediaType === 'video') {
     return NextResponse.json(
       {
@@ -51,14 +101,18 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const quality =
-    typeof body?.quality === 'string' && body.quality.length <= 32
-      ? body.quality
-      : 'studio';
-  const aspectRatio =
-    typeof body?.aspectRatio === 'string' && body.aspectRatio.length <= 16
-      ? body.aspectRatio
-      : '1:1';
+  // Server-side attachment policy: same rules as the paid flow.
+  if (files.length > 0) {
+    const check = validateUploads(
+      files.map((f) => ({ name: f.name, size: f.size, type: f.type }))
+    );
+    if (!check.ok) {
+      return NextResponse.json(
+        { code: 'INVALID_ATTACHMENTS', error: check.message },
+        { status: 400 }
+      );
+    }
+  }
 
   const used = await countFreeImagesToday(user.id);
   if (used >= FREE_DAILY_CAP) {
@@ -83,6 +137,39 @@ export async function POST(req: NextRequest) {
       status: 'queued',
     })
     .returning({ id: generations.id });
+
+  // Persist validated reference files on the generation (bytea). If the
+  // insert fails, remove the just-created row so no attachment-less orphan
+  // consumes the user's daily cap.
+  if (files.length > 0) {
+    try {
+      const rows = [];
+      for (const f of files) {
+        const data = Buffer.from(await f.arrayBuffer());
+        rows.push({
+          generationId: row.id,
+          filename: f.name,
+          // Never trust the browser-reported MIME; the extension is the gate.
+          mimeType: canonicalMimeFor(f.name) ?? 'application/octet-stream',
+          byteSize: data.byteLength,
+          data,
+        });
+      }
+      await db.insert(freeGenerationAttachments).values(rows);
+    } catch {
+      await db
+        .delete(generations)
+        .where(eq(generations.id, row.id))
+        .catch(() => {});
+      return NextResponse.json(
+        {
+          code: 'ATTACHMENT_SAVE_FAILED',
+          error: 'Could not save your reference files. Please try again.',
+        },
+        { status: 500 }
+      );
+    }
+  }
 
   return NextResponse.json({ id: row.id }, { status: 201 });
 }

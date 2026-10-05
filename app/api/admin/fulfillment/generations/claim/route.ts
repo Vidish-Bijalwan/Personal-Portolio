@@ -4,6 +4,11 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { sql } from 'drizzle-orm';
 import { db } from '@/lib/db/client';
 import { adminAuthFail } from '@/lib/fulfillment/guards';
+import {
+  failureMessageFor,
+  isGenerationErrorCode,
+  type GenerationErrorCode,
+} from '@/lib/free/policy';
 
 const REAP_MINUTES = 45;
 const MAX_ATTEMPTS = 3;
@@ -19,12 +24,29 @@ const MAX_ATTEMPTS = 3;
  *   then atomically moves the oldest `limit` queued rows to generating
  *   (FOR UPDATE SKIP LOCKED) and returns them WITHOUT the bytea blobs.
  * { action: 'stage', id, stage } — updates the waiting-room progress label.
- * { action: 'fail', id, error? } — marks a row failed (user-safe message).
+ * { action: 'fail', id, error_code? } — marks a row failed. error_code
+ *   must be 'content_refused' (safety-filter refusal) or 'technical'
+ *   (default); the stored user message is the fixed copy for that class —
+ *   raw watcher/provider text is never stored or echoed back.
  */
 export async function POST(req: NextRequest) {
   const authFail = adminAuthFail(req);
   if (authFail) return authFail;
 
+  // Unexpected failures must never leak raw internals to the caller —
+  // generic 500, details stay server-side.
+  try {
+    return await handleClaim(req);
+  } catch (e) {
+    console.error('generations/claim unexpected failure', e);
+    return NextResponse.json(
+      { code: 'INTERNAL', error: 'Could not process the queue action' },
+      { status: 500 }
+    );
+  }
+}
+
+async function handleClaim(req: NextRequest) {
   const body = await req.json().catch(() => null);
   const action = body?.action;
 
@@ -37,6 +59,7 @@ export async function POST(req: NextRequest) {
           error = CASE WHEN attempts >= ${MAX_ATTEMPTS}
                        THEN 'The grill flared up too many times — try a fresh request.'
                        ELSE NULL END,
+          error_code = CASE WHEN attempts >= ${MAX_ATTEMPTS} THEN 'technical' ELSE NULL END,
           updated_at = now()
       WHERE status = 'generating'
         AND updated_at < now() - (${REAP_MINUTES} || ' minutes')::interval`);
@@ -78,20 +101,28 @@ export async function POST(req: NextRequest) {
 
   if (action === 'fail') {
     const id = body?.id;
-    const error =
-      typeof body?.error === 'string' && body.error
-        ? body.error.slice(0, 300)
-        : 'The grill flared up — try again.';
     if (typeof id !== 'string' || !id) {
       return NextResponse.json(
         { code: 'INVALID_REQUEST', error: 'id is required' },
         { status: 400 }
       );
     }
+    // Failure class drives the user-visible message. Raw watcher/provider
+    // text is NEVER stored or echoed — only the fixed user-safe copy per
+    // failure class, so tracebacks and provider internals can't reach the
+    // watch room. (body.error is accepted for backward compat and ignored.)
+    const errorCode: GenerationErrorCode = isGenerationErrorCode(
+      body?.error_code
+    )
+      ? body.error_code
+      : 'technical';
+    const message = failureMessageFor(errorCode);
     await db.execute(sql`
-      UPDATE generations SET status = 'failed', error = ${error}, updated_at = now()
+      UPDATE generations
+      SET status = 'failed', error_code = ${errorCode}, error = ${message},
+          updated_at = now()
       WHERE id = ${id}::uuid AND status IN ('queued', 'generating')`);
-    return NextResponse.json({ ok: true });
+    return NextResponse.json({ ok: true, error_code: errorCode });
   }
 
   return NextResponse.json(

@@ -12,7 +12,7 @@
 import QRCode from 'qrcode';
 import { and, eq, inArray, ne } from 'drizzle-orm';
 import { db } from '@/lib/db/client';
-import { auditLogs, generationOrders, generations, orders, payments } from '@/lib/db/schema';
+import { auditLogs, generationOrders, generations, orders, payments, videoJobOrders, videoJobs } from '@/lib/db/schema';
 import {
   buildUpiUri,
   isValidUtr,
@@ -405,6 +405,26 @@ export async function verifyPaymentOrder(input: {
     }
   } catch (hookErr) {
     console.error('[payments] generation unlock hook failed:', hookErr);
+  }
+  // Video Studio unlock side-effect (W2): if this order is linked to a
+  // video_jobs row (purpose 'video_studio' = ₹49 clean-video unlock),
+  // flip its unlocked flag so the clean mp4 opens. Same guard as above:
+  // a missing video_jobs table must NEVER break payment verify.
+  try {
+    const vlinks = await db
+      .select()
+      .from(videoJobOrders)
+      .where(eq(videoJobOrders.orderId, order.id))
+      .limit(1);
+    const vlink = vlinks[0];
+    if (vlink && vlink.purpose === 'video_studio') {
+      await db
+        .update(videoJobs)
+        .set({ unlocked: true, updatedAt: new Date() })
+        .where(eq(videoJobs.id, vlink.videoJobId));
+    }
+  } catch (hookErr) {
+    console.error('[payments] video-job unlock hook failed:', hookErr);
   }
   return { status: 'PAYMENT_VERIFIED' as PaymentOrderState, jobId: order.jobId };
 }
