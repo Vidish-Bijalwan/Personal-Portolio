@@ -170,7 +170,7 @@ function CardFlourish({ kind }: { kind: Flourish }) {
       <div aria-hidden className="relative h-9 w-9">
         <span className="absolute inset-0 rounded-full border border-white/[0.14]" />
         <span
-          className={`absolute left-1/2 top-1/2 h-1.5 w-1.5 rounded-full bg-[#8b5cf6] ${reduced ? "ml-[-3px] mt-[-3px]" : "v-bento-orbit"}`}
+          className={`absolute left-1/2 top-1/2 h-1.5 w-1.5 rounded-full bg-[#FF2D78] ${reduced ? "ml-[-3px] mt-[-3px]" : "v-bento-orbit"}`}
         />
       </div>
     );
@@ -191,7 +191,7 @@ function CardFlourish({ kind }: { kind: Flourish }) {
     <div aria-hidden className="relative h-9 w-full max-w-[180px]">
       <div className="absolute inset-0 rounded-full border border-dashed border-white/[0.16]" />
       <div
-        className={`absolute inset-y-[3px] left-[3px] w-10 rounded-full bg-gradient-to-r from-[#8b5cf6]/40 to-[#4f7cff]/10 ${reduced ? "" : "v-bento-sweep"}`}
+        className={`absolute inset-y-[3px] left-[3px] w-10 rounded-full bg-gradient-to-r from-[#FF2D78]/40 to-[#00F0FF]/10 ${reduced ? "" : "v-bento-sweep"}`}
       />
     </div>
   );
@@ -217,7 +217,7 @@ function BentoCard({ cap }: { cap: Capability }) {
             {cap.price}
           </span>
         ) : (
-          <span className="rounded-full border border-[#8b5cf6]/40 bg-[#8b5cf6]/10 px-2.5 py-0.5 text-[12px] font-semibold text-[#c4b5fd]">
+          <span className="rounded-full border border-[#FF2D78]/40 bg-[#FF2D78]/10 px-2.5 py-0.5 text-[12px] font-semibold text-[#FF7AA8]">
             {cap.badge}
           </span>
         )}
@@ -373,7 +373,7 @@ export default function VilishLanding() {
           <div className="mx-auto max-w-5xl px-4">
             <Reveal>
               <div className="flex items-center gap-2">
-                <Sparkles className="h-4 w-4 text-[#8b5cf6]" strokeWidth={1.8} aria-hidden />
+                <Sparkles className="h-4 w-4 text-[#FF2D78]" strokeWidth={1.8} aria-hidden />
                 <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-white/45">
                   Showreel
                 </p>
@@ -562,11 +562,11 @@ export default function VilishLanding() {
                 >
                   <span
                     aria-hidden
-                    className="flex items-center justify-center rounded-md border border-[#8b5cf6]/50 bg-[#8b5cf6]/[0.08]"
+                    className="flex items-center justify-center rounded-md border border-[#FF2D78]/50 bg-[#FF2D78]/[0.08]"
                     style={{ width: f.w + 14, height: f.h + 10 }}
                   >
                     <span
-                      className="rounded-[2px] bg-gradient-to-br from-[#4f7cff] to-[#8b5cf6]"
+                      className="rounded-[2px] bg-gradient-to-br from-[#00F0FF] to-[#FF2D78]"
                       style={{ width: f.w, height: f.h }}
                     />
                   </span>

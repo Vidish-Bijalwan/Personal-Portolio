@@ -94,7 +94,7 @@ export default function Carousel({ ariaLabel, className, children }: CarouselPro
         tabIndex={0}
         aria-label={`${ariaLabel} — use left and right arrow keys to move`}
         onKeyDown={onKeyDown}
-        className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-1 outline-none focus-visible:ring-2 focus-visible:ring-[#8b5cf6]/60"
+        className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-1 outline-none focus-visible:ring-2 focus-visible:ring-[#00F0FF]/60"
         style={{ scrollbarWidth: "none", scrollBehavior: reduced ? "auto" : undefined }}
       >
         {children}

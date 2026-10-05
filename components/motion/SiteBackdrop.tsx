@@ -10,7 +10,7 @@ interface SiteBackdropProps {
  * Global ambient site backdrop (mounted once in the root layout).
  *
  * A fixed, full-viewport layer sitting behind everything: a barely-there
- * iris glow at the top and bottom of the viewport plus a faint film-grain
+ * neon glow at the top and bottom of the viewport plus a faint film-grain
  * noise. Deliberately quiet — hero video and section backgrounds own the
  * motion; this just stops large dark areas from feeling dead.
  *
@@ -26,20 +26,20 @@ export default function SiteBackdrop({ className }: SiteBackdropProps) {
       className={`pointer-events-none fixed inset-0 -z-10 overflow-hidden ${className ?? ""}`}
       style={{ backgroundColor: "#080808" }}
     >
-      {/* top iris glow */}
+      {/* top neon glow */}
       <div
         className="absolute inset-x-0 top-0 h-[46vh]"
         style={{
           background:
-            "radial-gradient(ellipse 70% 100% at 50% -20%, rgba(79,124,255,0.07) 0%, rgba(139,92,246,0.045) 45%, transparent 100%)",
+            "radial-gradient(ellipse 70% 100% at 50% -20%, rgba(0,240,255,0.07) 0%, rgba(255,45,120,0.045) 45%, transparent 100%)",
         }}
       />
-      {/* bottom ember glow */}
+      {/* bottom lime glow */}
       <div
         className="absolute inset-x-0 bottom-0 h-[40vh]"
         style={{
           background:
-            "radial-gradient(ellipse 70% 100% at 50% 120%, rgba(255,122,110,0.05) 0%, rgba(139,92,246,0.04) 50%, transparent 100%)",
+            "radial-gradient(ellipse 70% 100% at 50% 120%, rgba(215,255,63,0.05) 0%, rgba(255,45,120,0.04) 50%, transparent 100%)",
         }}
       />
       {/* ultra-slow drifting sheen — omitted for reduced motion */}
@@ -48,7 +48,7 @@ export default function SiteBackdrop({ className }: SiteBackdropProps) {
           className="v-site-backdrop-drift absolute inset-x-[-20%] top-[10%] h-[60vh]"
           style={{
             background:
-              "radial-gradient(ellipse 40% 60% at 60% 40%, rgba(139,92,246,0.05) 0%, transparent 70%)",
+              "radial-gradient(ellipse 40% 60% at 60% 40%, rgba(0,240,255,0.05) 0%, transparent 70%)",
           }}
         />
       )}

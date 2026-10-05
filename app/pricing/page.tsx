@@ -147,7 +147,7 @@ function TierCard({ tier }: { tier: Tier }) {
       className={
         "relative flex h-full flex-col rounded-[18px] border bg-[#121214] p-6 " +
         (popular
-          ? "v-iris-border shadow-[0_0_44px_-12px_rgba(139,92,246,0.5)] "
+          ? "v-iris-border shadow-[0_0_44px_-12px_rgba(255,45,120,0.5)] "
           : "border-white/[0.08] hover:shadow-[0_24px_60px_-24px_rgba(0,0,0,0.9)] ") +
         (tier.comingSoon ? "opacity-60 " : "")
       }

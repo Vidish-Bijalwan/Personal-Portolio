@@ -25,13 +25,13 @@ interface GenerativeFieldProps {
   density?: number
 }
 
-// Iris tints sampled from the brand gradient (#4f7cff → #8b5cf6 → #ff7a6e → #f5a524)
+// Cyberpunk tints: acid lime / electric cyan / hot magenta on near-black
 const TINTS: Array<[number, number, number]> = [
   [245, 245, 243], // white
-  [79, 124, 255], // iris blue
-  [139, 92, 246], // violet
-  [255, 122, 110], // ember
-  [245, 165, 36], // amber
+  [0, 240, 255], // electric cyan
+  [255, 45, 120], // hot magenta
+  [215, 255, 63], // acid lime
+  [0, 180, 200], // deep cyan
 ]
 
 interface Mote {
@@ -59,7 +59,7 @@ export default function GenerativeField({ className, density = 1 }: GenerativeFi
         aria-hidden="true"
         style={{
           background:
-            "radial-gradient(60% 50% at 50% 45%, rgba(79,124,255,0.10), rgba(139,92,246,0.05) 55%, transparent 100%)",
+            "radial-gradient(60% 50% at 50% 45%, rgba(0,240,255,0.10), rgba(255,45,120,0.05) 55%, transparent 100%)",
         }}
       />
     )
@@ -154,8 +154,8 @@ function FieldCanvas({ className, density, wrapRef }: FieldCanvasProps) {
         height * 0.45,
         Math.max(width, height) * 0.6
       )
-      wash.addColorStop(0, "rgba(79,124,255,0.05)")
-      wash.addColorStop(0.55, "rgba(139,92,246,0.025)")
+      wash.addColorStop(0, "rgba(0,240,255,0.05)")
+      wash.addColorStop(0.55, "rgba(255,45,120,0.025)")
       wash.addColorStop(1, "rgba(0,0,0,0)")
       cx.fillStyle = wash
       cx.fillRect(0, 0, width, height)
