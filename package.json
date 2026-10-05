@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test": "vitest run"
   },
   "dependencies": {
     "@emotion/is-prop-valid": "latest",
@@ -62,7 +63,15 @@
     "tailwind-merge": "^2.5.5",
     "tailwindcss-animate": "^1.0.7",
     "vaul": "^0.9.6",
-    "zod": "^3.24.1"
+    "zod": "^3.24.1",
+    "@electric-sql/pglite": "^0.5.8",
+    "drizzle-orm": "^0.45.3",
+    "pg": "^8.23.1",
+    "@fal-ai/client": "^1.10.1",
+    "qrcode": "^1.5.4",
+    "@auth/drizzle-adapter": "^1.11.3",
+    "@aws-sdk/client-s3": "^3.1146.0",
+    "next-auth": "^5.0.0-beta.25"
   },
   "devDependencies": {
     "@types/d3-array": "^3.2.2",
@@ -79,6 +88,11 @@
     "@types/react-dom": "^19.2.3",
     "postcss": "^8",
     "tailwindcss": "^3.4.17",
-    "typescript": "^5"
+    "typescript": "^5",
+    "@types/pg": "^8.23.1",
+    "drizzle-kit": "^0.31.11",
+    "vite": "^8.3.2",
+    "vitest": "^5.0.3",
+    "@types/qrcode": "^1.5.6"
   }
 }

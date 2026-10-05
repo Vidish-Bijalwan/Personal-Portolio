@@ -1,0 +1,15 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "crons": [
+    {
+      // NOTE: Vercel cron paths cannot embed secrets or env vars.
+      // The worker route accepts CRON_SECRET via the ?cron_secret= query
+      // parameter, so schedule the caller as:
+      //   GET /api/worker/poll?cron_secret=<CRON_SECRET>
+      // If your scheduler cannot append a query string, point it at a
+      // thin proxy/edge route that injects the secret from env.
+      "path": "/api/worker/poll",
+      "schedule": "*/5 * * * *"
+    }
+  ]
+}

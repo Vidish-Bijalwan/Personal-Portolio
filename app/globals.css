@@ -385,3 +385,41 @@
    SCROLLBAR — hidden globally
    ───────────────────────────────────────────── */
 ::-webkit-scrollbar { display: none; }
+
+/* ─────────────────────────────────────────────
+   VILISH Studio design tokens + helpers
+   (scoped classes; portfolio /about styles untouched)
+   ───────────────────────────────────────────── */
+.v-iris-bg {
+  background: linear-gradient(120deg, #4f7cff 0%, #8b5cf6 42%, #ff7a6e 78%, #f5a524 100%);
+}
+
+.v-iris-border {
+  border-color: transparent;
+  background:
+    linear-gradient(#121214, #121214) padding-box,
+    linear-gradient(120deg, #4f7cff, #8b5cf6, #ff7a6e, #f5a524) border-box;
+}
+
+.v-iris-text {
+  background: linear-gradient(120deg, #7ea0ff 0%, #a78bfa 42%, #ff9a8b 78%, #f5c04e 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@keyframes v-price-swap {
+  from { opacity: 0; transform: translateY(3px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.v-price-swap { animation: v-price-swap 0.35s ease; }
+
+@keyframes v-gen-glow {
+  0%, 100% { opacity: 0.55; }
+  50%      { opacity: 1; }
+}
+.v-gen-glow { animation: v-gen-glow 2.4s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .v-price-swap, .v-gen-glow { animation: none; }
+}

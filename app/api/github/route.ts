@@ -2,7 +2,11 @@ import { NextResponse } from "next/server"
 
 const GITHUB_USER = "Vidish-Bijalwan"
 
-export const revalidate = 1800 // 30 minutes ISR cache
+// Never pre-render at build time — this route calls an external API that may
+// be unreachable from the build environment (build hangs otherwise).
+// It executes on demand instead, with the upstream response cached via the
+// Data Cache on the fetch below.
+export const dynamic = "force-dynamic"
 
 async function fetchGitHub(path: string) {
   const res = await fetch(`https://api.github.com/${path}`, {
