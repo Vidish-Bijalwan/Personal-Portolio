@@ -59,6 +59,13 @@
     --ease-expo:        cubic-bezier(0.16, 1, 0.3, 1);
     --ease-precision:   cubic-bezier(0.4, 0, 0.2, 1);
     --ease-in:          cubic-bezier(0.4, 0, 1, 1);
+
+    /* Vidish Studio — cyberpunk neon identity (replaces the old iris wash).
+       Acid lime #D7FF3F / electric cyan #00F0FF / hot magenta #FF2D78
+       on near-black #080808. Sharp neon, no purple-blue gradient cliché. */
+    --neon-lime:       73 100% 62%;
+    --neon-cyan:       184 100% 50%;
+    --neon-magenta:    339 100% 59%;
   }
 
   /* Force dark — no light mode */
@@ -105,8 +112,14 @@
   }
 
   :focus-visible {
-    outline: 1px solid hsl(var(--amber));
+    outline: 1px solid hsl(var(--neon-cyan));
     outline-offset: 3px;
+    box-shadow: 0 0 12px hsl(var(--neon-cyan) / 0.35);
+  }
+
+  ::selection {
+    background: hsl(var(--neon-lime));
+    color: #080808;
   }
 }
 
@@ -143,6 +156,35 @@
     line-height: 1.0;
     letter-spacing: -0.03em;
     font-weight: 600;
+  }
+
+  /* ── Cyberpunk display font ──
+     CONTRACT: workers A and C apply this class to h1/h2/eyebrow headlines.
+     Chakra Petch via next/font/google, exposed as --font-display.
+     Body text stays IBM Plex Sans — this is display-only. */
+  .font-display {
+    font-family: var(--font-display), var(--font-ibm-plex-sans), system-ui, sans-serif;
+    font-weight: 600;
+    letter-spacing: 0.015em;
+  }
+
+  .font-display-strong {
+    font-family: var(--font-display), var(--font-ibm-plex-sans), system-ui, sans-serif;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+  }
+
+  /* ── Neon text glows (pair with .font-display) ── */
+  .v-text-glow-lime {
+    text-shadow: 0 0 18px hsl(var(--neon-lime) / 0.55), 0 0 60px hsl(var(--neon-lime) / 0.25);
+  }
+
+  .v-text-glow-cyan {
+    text-shadow: 0 0 18px hsl(var(--neon-cyan) / 0.55), 0 0 60px hsl(var(--neon-cyan) / 0.25);
+  }
+
+  .v-text-glow-magenta {
+    text-shadow: 0 0 18px hsl(var(--neon-magenta) / 0.55), 0 0 60px hsl(var(--neon-magenta) / 0.25);
   }
 
   /* Editorial headings */
@@ -387,25 +429,40 @@
 ::-webkit-scrollbar { display: none; }
 
 /* ─────────────────────────────────────────────
-   Vidish Studio design tokens + helpers
-   (scoped classes; portfolio /about styles untouched)
+   Vidish Studio — cyberpunk neon identity
+   (v-iris-* class names kept: many usages depend on them.
+    Old blue→purple→pink→orange wash replaced with
+    acid lime → electric cyan → hot magenta on near-black.)
    ───────────────────────────────────────────── */
 .v-iris-bg {
-  background: linear-gradient(120deg, #4f7cff 0%, #8b5cf6 42%, #ff7a6e 78%, #f5a524 100%);
+  background: linear-gradient(115deg, #D7FF3F 0%, #00F0FF 48%, #FF2D78 100%);
 }
 
 .v-iris-border {
   border-color: transparent;
   background:
-    linear-gradient(#121214, #121214) padding-box,
-    linear-gradient(120deg, #4f7cff, #8b5cf6, #ff7a6e, #f5a524) border-box;
+    linear-gradient(#0A0A0A, #0A0A0A) padding-box,
+    linear-gradient(115deg, #D7FF3F, #00F0FF 50%, #FF2D78) border-box;
 }
 
 .v-iris-text {
-  background: linear-gradient(120deg, #7ea0ff 0%, #a78bfa 42%, #ff9a8b 78%, #f5c04e 100%);
+  background: linear-gradient(115deg, #E7FF70 0%, #63F6FF 48%, #FF7AA8 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+}
+
+/* Neon glow utilities — match the new palette */
+.v-glow-lime {
+  box-shadow: 0 0 20px hsl(var(--neon-lime) / 0.35), 0 0 60px hsl(var(--neon-lime) / 0.14);
+}
+
+.v-glow-cyan {
+  box-shadow: 0 0 20px hsl(var(--neon-cyan) / 0.35), 0 0 60px hsl(var(--neon-cyan) / 0.14);
+}
+
+.v-glow-magenta {
+  box-shadow: 0 0 20px hsl(var(--neon-magenta) / 0.35), 0 0 60px hsl(var(--neon-magenta) / 0.14);
 }
 
 @keyframes v-price-swap {
@@ -415,8 +472,14 @@
 .v-price-swap { animation: v-price-swap 0.35s ease; }
 
 @keyframes v-gen-glow {
-  0%, 100% { opacity: 0.55; }
-  50%      { opacity: 1; }
+  0%, 100% {
+    opacity: 0.55;
+    box-shadow: 0 0 0 hsl(var(--neon-cyan) / 0);
+  }
+  50% {
+    opacity: 1;
+    box-shadow: 0 0 28px hsl(var(--neon-cyan) / 0.45), 0 0 80px hsl(var(--neon-cyan) / 0.18);
+  }
 }
 .v-gen-glow { animation: v-gen-glow 2.4s ease-in-out infinite; }
 

@@ -220,7 +220,7 @@ export default function PaymentModal({ jobId, initialPayment, onClose, navigate 
             <button
               type="button"
               onClick={() => setPhase("paid-form")}
-              className="v-iris-bg mt-4 w-full rounded-[10px] px-4 py-3 text-[14px] font-semibold text-white hover:opacity-95"
+              className="mt-4 w-full rounded-[10px] bg-[#D7FF3F] px-4 py-3 text-[14px] font-semibold text-[#080808] hover:opacity-95"
             >
               I&apos;ve paid
             </button>
@@ -275,7 +275,7 @@ export default function PaymentModal({ jobId, initialPayment, onClose, navigate 
               onClick={handleSubmitPaid}
               disabled={submitting}
               className={cn(
-                "v-iris-bg mt-5 flex w-full items-center justify-center gap-2 rounded-[10px] px-4 py-3 text-[14px] font-semibold text-white",
+                "mt-5 flex w-full items-center justify-center gap-2 rounded-[10px] bg-[#D7FF3F] px-4 py-3 text-[14px] font-semibold text-[#080808]",
                 submitting ? "cursor-wait opacity-70" : "hover:opacity-95",
               )}
             >
@@ -318,7 +318,7 @@ export default function PaymentModal({ jobId, initialPayment, onClose, navigate 
               onClick={handleReorder}
               disabled={reordering}
               className={cn(
-                "v-iris-bg mt-5 inline-flex w-full items-center justify-center gap-2 rounded-[10px] px-4 py-3 text-[14px] font-semibold text-white",
+                "mt-5 inline-flex w-full items-center justify-center gap-2 rounded-[10px] bg-[#D7FF3F] px-4 py-3 text-[14px] font-semibold text-[#080808]",
                 reordering ? "cursor-wait opacity-70" : "hover:opacity-95",
               )}
             >
