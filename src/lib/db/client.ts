@@ -47,17 +47,13 @@ export function getPgliteInstance(): PGlite | null {
 }
 
 /**
- * Apply every `drizzle/*.sql` migration in filename order.
- * Uses raw SQL through PGlite's exec, or the node-postgres pool.
+ * Apply every embedded migration in filename order.
+ * The SQL is bundled at build time (see migrations-data.ts) — no runtime
+ * filesystem access, which Vercel serverless functions do not reliably
+ * provide for the drizzle/ directory.
  */
 export async function runMigrations(): Promise<void> {
-  const fs = await import('node:fs');
-  const path = await import('node:path');
-  const dir = path.resolve(process.cwd(), 'drizzle');
-  const files = fs
-    .readdirSync(dir)
-    .filter((f) => f.endsWith('.sql'))
-    .sort();
+  const { MIGRATION_FILES, MIGRATION_SQL } = await import('./migrations-data');
 
   if (process.env.DATABASE_URL) {
     const { Pool: PgPool } = await import('pg');
@@ -71,8 +67,8 @@ export async function runMigrations(): Promise<void> {
         `SELECT 1 FROM information_schema.tables WHERE table_schema='public' AND table_name='orders'`,
       );
       if ((marker.rowCount ?? 0) === 0) {
-        for (const f of files) {
-          const sql = fs.readFileSync(path.join(dir, f), 'utf8');
+        for (let i = 0; i < MIGRATION_FILES.length; i++) {
+          const sql = MIGRATION_SQL[i];
           try {
             await pool.query(sql);
           } catch (err) {
@@ -90,10 +86,10 @@ export async function runMigrations(): Promise<void> {
   }
 
   // PGlite path: share the instance the drizzle handle wraps.
+  // Fresh in-memory DB per serverless instance -> always migrate.
   getDb();
   const client = pgliteInstance!;
-  for (const f of files) {
-    const sql = fs.readFileSync(path.join(dir, f), 'utf8');
+  for (const sql of MIGRATION_SQL) {
     await client.exec(sql);
   }
 }
