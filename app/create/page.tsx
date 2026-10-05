@@ -6,6 +6,8 @@ import Composer from "@/components/vilish/composer";
 import FulfillmentNotices from "@/components/vilish/fulfillment-notices";
 import Reveal from "@/components/motion/Reveal";
 import { Stagger, StaggerItem } from "@/components/motion/Stagger";
+import { PRICE_CATALOG } from "@/src/lib/pricing/catalog";
+import { formatINR } from "@/src/lib/vilish/types";
 
 const TRUST = [
   { icon: Wallet, label: "UPI payments" },
@@ -31,12 +33,10 @@ const NEXT = [
   },
 ];
 
-const TEASER = [
-  { label: "Single image", price: "₹29" },
-  { label: "Product photo", price: "₹49" },
-  { label: "4-pack", price: "₹79" },
-  { label: "5s clip", price: "₹99" },
-];
+/* Rendered from the canonical price catalog — never hardcode prices here. */
+const TEASER = PRICE_CATALOG.filter((p) =>
+  ["single-image", "product-photo", "pack-4", "clip-5s", "video-studio"].includes(p.id),
+).map((p) => ({ label: p.id === "video-studio" ? "Video Studio job" : p.label, price: formatINR(p.paise) }));
 
 /** Standard eyebrow, matching the homepage section headers. */
 function Eyebrow({ children }: { children: string }) {

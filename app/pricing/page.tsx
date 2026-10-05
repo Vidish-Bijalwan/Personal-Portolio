@@ -17,47 +17,61 @@ import { Stagger, StaggerItem } from "@/components/motion/Stagger";
 import Counter from "@/components/motion/Counter";
 import MagneticButton from "@/components/motion/MagneticButton";
 import { MOTION, usePrefersReducedMotion } from "@/src/lib/motion/theme";
+import { PRICE_CATALOG, type PriceEntry } from "@/src/lib/pricing/catalog";
+import { formatINR } from "@/src/lib/vilish/types";
 
-interface Tier {
-  name: string;
-  price?: string;
+interface TierMeta {
   blurb: string;
   action?: { label: string; href: string };
   comingSoon?: boolean;
 }
 
-/* Exact pricing data — prices and copy unchanged. */
-const TIERS: Tier[] = [
-  {
-    name: "Single image",
-    price: "₹29",
-    blurb: "One AI image at your chosen quality and aspect ratio. Live price shown before you pay.",
+/* Per-tier copy. Prices come from PRICE_CATALOG — never hardcode them here. */
+const TIER_META: Record<PriceEntry["id"], TierMeta> = {
+  "single-image": {
+    blurb:
+      "One AI image at your chosen quality and aspect ratio. Live price shown before you pay.",
     action: { label: "Create one", href: "/create" },
   },
-  {
-    name: "4-pack",
-    price: "₹79",
-    blurb: "Four images in one bundle — iterate on a concept without paying four times.",
+  "pack-4": {
+    blurb:
+      "Four images in one bundle — iterate on a concept without paying four times.",
     action: { label: "Create", href: "/create" },
   },
-  {
-    name: "Product photo",
-    price: "₹49",
+  "product-photo": {
     blurb: "Studio-grade product shot from a description or reference.",
     action: { label: "Create", href: "/create" },
   },
-  {
-    name: "5s clip",
-    price: "₹99",
-    blurb: "A 5-second AI video clip from your description. Made for you in minutes, not 24 hours.",
+  "clip-5s": {
+    blurb:
+      "A 5-second AI video clip from your description. Made for you in minutes, not 24 hours.",
     action: { label: "Create a clip", href: "/create?media=video" },
   },
-  {
-    name: "Remake",
-    price: "₹19",
-    blurb: "Didn't land? Regenerate any finished image with the same settings for less.",
+  "video-studio": {
+    blurb:
+      "Voice-over & TTS, auto-captioning, or trim + text overlay on your video. One finished video per job.",
+    action: { label: "Open Video Studio", href: "/video-studio" },
   },
-];
+  remake: {
+    blurb:
+      "Didn't land? Regenerate any finished image with the same settings for less.",
+  },
+};
+
+interface Tier {
+  name: string;
+  price: string;
+  blurb: string;
+  action?: { label: string; href: string };
+  comingSoon?: boolean;
+}
+
+/* Tiers rendered from the canonical catalog — price drift fails the catalog test. */
+const TIERS: Tier[] = PRICE_CATALOG.map((p) => ({
+  name: p.label,
+  price: formatINR(p.paise),
+  ...TIER_META[p.id],
+}));
 
 /* Emphasized tier — rendered with .v-iris-border. */
 const POPULAR_TIER = "4-pack";

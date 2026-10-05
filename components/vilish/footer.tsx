@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Github, Linkedin, Mail } from "lucide-react";
 import Wordmark from "./wordmark";
+import CursorSettingsControl from "@/components/motion/CursorSettingsControl";
 
 const COLUMNS = [
   {
@@ -126,7 +127,10 @@ export default function VilishFooter() {
           <p className="text-[12px] leading-5 text-white/35">
             Prices include GST. All images shown are examples.
           </p>
-          <p className="text-[12px] text-white/30">© 2026 Pixaura</p>
+          <div className="flex items-center gap-3">
+            <CursorSettingsControl />
+            <p className="text-[12px] text-white/30">© 2026 Pixaura</p>
+          </div>
         </div>
       </div>
     </footer>
