@@ -60,7 +60,8 @@ export default function CursorSettingsControl() {
         aria-label="Cursor settings"
         title="Cursor settings"
         className={cn(
-          "inline-flex items-center gap-1.5 rounded-[8px] border px-2.5 py-1.5 text-[12px] text-white/50 transition-colors",
+          // 44px minimum tap target on touch.
+          "inline-flex min-h-[44px] min-w-[44px] items-center justify-center gap-1.5 rounded-[8px] border px-3 py-2 text-[12px] text-white/50 transition-colors",
           "border-white/[0.1] hover:border-white/25 hover:text-white/90",
           open && "border-white/25 text-white/90",
         )}
@@ -73,7 +74,7 @@ export default function CursorSettingsControl() {
         <div
           role="dialog"
           aria-label="Cursor settings"
-          className="absolute bottom-full right-0 z-50 mb-2 w-64 rounded-[14px] border border-white/[0.1] bg-[#121214] p-4 shadow-[0_24px_64px_-16px_rgba(0,0,0,0.9)]"
+          className="absolute bottom-full right-0 z-50 mb-2 w-[calc(100vw-3rem)] max-w-64 rounded-[14px] border border-white/[0.1] bg-[#121214] p-4 shadow-[0_24px_64px_-16px_rgba(0,0,0,0.9)]"
         >
           {/* on/off */}
           <div className="flex items-center justify-between">

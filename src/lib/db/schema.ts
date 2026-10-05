@@ -147,6 +147,10 @@ export const generationJobs = pgTable('generation_jobs', {
   fulfillmentSource: text('fulfillment_source'),
   /** 'generation' | 'remake' | 'edit'. */
   jobKind: text('job_kind').notNull().default('generation').$type<JobKind>(),
+  /** Catalog product id for paid image orders: 'single-image' | 'pack-4' | 'product-photo'.
+   *  Written at quote time from the composer service selector; the operator
+   *  uses it to know what was sold (4-pack = 4 takes, product-photo = studio brief). */
+  product: text('product').notNull().default('single-image'),
   /** Internal operator notes; COPIED to child jobs on remake/edit. */
   operatorNotes: text('operator_notes'),
   /** Customer-visible clarification thread. */

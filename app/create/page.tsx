@@ -6,7 +6,7 @@ import Composer from "@/components/vilish/composer";
 import FulfillmentNotices from "@/components/vilish/fulfillment-notices";
 import Reveal from "@/components/motion/Reveal";
 import { Stagger, StaggerItem } from "@/components/motion/Stagger";
-import { PRICE_CATALOG } from "@/src/lib/pricing/catalog";
+import { PRICE_CATALOG, composerServiceById, priceOf } from "@/src/lib/pricing/catalog";
 import { formatINR } from "@/src/lib/vilish/types";
 
 const TRUST = [
@@ -50,11 +50,16 @@ function Eyebrow({ children }: { children: string }) {
 export default async function CreatePage({
   searchParams,
 }: {
-  searchParams: Promise<{ media?: string }>;
+  searchParams: Promise<{ media?: string; service?: string }>;
 }) {
   const sp = await searchParams;
   const initialMedia = sp?.media === "video" ? "video" : "image";
   const isVideo = initialMedia === "video";
+  // Deep link from pricing cards, e.g. /create?service=product-photo.
+  // Invalid values fall back to single-image; ignored in video mode.
+  const initialService = !isVideo
+    ? (composerServiceById(sp?.service)?.id ?? undefined)
+    : undefined;
 
   return (
     <div className="min-h-screen bg-[#080808] font-sans text-[#F5F5F3] antialiased">
@@ -90,7 +95,7 @@ export default async function CreatePage({
               <StaggerItem>
                 <p className="mx-auto mt-5 max-w-xl text-[15px] leading-7 text-white/[0.62] sm:text-[16px]">
                   {isVideo
-                    ? "Describe the 5-second clip. ₹99, made for you in minutes — exact price shown before you pay."
+                    ? `Describe the 5-second clip. ${formatINR(priceOf("clip-5s"))}, made for you in minutes — exact price shown before you pay.`
                     : "Type what you want in plain words — you see the exact price before anything is charged. One UPI payment, human quality review, your finished piece to download."}
                 </p>
               </StaggerItem>
@@ -114,10 +119,10 @@ export default async function CreatePage({
               <div className="relative">
                 <span
                   aria-hidden
-                  className="v-iris-bg pointer-events-none absolute -inset-px rounded-[22px] opacity-35 blur-xl"
+                  className="v-iris-bg pointer-events-none absolute -inset-px rounded-[22px] opacity-30 blur-md sm:opacity-35 sm:blur-xl"
                 />
                 <div className="v-iris-border relative rounded-[20px] border bg-[#0C0C0E] p-4 sm:p-7">
-                  <Composer variant="page" initialMedia={initialMedia} />
+                  <Composer variant="page" initialMedia={initialMedia} initialService={initialService} />
                 </div>
               </div>
             </Reveal>

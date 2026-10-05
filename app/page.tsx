@@ -26,7 +26,7 @@ import VilishNav from "@/components/vilish/nav";
 import VilishFooter from "@/components/vilish/footer";
 import Composer from "@/components/vilish/composer";
 import Lightbox, { type LightboxItem } from "@/components/vilish/lightbox";
-import { PRICE_CATALOG } from "@/src/lib/pricing/catalog";
+import { PRICE_CATALOG, priceOf } from "@/src/lib/pricing/catalog";
 import { formatINR } from "@/src/lib/vilish/types";
 import GenerativeField from "@/components/motion/GenerativeField";
 import HeroVideo from "@/components/motion/HeroVideo";
@@ -72,7 +72,7 @@ const SHOWREEL = [
     caption: "Floating chronograph, dramatic rim light",
     prompt:
       "Studio product shot of a steel chronograph floating in a dark studio, dramatic rim light tracing the case, deep shadows, luxury watch advertising.",
-    price: "₹49",
+    price: formatINR(priceOf("product-photo")),
     frame: "h-36 sm:h-48",
   },
   {
@@ -83,7 +83,7 @@ const SHOWREEL = [
     caption: "Astronaut before the monolith",
     prompt:
       "Painterly 1980s movie poster of a lone astronaut standing before a colossal alien monolith, dramatic scale, retro sci-fi illustration style.",
-    price: "₹29",
+    price: formatINR(priceOf("single-image")),
     frame: "h-52 sm:h-72",
   },
   {
@@ -94,7 +94,7 @@ const SHOWREEL = [
     caption: "Golden retriever, Rembrandt light",
     prompt:
       "Fine-art studio portrait of a golden retriever in a dark room, Rembrandt lighting sculpting the fur, soulful eyes, museum-grade pet photography.",
-    price: "₹29",
+    price: formatINR(priceOf("single-image")),
     frame: "h-44 sm:h-60",
   },
   {
@@ -105,7 +105,7 @@ const SHOWREEL = [
     caption: "Neon night, wet asphalt",
     prompt:
       "Sports car parked on a rain-wet street at night, neon signs reflected in the wet asphalt, cinematic night photography, moody atmosphere.",
-    price: "₹29",
+    price: formatINR(priceOf("single-image")),
     frame: "h-32 sm:h-44",
   },
   {
@@ -116,7 +116,7 @@ const SHOWREEL = [
     caption: "Himalayan dawn, tiny trekker",
     prompt:
       "Epic travel poster of Himalayan peaks at dawn, dramatic clouds, tiny trekker silhouette, vintage adventure poster aesthetic.",
-    price: "₹29",
+    price: formatINR(priceOf("single-image")),
     frame: "h-48 sm:h-64",
   },
   {
@@ -127,7 +127,7 @@ const SHOWREEL = [
     caption: "Burger, dramatic side light",
     prompt:
       "Overhead food photography of a gourmet burger with melting cheese on dark slate, dramatic side lighting, restaurant advertising style.",
-    price: "₹49",
+    price: formatINR(priceOf("product-photo")),
     frame: "h-44 sm:h-60",
   },
 ];
@@ -142,7 +142,7 @@ const SHOWCASE = [
     height: 1920,
     alt: "High-fashion model with sculptural black spiked hair in a charcoal studio — AI-generated example",
     caption: "Fashion editorial, sculptural hair",
-    price: "₹29",
+    price: formatINR(priceOf("single-image")),
   },
   {
     src: "/examples/10-perfume-ad.webp",
@@ -150,7 +150,7 @@ const SHOWCASE = [
     height: 1600,
     alt: "Faceted glass perfume bottle with golden liquid — AI-generated example",
     caption: "Golden perfume, faceted glass",
-    price: "₹49",
+    price: formatINR(priceOf("product-photo")),
   },
   {
     src: "/examples/1-sneaker-ad.webp",
@@ -158,7 +158,7 @@ const SHOWCASE = [
     height: 1280,
     alt: "Sneaker floating in a dark studio with dramatic rim lighting — AI-generated example",
     caption: "Floating sneaker, studio shot",
-    price: "₹29",
+    price: formatINR(priceOf("single-image")),
   },
   {
     src: "/examples/2-neon-portrait.webp",
@@ -166,7 +166,7 @@ const SHOWCASE = [
     height: 1920,
     alt: "Stylized portrait with neon city lights reflected in her eyes — AI-generated example",
     caption: "Neon portrait, city lights",
-    price: "₹29",
+    price: formatINR(priceOf("single-image")),
   },
 ];
 
@@ -203,21 +203,21 @@ const CAPABILITIES: Capability[] = [
     icon: ImageIcon,
     title: "Image",
     desc: "Anything you can describe — portraits, posters, concepts, scenes. Studio-grade renders, priced per piece.",
-    price: "from ₹29",
+    price: `from ${formatINR(priceOf("single-image"))}`,
     href: "/create",
   },
   {
     icon: SlidersHorizontal,
     title: "Edit",
     desc: "Retouch, restyle, recolor, remove backgrounds. Your photo, transformed exactly as you brief it.",
-    price: "from ₹29",
+    price: `from ${formatINR(priceOf("single-image"))}`,
     href: "/create",
   },
   {
     icon: Sparkles,
     title: "Ad",
     desc: "Product shots and campaign creatives that look shot in a studio — without booking a studio.",
-    price: "from ₹49",
+    price: `from ${formatINR(priceOf("product-photo"))}`,
     href: "/create",
   },
 ];
@@ -324,11 +324,11 @@ function FormatLab() {
 const FAQS = [
   {
     q: "How much does it cost to generate one AI image in India?",
-    a: "At Pixaura, a single AI image costs a fixed ₹29 — no subscription, no credits to manage. You see the exact price before you pay, and you pay once with UPI.",
+    a: `At Pixaura, a single AI image costs a fixed ${formatINR(priceOf("single-image"))} — no subscription, no credits to manage. You see the exact price before you pay, and you pay once with UPI.`,
   },
   {
     q: "Is there an AI image generator without a subscription?",
-    a: "Yes. Unlike monthly AI subscriptions, Pixaura is pay-per-creation: you pay only for the images you actually want, starting at ₹29 each. Nothing renews, nothing auto-charges.",
+    a: `Yes. Unlike monthly AI subscriptions, Pixaura is pay-per-creation: you pay only for the images you actually want, starting at ${formatINR(priceOf("single-image"))} each. Nothing renews, nothing auto-charges.`,
   },
   {
     q: "Can I pay with UPI for AI image generation?",
@@ -340,7 +340,7 @@ const FAQS = [
   },
   {
     q: "Do I own the images I generate? Can I use them commercially?",
-    a: "Yes. Once delivered, the image is yours — use it for your shop, listings, social media, or client work. Seller tip: our ₹49 product-photo tier is built for Amazon, Flipkart, and Meesho listings.",
+    a: `Yes. Once delivered, the image is yours — use it for your shop, listings, social media, or client work. Seller tip: our ${formatINR(priceOf("product-photo"))} product-photo tier is built for Amazon, Flipkart, and Meesho listings.`,
   },
   {
     q: "How long does it take to get my image?",
@@ -371,13 +371,13 @@ const VIDEO_CATS = [
     label: "Portraits",
     accent: "#FF2D78",
     blurb: "Character loops and living portraits — stills that breathe.",
-    bullets: ["5s loop · 9:16 vertical", "Animated from a single image", "₹99 per clip"],
+    bullets: ["5s loop · 9:16 vertical", "Animated from a single image", `${formatINR(priceOf("clip-5s"))} per clip`],
     clip: {
       src: "/examples/videos/clip-1-portrait.mp4",
       poster: "/examples/videos/poster-1-portrait.jpg",
       alt: "AI video example: stylized neon portrait animating in a 5s loop — made with Pixaura",
       caption: "Neon portrait, in motion",
-      price: "₹99",
+      price: formatINR(priceOf("clip-5s")),
     },
   },
   {
@@ -385,13 +385,13 @@ const VIDEO_CATS = [
     label: "Product",
     accent: "#D7FF3F",
     blurb: "Product shots with slow cinematic motion — built for listings and ads.",
-    bullets: ["5s loop · 9:16 vertical", "Studio-light drift and rotation", "₹99 per clip"],
+    bullets: ["5s loop · 9:16 vertical", "Studio-light drift and rotation", `${formatINR(priceOf("clip-5s"))} per clip`],
     clip: {
       src: "/examples/videos/clip-2-product.mp4",
       poster: "/examples/videos/poster-2-product.jpg",
       alt: "AI video example: premium product shot with slow cinematic motion — made with Pixaura",
       caption: "Product shot, in motion",
-      price: "₹99",
+      price: formatINR(priceOf("clip-5s")),
     },
   },
   {
@@ -399,13 +399,13 @@ const VIDEO_CATS = [
     label: "Cinematic",
     accent: "#00F0FF",
     blurb: "Atmospheric scenes with a drifting camera — mood you can feel.",
-    bullets: ["5s loop · 9:16 vertical", "Aerial-style slow push", "₹99 per clip"],
+    bullets: ["5s loop · 9:16 vertical", "Aerial-style slow push", `${formatINR(priceOf("clip-5s"))} per clip`],
     clip: {
       src: "/examples/videos/clip-3-city.mp4",
       poster: "/examples/videos/poster-3-city.jpg",
       alt: "AI video example: cinematic night cityscape with slow aerial motion — made with Pixaura",
       caption: "Night city, in motion",
-      price: "₹99",
+      price: formatINR(priceOf("clip-5s")),
     },
   },
 ];
@@ -570,7 +570,7 @@ function VideoShowcase() {
             className="inline-flex items-center gap-2 rounded-[12px] px-6 py-3 text-[14px] font-semibold text-[#080808] transition-transform duration-200 hover:scale-[1.03] motion-reduce:transition-none"
             style={{ background: active.accent }}
           >
-            Make yours — ₹99 <ArrowRight className="h-4 w-4" strokeWidth={2} />
+            Make yours — {formatINR(priceOf("clip-5s"))} <ArrowRight className="h-4 w-4" strokeWidth={2} />
           </Link>
         </div>
       </div>
@@ -905,7 +905,7 @@ export default function VilishLanding() {
               <StaggerItem>
                 <p className="mx-auto mt-5 max-w-xl text-[15px] leading-7 text-white/[0.62] sm:text-[17px]">
                   Generate AI images without another monthly subscription. See the exact
-                  price before you pay — from ₹29.
+                  price before you pay — from {formatINR(priceOf("single-image"))}.
                 </p>
               </StaggerItem>
               <StaggerItem>
@@ -930,7 +930,7 @@ export default function VilishLanding() {
         </section>
 
         {/* ── showreel strip ───────────────────────────────── */}
-        <section aria-label="Example showreel" className="border-b border-white/[0.08] py-10 sm:py-14">
+        <section aria-label="Example showreel" className="cv-auto border-b border-white/[0.08] py-10 sm:py-14">
           <div className="mx-auto max-w-5xl px-4">
             <Reveal>
               <Eyebrow>Showreel</Eyebrow>
@@ -954,7 +954,7 @@ export default function VilishLanding() {
         {/* ── how it works (editorial band) ────────────────── */}
         <section
           aria-label="How it works"
-          className="border-b border-white/[0.08] bg-[#0B0B0C]"
+          className="cv-auto border-b border-white/[0.08] bg-[#0B0B0C]"
         >
           <div className="mx-auto max-w-5xl px-4 py-20 sm:py-28">
             <Reveal>
@@ -976,7 +976,7 @@ export default function VilishLanding() {
         </section>
 
         {/* ── showcase ─────────────────────────────────────── */}
-        <section aria-label="Example creations" className="border-b border-white/[0.08] py-20 sm:py-28">
+        <section aria-label="Example creations" className="cv-auto border-b border-white/[0.08] py-20 sm:py-28">
           <div className="mx-auto max-w-5xl px-4">
             <Reveal>
               <Eyebrow>Showcase</Eyebrow>
@@ -1040,7 +1040,7 @@ export default function VilishLanding() {
         </section>
 
         {/* ── motion showcase (AI video examples, tabbed) ─── */}
-        <section aria-label="AI video examples" className="border-b border-white/[0.08] py-16 sm:py-20">
+        <section aria-label="AI video examples" className="cv-auto border-b border-white/[0.08] py-16 sm:py-20">
           <div className="mx-auto max-w-5xl px-4">
             <Reveal>
               <Eyebrow>Motion</Eyebrow>
@@ -1048,7 +1048,7 @@ export default function VilishLanding() {
                 Stills are the warm-up. <span className="text-[#00F0FF]">Video is live.</span>
               </h2>
               <p className="mt-3 max-w-xl text-[14px] leading-6 text-white/50">
-                AI video examples from Pixaura — 5s clips at ₹99 each. Hover to
+                AI video examples from Pixaura — 5s clips at {formatINR(priceOf("clip-5s"))} each. Hover to
                 preview, tap a category to switch lanes, click to watch full-screen.
               </p>
             </Reveal>
@@ -1059,7 +1059,7 @@ export default function VilishLanding() {
         </section>
 
         {/* ── capability bento ─────────────────────────────── */}
-        <section aria-label="What you can create" className="mx-auto max-w-5xl px-4 py-20 sm:py-28">
+        <section aria-label="What you can create" className="cv-auto mx-auto max-w-5xl px-4 py-20 sm:py-28">
           <Reveal>
             <Eyebrow>Capabilities</Eyebrow>
             <h2 className="font-display mt-3 max-w-[22ch] text-[26px] font-semibold tracking-[-0.01em] sm:text-[34px]">
@@ -1078,7 +1078,7 @@ export default function VilishLanding() {
               <span className="rounded-full border border-[#D7FF3F]/40 px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#D7FF3F]">
                 Now live
               </span>
-              Video — 5s motion clips at ₹99 each, made in minutes. Every
+              Video — 5s motion clips at {formatINR(priceOf("clip-5s"))} each, made in minutes. Every
               frame you see here is still a single creation.
             </p>
           </Reveal>
@@ -1092,7 +1092,7 @@ export default function VilishLanding() {
         {/* ── stats band ───────────────────────────────────── */}
         <section
           aria-label="Studio stats"
-          className="border-y border-white/[0.08] bg-white/[0.015]"
+          className="cv-auto border-y border-white/[0.08] bg-white/[0.015]"
         >
           <div className="mx-auto max-w-5xl px-4 py-14 text-center sm:py-20">
             <Stagger className="grid grid-cols-1 gap-10 sm:grid-cols-3">
@@ -1117,7 +1117,7 @@ export default function VilishLanding() {
         </section>
 
         {/* ── formats: interactive ratio lab ───────────────── */}
-        <section aria-label="Supported formats" className="border-b border-white/[0.08] py-16 sm:py-24">
+        <section aria-label="Supported formats" className="cv-auto border-b border-white/[0.08] py-16 sm:py-24">
           <div className="mx-auto max-w-5xl px-4">
             <Reveal>
               <Eyebrow>Formats</Eyebrow>
@@ -1136,7 +1136,7 @@ export default function VilishLanding() {
         </section>
 
         {/* ── pricing teaser (tinted band) ──────────────────── */}
-        <section aria-label="Pricing teaser" className="border-y border-white/[0.08] bg-[#0B0B0C]">
+        <section aria-label="Pricing teaser" className="cv-auto border-y border-white/[0.08] bg-[#0B0B0C]">
           <div className="mx-auto max-w-3xl px-4 py-16 text-center sm:py-20">
             <Reveal>
               <Eyebrow>Pricing</Eyebrow>
@@ -1168,7 +1168,7 @@ export default function VilishLanding() {
         <section
           id="faq"
           aria-label="Frequently asked questions"
-          className="mx-auto max-w-5xl scroll-mt-24 px-4 py-20 sm:py-28"
+          className="cv-auto mx-auto max-w-5xl scroll-mt-24 px-4 py-20 sm:py-28"
         >
           <Reveal>
             <Eyebrow>FAQ</Eyebrow>
@@ -1211,7 +1211,7 @@ export default function VilishLanding() {
         </section>
 
         {/* ── closing CTA ──────────────────────────────────── */}
-        <section className="relative overflow-hidden">
+        <section className="cv-auto relative overflow-hidden">
           <GenerativeField className="absolute inset-0" density={0.8} />
           <FlyingElements className="absolute inset-0" density={0.5} />
           <div
@@ -1238,11 +1238,11 @@ export default function VilishLanding() {
               aria-label="Price list"
             >
               {[
-                { label: "Image", price: "₹29" },
-                { label: "Product shot", price: "₹49" },
-                { label: "4-pack", price: "₹79" },
-                { label: "5s video", price: "₹99" },
-                { label: "Remake", price: "₹19" },
+                { label: "Image", price: formatINR(priceOf("single-image")), },
+                { label: "Product shot", price: formatINR(priceOf("product-photo")) },
+                { label: "4-pack", price: formatINR(priceOf("pack-4")) },
+                { label: "5s video", price: formatINR(priceOf("clip-5s")) },
+                { label: "Remake", price: formatINR(priceOf("remake")) },
               ].map((c) => (
                 <StaggerItem key={c.label}>
                   <span className="inline-flex items-baseline gap-2 rounded-full border border-white/[0.14] bg-white/[0.04] px-4 py-2 backdrop-blur-sm transition-colors duration-200 hover:border-[#D7FF3F]/50 hover:bg-[#D7FF3F]/[0.07]">
@@ -1267,7 +1267,7 @@ export default function VilishLanding() {
             <Reveal delay={0.2}>
               <Link
                 href="/pricing"
-                className="mt-6 inline-flex items-center gap-1.5 text-[14px] font-medium text-[#F5F5F3] underline decoration-white/25 underline-offset-4 hover:decoration-white/60"
+                className="mt-6 inline-flex min-h-[44px] items-center gap-1.5 px-2 py-2 text-[14px] font-medium text-[#F5F5F3] underline decoration-white/30 underline-offset-4 hover:decoration-white/70"
               >
                 See full pricing <ArrowRight className="h-4 w-4" strokeWidth={1.8} />
               </Link>

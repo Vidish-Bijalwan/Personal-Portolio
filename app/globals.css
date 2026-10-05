@@ -641,3 +641,13 @@
     transform: none;
   }
 }
+
+/* ── below-fold rendering: skip layout/paint for off-screen sections ── */
+/* Applied to heavy homepage sections. The browser renders them on approach
+ * (IntersectionObserver reveals still fire). contain-intrinsic-size keeps
+ * scroll height stable so the scrollbar doesn't jump. Ignored by older
+ * browsers — progressive enhancement only. */
+.cv-auto {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 640px;
+}

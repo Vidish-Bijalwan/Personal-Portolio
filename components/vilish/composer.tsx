@@ -12,6 +12,13 @@ import {
   type QualityTier,
 } from "@/src/lib/vilish/types";
 import {
+  COMPOSER_SERVICES,
+  composerServiceById,
+  priceOf,
+  servicePricePaise,
+  type ComposerServiceId,
+} from "@/src/lib/pricing/catalog";
+import {
   ATTACH_MAX_FILES,
   ATTACH_MAX_FILE_BYTES,
   ATTACH_MAX_TOTAL_BYTES,
@@ -72,6 +79,9 @@ interface ComposerProps {
   className?: string;
   /** Deep-link support, e.g. /create?media=video from the pricing page. */
   initialMedia?: MediaMode;
+  /** Deep-link support, e.g. /create?service=product-photo — selects the
+   *  paid image service. Only applies when initialMedia is "image". */
+  initialService?: ComposerServiceId;
 }
 
 const ACCEPT_ATTR = ".png,.jpg,.jpeg,.webp,.gif,.pdf,.doc,.docx,.txt,.md";
@@ -82,12 +92,17 @@ function formatBytes(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-export default function Composer({ variant = "hero", className, initialMedia = "image" }: ComposerProps) {
+export default function Composer({ variant = "hero", className, initialMedia = "image", initialService }: ComposerProps) {
   const router = useRouter();
   const [prompt, setPrompt] = useState("");
   const [quality, setQuality] = useState<QualityTier>("studio");
   const [aspectRatio, setAspectRatio] = useState<AspectRatio>(
     initialMedia === "video" ? "9:16" : "1:1"
+  );
+  // Paid image service: single-image | 4-pack | product-photo. The estimate
+  // and the server quote both derive from the price catalog — never hardcoded.
+  const [service, setService] = useState<ComposerServiceId>(
+    initialService ?? "single-image"
   );
   const [phase, setPhase] = useState<QuotePhase>("idle");
   const [quote, setQuote] = useState<QuoteResult | null>(null);
@@ -152,7 +167,7 @@ export default function Composer({ variant = "hero", className, initialMedia = "
     void refreshFreeRemaining();
   }, [refreshFreeRemaining]);
 
-  const runQuote = useCallback(async (text: string, q: QualityTier, ar: AspectRatio) => {
+  const runQuote = useCallback(async (text: string, q: QualityTier, ar: AspectRatio, svc: ComposerServiceId) => {
     abortRef.current?.abort();
     const ctrl = new AbortController();
     abortRef.current = ctrl;
@@ -183,7 +198,7 @@ export default function Composer({ variant = "hero", className, initialMedia = "
       const quoteRes = await fetch("/api/generation/quote", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ spec }),
+        body: JSON.stringify({ spec, product: svc }),
         signal: ctrl.signal,
       });
       if (!quoteRes.ok) {
@@ -213,9 +228,9 @@ export default function Composer({ variant = "hero", className, initialMedia = "
       return;
     }
     setPhase("loading");
-    const t = setTimeout(() => runQuote(prompt.trim(), quality, aspectRatio), 600);
+    const t = setTimeout(() => runQuote(prompt.trim(), quality, aspectRatio, service), 600);
     return () => clearTimeout(t);
-  }, [prompt, quality, aspectRatio, promptOk, runQuote, mediaMode, billingMode]);
+  }, [prompt, quality, aspectRatio, service, promptOk, runQuote, mediaMode, billingMode]);
 
   const addFiles = useCallback((picked: File[]) => {
     if (picked.length === 0) return;
@@ -451,6 +466,14 @@ export default function Composer({ variant = "hero", className, initialMedia = "
     }
   };
 
+  const selectService = (s: ComposerServiceId) => {
+    if (s === service) return;
+    setService(s);
+    setStatus("");
+    setPhase("idle");
+    setQuote(null);
+  };
+
   const aspects = mediaMode === "video" ? VIDEO_ASPECTS : IMAGE_ASPECTS;
   // Reference attachments are supported for image generations in both
   // billing modes: paid orders store them on generation_attachments for the
@@ -487,7 +510,7 @@ export default function Composer({ variant = "hero", className, initialMedia = "
               onClick={() => selectMedia(m.id)}
               aria-pressed={mediaMode === m.id}
               className={cn(
-                "rounded-[9px] px-4 py-2 text-[13px] font-semibold transition-colors",
+                "min-h-[44px] rounded-[9px] px-4 py-2 text-[13px] font-semibold transition-colors",
                 mediaMode === m.id
                   ? "bg-[#D7FF3F] text-[#080808]"
                   : "text-white/55 hover:text-white/85",
@@ -499,12 +522,12 @@ export default function Composer({ variant = "hero", className, initialMedia = "
         </div>
         <Link
           href="/video-studio"
-          title="Voice-over & TTS, auto-captioning, trim + text overlay — ₹49 per finished video"
-          className="inline-flex items-center gap-1.5 rounded-[12px] border border-dashed border-white/[0.14] px-4 py-2 text-[13px] font-semibold text-white/60 transition-colors hover:border-[#00F0FF]/50 hover:text-white/95"
+          title={`Voice-over & TTS, auto-captioning, trim + text overlay — ${formatINR(priceOf("video-studio"))} per finished video`}
+          className="inline-flex min-h-[44px] items-center gap-1.5 rounded-[12px] border border-dashed border-white/[0.14] px-4 py-2 text-[13px] font-semibold text-white/60 transition-colors hover:border-[#00F0FF]/50 hover:text-white/95"
         >
           <Clapperboard className="h-3.5 w-3.5" aria-hidden />
           Edit video
-          <span className="text-[11px] font-medium text-white/35">₹49</span>
+          <span className="text-[11px] font-medium text-white/35">{formatINR(priceOf("video-studio"))}</span>
         </Link>
         {mediaMode === "image" && (
           <div
@@ -517,7 +540,7 @@ export default function Composer({ variant = "hero", className, initialMedia = "
               onClick={() => setBillingMode("free")}
               aria-pressed={billingMode === "free"}
               className={cn(
-                "rounded-[9px] px-4 py-2 text-[13px] font-semibold transition-colors",
+                "min-h-[44px] rounded-[9px] px-4 py-2 text-[13px] font-semibold transition-colors",
                 billingMode === "free"
                   ? "bg-[#00F0FF] text-[#080808]"
                   : "text-white/55 hover:text-white/85",
@@ -534,7 +557,7 @@ export default function Composer({ variant = "hero", className, initialMedia = "
               onClick={() => setBillingMode("paid")}
               aria-pressed={billingMode === "paid"}
               className={cn(
-                "rounded-[9px] px-4 py-2 text-[13px] font-semibold transition-colors",
+                "min-h-[44px] rounded-[9px] px-4 py-2 text-[13px] font-semibold transition-colors",
                 billingMode === "paid"
                   ? "bg-[#D7FF3F] text-[#080808]"
                   : "text-white/55 hover:text-white/85",
@@ -547,12 +570,58 @@ export default function Composer({ variant = "hero", className, initialMedia = "
       </div>
       {mediaMode === "image" && billingMode === "free" && (
         <p className="mb-4 text-[12px] leading-5 text-white/40">
-          Free previews carry a Pixaura watermark. Unlock the clean HD file for ₹29.
+          Free previews carry a Pixaura watermark. Unlock the clean HD file
+          for {formatINR(priceOf("single-image"))}.
         </p>
+      )}
+      {/* service selector: which paid product to create — prices live from the catalog */}
+      {mediaMode === "image" && billingMode === "paid" && (
+        <div className="mb-4">
+          <div
+            role="group"
+            aria-label="Choose a service"
+            className="grid grid-cols-1 gap-2 min-[420px]:grid-cols-3"
+          >
+            {COMPOSER_SERVICES.map((s) => {
+              const active = service === s.id;
+              return (
+                <button
+                  key={s.id}
+                  type="button"
+                  onClick={() => selectService(s.id)}
+                  aria-pressed={active}
+                  title={s.blurb}
+                  className={cn(
+                    "rounded-[12px] border px-3 py-2.5 text-left transition-colors min-h-[44px]",
+                    active
+                      ? "border-[#D7FF3F]/60 bg-[#D7FF3F]/[0.07]"
+                      : "border-white/[0.08] bg-[#0D0D0F] hover:border-white/25",
+                  )}
+                >
+                  <span className={cn(
+                    "block text-[13px] font-semibold",
+                    active ? "text-[#F5F5F3]" : "text-white/70",
+                  )}>
+                    {s.label}
+                  </span>
+                  <span className={cn(
+                    "mt-0.5 block text-[13px] font-semibold tabular-nums",
+                    active ? "text-[#D7FF3F]" : "text-white/45",
+                  )}>
+                    {formatINR(servicePricePaise(s.id))}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+          <p className="mt-2 text-[12px] leading-5 text-white/40">
+            {COMPOSER_SERVICES.find((s) => s.id === service)?.blurb}
+          </p>
+        </div>
       )}
       {mediaMode === "video" && (
         <p className="mb-4 text-[12px] leading-5 text-white/40">
-          ₹99 per 5s clip — made for you in minutes. AI-generated; a watermarked
+          {formatINR(priceOf("clip-5s"))} per 5s clip — made for you in minutes. AI-generated; a watermarked
           preview shows until you unlock the clean HD file.
         </p>
       )}
@@ -638,7 +707,7 @@ export default function Composer({ variant = "hero", className, initialMedia = "
               type="button"
               onClick={() => fileInputRef.current?.click()}
               disabled={files.length >= ATTACH_MAX_FILES}
-              className="inline-flex items-center gap-1.5 rounded-[8px] border border-white/[0.1] bg-[#0D0D0F] px-3 py-1.5 text-[12px] font-medium text-white/60 transition-colors hover:border-white/25 hover:text-white/90 disabled:cursor-not-allowed disabled:opacity-40"
+              className="inline-flex min-h-[44px] items-center gap-1.5 rounded-[8px] border border-white/[0.1] bg-[#0D0D0F] px-3 py-1.5 text-[12px] font-medium text-white/60 transition-colors hover:border-white/25 hover:text-white/90 disabled:cursor-not-allowed disabled:opacity-40"
             >
               <Paperclip className="h-3.5 w-3.5" />
               {files.length === 0
@@ -675,7 +744,7 @@ export default function Composer({ variant = "hero", className, initialMedia = "
                 aria-pressed={quality === qt.id}
                 title={qt.hint}
                 className={cn(
-                  "rounded-[8px] px-3 py-1.5 text-[13px] font-medium transition-colors",
+                  "min-h-[44px] rounded-[8px] px-3 py-1.5 text-[13px] font-medium transition-colors",
                   quality === qt.id
                     ? "bg-[#D7FF3F] text-[#080808]"
                     : "text-white/55 hover:text-white/85",
@@ -696,7 +765,7 @@ export default function Composer({ variant = "hero", className, initialMedia = "
               onClick={() => setAspectRatio(ar.id)}
               aria-pressed={aspectRatio === ar.id}
               className={cn(
-                "rounded-full border px-3 py-1 text-[12px] font-medium tabular-nums transition-colors",
+                "min-h-[44px] rounded-full border px-3 py-1 text-[12px] font-medium tabular-nums transition-colors",
                 aspectRatio === ar.id
                   ? "border-[#D7FF3F]/60 bg-[#D7FF3F]/[0.08] text-[#F5F5F3]"
                   : "border-white/[0.08] text-white/50 hover:border-white/20 hover:text-white/80",
@@ -713,7 +782,7 @@ export default function Composer({ variant = "hero", className, initialMedia = "
         <div className="min-w-0">
           {mediaMode === "video" && (
             <p className="text-[13px] text-white/40 tabular-nums">
-              <span className="text-[18px] font-semibold text-[#F5F5F3]">₹99</span>{" "}
+              <span className="text-[18px] font-semibold text-[#F5F5F3]">{formatINR(priceOf("clip-5s"))}</span>{" "}
               per 5s clip
             </p>
           )}
@@ -727,13 +796,13 @@ export default function Composer({ variant = "hero", className, initialMedia = "
           )}
           {mediaMode === "image" && billingMode === "paid" && phase === "loading" && (
             <p className="text-[13px] text-white/40 tabular-nums">
-              Estimated <span className="text-[#F5F5F3]">₹29</span>
+              Estimated <span className="text-[#F5F5F3]">{formatINR(servicePricePaise(service))}</span>
               <span className="ml-2 inline-block h-3 w-3 animate-spin rounded-full border-2 border-white/20 border-t-white/70 align-[-1px]" />
             </p>
           )}
           {mediaMode === "image" && billingMode === "paid" && phase === "idle" && (
             <p className="text-[13px] text-white/40 tabular-nums">
-              Estimated <span className="text-[#F5F5F3]">₹29</span>
+              Estimated <span className="text-[#F5F5F3]">{formatINR(servicePricePaise(service))}</span>
             </p>
           )}
           {mediaMode === "image" && billingMode === "paid" && phase === "quoted" && quote && (
@@ -847,7 +916,7 @@ export default function Composer({ variant = "hero", className, initialMedia = "
       {mediaMode === "image" && billingMode === "free" && (
         <p className="mt-3 text-[12px] leading-5 text-white/35">
           3 free AI previews a day, no payment needed. This is a preview, not a
-          finished order — unlock the clean HD file for ₹29 if you love it.
+          finished order — unlock the clean HD file for {formatINR(priceOf("single-image"))} if you love it.
         </p>
       )}
       {ordersAccepting === false && (

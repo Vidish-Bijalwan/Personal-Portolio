@@ -26,21 +26,23 @@ interface TierMeta {
   comingSoon?: boolean;
 }
 
-/* Per-tier copy. Prices come from PRICE_CATALOG — never hardcode them here. */
+/* Per-tier copy. Prices come from PRICE_CATALOG — never hardcode them here.
+ * Card CTAs deep-link into the composer with the matching service
+ * preselected, so the price the card advertises is the price quoted. */
 const TIER_META: Record<PriceEntry["id"], TierMeta> = {
   "single-image": {
     blurb:
       "One AI image at your chosen quality and aspect ratio. Live price shown before you pay.",
-    action: { label: "Create one", href: "/create" },
+    action: { label: "Create one", href: "/create?service=single-image" },
   },
   "pack-4": {
     blurb:
       "Four images in one bundle — iterate on a concept without paying four times.",
-    action: { label: "Create", href: "/create" },
+    action: { label: "Create", href: "/create?service=pack-4" },
   },
   "product-photo": {
     blurb: "Studio-grade product shot from a description or reference.",
-    action: { label: "Create", href: "/create" },
+    action: { label: "Create", href: "/create?service=product-photo" },
   },
   "clip-5s": {
     blurb:

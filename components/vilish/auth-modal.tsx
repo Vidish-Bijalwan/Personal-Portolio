@@ -121,7 +121,7 @@ export default function AuthModal({ open, onClose, onAuthenticated }: AuthModalP
         if (e.target === e.currentTarget && !busy) onClose();
       }}
     >
-      <div className="w-full max-w-md rounded-t-[20px] border border-white/[0.1] bg-[#121214] p-6 sm:rounded-[20px]">
+      <div className="max-h-[92dvh] w-full max-w-md overflow-y-auto rounded-t-[20px] border border-white/[0.1] bg-[#121214] p-6 sm:rounded-[20px]">
         <div className="flex items-start justify-between">
           <div>
             <h2 className="font-display text-[19px] font-semibold tracking-[0.01em]">
@@ -136,7 +136,7 @@ export default function AuthModal({ open, onClose, onAuthenticated }: AuthModalP
           <button
             type="button"
             onClick={() => !busy && onClose()}
-            className="rounded-[8px] p-1.5 text-white/50 hover:bg-white/[0.06] hover:text-white/85"
+            className="rounded-[8px] p-2.5 text-white/50 hover:bg-white/[0.06] hover:text-white/85"
             aria-label="Close"
           >
             <X className="h-5 w-5" />
@@ -153,7 +153,7 @@ export default function AuthModal({ open, onClose, onAuthenticated }: AuthModalP
                 setError("");
               }}
               className={cn(
-                "rounded-[8px] px-3 py-2 text-[13px] font-medium transition-colors",
+                "min-h-[44px] rounded-[8px] px-3 py-2 text-[13px] font-medium transition-colors",
                 mode === m ? "bg-white/[0.08] text-white" : "text-white/45 hover:text-white/70",
               )}
             >
