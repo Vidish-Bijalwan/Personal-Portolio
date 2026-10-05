@@ -5,7 +5,7 @@
  */
 
 export interface LightboxItem {
-  /** Image URL (public path). */
+  /** Image or video URL (public path). */
   src: string;
   /** Caption shown under the image and used for the dialog label/alt fallback. */
   caption: string;
@@ -17,6 +17,10 @@ export interface LightboxItem {
   badge?: string;
   /** Optional alt text; falls back to caption when omitted. */
   alt?: string;
+  /** "video" for AI video example items — renders a <video>, not next/Image. */
+  kind?: "image" | "video";
+  /** Poster image for video items (shown while loading and under reduced motion). */
+  poster?: string;
 }
 
 /** Wrap-around navigation for the lightbox arrows. dir: 1 = next, -1 = prev. */

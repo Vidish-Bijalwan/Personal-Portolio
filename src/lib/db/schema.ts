@@ -238,6 +238,60 @@ export const generationAttachments = pgTable('generation_attachments', {
   createdAt: createdAt(),
 });
 
+/* ---------------- free-tier images + paid video clips ---------------- */
+
+/**
+ * Unified generations table for the free-tier image flow and paid video
+ * clips. tier='free' + media_type='image': 3/day cap, watermarked preview,
+ * clean download unlocks for ₹29 after manual-UPI verify. tier='paid' +
+ * media_type='video': ₹99 per 5s clip, no daily cap; the watcher generates
+ * immediately on order and the clean mp4 unlocks on payment verify.
+ * (Paid operator images keep using generation_jobs — NOT this table.)
+ */
+export const generations = pgTable('generations', {
+  id: id(),
+  userId: text('user_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  prompt: text('prompt').notNull(),
+  quality: text('quality').notNull().default('studio'),
+  aspectRatio: text('aspect_ratio').notNull().default('1:1'),
+  /** queued | generating | done | failed */
+  status: text('status').notNull().default('queued'),
+  /** operator/watcher progress label for the waiting room */
+  stage: text('stage'),
+  /** image | video */
+  mediaType: text('media_type').notNull().default('image'),
+  /** free | paid */
+  tier: text('tier').notNull().default('free'),
+  attempts: integer('attempts').notNull().default(0),
+  watermarked: bytea('watermarked'),
+  clean: bytea('clean'),
+  mime: text('mime').notNull().default('image/jpeg'),
+  error: text('error'),
+  unlocked: boolean('unlocked').notNull().default(false),
+  createdAt: createdAt(),
+  updatedAt: updatedAt(),
+  deliveredAt: timestamp('delivered_at', { withTimezone: true }),
+});
+
+/**
+ * Links a manual-UPI order to a generations row. purpose 'unlock': ₹29
+ * clean-image download for a free generation. purpose 'video': ₹99 paid
+ * clip. The payment-verify hook flips generations.unlocked from this link.
+ */
+export const generationOrders = pgTable('generation_orders', {
+  orderId: uuid('order_id')
+    .primaryKey()
+    .references(() => orders.id, { onDelete: 'cascade' }),
+  generationId: uuid('generation_id')
+    .notNull()
+    .references(() => generations.id, { onDelete: 'cascade' }),
+  /** unlock | video */
+  purpose: text('purpose').notNull(),
+  createdAt: createdAt(),
+});
+
 /* ---------------- providers & pricing ---------------- */
 
 export const providers = pgTable('providers', {

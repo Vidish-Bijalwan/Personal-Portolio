@@ -26,6 +26,7 @@ import {
 } from "./payment";
 import PaymentModal from "./payment-modal";
 import AuthModal from "./auth-modal";
+import { videoPaymentStorageKey } from "./free-tier";
 
 const QUALITIES: { id: QualityTier; label: string; hint: string }[] = [
   { id: "quick", label: "Quick", hint: "Fast drafts" },
@@ -33,11 +34,18 @@ const QUALITIES: { id: QualityTier; label: string; hint: string }[] = [
   { id: "cinema", label: "Cinema", hint: "Best quality" },
 ];
 
-const ASPECTS: { id: AspectRatio; label: string }[] = [
+const IMAGE_ASPECTS: { id: AspectRatio; label: string }[] = [
   { id: "1:1", label: "1:1" },
   { id: "4:5", label: "4:5" },
   { id: "9:16", label: "9:16" },
   { id: "16:9", label: "16:9" },
+];
+
+/** Aspect ratios offered for video clips. */
+const VIDEO_ASPECTS: { id: AspectRatio; label: string }[] = [
+  { id: "9:16", label: "9:16" },
+  { id: "16:9", label: "16:9" },
+  { id: "1:1", label: "1:1" },
 ];
 
 type QuotePhase =
@@ -53,9 +61,14 @@ interface QuoteResult {
   expiresAt: string;
 }
 
+type MediaMode = "image" | "video";
+type BillingMode = "free" | "paid";
+
 interface ComposerProps {
   variant?: "hero" | "page";
   className?: string;
+  /** Deep-link support, e.g. /create?media=video from the pricing page. */
+  initialMedia?: MediaMode;
 }
 
 const ACCEPT_ATTR = ".png,.jpg,.jpeg,.webp,.gif,.pdf,.doc,.docx,.txt,.md";
@@ -66,21 +79,33 @@ function formatBytes(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-export default function Composer({ variant = "hero", className }: ComposerProps) {
+export default function Composer({ variant = "hero", className, initialMedia = "image" }: ComposerProps) {
   const router = useRouter();
   const [prompt, setPrompt] = useState("");
   const [quality, setQuality] = useState<QualityTier>("studio");
-  const [aspectRatio, setAspectRatio] = useState<AspectRatio>("1:1");
+  const [aspectRatio, setAspectRatio] = useState<AspectRatio>(
+    initialMedia === "video" ? "9:16" : "1:1"
+  );
   const [phase, setPhase] = useState<QuotePhase>("idle");
   const [quote, setQuote] = useState<QuoteResult | null>(null);
   const [starting, setStarting] = useState(false);
   const [status, setStatus] = useState("");
   const [authNeeded, setAuthNeeded] = useState(false);
+  const [pendingAuth, setPendingAuth] = useState<"paid" | "free" | "video" | null>(null);
   const [modal, setModal] = useState<{ jobId: string; payment: ManualPayment } | null>(null);
   const [ordersAccepting, setOrdersAccepting] = useState<boolean | null>(null);
   const [turnaround, setTurnaround] = useState("");
   const abortRef = useRef<AbortController | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // ── free trial + media mode ──────────────────────────────────────────────
+  const [mediaMode, setMediaMode] = useState<MediaMode>(initialMedia);
+  const [billingMode, setBillingMode] = useState<BillingMode>("paid");
+  const [freeLeft, setFreeLeft] = useState<number | null>(null);
+  const [freeCap, setFreeCap] = useState(3);
+  const [freeSending, setFreeSending] = useState(false);
+  const [videoSending, setVideoSending] = useState(false);
+  const [videoModal, setVideoModal] = useState<{ jobId: string; payment: ManualPayment } | null>(null);
 
   // reference attachments (stored with the order, shown to the operator)
   const [files, setFiles] = useState<File[]>([]);
@@ -98,6 +123,23 @@ export default function Composer({ variant = "hero", className }: ComposerProps)
       })
       .catch(() => {});
   }, []);
+
+  // free-trial quota
+  const refreshFreeRemaining = useCallback(async () => {
+    try {
+      const r = await fetch("/api/free/remaining", { cache: "no-store" });
+      if (!r.ok) return;
+      const b = await r.json().catch(() => null);
+      if (typeof b?.left === "number") setFreeLeft(b.left);
+      if (typeof b?.cap === "number") setFreeCap(b.cap);
+    } catch {
+      /* quota unknown — free mode stays usable, server enforces */
+    }
+  }, []);
+
+  useEffect(() => {
+    void refreshFreeRemaining();
+  }, [refreshFreeRemaining]);
 
   const runQuote = useCallback(async (text: string, q: QualityTier, ar: AspectRatio) => {
     abortRef.current?.abort();
@@ -149,9 +191,11 @@ export default function Composer({ variant = "hero", className }: ComposerProps)
   }, []);
 
   const overLimit = countPromptChars(prompt) > PROMPT_MAX_LENGTH;
+  const promptOk = prompt.trim().length >= 3 && !overLimit;
 
+  // price quote only runs for the paid image flow
   useEffect(() => {
-    if (prompt.trim().length < 3 || overLimit) {
+    if (mediaMode !== "image" || billingMode !== "paid" || !promptOk) {
       setPhase("idle");
       setQuote(null);
       setAuthNeeded(false);
@@ -160,7 +204,7 @@ export default function Composer({ variant = "hero", className }: ComposerProps)
     setPhase("loading");
     const t = setTimeout(() => runQuote(prompt.trim(), quality, aspectRatio), 600);
     return () => clearTimeout(t);
-  }, [prompt, quality, aspectRatio, overLimit, runQuote]);
+  }, [prompt, quality, aspectRatio, promptOk, runQuote, mediaMode, billingMode]);
 
   const addFiles = useCallback((picked: File[]) => {
     if (picked.length === 0) return;
@@ -213,6 +257,7 @@ export default function Composer({ variant = "hero", className }: ComposerProps)
       setUploadProgress(null);
       if (!res.ok) {
         if (res.error.kind === "unauthorized") {
+          setPendingAuth("paid");
           setAuthNeeded(true);
         } else if (res.error.kind === "paused") {
           setStatus("New generation orders are temporarily paused.");
@@ -230,7 +275,123 @@ export default function Composer({ variant = "hero", className }: ComposerProps)
     }
   };
 
+  /** Free-tier image generation: no quote, no payment — straight to the watch room. */
+  const handleFreeGenerate = async () => {
+    if (freeSending || !promptOk) return;
+    if (freeLeft === 0) {
+      setStatus(
+        `That's all ${freeCap} free previews for today — back tomorrow. The paid route is open whenever you want it.`
+      );
+      return;
+    }
+    setFreeSending(true);
+    setStatus("");
+    setAuthNeeded(false);
+    try {
+      const res = await fetch("/api/free/generate", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ prompt: prompt.trim(), quality, aspectRatio }),
+      });
+      if (res.status === 401) {
+        setPendingAuth("free");
+        setAuthNeeded(true);
+        return;
+      }
+      const body = await res.json().catch(() => null);
+      if (res.status === 429 && body?.code === "FREE_CAP_REACHED") {
+        setFreeLeft(0);
+        setStatus(
+          `That's all ${freeCap} free previews for today — back tomorrow. The paid route is open whenever you want it.`
+        );
+        return;
+      }
+      if (!res.ok || !body?.id) {
+        setStatus(
+          typeof body?.error === "string" && body.error
+            ? body.error
+            : "Could not start your free preview. Please try again."
+        );
+        return;
+      }
+      void refreshFreeRemaining();
+      router.push(`/watch/${body.id}`);
+    } finally {
+      setFreeSending(false);
+    }
+  };
+
+  /** Paid 5s video clip: creates the order, opens the payment modal, then the watch room. */
+  const handleVideoGenerate = async () => {
+    if (videoSending || !promptOk) return;
+    setVideoSending(true);
+    setStatus("");
+    setAuthNeeded(false);
+    try {
+      const res = await fetch("/api/video/order", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ prompt: prompt.trim(), aspectRatio }),
+      });
+      if (res.status === 401) {
+        setPendingAuth("video");
+        setAuthNeeded(true);
+        return;
+      }
+      const body = await res.json().catch(() => null);
+      if (!res.ok || !body?.payment) {
+        setStatus(
+          typeof body?.error === "string" && body.error
+            ? body.error
+            : "Could not create your video order. Please try again."
+        );
+        return;
+      }
+      const id = body.id ?? body.jobId;
+      const payment = body.payment as ManualPayment;
+      try {
+        sessionStorage.setItem(
+          videoPaymentStorageKey(id),
+          JSON.stringify({ jobId: id, payment })
+        );
+      } catch {
+        /* storage unavailable — payment can still proceed in-session */
+      }
+      setVideoModal({ jobId: id, payment });
+    } finally {
+      setVideoSending(false);
+    }
+  };
+
+  const resumeAfterAuth = () => {
+    setAuthNeeded(false);
+    const which = pendingAuth;
+    setPendingAuth(null);
+    if (which === "free") void handleFreeGenerate();
+    else if (which === "video") void handleVideoGenerate();
+    else void handleGenerate();
+  };
+
   const canGenerate = phase === "quoted" && !!quote && !starting && ordersAccepting !== false && !overLimit;
+  const canFreeGenerate = promptOk && freeLeft !== 0 && !freeSending;
+  const canVideoGenerate = promptOk && !videoSending;
+
+  const selectMedia = (m: MediaMode) => {
+    setMediaMode(m);
+    setStatus("");
+    setAuthNeeded(false);
+    setPendingAuth(null);
+    setPhase("idle");
+    setQuote(null);
+    if (m === "video") {
+      setAspectRatio("9:16");
+    } else {
+      setAspectRatio("1:1");
+    }
+  };
+
+  const aspects = mediaMode === "video" ? VIDEO_ASPECTS : IMAGE_ASPECTS;
+  const showAttachments = mediaMode === "image" && billingMode === "paid";
 
   return (
     <div
@@ -240,6 +401,84 @@ export default function Composer({ variant = "hero", className }: ComposerProps)
         className,
       )}
     >
+      {/* media toggle: image vs 5s video clip */}
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        <div
+          role="group"
+          aria-label="What to create"
+          className="flex rounded-[12px] border border-white/[0.08] bg-[#0D0D0F] p-1"
+        >
+          {(
+            [
+              { id: "image", label: "Image" },
+              { id: "video", label: "5s video clip" },
+            ] as const
+          ).map((m) => (
+            <button
+              key={m.id}
+              type="button"
+              onClick={() => selectMedia(m.id)}
+              aria-pressed={mediaMode === m.id}
+              className={cn(
+                "rounded-[9px] px-4 py-2 text-[13px] font-semibold transition-colors",
+                mediaMode === m.id
+                  ? "bg-[#D7FF3F] text-[#080808]"
+                  : "text-white/55 hover:text-white/85",
+              )}
+            >
+              {m.label}
+            </button>
+          ))}
+        </div>
+        {mediaMode === "image" && (
+          <div
+            role="group"
+            aria-label="Image pricing"
+            className="flex rounded-[12px] border border-white/[0.08] bg-[#0D0D0F] p-1"
+          >
+            <button
+              type="button"
+              onClick={() => setBillingMode("free")}
+              aria-pressed={billingMode === "free"}
+              className={cn(
+                "rounded-[9px] px-4 py-2 text-[13px] font-semibold transition-colors",
+                billingMode === "free"
+                  ? "bg-[#00F0FF] text-[#080808]"
+                  : "text-white/55 hover:text-white/85",
+              )}
+            >
+              {freeLeft === 0
+                ? "Free trial (0 left — back tomorrow)"
+                : `Free trial (${freeLeft ?? "…"} left today)`}
+            </button>
+            <button
+              type="button"
+              onClick={() => setBillingMode("paid")}
+              aria-pressed={billingMode === "paid"}
+              className={cn(
+                "rounded-[9px] px-4 py-2 text-[13px] font-semibold transition-colors",
+                billingMode === "paid"
+                  ? "bg-[#D7FF3F] text-[#080808]"
+                  : "text-white/55 hover:text-white/85",
+              )}
+            >
+              Paid
+            </button>
+          </div>
+        )}
+      </div>
+      {mediaMode === "image" && billingMode === "free" && (
+        <p className="mb-4 text-[12px] leading-5 text-white/40">
+          Free previews carry a Vidish watermark. Unlock the clean HD file for ₹29.
+        </p>
+      )}
+      {mediaMode === "video" && (
+        <p className="mb-4 text-[12px] leading-5 text-white/40">
+          ₹99 per 5s clip — made for you in minutes. AI-generated; a watermarked
+          preview shows until you unlock the clean HD file.
+        </p>
+      )}
+
       <div className="flex items-start justify-between gap-3">
         <label htmlFor="vidish-prompt" className="sr-only">
           Describe the image you want to create
@@ -258,7 +497,7 @@ export default function Composer({ variant = "hero", className }: ComposerProps)
         id="vidish-prompt"
         value={prompt}
         onChange={(e) => setPrompt(e.target.value)}
-        placeholder="What do you want to make?"
+        placeholder={mediaMode === "video" ? "Describe the 5-second clip…" : "What do you want to make?"}
         rows={variant === "hero" ? 3 : 4}
         maxLength={PROMPT_MAX_LENGTH}
         aria-invalid={overLimit}
@@ -272,101 +511,105 @@ export default function Composer({ variant = "hero", className }: ComposerProps)
         </p>
       )}
 
-      {/* reference attachments */}
-      <div className="mt-3">
-        <input
-          ref={fileInputRef}
-          type="file"
-          multiple
-          accept={ACCEPT_ATTR}
-          className="sr-only"
-          aria-label="Attach reference files"
-          onChange={(e) => {
-            addFiles(Array.from(e.target.files ?? []));
-            e.target.value = "";
-          }}
-        />
-        {files.length > 0 && (
-          <ul className="mb-2.5 flex flex-wrap gap-2" aria-label="Attached files">
-            {files.map((f, i) => (
-              <li
-                key={`${f.name}-${f.size}-${i}`}
-                className="inline-flex max-w-full items-center gap-2 rounded-[10px] border border-white/[0.1] bg-[#0D0D0F] py-1.5 pl-3 pr-1.5"
-              >
-                <span className="min-w-0">
-                  <span className="block max-w-[180px] truncate text-[12px] font-medium text-white/80">
-                    {f.name}
-                  </span>
-                  <span className="block text-[11px] text-white/40 tabular-nums">
-                    {formatBytes(f.size)}
-                  </span>
-                </span>
-                <button
-                  type="button"
-                  onClick={() => removeFile(i)}
-                  aria-label={`Remove ${f.name}`}
-                  className="rounded-[6px] p-1.5 text-white/45 hover:bg-white/[0.06] hover:text-white/90"
+      {/* reference attachments — paid image flow only */}
+      {showAttachments && (
+        <div className="mt-3">
+          <input
+            ref={fileInputRef}
+            type="file"
+            multiple
+            accept={ACCEPT_ATTR}
+            className="sr-only"
+            aria-label="Attach reference files"
+            onChange={(e) => {
+              addFiles(Array.from(e.target.files ?? []));
+              e.target.value = "";
+            }}
+          />
+          {files.length > 0 && (
+            <ul className="mb-2.5 flex flex-wrap gap-2" aria-label="Attached files">
+              {files.map((f, i) => (
+                <li
+                  key={`${f.name}-${f.size}-${i}`}
+                  className="inline-flex max-w-full items-center gap-2 rounded-[10px] border border-white/[0.1] bg-[#0D0D0F] py-1.5 pl-3 pr-1.5"
                 >
-                  <X className="h-3.5 w-3.5" />
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-          <button
-            type="button"
-            onClick={() => fileInputRef.current?.click()}
-            disabled={files.length >= ATTACH_MAX_FILES}
-            className="inline-flex items-center gap-1.5 rounded-[8px] border border-white/[0.1] bg-[#0D0D0F] px-3 py-1.5 text-[12px] font-medium text-white/60 transition-colors hover:border-white/25 hover:text-white/90 disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            <Paperclip className="h-3.5 w-3.5" />
-            {files.length === 0
-              ? "Attach references"
-              : `Add more (${files.length}/${ATTACH_MAX_FILES})`}
-          </button>
-          <span className="text-[11px] text-white/35">
-            Images, PDF, docs or notes · {formatBytes(ATTACH_MAX_FILE_BYTES)} each ·{" "}
-            {formatBytes(ATTACH_MAX_TOTAL_BYTES)} total — the creator sees them with your brief.
-          </span>
+                  <span className="min-w-0">
+                    <span className="block max-w-[180px] truncate text-[12px] font-medium text-white/80">
+                      {f.name}
+                    </span>
+                    <span className="block text-[11px] text-white/40 tabular-nums">
+                      {formatBytes(f.size)}
+                    </span>
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => removeFile(i)}
+                    aria-label={`Remove ${f.name}`}
+                    className="rounded-[6px] p-1.5 text-white/45 hover:bg-white/[0.06] hover:text-white/90"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={files.length >= ATTACH_MAX_FILES}
+              className="inline-flex items-center gap-1.5 rounded-[8px] border border-white/[0.1] bg-[#0D0D0F] px-3 py-1.5 text-[12px] font-medium text-white/60 transition-colors hover:border-white/25 hover:text-white/90 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              <Paperclip className="h-3.5 w-3.5" />
+              {files.length === 0
+                ? "Attach references"
+                : `Add more (${files.length}/${ATTACH_MAX_FILES})`}
+            </button>
+            <span className="text-[11px] text-white/35">
+              Images, PDF, docs or notes · {formatBytes(ATTACH_MAX_FILE_BYTES)} each ·{" "}
+              {formatBytes(ATTACH_MAX_TOTAL_BYTES)} total — the creator sees them with your brief.
+            </span>
+          </div>
+          {fileError && (
+            <p className="mt-2 text-[13px] text-red-300/90" role="alert">
+              {fileError}
+            </p>
+          )}
         </div>
-        {fileError && (
-          <p className="mt-2 text-[13px] text-red-300/90" role="alert">
-            {fileError}
-          </p>
-        )}
-      </div>
+      )}
 
       {/* controls row */}
       <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-3">
-        {/* quality segmented control */}
-        <div
-          role="group"
-          aria-label="Quality"
-          className="flex rounded-[10px] border border-white/[0.08] bg-[#0D0D0F] p-1"
-        >
-          {QUALITIES.map((qt) => (
-            <button
-              key={qt.id}
-              type="button"
-              onClick={() => setQuality(qt.id)}
-              aria-pressed={quality === qt.id}
-              title={qt.hint}
-              className={cn(
-                "rounded-[8px] px-3 py-1.5 text-[13px] font-medium transition-colors",
-                quality === qt.id
-                  ? "bg-[#D7FF3F] text-[#080808]"
-                  : "text-white/55 hover:text-white/85",
-              )}
-            >
-              {qt.label}
-            </button>
-          ))}
-        </div>
+        {/* quality segmented control — image modes only */}
+        {mediaMode === "image" && (
+          <div
+            role="group"
+            aria-label="Quality"
+            className="flex rounded-[10px] border border-white/[0.08] bg-[#0D0D0F] p-1"
+          >
+            {QUALITIES.map((qt) => (
+              <button
+                key={qt.id}
+                type="button"
+                onClick={() => setQuality(qt.id)}
+                aria-pressed={quality === qt.id}
+                title={qt.hint}
+                className={cn(
+                  "rounded-[8px] px-3 py-1.5 text-[13px] font-medium transition-colors",
+                  quality === qt.id
+                    ? "bg-[#D7FF3F] text-[#080808]"
+                    : "text-white/55 hover:text-white/85",
+                )}
+              >
+                {qt.label}
+              </button>
+            ))}
+          </div>
+        )}
 
         {/* aspect ratio pills */}
         <div role="group" aria-label="Aspect ratio" className="flex flex-wrap gap-1.5">
-          {ASPECTS.map((ar) => (
+          {aspects.map((ar) => (
             <button
               key={ar.id}
               type="button"
@@ -388,18 +631,32 @@ export default function Composer({ variant = "hero", className }: ComposerProps)
       {/* price + generate row */}
       <div className="mt-5 flex items-center justify-between gap-4 border-t border-white/[0.06] pt-4">
         <div className="min-w-0">
-          {phase === "loading" && (
+          {mediaMode === "video" && (
+            <p className="text-[13px] text-white/40 tabular-nums">
+              <span className="text-[18px] font-semibold text-[#F5F5F3]">₹99</span>{" "}
+              per 5s clip
+            </p>
+          )}
+          {mediaMode === "image" && billingMode === "free" && (
+            <p className="text-[13px] text-white/40">
+              Free trial ·{" "}
+              <span className="font-medium text-[#F5F5F3]">
+                {freeLeft === null ? "…" : freeLeft === 0 ? "none left today" : `${freeLeft} of ${freeCap} left today`}
+              </span>
+            </p>
+          )}
+          {mediaMode === "image" && billingMode === "paid" && phase === "loading" && (
             <p className="text-[13px] text-white/40 tabular-nums">
               Estimated <span className="text-[#F5F5F3]">₹29</span>
               <span className="ml-2 inline-block h-3 w-3 animate-spin rounded-full border-2 border-white/20 border-t-white/70 align-[-1px]" />
             </p>
           )}
-          {phase === "idle" && (
+          {mediaMode === "image" && billingMode === "paid" && phase === "idle" && (
             <p className="text-[13px] text-white/40 tabular-nums">
               Estimated <span className="text-[#F5F5F3]">₹29</span>
             </p>
           )}
-          {phase === "quoted" && quote && (
+          {mediaMode === "image" && billingMode === "paid" && phase === "quoted" && quote && (
             <p key={quote.totalPaise} className="v-price-swap text-[13px] text-white/60 tabular-nums">
               Exact price{" "}
               <span className="text-[18px] font-semibold text-[#F5F5F3]">
@@ -407,32 +664,64 @@ export default function Composer({ variant = "hero", className }: ComposerProps)
               </span>
             </p>
           )}
-          {phase === "blocked" && (
+          {mediaMode === "image" && billingMode === "paid" && phase === "blocked" && (
             <p className="text-[13px] text-red-300/80">
               That prompt was blocked by content moderation.
             </p>
           )}
-          {phase === "unavailable" && (
+          {mediaMode === "image" && billingMode === "paid" && phase === "unavailable" && (
             <p className="text-[13px] text-white/50">
               Price unavailable right now — try again in a moment.
             </p>
           )}
         </div>
 
-        <button
-          type="button"
-          onClick={handleGenerate}
-          disabled={!canGenerate}
-          className={cn(
-            "inline-flex shrink-0 items-center gap-2 rounded-[10px] bg-[#D7FF3F] px-5 py-2.5",
-            "text-[14px] font-semibold text-[#080808] transition-opacity",
-            canGenerate ? "hover:opacity-95 active:opacity-90" : "cursor-not-allowed opacity-40",
-          )}
-        >
-          {starting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-          Generate
-          <ArrowRight className="h-4 w-4" />
-        </button>
+        {mediaMode === "video" ? (
+          <button
+            type="button"
+            onClick={handleVideoGenerate}
+            disabled={!canVideoGenerate}
+            className={cn(
+              "inline-flex shrink-0 items-center gap-2 rounded-[10px] bg-[#D7FF3F] px-5 py-2.5",
+              "text-[14px] font-semibold text-[#080808] transition-opacity",
+              canVideoGenerate ? "hover:opacity-95 active:opacity-90" : "cursor-not-allowed opacity-40",
+            )}
+          >
+            {videoSending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+            Generate video
+            <ArrowRight className="h-4 w-4" />
+          </button>
+        ) : billingMode === "free" ? (
+          <button
+            type="button"
+            onClick={handleFreeGenerate}
+            disabled={!canFreeGenerate}
+            className={cn(
+              "inline-flex shrink-0 items-center gap-2 rounded-[10px] bg-[#00F0FF] px-5 py-2.5",
+              "text-[14px] font-semibold text-[#080808] transition-opacity",
+              canFreeGenerate ? "hover:opacity-95 active:opacity-90" : "cursor-not-allowed opacity-40",
+            )}
+          >
+            {freeSending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+            Generate free
+            <ArrowRight className="h-4 w-4" />
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={handleGenerate}
+            disabled={!canGenerate}
+            className={cn(
+              "inline-flex shrink-0 items-center gap-2 rounded-[10px] bg-[#D7FF3F] px-5 py-2.5",
+              "text-[14px] font-semibold text-[#080808] transition-opacity",
+              canGenerate ? "hover:opacity-95 active:opacity-90" : "cursor-not-allowed opacity-40",
+            )}
+          >
+            {starting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+            Generate
+            <ArrowRight className="h-4 w-4" />
+          </button>
+        )}
       </div>
       {uploadProgress !== null && (
         <div className="mt-4" role="status" aria-label="Uploading reference files">
@@ -457,13 +746,13 @@ export default function Composer({ variant = "hero", className }: ComposerProps)
           pending generate action resumes automatically. */}
       <AuthModal
         open={authNeeded}
-        onClose={() => setAuthNeeded(false)}
-        onAuthenticated={() => {
+        onClose={() => {
           setAuthNeeded(false);
-          void handleGenerate();
+          setPendingAuth(null);
         }}
+        onAuthenticated={resumeAfterAuth}
       />
-      {phase === "quoted" && quote && (
+      {mediaMode === "image" && billingMode === "paid" && phase === "quoted" && quote && (
         <>
           <p className="mt-3 text-[12px] text-white/35">
             No subscription · Pay once for this render · Failed renders refunded
@@ -474,6 +763,12 @@ export default function Composer({ variant = "hero", className }: ComposerProps)
             {turnaround ? ` ${turnaround}` : ""}
           </p>
         </>
+      )}
+      {mediaMode === "image" && billingMode === "free" && (
+        <p className="mt-3 text-[12px] leading-5 text-white/35">
+          3 free AI previews a day, no payment needed. This is a preview, not a
+          finished order — unlock the clean HD file for ₹29 if you love it.
+        </p>
       )}
       {ordersAccepting === false && (
         <p className="mt-3 text-[13px] font-medium text-amber-200/90" role="status">
@@ -487,6 +782,18 @@ export default function Composer({ variant = "hero", className }: ComposerProps)
           initialPayment={modal.payment}
           onClose={() => setModal(null)}
           navigate={(url) => router.push(url)}
+        />
+      )}
+      {videoModal && (
+        <PaymentModal
+          jobId={videoModal.jobId}
+          initialPayment={videoModal.payment}
+          onClose={() => setVideoModal(null)}
+          navigate={(url) => router.push(url)}
+          onPaymentVerified={(jobId) => {
+            setVideoModal(null);
+            router.push(`/watch/${jobId}`);
+          }}
         />
       )}
     </div>

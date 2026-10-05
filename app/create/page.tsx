@@ -29,21 +29,28 @@ const TRUST_BADGES = [
   { icon: BadgeCheck, label: "Exact price first" },
 ];
 
-export default function CreatePage() {
+export default async function CreatePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ media?: string }>;
+}) {
+  const sp = await searchParams;
+  const initialMedia = sp?.media === "video" ? "video" : "image";
   return (
     <div className="flex min-h-screen flex-col bg-[#080808] font-sans text-[#F5F5F3] antialiased">
       <VilishNav />
       <main className="mx-auto w-full max-w-2xl flex-1 px-4 pb-16 pt-10 sm:pt-16">
         <h1 className="font-display text-[26px] font-semibold tracking-[-0.02em] sm:text-[32px]">
-          Create an image
+          {initialMedia === "video" ? "Create a 5s video clip" : "Create an image"}
         </h1>
         <p className="mt-2 text-[14px] leading-6 text-white/[0.58]">
-          Describe what you want. You&apos;ll see the exact price before anything
-          is charged.
+          {initialMedia === "video"
+            ? "Describe the 5-second clip. ₹99, made for you in minutes."
+            : "Describe what you want. You\u2019ll see the exact price before anything is charged."}
         </p>
         <FulfillmentNotices />
         <div className="mt-6">
-          <Composer variant="page" />
+          <Composer variant="page" initialMedia={initialMedia} />
         </div>
         <p className="mt-6 text-[13px] leading-6 text-white/40">
           Every order is quoted at a fixed, human-reviewed price — the number

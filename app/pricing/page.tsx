@@ -48,8 +48,9 @@ const TIERS: Tier[] = [
   },
   {
     name: "5s clip",
-    blurb: "Short AI video generation.",
-    comingSoon: true,
+    price: "₹99",
+    blurb: "A 5-second AI video clip from your description. Made for you in minutes, not 24 hours.",
+    action: { label: "Create a clip", href: "/create?media=video" },
   },
   {
     name: "Remake",

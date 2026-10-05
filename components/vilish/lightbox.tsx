@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import Image from "next/image";
+import { usePrefersReducedMotion } from "@/src/lib/motion/theme";
 import {
   handleLightboxKey,
   nextLightboxIndex,
@@ -48,6 +49,7 @@ function BadgeChip({ label }: { label: string }) {
 export default function Lightbox({ items, index, onClose, onIndex }: LightboxProps) {
   const dialogRef = useRef<HTMLDivElement>(null);
   const item = items[index];
+  const reducedMotion = usePrefersReducedMotion();
   // Return focus to the thumbnail that opened the lightbox when it closes.
   const triggerRef = useRef<Element | null>(null);
 
@@ -91,14 +93,29 @@ export default function Lightbox({ items, index, onClose, onIndex }: LightboxPro
         onClick={(e) => e.stopPropagation()}
       >
         <div className="relative bg-[#080808]">
-          <Image
-            src={item.src}
-            alt={item.alt ?? item.caption}
-            width={1280}
-            height={960}
-            className="max-h-[62vh] w-full object-contain"
-            priority
-          />
+          {item.kind === "video" ? (
+            <video
+              src={item.src}
+              poster={item.poster}
+              aria-label={`AI video example: ${item.caption}`}
+              controls
+              muted
+              loop
+              playsInline
+              preload="metadata"
+              autoPlay={!reducedMotion}
+              className="max-h-[62vh] w-full object-contain"
+            />
+          ) : (
+            <Image
+              src={item.src}
+              alt={item.alt ?? item.caption}
+              width={1280}
+              height={960}
+              className="max-h-[62vh] w-full object-contain"
+              priority
+            />
+          )}
           <div className="absolute left-4 top-4 flex gap-2">
             <ExampleBadge />
             {item.badge && <BadgeChip label={item.badge} />}

@@ -12,6 +12,10 @@ export interface ExampleItem {
   price: string;
   model: string;
   category: ExampleCategory;
+  /** Descriptive alt text ("what it shows — AI-generated example"); grid falls back to prompt. */
+  alt?: string;
+  /** Poster frame for category "video" items. */
+  poster?: string;
 }
 
 export const CATEGORY_LABEL: Record<ExampleCategory, string> = {
@@ -32,6 +36,9 @@ export function toLightboxItem(item: ExampleItem): LightboxItem {
     price: item.price,
     model: item.model,
     badge: CATEGORY_LABEL[item.category],
+    alt: item.alt ?? item.prompt,
+    kind: item.category === "video" ? "video" : "image",
+    poster: item.poster,
   };
 }
 

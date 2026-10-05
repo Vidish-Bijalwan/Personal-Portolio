@@ -1,0 +1,447 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
+import { useParams, useRouter } from "next/navigation";
+import {
+  ArrowLeft,
+  Check,
+  Download,
+  Loader2,
+  RefreshCcw,
+  Sparkles,
+  TriangleAlert,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import VilishNav from "@/components/vilish/nav";
+import VilishFooter from "@/components/vilish/footer";
+import BurgerGrill, { burgerFrameForStage } from "@/components/vilish/burger-grill";
+import PopcornReel, { reelFrameForStage } from "@/components/vilish/popcorn-reel";
+import PaymentModal from "@/components/vilish/payment-modal";
+import AuthModal from "@/components/vilish/auth-modal";
+import { videoPaymentStorageKey } from "@/components/vilish/free-tier";
+import type { ManualPayment } from "@/components/vilish/payment";
+import "./watch.css";
+
+interface GenStatus {
+  media_type: "image" | "video";
+  tier: "free" | "paid";
+  status: "queued" | "generating" | "done" | "failed";
+  stage: string | null;
+  unlocked: boolean;
+  error?: string;
+}
+
+const IMAGE_CAPTIONS = [
+  "Seasoning the pixels…",
+  "Flipping the patty…",
+  "Melting the cheese…",
+  "Plating it up…",
+];
+
+const VIDEO_CAPTIONS = [
+  "Popping the kernels…",
+  "Threading the projector…",
+  "Cutting the final scene…",
+  "Rolling the credits…",
+];
+
+export default function WatchRoomPage() {
+  const params = useParams<{ id: string }>();
+  const router = useRouter();
+  const id = params.id;
+  const [data, setData] = useState<GenStatus | null>(null);
+  const [fetchError, setFetchError] = useState("");
+  const [captionIdx, setCaptionIdx] = useState(0);
+  const [previewOk, setPreviewOk] = useState(true);
+  const dataRef = useRef<GenStatus | null>(null);
+  dataRef.current = data;
+
+  // unlock flow
+  const [unlockBusy, setUnlockBusy] = useState(false);
+  const [unlockError, setUnlockError] = useState("");
+  const [payModal, setPayModal] = useState<{ jobId: string; payment: ManualPayment } | null>(null);
+  const [authNeeded, setAuthNeeded] = useState(false);
+  const [pendingUnlock, setPendingUnlock] = useState(false);
+  const [noStoredPayment, setNoStoredPayment] = useState(false);
+
+  const fetchStatus = async () => {
+    try {
+      const r = await fetch(`/api/gen/${encodeURIComponent(id)}/status`, { cache: "no-store" });
+      if (!r.ok) throw new Error(`status ${r.status}`);
+      const b = (await r.json()) as GenStatus;
+      setData(b);
+      setFetchError("");
+      return b;
+    } catch {
+      setFetchError("Lost the kitchen for a moment — retrying…");
+      return null;
+    }
+  };
+
+  // poll every 3s until terminal
+  useEffect(() => {
+    let alive = true;
+    let timer: ReturnType<typeof setInterval> | null = null;
+    const tick = async () => {
+      const cur = dataRef.current;
+      if (cur && (cur.status === "done" || cur.status === "failed")) {
+        if (timer) clearInterval(timer);
+        return;
+      }
+      const next = await fetchStatus();
+      if (alive && next && (next.status === "done" || next.status === "failed") && timer) {
+        clearInterval(timer);
+      }
+    };
+    void tick();
+    timer = setInterval(() => void tick(), 3000);
+    return () => {
+      alive = false;
+      if (timer) clearInterval(timer);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
+
+  // rotate witty captions
+  useEffect(() => {
+    const t = setInterval(() => setCaptionIdx((i) => i + 1), 2600);
+    return () => clearInterval(t);
+  }, []);
+
+  const handleUnlock = async () => {
+    setUnlockBusy(true);
+    setUnlockError("");
+    setNoStoredPayment(false);
+    try {
+      const res = await fetch(`/api/gen/${encodeURIComponent(id)}/unlock`, { method: "POST" });
+      if (res.status === 401) {
+        setPendingUnlock(true);
+        setAuthNeeded(true);
+        return;
+      }
+      const body = await res.json().catch(() => null);
+      if (!res.ok || !body?.payment) {
+        setUnlockError(
+          typeof body?.error === "string" && body.error
+            ? body.error
+            : "Could not create the unlock order. Please try again."
+        );
+        return;
+      }
+      setPayModal({ jobId: body.id ?? id, payment: body.payment as ManualPayment });
+    } finally {
+      setUnlockBusy(false);
+    }
+  };
+
+  /** Reopen the stored video payment order (same-session; sessionStorage). */
+  const openStoredPayment = () => {
+    setNoStoredPayment(false);
+    try {
+      const raw = sessionStorage.getItem(videoPaymentStorageKey(id));
+      if (raw) {
+        const parsed = JSON.parse(raw) as { jobId?: string; payment?: ManualPayment };
+        if (parsed?.payment) {
+          setPayModal({ jobId: parsed.jobId ?? id, payment: parsed.payment });
+          return;
+        }
+      }
+    } catch {
+      /* fall through to fallback copy */
+    }
+    setNoStoredPayment(true);
+  };
+
+  const previewUrl = `/api/gen/${encodeURIComponent(id)}/preview`;
+  const cleanUrl = `/api/gen/${encodeURIComponent(id)}/clean`;
+
+  const isVideo = data?.media_type === "video";
+  const captions = isVideo ? VIDEO_CAPTIONS : IMAGE_CAPTIONS;
+  const caption = captions[captionIdx % captions.length];
+  const stageText =
+    data?.stage ??
+    (isVideo ? "Setting up the projector…" : "Warming up the grill…");
+
+  return (
+    <div className="flex min-h-screen flex-col bg-[#080808] font-sans text-[#F5F5F3] antialiased">
+      <VilishNav />
+      <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col px-4 pb-16 pt-8 sm:pt-12">
+        <Link
+          href="/create"
+          className="inline-flex w-fit items-center gap-1.5 text-[13px] text-white/50 hover:text-white/85"
+        >
+          <ArrowLeft className="h-3.5 w-3.5" />
+          Back to the composer
+        </Link>
+
+        {/* initial load */}
+        {!data && !fetchError && (
+          <div className="flex flex-1 flex-col items-center justify-center py-24 text-center">
+            <Loader2 className="h-8 w-8 animate-spin text-[#D7FF3F]" />
+            <p className="mt-4 text-[14px] text-white/50">Finding your order…</p>
+          </div>
+        )}
+
+        {/* fetch error before first status */}
+        {!data && fetchError && (
+          <div className="flex flex-1 flex-col items-center justify-center py-24 text-center">
+            <TriangleAlert className="h-8 w-8 text-amber-200/80" />
+            <p className="mt-4 max-w-sm text-[14px] leading-6 text-white/60">{fetchError}</p>
+            <button
+              type="button"
+              onClick={() => void fetchStatus()}
+              className="mt-5 inline-flex items-center gap-2 rounded-[10px] border border-white/[0.12] bg-[#18181B] px-4 py-2.5 text-[13px] font-medium hover:border-white/30"
+            >
+              <RefreshCcw className="h-4 w-4" />
+              Retry
+            </button>
+          </div>
+        )}
+
+        {data && data.status === "failed" && (
+          <section className="flex flex-1 flex-col items-center py-12 text-center">
+            <h1 className="font-display text-[26px] font-semibold tracking-[-0.02em] sm:text-[32px]">
+              {isVideo ? "The projector jammed" : "The grill flared up"}
+            </h1>
+            <p className="mt-3 max-w-md text-[14px] leading-6 text-white/60">
+              {isVideo
+                ? "Your clip didn't make it this time — nothing was charged."
+                : "Try again — it's still free."}
+            </p>
+            {data.tier === "free" && (
+              <p className="mt-2 max-w-md text-[13px] leading-6 text-white/40">
+                Your free tries weren&apos;t used up — the daily cap only counts
+                finished previews.
+              </p>
+            )}
+            {data.error && (
+              <p className="mt-3 max-w-md text-[13px] text-white/40">{data.error}</p>
+            )}
+            <Link
+              href={isVideo ? "/create?media=video" : "/create"}
+              className="mt-7 inline-flex items-center gap-2 rounded-[10px] bg-[#D7FF3F] px-5 py-2.5 text-[14px] font-semibold text-[#080808] hover:opacity-95"
+            >
+              <RefreshCcw className="h-4 w-4" />
+              Try again
+            </Link>
+          </section>
+        )}
+
+        {/* paid + not unlocked: payment pending / under review */}
+        {data && data.status !== "failed" && data.tier === "paid" && !data.unlocked && (
+          <section className="flex flex-1 flex-col items-center py-10 text-center">
+            <h1 className="font-display text-[26px] font-semibold tracking-[-0.02em] sm:text-[32px]">
+              Your {isVideo ? "clip" : "creation"} is waiting on payment
+            </h1>
+            <p className="mt-3 max-w-md text-[14px] leading-6 text-white/60">
+              Complete your {isVideo ? "₹99" : "₹29"} payment to unlock the clean HD{" "}
+              {isVideo ? "clip" : "file"}. If you already paid, it unlocks here as
+              soon as the payment is confirmed.
+            </p>
+            {previewOk && data.media_type === "video" && (
+              <div className="mt-6 w-full max-w-md overflow-hidden rounded-[16px] border border-white/[0.1]">
+                <video
+                  src={previewUrl}
+                  muted
+                  loop
+                  playsInline
+                  autoPlay
+                  className="block aspect-video w-full bg-black object-cover"
+                  onError={() => setPreviewOk(false)}
+                />
+                <p className="border-t border-white/[0.08] bg-[#121214] px-4 py-2 text-[11px] uppercase tracking-[0.08em] text-white/40">
+                  Watermarked preview · AI-generated
+                </p>
+              </div>
+            )}
+            <button
+              type="button"
+              onClick={openStoredPayment}
+              className="mt-6 inline-flex items-center gap-2 rounded-[10px] bg-[#D7FF3F] px-5 py-2.5 text-[14px] font-semibold text-[#080808] hover:opacity-95"
+            >
+              <Sparkles className="h-4 w-4" />
+              Open payment
+            </button>
+            {noStoredPayment && (
+              <p className="mt-3 max-w-md text-[13px] leading-6 text-white/45">
+                We couldn&apos;t find your payment details on this device — head back
+                to the{" "}
+                <Link href="/create?media=video" className="text-[#D7FF3F] underline underline-offset-2">
+                  composer
+                </Link>{" "}
+                to start the order again.
+              </p>
+            )}
+          </section>
+        )}
+
+        {/* cooking / generating */}
+        {data &&
+          data.status !== "failed" &&
+          data.status !== "done" &&
+          !(data.tier === "paid" && !data.unlocked) && (
+            <section className="flex flex-1 flex-col items-center py-8 text-center" aria-live="polite">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#D7FF3F]">
+                {data.tier === "free" ? "Free preview" : "Paid order"} · AI-generated
+              </p>
+              <h1 className="font-display mt-2 text-[26px] font-semibold tracking-[-0.02em] sm:text-[32px]">
+                {isVideo ? "Your clip is in the projector" : "Your creation is on the grill"}
+              </h1>
+
+              <div className="mt-6 w-full max-w-[420px]">
+                {isVideo ? (
+                  <PopcornReel frame={reelFrameForStage(data.stage)} />
+                ) : (
+                  <BurgerGrill frame={burgerFrameForStage(data.stage)} />
+                )}
+              </div>
+
+              <p className="font-display mt-4 text-[16px] font-medium text-[#F5F5F3]">
+                {stageText}
+              </p>
+              <p key={captionIdx} className="fg-caption mt-1.5 h-6 text-[13px] text-white/45">
+                {caption}
+              </p>
+
+              {/* playful indeterminate progress */}
+              <div className="mt-6 h-1.5 w-full max-w-[320px] overflow-hidden rounded-full bg-white/[0.08]">
+                <div className="fg-bar h-full w-1/3 rounded-full bg-gradient-to-r from-[#D7FF3F] via-[#00F0FF] to-[#FF2D78] motion-reduce:animate-none" />
+              </div>
+              {fetchError && (
+                <p className="mt-3 text-[12px] text-white/40">{fetchError}</p>
+              )}
+            </section>
+          )}
+
+        {/* done + locked: reveal with unlock CTA */}
+        {data && data.status === "done" && !data.unlocked && (
+          <section className="flex flex-1 flex-col items-center py-8 text-center">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-[#D7FF3F]/40 bg-[#D7FF3F]/[0.08] px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.1em] text-[#D7FF3F]">
+              <Sparkles className="h-3.5 w-3.5" />
+              {isVideo ? "Your video preview — AI-generated" : "Your free preview — AI-generated"}
+            </span>
+
+            <div className="mt-6 w-full max-w-md overflow-hidden rounded-[16px] border border-white/[0.1]">
+              {previewOk ? (
+                isVideo ? (
+                  <video
+                    src={previewUrl}
+                    muted
+                    loop
+                    playsInline
+                    autoPlay
+                    controls
+                    className="block aspect-video w-full bg-black object-cover"
+                    onError={() => setPreviewOk(false)}
+                  />
+                ) : (
+                  <img
+                    src={previewUrl}
+                    alt="Your free AI-generated preview (watermarked)"
+                    className="block w-full"
+                    onError={() => setPreviewOk(false)}
+                  />
+                )
+              ) : (
+                <p className="px-6 py-12 text-[13px] text-white/45">
+                  The preview file isn&apos;t ready to show yet — try refreshing in a moment.
+                </p>
+              )}
+            </div>
+
+            <p className="mt-5 max-w-md text-[14px] leading-6 text-white/60">
+              Watermarked preview. The clean HD {isVideo ? "clip" : "file"} is yours
+              for {isVideo ? "₹99" : "₹29"}.
+            </p>
+
+            <button
+              type="button"
+              onClick={handleUnlock}
+              disabled={unlockBusy}
+              className={cn(
+                "mt-5 inline-flex items-center gap-2 rounded-[10px] bg-[#D7FF3F] px-6 py-3 text-[15px] font-semibold text-[#080808]",
+                unlockBusy ? "cursor-wait opacity-70" : "hover:opacity-95",
+              )}
+            >
+              {unlockBusy && <Loader2 className="h-4 w-4 animate-spin" />}
+              Unlock clean HD — {isVideo ? "₹99" : "₹29"}
+            </button>
+            {unlockError && (
+              <p className="mt-3 max-w-md text-[13px] text-red-300/80" role="alert">
+                {unlockError}
+              </p>
+            )}
+            <p className="mt-3 text-[12px] text-white/35">
+              This is a preview, not a finished order — unlock only if you love it.
+            </p>
+          </section>
+        )}
+
+        {/* done + unlocked: clean download */}
+        {data && data.status === "done" && data.unlocked && (
+          <section className="flex flex-1 flex-col items-center py-8 text-center">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-300/40 bg-emerald-300/[0.08] px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.1em] text-emerald-300">
+              <Check className="h-3.5 w-3.5" />
+              Unlocked!
+            </span>
+            <h1 className="font-display mt-3 text-[26px] font-semibold tracking-[-0.02em] sm:text-[32px]">
+              Your clean HD {isVideo ? "clip" : "file"} is ready
+            </h1>
+
+            <div className="mt-6 w-full max-w-md overflow-hidden rounded-[16px] border border-white/[0.1]">
+              {isVideo ? (
+                <video src={cleanUrl} controls playsInline className="block aspect-video w-full bg-black object-cover" />
+              ) : (
+                <img src={cleanUrl} alt="Your unlocked AI-generated creation" className="block w-full" />
+              )}
+            </div>
+
+            <a
+              href={cleanUrl}
+              download
+              className="mt-6 inline-flex items-center gap-2 rounded-[10px] bg-[#D7FF3F] px-6 py-3 text-[15px] font-semibold text-[#080808] hover:opacity-95"
+            >
+              <Download className="h-4 w-4" />
+              Download clean HD
+            </a>
+            <Link
+              href={isVideo ? "/create?media=video" : "/create"}
+              className="mt-4 text-[13px] text-white/50 hover:text-white/85"
+            >
+              Make another one
+            </Link>
+          </section>
+        )}
+      </main>
+      <VilishFooter />
+
+      {payModal && (
+        <PaymentModal
+          jobId={payModal.jobId}
+          initialPayment={payModal.payment}
+          onClose={() => setPayModal(null)}
+          navigate={(url) => router.push(url)}
+          onPaymentVerified={() => {
+            setPayModal(null);
+            void fetchStatus();
+          }}
+        />
+      )}
+      <AuthModal
+        open={authNeeded}
+        onClose={() => {
+          setAuthNeeded(false);
+          setPendingUnlock(false);
+        }}
+        onAuthenticated={() => {
+          setAuthNeeded(false);
+          if (pendingUnlock) {
+            setPendingUnlock(false);
+            void handleUnlock();
+          }
+        }}
+      />
+    </div>
+  );
+}
