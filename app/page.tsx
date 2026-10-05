@@ -409,7 +409,7 @@ export default function VilishLanding() {
             </Marquee>
           </Reveal>
           <p className="mt-6 text-center text-[12px] text-white/35">
-            All images above are examples made with Vilish Studio — yours will look like yours.
+            All images above are examples made with Vidish Studio — yours will look like yours.
           </p>
         </section>
 

@@ -174,11 +174,11 @@ export default function Composer({ variant = "hero", className }: ComposerProps)
         className,
       )}
     >
-      <label htmlFor="vilish-prompt" className="sr-only">
+      <label htmlFor="vidish-prompt" className="sr-only">
         Describe the image you want to create
       </label>
       <textarea
-        id="vilish-prompt"
+        id="vidish-prompt"
         value={prompt}
         onChange={(e) => setPrompt(e.target.value)}
         placeholder="What do you want to make?"
