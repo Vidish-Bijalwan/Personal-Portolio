@@ -31,21 +31,21 @@ export const viewport = {
 };
 
 export const metadata = {
-  title: "Vidish — One creation. One price.",
+  title: "AI Image Generator India — ₹29 per Creation | Vidish",
   description:
-    "Generate AI images without another monthly subscription. See the exact price before you pay — from ₹29.",
+    "Generate custom AI images for a fixed ₹29 each. No subscription, pay with UPI, human-reviewed quality. Portraits, product photos, posters & more.",
   openGraph: {
-    title: "Vidish — One creation. One price.",
+    title: "AI Image Generator India — ₹29 per Creation | Vidish",
     description:
-      "Generate AI images without another monthly subscription. See the exact price before you pay — from ₹29.",
+      "Generate custom AI images for a fixed ₹29 each. No subscription, pay with UPI, human-reviewed quality. Portraits, product photos, posters & more.",
     siteName: "Vidish",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Vidish — One creation. One price.",
+    title: "AI Image Generator India — ₹29 per Creation | Vidish",
     description:
-      "Generate AI images without another monthly subscription. See the exact price before you pay — from ₹29.",
+      "Generate custom AI images for a fixed ₹29 each. No subscription, pay with UPI, human-reviewed quality. Portraits, product photos, posters & more.",
   },
 }
 

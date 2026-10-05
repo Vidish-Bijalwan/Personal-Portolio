@@ -41,6 +41,32 @@ describe("toLightboxItem (thumbnail click → lightbox data)", () => {
       price: "₹29",
       model: "flux-2",
       badge: "Ad",
+      alt: "Floating sneaker, studio shot",
+      kind: "image",
+      poster: undefined,
+    });
+  });
+
+  it("maps a video manifest item to a video lightbox item", () => {
+    expect(
+      toLightboxItem({
+        src: "/examples/videos/clip-1-portrait.mp4",
+        prompt: "AI video example — animated neon portrait loop",
+        price: "₹99",
+        model: "5s clip",
+        category: "video",
+        poster: "/examples/videos/poster-1-portrait.jpg",
+        alt: "AI-generated video example: neon portrait",
+      }),
+    ).toEqual({
+      src: "/examples/videos/clip-1-portrait.mp4",
+      caption: "AI video example — animated neon portrait loop",
+      price: "₹99",
+      model: "5s clip",
+      badge: "Video",
+      alt: "AI-generated video example: neon portrait",
+      kind: "video",
+      poster: "/examples/videos/poster-1-portrait.jpg",
     });
   });
 

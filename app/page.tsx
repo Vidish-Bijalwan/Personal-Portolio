@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -57,7 +57,7 @@ const SHOWREEL = [
     src: "/examples/5-watch-ad.webp",
     width: 1920,
     height: 1280,
-    alt: "Steel chronograph watch floating in a dark studio with dramatic rim light",
+    alt: "Steel chronograph watch floating in a dark studio with dramatic rim light — AI-generated example",
     caption: "Floating chronograph, dramatic rim light",
     price: "₹49",
   },
@@ -65,7 +65,7 @@ const SHOWREEL = [
     src: "/examples/6-movie-poster.webp",
     width: 1344,
     height: 1792,
-    alt: "Lone astronaut before a colossal alien monolith, 1980s poster style",
+    alt: "Lone astronaut before a colossal alien monolith, 1980s poster style — AI-generated example",
     caption: "Astronaut before the monolith",
     price: "₹29",
   },
@@ -73,7 +73,7 @@ const SHOWREEL = [
     src: "/examples/7-pet-portrait.webp",
     width: 1600,
     height: 1600,
-    alt: "Golden retriever in a dark studio with Rembrandt lighting",
+    alt: "Golden retriever in a dark studio with Rembrandt lighting — AI-generated example",
     caption: "Golden retriever, Rembrandt light",
     price: "₹29",
   },
@@ -81,7 +81,7 @@ const SHOWREEL = [
     src: "/examples/8-sportscar.webp",
     width: 1920,
     height: 1280,
-    alt: "Sports car on a rain-wet street at night with neon reflections",
+    alt: "Sports car on a rain-wet street at night with neon reflections — AI-generated example",
     caption: "Neon night, wet asphalt",
     price: "₹29",
   },
@@ -92,7 +92,7 @@ const SHOWCASE = [
     src: "/examples/9-fashion-editorial.webp",
     width: 1280,
     height: 1920,
-    alt: "High-fashion model with sculptural black spiked hair in a charcoal studio",
+    alt: "High-fashion model with sculptural black spiked hair in a charcoal studio — AI-generated example",
     caption: "Fashion editorial, sculptural hair",
     price: "₹29",
   },
@@ -100,7 +100,7 @@ const SHOWCASE = [
     src: "/examples/10-perfume-ad.webp",
     width: 1600,
     height: 1600,
-    alt: "Faceted glass perfume bottle with golden liquid",
+    alt: "Faceted glass perfume bottle with golden liquid — AI-generated example",
     caption: "Golden perfume, faceted glass",
     price: "₹49",
   },
@@ -108,7 +108,7 @@ const SHOWCASE = [
     src: "/examples/1-sneaker-ad.webp",
     width: 1920,
     height: 1280,
-    alt: "Sneaker floating in a dark studio with dramatic rim lighting",
+    alt: "Sneaker floating in a dark studio with dramatic rim lighting — AI-generated example",
     caption: "Floating sneaker, studio shot",
     price: "₹29",
   },
@@ -116,7 +116,7 @@ const SHOWCASE = [
     src: "/examples/2-neon-portrait.webp",
     width: 1280,
     height: 1920,
-    alt: "Stylized portrait with neon city lights reflected in her eyes",
+    alt: "Stylized portrait with neon city lights reflected in her eyes — AI-generated example",
     caption: "Neon portrait, city lights",
     price: "₹29",
   },
@@ -179,6 +179,73 @@ const FORMATS = [
   { ratio: "4:5", w: 22, h: 28, tag: "Portraits" },
   { ratio: "9:16", w: 16, h: 30, tag: "Reels & stories" },
   { ratio: "16:9", w: 34, h: 20, tag: "Banners & covers" },
+];
+
+const FAQS = [
+  {
+    q: "How much does it cost to generate one AI image in India?",
+    a: "At Vidish Studio, a single AI image costs a fixed ₹29 — no subscription, no credits to manage. You see the exact price before you pay, and you pay once with UPI.",
+  },
+  {
+    q: "Is there an AI image generator without a subscription?",
+    a: "Yes. Unlike monthly AI subscriptions, Vidish Studio is pay-per-creation: you pay only for the images you actually want, starting at ₹29 each. Nothing renews, nothing auto-charges.",
+  },
+  {
+    q: "Can I pay with UPI for AI image generation?",
+    a: "Yes — every order is paid with a simple UPI payment. After you approve the quoted price, you get a QR code, pay from any UPI app, and submit your transaction ID.",
+  },
+  {
+    q: "How is Vidish Studio different from free AI image generators?",
+    a: "Free tools make you do the prompting, editing, and fixing yourself — and often add watermarks or daily limits. At Vidish Studio you describe what you want, a human reviews the result for quality, and you download a clean, finished image.",
+  },
+  {
+    q: "Do I own the images I generate? Can I use them commercially?",
+    a: "Yes. Once delivered, the image is yours — use it for your shop, listings, social media, or client work. Seller tip: our ₹49 product-photo tier is built for Amazon, Flipkart, and Meesho listings.",
+  },
+  {
+    q: "How long does it take to get my image?",
+    a: "Most orders are delivered within 24 hours. Every creation passes a human quality check before download, so you're never stuck with a bad render.",
+  },
+  {
+    q: "Can I use my own photo as a reference?",
+    a: "Yes — upload your photo (or any reference file: PDF, document, or image) with your order, and it will guide the creation. Portraits, product shots, and restorations all work best with a reference.",
+  },
+];
+
+/** FAQPage structured data matching the visible FAQ section above. */
+const FAQ_JSON_LD = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: FAQS.map((f) => ({
+    "@type": "Question",
+    name: f.q,
+    acceptedAnswer: { "@type": "Answer", text: f.a },
+  })),
+};
+
+/** Homepage motion strip: max 3 AI video example clips (9:16, muted loop). */
+const MOTION_CLIPS = [
+  {
+    src: "/examples/videos/clip-1-portrait.mp4",
+    poster: "/examples/videos/poster-1-portrait.jpg",
+    alt: "AI-generated video example: stylized neon portrait animating in a 5s loop — 5s clips ₹99 at Vidish Studio",
+    caption: "Neon portrait, in motion",
+    price: "₹99",
+  },
+  {
+    src: "/examples/videos/clip-3-city.mp4",
+    poster: "/examples/videos/poster-3-city.jpg",
+    alt: "AI-generated video example: cinematic night cityscape with slow aerial motion — 5s clips ₹99 at Vidish Studio",
+    caption: "Night city, in motion",
+    price: "₹99",
+  },
+  {
+    src: "/examples/videos/clip-2-product.mp4",
+    poster: "/examples/videos/poster-2-product.jpg",
+    alt: "AI-generated video example: premium product shot with slow cinematic motion — 5s clips ₹99 at Vidish Studio",
+    caption: "Product shot, in motion",
+    price: "₹99",
+  },
 ];
 
 /** Standard eyebrow, used on every section header. */
@@ -273,6 +340,89 @@ function HowItWorksProgress() {
         ))}
       </Stagger>
     </div>
+  );
+}
+
+/**
+ * One motion-strip card: an AI video example in a 9:16 frame.
+ * Lightweight by design — preload="none" (poster paints first), muted loop
+ * gated on IntersectionObserver, paused off-screen and on tab-hide.
+ * prefers-reduced-motion → poster image only, no video element.
+ */
+function MotionClipCard({ clip }: { clip: (typeof MOTION_CLIPS)[number] }) {
+  const reduced = usePrefersReducedMotion();
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    if (reduced) return;
+    const video = videoRef.current;
+    if (!video) return;
+    video.muted = true;
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            void video.play().catch(() => {});
+          } else {
+            video.pause();
+          }
+        }
+      },
+      { threshold: 0.1 },
+    );
+    io.observe(video);
+
+    const onVisibility = () => {
+      if (document.hidden) video.pause();
+      else void video.play().catch(() => {});
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+
+    return () => {
+      io.disconnect();
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, [reduced]);
+
+  return (
+    <figure className="w-[62vw] max-w-[240px] shrink-0 sm:w-[200px]">
+      <span className="relative block aspect-[9/16] overflow-hidden rounded-xl border border-white/[0.08] bg-white/[0.03]">
+        {reduced ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={clip.poster}
+            alt={clip.alt}
+            className="h-full w-full object-cover"
+            loading="lazy"
+            decoding="async"
+          />
+        ) : (
+          <video
+            ref={videoRef}
+            className="h-full w-full object-cover"
+            muted
+            loop
+            playsInline
+            preload="none"
+            poster={clip.poster}
+            aria-label={clip.alt}
+            disablePictureInPicture
+          >
+            <source src={clip.src} type="video/mp4" />
+          </video>
+        )}
+        <span className="absolute left-2.5 top-2.5 rounded-full border border-white/[0.14] bg-black/70 px-2.5 py-1 text-[10px] font-medium uppercase tracking-[0.08em] text-[#F5F5F3] backdrop-blur-sm">
+          AI video example
+        </span>
+        <span className="absolute bottom-2.5 right-2.5 rounded-full bg-black/70 px-2.5 py-1 text-[12px] font-semibold tabular-nums text-[#F5F5F3] backdrop-blur-sm">
+          {clip.price}
+        </span>
+      </span>
+      <figcaption className="mt-2 px-0.5 text-[12px] text-white/50">
+        {clip.caption}
+      </figcaption>
+    </figure>
   );
 }
 
@@ -472,6 +622,37 @@ export default function VilishLanding() {
           </Reveal>
         </section>
 
+        {/* ── motion strip (AI video examples) ─────────────── */}
+        <section aria-label="AI video examples" className="border-b border-white/[0.08] py-16 sm:py-20">
+          <div className="mx-auto max-w-5xl px-4">
+            <Reveal>
+              <Eyebrow>Motion</Eyebrow>
+              <h2 className="font-display mt-3 text-[26px] font-semibold tracking-[-0.01em] sm:text-[34px]">
+                Stills are the warm-up. <span className="text-[#00F0FF]">Video is live.</span>
+              </h2>
+              <p className="mt-3 max-w-xl text-[14px] leading-6 text-white/50">
+                AI video examples — 5s clips at ₹99 each, made in minutes. No
+                subscription, same per-creation deal.
+              </p>
+            </Reveal>
+          </div>
+          <Reveal delay={0.1} className="mt-8">
+            <div className="mx-auto flex max-w-5xl gap-4 overflow-x-auto px-4 pb-2 sm:gap-5">
+              {MOTION_CLIPS.map((clip) => (
+                <MotionClipCard key={clip.src} clip={clip} />
+              ))}
+            </div>
+          </Reveal>
+          <Reveal delay={0.15} className="mt-8 text-center">
+            <Link
+              href="/pricing"
+              className="inline-flex items-center gap-1.5 text-[14px] font-medium text-[#F5F5F3] underline decoration-white/25 underline-offset-4 hover:decoration-white/60"
+            >
+              5s clips at ₹99 — see pricing <ArrowRight className="h-4 w-4" strokeWidth={1.8} />
+            </Link>
+          </Reveal>
+        </section>
+
         {/* ── capability bento ─────────────────────────────── */}
         <section aria-label="What you can create" className="mx-auto max-w-5xl px-4 py-20 sm:py-28">
           <Reveal>
@@ -489,11 +670,11 @@ export default function VilishLanding() {
           </Stagger>
           <Reveal delay={0.1}>
             <p className="mt-6 flex flex-wrap items-center gap-x-3 gap-y-1.5 rounded-2xl border border-dashed border-white/[0.12] bg-white/[0.015] px-5 py-4 text-[13.5px] text-white/55">
-              <span className="rounded-full border border-white/[0.12] px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-white/60">
-                On the roadmap
+              <span className="rounded-full border border-[#D7FF3F]/40 px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#D7FF3F]">
+                Now live
               </span>
-              Video — short motion clips. Every frame you see here is still a
-              single creation.
+              Video — 5s motion clips at ₹99 each, made in minutes. Every
+              frame you see here is still a single creation.
             </p>
           </Reveal>
           <Reveal delay={0.15}>
@@ -599,6 +780,48 @@ export default function VilishLanding() {
               </Link>
             </Reveal>
           </div>
+        </section>
+
+        {/* ── FAQ (SEO: keyword questions + FAQPage schema) ── */}
+        <section aria-label="Frequently asked questions" className="mx-auto max-w-5xl px-4 py-20 sm:py-28">
+          <Reveal>
+            <Eyebrow>FAQ</Eyebrow>
+            <h2 className="font-display mt-3 max-w-[24ch] text-[26px] font-semibold tracking-[-0.01em] sm:text-[34px]">
+              Questions, <span className="text-[#D7FF3F]">answered straight.</span>
+            </h2>
+          </Reveal>
+          <div className="mt-10 grid grid-cols-1 gap-3 sm:gap-4">
+            {FAQS.map((f, i) => (
+              <Reveal key={f.q} delay={Math.min(i * 0.04, 0.2)}>
+                <details
+                  className="group rounded-2xl border border-white/[0.08] bg-white/[0.02] transition-colors open:border-[#D7FF3F]/30 open:bg-white/[0.03] hover:border-white/[0.16]"
+                >
+                  <summary className="flex cursor-pointer list-none items-baseline gap-4 px-5 py-4 outline-none focus-visible:ring-2 focus-visible:ring-[#D7FF3F] sm:px-6 sm:py-5 [&::-webkit-details-marker]:hidden">
+                    <span aria-hidden className="font-display text-[12px] font-semibold tabular-nums text-[#D7FF3F]/70">
+                      {String(i + 1).padStart(2, "0")}
+                    </span>
+                    <span className="flex-1 text-[15px] font-medium leading-6 text-[#F5F5F3]">
+                      {f.q}
+                    </span>
+                    <span
+                      aria-hidden
+                      className="font-display text-[18px] leading-none text-[#D7FF3F] transition-transform duration-200 group-open:rotate-45 motion-reduce:transition-none"
+                    >
+                      +
+                    </span>
+                  </summary>
+                  <p className="px-5 pb-5 pl-[3.25rem] pr-6 text-[14px] leading-7 text-white/[0.62] sm:px-6 sm:pb-6 sm:pl-[3.5rem]">
+                    {f.a}
+                  </p>
+                </details>
+              </Reveal>
+            ))}
+          </div>
+          {/* Structured data for the visible FAQ above. */}
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(FAQ_JSON_LD) }}
+          />
         </section>
 
         {/* ── closing CTA ──────────────────────────────────── */}

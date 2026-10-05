@@ -12,7 +12,7 @@
 import QRCode from 'qrcode';
 import { and, eq, inArray, ne } from 'drizzle-orm';
 import { db } from '@/lib/db/client';
-import { auditLogs, orders, payments } from '@/lib/db/schema';
+import { auditLogs, generationOrders, generations, orders, payments } from '@/lib/db/schema';
 import {
   buildUpiUri,
   isValidUtr,
@@ -281,6 +281,27 @@ export async function verifyPaymentOrder(input: {
     // address, shown to the paying customer only, never to third parties.
     target: { code: order.code, amountPaise: order.amountPaise },
   });
+  // Free-tier / paid-video unlock side-effect: if this order is linked to a
+  // generations row (purpose 'unlock' = ₹29 clean-image unlock,
+  // purpose 'video' = ₹99 clip), flip its unlocked flag so the clean
+  // download opens. Guarded: a missing generations table (legacy DB where
+  // the 0004 migration hasn't applied) must NEVER break payment verify.
+  try {
+    const links = await db
+      .select()
+      .from(generationOrders)
+      .where(eq(generationOrders.orderId, order.id))
+      .limit(1);
+    const link = links[0];
+    if (link && (link.purpose === 'unlock' || link.purpose === 'video')) {
+      await db
+        .update(generations)
+        .set({ unlocked: true, updatedAt: new Date() })
+        .where(eq(generations.id, link.generationId));
+    }
+  } catch (hookErr) {
+    console.error('[payments] generation unlock hook failed:', hookErr);
+  }
   return { status: 'PAYMENT_VERIFIED' as PaymentOrderState, jobId: order.jobId };
 }
 

@@ -1,9 +1,10 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { Stagger, StaggerItem } from "@/components/motion/Stagger";
+import { usePrefersReducedMotion } from "@/src/lib/motion/theme";
 import Lightbox from "@/components/vilish/lightbox";
 import {
   CATEGORY_LABEL,
@@ -22,6 +23,82 @@ const CATEGORY_TABS: { id: "all" | ExampleCategory; label: string }[] = [
   { id: "edit", label: "Edit" },
   { id: "ad", label: "Ad" },
 ];
+
+/**
+ * Video example card body. Mirrors HeroVideo's motion contract:
+ * muted/loop/playsInline, IntersectionObserver-gated play, paused off-screen
+ * and on tab-hide. Reduced motion renders only the poster image —
+ * no video element at all.
+ */
+function ExampleVideo({ item }: { item: ExampleItem }) {
+  const reduced = usePrefersReducedMotion();
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    if (reduced) return;
+    const video = videoRef.current;
+    if (!video) return;
+    video.muted = true;
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            void video.play().catch(() => {
+              /* autoplay blocked — poster stays visible */
+            });
+          } else {
+            video.pause();
+          }
+        }
+      },
+      { threshold: 0.1 },
+    );
+    io.observe(video);
+
+    const onVisibility = () => {
+      if (document.hidden) video.pause();
+      else void video.play().catch(() => {});
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+
+    return () => {
+      io.disconnect();
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, [reduced]);
+
+  const alt = item.alt ?? item.prompt;
+
+  if (reduced || !item.poster) {
+    return (
+      <Image
+        src={item.poster ?? item.src}
+        alt={alt}
+        fill
+        sizes="(max-width: 640px) 100vw, 50vw"
+        className="object-cover"
+        loading="lazy"
+      />
+    );
+  }
+
+  return (
+    <video
+      ref={videoRef}
+      className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.04] motion-reduce:transition-none"
+      muted
+      loop
+      playsInline
+      preload="none"
+      poster={item.poster}
+      aria-label={alt}
+      disablePictureInPicture
+    >
+      <source src={item.src} type="video/mp4" />
+    </video>
+  );
+}
 
 function ExampleBadge() {
   return (
@@ -125,14 +202,18 @@ export default function ExamplesGrid({ items }: { items: ExampleItem[] }) {
                   className="group block w-full overflow-hidden rounded-[16px] border border-white/[0.08] bg-[#121214] text-left transition-all duration-200 hover:-translate-y-1 hover:border-white/[0.16] hover:shadow-[0_20px_50px_-20px_rgba(0,0,0,0.8)] motion-reduce:transition-none motion-reduce:hover:translate-y-0"
                 >
                   <span className="relative block aspect-[4/3] overflow-hidden">
-                    <Image
-                      src={item.src}
-                      alt={item.prompt}
-                      fill
-                      sizes="(max-width: 640px) 100vw, 50vw"
-                      className="object-cover transition-transform duration-300 group-hover:scale-[1.04] motion-reduce:transition-none"
-                      loading="lazy"
-                    />
+                    {item.category === "video" ? (
+                      <ExampleVideo item={item} />
+                    ) : (
+                      <Image
+                        src={item.src}
+                        alt={item.alt ?? item.prompt}
+                        fill
+                        sizes="(max-width: 640px) 100vw, 50vw"
+                        className="object-cover transition-transform duration-300 group-hover:scale-[1.04] motion-reduce:transition-none"
+                        loading="lazy"
+                      />
+                    )}
                     <span className="absolute left-3 top-3">
                       <ExampleBadge />
                     </span>

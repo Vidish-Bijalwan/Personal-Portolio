@@ -19,6 +19,8 @@ interface PaymentModalProps {
   initialPayment: ManualPayment;
   onClose: () => void;
   navigate: (url: string) => void;
+  /** When set, called on payment verification instead of navigating to /generation/[jobId]. */
+  onPaymentVerified?: (jobId: string) => void;
 }
 
 function useCountdown(expiresAt: string, active: boolean) {
@@ -36,7 +38,7 @@ function useCountdown(expiresAt: string, active: boolean) {
   };
 }
 
-export default function PaymentModal({ jobId, initialPayment, onClose, navigate }: PaymentModalProps) {
+export default function PaymentModal({ jobId, initialPayment, onClose, navigate, onPaymentVerified }: PaymentModalProps) {
   const [payment, setPayment] = useState<ManualPayment>(initialPayment);
   const [phase, setPhase] = useState<ModalPhase>("pay");
   const [vpaCopied, setVpaCopied] = useState(false);
@@ -69,7 +71,11 @@ export default function PaymentModal({ jobId, initialPayment, onClose, navigate 
       if (!status) return;
       if (status === "PAYMENT_VERIFIED" || status === "GENERATION_QUEUED") {
         if (pollRef.current) clearInterval(pollRef.current);
-        navigate(`/generation/${jobId}`);
+        if (onPaymentVerified) {
+          onPaymentVerified(jobId);
+        } else {
+          navigate(`/generation/${jobId}`);
+        }
       } else if (status === "PAYMENT_REJECTED") {
         if (pollRef.current) clearInterval(pollRef.current);
         setStatusMsg("Payment rejected — contact support");
@@ -86,7 +92,7 @@ export default function PaymentModal({ jobId, initialPayment, onClose, navigate 
     return () => {
       if (pollRef.current) clearInterval(pollRef.current);
     };
-  }, [phase, payment.code, jobId, navigate]);
+  }, [phase, payment.code, jobId, navigate, onPaymentVerified]);
 
   const copyVpa = async () => {
     try {
