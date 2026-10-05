@@ -26,6 +26,8 @@ import VilishNav from "@/components/vilish/nav";
 import VilishFooter from "@/components/vilish/footer";
 import Composer from "@/components/vilish/composer";
 import Lightbox, { type LightboxItem } from "@/components/vilish/lightbox";
+import { PRICE_CATALOG } from "@/src/lib/pricing/catalog";
+import { formatINR } from "@/src/lib/vilish/types";
 import GenerativeField from "@/components/motion/GenerativeField";
 import HeroVideo from "@/components/motion/HeroVideo";
 import FlyingElements from "@/components/motion/FlyingElements";
@@ -51,12 +53,13 @@ const FLOW = [
   { step: "Download", desc: "Download your creation once it passes QC." },
 ];
 
-const TEASER = [
-  { label: "Single image", price: "₹29" },
-  { label: "4-pack", price: "₹79" },
-  { label: "Product photo", price: "₹49" },
-  { label: "Remake", price: "₹19" },
-];
+/* Rendered from the canonical price catalog — never hardcode prices here. */
+const TEASER = PRICE_CATALOG.filter((p) =>
+  ["single-image", "pack-4", "product-photo", "clip-5s", "video-studio"].includes(p.id),
+).map((p) => ({
+  label: p.id === "video-studio" ? "Video Studio job" : p.label,
+  price: formatINR(p.paise),
+}));
 
 /** Showreel: six unique examples, zero overlap with the Showcase section (9, 10, 1, 2).
  *  Frames vary in height so the strip reads as a living reel, not a tile grid. */

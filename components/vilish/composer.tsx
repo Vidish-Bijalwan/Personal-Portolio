@@ -2,8 +2,10 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, Loader2, Paperclip, Sparkles, X } from "lucide-react";
+import Link from "next/link";
+import { ArrowRight, Clapperboard, Loader2, Paperclip, Sparkles, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useTypewriterPlaceholder } from "./use-typewriter-placeholder";
 import {
   formatINR,
   type AspectRatio,
@@ -112,6 +114,14 @@ export default function Composer({ variant = "hero", className, initialMedia = "
   const [files, setFiles] = useState<File[]>([]);
   const [fileError, setFileError] = useState("");
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
+
+  // typewriter placeholder: cycles example prompts while the box is empty
+  // and unfocused; pauses the moment the user focuses or types.
+  const [promptFocused, setPromptFocused] = useState(false);
+  const animatedPlaceholder = useTypewriterPlaceholder(
+    prompt === "" && !promptFocused && mediaMode === "image"
+  );
+  const typing = prompt.trim().length > 0;
 
   // public fulfillment config: turnaround copy + paused gate
   useEffect(() => {
@@ -451,12 +461,14 @@ export default function Composer({ variant = "hero", className, initialMedia = "
   return (
     <div
       className={cn(
-        "w-full rounded-[20px] border border-white/[0.08] bg-[#121214] p-5 sm:p-6",
-        "shadow-[0_0_0_1px_rgba(0,0,0,0.4),0_24px_64px_-24px_rgba(0,0,0,0.8)]",
+        "w-full rounded-[20px] border p-5 sm:p-6 transition-shadow duration-300 motion-reduce:transition-none",
+        typing
+          ? "border-[#D7FF3F]/25 bg-[#121214] shadow-[0_0_0_1px_rgba(0,0,0,0.4),0_0_56px_-12px_rgba(215,255,63,0.35),0_24px_64px_-24px_rgba(0,0,0,0.8)]"
+          : "border-white/[0.08] bg-[#121214] shadow-[0_0_0_1px_rgba(0,0,0,0.4),0_24px_64px_-24px_rgba(0,0,0,0.8)]",
         className,
       )}
     >
-      {/* media toggle: image vs 5s video clip */}
+      {/* media toggle: image vs 5s video clip vs edit-your-video */}
       <div className="mb-4 flex flex-wrap items-center gap-2">
         <div
           role="group"
@@ -485,6 +497,15 @@ export default function Composer({ variant = "hero", className, initialMedia = "
             </button>
           ))}
         </div>
+        <Link
+          href="/video-studio"
+          title="Voice-over & TTS, auto-captioning, trim + text overlay — ₹49 per finished video"
+          className="inline-flex items-center gap-1.5 rounded-[12px] border border-dashed border-white/[0.14] px-4 py-2 text-[13px] font-semibold text-white/60 transition-colors hover:border-[#00F0FF]/50 hover:text-white/95"
+        >
+          <Clapperboard className="h-3.5 w-3.5" aria-hidden />
+          Edit video
+          <span className="text-[11px] font-medium text-white/35">₹49</span>
+        </Link>
         {mediaMode === "image" && (
           <div
             role="group"
@@ -554,7 +575,9 @@ export default function Composer({ variant = "hero", className, initialMedia = "
         id="vidish-prompt"
         value={prompt}
         onChange={(e) => setPrompt(e.target.value)}
-        placeholder={mediaMode === "video" ? "Describe the 5-second clip…" : "What do you want to make?"}
+        onFocus={() => setPromptFocused(true)}
+        onBlur={() => setPromptFocused(false)}
+        placeholder={mediaMode === "video" ? "Describe the 5-second clip…" : (animatedPlaceholder ?? "What do you want to make?")}
         rows={variant === "hero" ? 3 : 4}
         maxLength={PROMPT_MAX_LENGTH}
         aria-invalid={overLimit}
