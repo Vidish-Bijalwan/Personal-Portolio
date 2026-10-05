@@ -134,8 +134,11 @@ if (process.env.DEV_AUTH === 'true') {
 const isProd = process.env.NODE_ENV === 'production';
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
-  // Database sessions via Drizzle (sessions table in schema.ts).
-  // Requires AUTH_SECRET to be set in every environment.
+  // NOTE: Credentials provider REQUIRES the JWT session strategy — Auth.js
+  // v5 throws UnsupportedStrategy if credentials is combined with
+  // strategy:'database'. Sessions are stateless signed JWTs (AUTH_SECRET);
+  // logout clears the cookie. The DrizzleAdapter stays for future OAuth
+  // account linking and does not interfere with the credentials flow.
   adapter: DrizzleAdapter(db, {
     usersTable: users,
     accountsTable: accounts,
@@ -143,11 +146,24 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     verificationTokensTable: verificationTokens,
   }),
   session: {
-    strategy: 'database',
-    // 30-day sessions, sliding: the session is extended when the user is
-    // active and the session is older than updateAge.
+    strategy: 'jwt',
+    // 30-day sessions.
     maxAge: 30 * 24 * 60 * 60,
-    updateAge: 24 * 60 * 60,
+  },
+  callbacks: {
+    // Propagate the DB user id into the JWT on sign-in...
+    async jwt({ token, user }) {
+      if (user) {
+        (token as Record<string, unknown>).id = (user as { id?: string }).id;
+      }
+      return token;
+    },
+    // ...and expose it on session.user for getSessionUser().
+    async session({ session, token }) {
+      const t = token as unknown as Record<string, unknown>;
+      (session.user as unknown as Record<string, unknown>).id = t.id ?? t.sub;
+      return session;
+    },
   },
   // Explicit cookie contract: httpOnly always (no JS access), SameSite=Lax
   // (CSRF-resistant top-level POSTs still work), Secure in production.
