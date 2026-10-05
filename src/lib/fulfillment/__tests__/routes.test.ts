@@ -1,5 +1,5 @@
 /**
- * VILISH Phase 2 — route contract tests (contract §5 + §8).
+ * Vidish Phase 2 — route contract tests (contract §5 + §8).
  *
  * - Admin authz: every new /api/admin/fulfillment/* route 401s without
  *   x-admin-token (same fail-closed pattern as existing admin routes).

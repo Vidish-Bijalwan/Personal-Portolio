@@ -1,5 +1,5 @@
 /**
- * VILISH Studio — pricing engine (pure functions, no I/O, no env reads).
+ * Vidish Studio — pricing engine (pure functions, no I/O, no env reads).
  *
  * LAW: money is INTEGER PAISE everywhere (₹1 = 100). Never floats in output.
  * All rounding uses integer ceiling arithmetic; totals always round UP to

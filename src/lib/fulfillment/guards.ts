@@ -1,5 +1,5 @@
 /**
- * VILISH Studio — fulfillment route guards (Phase 2 contract §5).
+ * Vidish Studio — fulfillment route guards (Phase 2 contract §5).
  *
  * - Every /api/admin/* route: fail-closed x-admin-token check.
  * - Every state-changing admin action: audit log (audit_logs table).

@@ -26,7 +26,7 @@ export default function ExamplesPage() {
       <VilishNav />
       <main className="mx-auto w-full max-w-5xl flex-1 px-4 pb-20 pt-10 sm:pt-16">
         <h1 className="text-[28px] font-semibold tracking-[-0.02em] sm:text-[36px]">
-          Made with VILISH
+          Made with Vidish
         </h1>
         <p className="mt-3 max-w-xl text-[15px] leading-7 text-white/[0.58]">
           Real generations, with the exact prompt and the exact price each one

@@ -1,5 +1,5 @@
 /**
- * VILISH vertical-slice E2E (no network, no external services).
+ * Vidish vertical-slice E2E (no network, no external services).
  * Drives the real lib functions the API routes call, in one PGlite DB:
  * interpret → quote → manual-UPI order → UTR submit → admin verify →
  * job queued → mock provider generation → READY + remake eligibility.
@@ -8,8 +8,8 @@ import { describe, expect, it, vi, beforeAll, afterAll } from 'vitest';
 import { eq } from 'drizzle-orm';
 
 vi.stubEnv('UPI_PAYMENT_ENABLED', 'true');
-vi.stubEnv('UPI_VPA', 'vilish-test@upi');
-vi.stubEnv('UPI_PAYEE_NAME', 'VILISH TEST');
+vi.stubEnv('UPI_VPA', 'vidish-test@upi');
+vi.stubEnv('UPI_PAYEE_NAME', 'Vidish TEST');
 vi.stubEnv('ALLOW_MOCK_PROVIDER', 'true');
 vi.stubEnv('GENERATION_PROVIDER_PRIORITY', 'mock');
 
@@ -36,7 +36,7 @@ async function getJob(id: string) {
   return rows[0];
 }
 
-describe('VILISH slice E2E', () => {
+describe('Vidish slice E2E', () => {
   let jobId: string;
   let orderCode: string;
 

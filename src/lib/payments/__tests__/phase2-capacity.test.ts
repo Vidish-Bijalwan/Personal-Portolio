@@ -1,5 +1,5 @@
 /**
- * VILISH Phase 2 — contract §5 capacity gates on POST /api/generation/start.
+ * Vidish Phase 2 — contract §5 capacity gates on POST /api/generation/start.
  *
  * The gate runs BEFORE order creation:
  * - ORDERS_ACCEPTING=false → 403 { error: 'ORDERS_PAUSED' }
@@ -24,7 +24,7 @@ vi.mock('@/lib/auth', () => ({
   getSessionUser: () =>
     Promise.resolve({
       id: 'cap-user-1',
-      email: 'capacity@vilish.dev',
+      email: 'capacity@vidish.dev',
       name: 'Capacity User',
     }),
 }));
@@ -55,7 +55,7 @@ describe.runIf(HAS_START)('POST /api/generation/start — capacity gates', () =>
       .values({
         id: 'cap-user-1',
         name: 'Capacity User',
-        email: 'capacity@vilish.dev',
+        email: 'capacity@vidish.dev',
       })
       .onConflictDoNothing();
   }, 120_000);

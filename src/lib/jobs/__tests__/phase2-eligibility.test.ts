@@ -1,5 +1,5 @@
 /**
- * VILISH Phase 2 — contract §3 worker eligibility.
+ * Vidish Phase 2 — contract §3 worker eligibility.
  *
  * isWorkerEligible(job): job.fulfillmentMode === 'provider' AND state in
  * QUEUED | SUBMITTED | GENERATING. In operator mode the worker never touches

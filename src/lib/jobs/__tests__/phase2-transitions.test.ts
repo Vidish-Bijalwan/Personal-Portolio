@@ -1,5 +1,5 @@
 /**
- * VILISH Phase 2 — contract §1/§2: new job states + replaced JOB_TRANSITIONS map.
+ * Vidish Phase 2 — contract §1/§2: new job states + replaced JOB_TRANSITIONS map.
  *
  * Independent contract check (written against PHASE2_CONTRACT.md, not the
  * implementation): every edge in the §2 replacement map must be allowed, and

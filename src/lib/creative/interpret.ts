@@ -1,5 +1,5 @@
 /**
- * VILISH Studio — deterministic rule-based creative interpretation.
+ * Vidish Studio — deterministic rule-based creative interpretation.
  * Pure function: prompt text -> CreativeSpec. No network, no LLM.
  * Throws ModerationBlockedError (status 400, code MODERATION_BLOCKED)
  * when the prompt matches the blocklist categories.

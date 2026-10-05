@@ -21,19 +21,19 @@ export const viewport = {
 };
 
 export const metadata = {
-  title: "VILISH — One creation. One price.",
+  title: "Vidish — One creation. One price.",
   description:
     "Generate AI images without another monthly subscription. See the exact price before you pay — from ₹29.",
   openGraph: {
-    title: "VILISH — One creation. One price.",
+    title: "Vidish — One creation. One price.",
     description:
       "Generate AI images without another monthly subscription. See the exact price before you pay — from ₹29.",
-    siteName: "VILISH",
+    siteName: "Vidish",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "VILISH — One creation. One price.",
+    title: "Vidish — One creation. One price.",
     description:
       "Generate AI images without another monthly subscription. See the exact price before you pay — from ₹29.",
   },

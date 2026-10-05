@@ -1,5 +1,5 @@
 /**
- * VILISH Studio — fulfillment config helper (Phase 2 contract §4).
+ * Vidish Studio — fulfillment config helper (Phase 2 contract §4).
  *
  * Reads adminConfig (DB) first, falls back to env, then hardcoded defaults.
  * DB wins over env. Money: N/A (strings / nullable cap).

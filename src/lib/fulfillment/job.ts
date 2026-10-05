@@ -1,5 +1,5 @@
 /**
- * VILISH Studio — fulfillment job row helpers (Phase 2 contract §4/§5).
+ * Vidish Studio — fulfillment job row helpers (Phase 2 contract §4/§5).
  *
  * The new `generation_jobs` columns (fulfillmentMode, jobKind, operatorNotes,
  * …) and the `fulfillment_results` table are created by the parallel schema

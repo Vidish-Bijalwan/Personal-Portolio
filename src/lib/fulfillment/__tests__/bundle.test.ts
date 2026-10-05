@@ -1,5 +1,5 @@
 /**
- * VILISH Phase 2 — contract §5 bundle:
+ * Vidish Phase 2 — contract §5 bundle:
  * GET /api/admin/fulfillment/[id]/bundle → ZIP `VLSH-XXXXXX.zip` containing
  * `<orderCode>/order.json`, `<orderCode>/prompt.txt`,
  * `<orderCode>/references/<file>` with correct contents.
@@ -62,7 +62,7 @@ describe.runIf(HAS_ROUTE)('fulfillment bundle ZIP — contract §5', () => {
 
     const [user] = await db
       .insert(schema.users)
-      .values({ name: 'Bundle User', email: 'bundle@vilish.dev' })
+      .values({ name: 'Bundle User', email: 'bundle@vidish.dev' })
       .returning();
     const [project] = await db
       .insert(schema.projects)

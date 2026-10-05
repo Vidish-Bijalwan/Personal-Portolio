@@ -33,25 +33,25 @@ const ENV_KEYS = [
 beforeEach(() => {
   for (const k of ENV_KEYS) delete process.env[k];
   process.env.UPI_PAYMENT_ENABLED = 'true';
-  process.env.UPI_VPA = 'vilish@okhdfcbank';
-  process.env.UPI_PAYEE_NAME = 'VilishStudio';
+  process.env.UPI_VPA = 'vidish@okhdfcbank';
+  process.env.UPI_PAYEE_NAME = 'VidishStudio';
 });
 
 describe('buildUpiUri', () => {
-  it('contains pa, pn, am (2 decimals), cu=INR, tn=VILISH-<code>', () => {
+  it('contains pa, pn, am (2 decimals), cu=INR, tn=Vidish-<code>', () => {
     const uri = buildUpiUri({
-      vpa: 'vilish@okhdfcbank',
-      payeeName: 'VilishStudio',
+      vpa: 'vidish@okhdfcbank',
+      payeeName: 'VidishStudio',
       amountPaise: 2900,
       orderCode: 'VLSH-8H4K2P',
     });
     expect(uri.startsWith('upi://pay?')).toBe(true);
     const p = new URLSearchParams(uri.slice('upi://pay?'.length));
-    expect(p.get('pa')).toBe('vilish@okhdfcbank');
-    expect(p.get('pn')).toBe('VilishStudio');
+    expect(p.get('pa')).toBe('vidish@okhdfcbank');
+    expect(p.get('pn')).toBe('VidishStudio');
     expect(p.get('am')).toBe('29.00');
     expect(p.get('cu')).toBe('INR');
-    expect(p.get('tn')).toBe('VILISH-VLSH-8H4K2P');
+    expect(p.get('tn')).toBe('Vidish-VLSH-8H4K2P');
   });
 
   it('keeps paise exactness (no float drift)', () => {
@@ -98,8 +98,8 @@ describe('getUpiConfig', () => {
   it('returns config from env with 30min default TTL', () => {
     const cfg = getUpiConfig();
     expect(cfg.enabled).toBe(true);
-    expect(cfg.vpa).toBe('vilish@okhdfcbank');
-    expect(cfg.payeeName).toBe('VilishStudio');
+    expect(cfg.vpa).toBe('vidish@okhdfcbank');
+    expect(cfg.payeeName).toBe('VidishStudio');
     expect(cfg.qrImageUrl).toBeNull();
     expect(cfg.orderTtlMin).toBe(30);
   });
@@ -107,7 +107,7 @@ describe('getUpiConfig', () => {
   it('throws when enabled but VPA/payee name missing', () => {
     delete process.env.UPI_VPA;
     expect(() => getUpiConfig()).toThrow(/UPI_VPA/);
-    process.env.UPI_VPA = 'vilish@okhdfcbank';
+    process.env.UPI_VPA = 'vidish@okhdfcbank';
     delete process.env.UPI_PAYEE_NAME;
     expect(() => getUpiConfig()).toThrow(/UPI_PAYEE_NAME/);
   });
@@ -130,20 +130,20 @@ describe('ManualUpiProvider QR', () => {
     });
     expect(checkout.qrDataUri).toMatch(/^data:image\/png;base64,/);
     expect(checkout.upiUri).toContain('upi://pay?');
-    expect(checkout.vpa).toBe('vilish@okhdfcbank');
-    expect(checkout.payeeName).toBe('VilishStudio');
+    expect(checkout.vpa).toBe('vidish@okhdfcbank');
+    expect(checkout.payeeName).toBe('VidishStudio');
     const ttl = Date.parse(checkout.expiresAt) - Date.now();
     expect(ttl).toBeGreaterThan(29 * 60_000);
     expect(ttl).toBeLessThanOrEqual(30 * 60_000);
   });
 
   it('prefers the hosted QR image when UPI_QR_IMAGE is set', async () => {
-    process.env.UPI_QR_IMAGE = 'https://cdn.example.com/vilish-qr.png';
+    process.env.UPI_QR_IMAGE = 'https://cdn.example.com/vidish-qr.png';
     const checkout = await new ManualUpiProvider().createCheckout({
       code: 'VLSH-8H4K2P',
       amountPaise: 4900,
     });
-    expect(checkout.qrImageUrl).toBe('https://cdn.example.com/vilish-qr.png');
+    expect(checkout.qrImageUrl).toBe('https://cdn.example.com/vidish-qr.png');
     expect(checkout.qrDataUri).toBeUndefined();
   });
 });

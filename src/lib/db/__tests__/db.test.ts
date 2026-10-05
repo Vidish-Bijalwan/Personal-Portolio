@@ -1,5 +1,5 @@
 /**
- * VILISH Studio DB tests — run against in-process PGlite, no external services.
+ * Vidish Studio DB tests — run against in-process PGlite, no external services.
  */
 import { describe, it, expect, beforeAll } from 'vitest';
 import { eq } from 'drizzle-orm';
@@ -28,7 +28,7 @@ describe('db roundtrip', () => {
 
     const [user] = await db
       .insert(users)
-      .values({ name: 'Test User', email: 'test@vilish.dev' })
+      .values({ name: 'Test User', email: 'test@vidish.dev' })
       .returning();
     expect(user.id).toBeTruthy();
 

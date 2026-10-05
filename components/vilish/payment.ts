@@ -1,5 +1,5 @@
 /**
- * VILISH — Manual UPI payment flow.
+ * Vidish — Manual UPI payment flow.
  * No payment gateway: the user pays to our VPA manually, then submits the
  * UTR reference (+ optional screenshot) for human verification.
  */

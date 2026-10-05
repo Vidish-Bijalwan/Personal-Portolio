@@ -15,7 +15,7 @@ export default function ExamplesGrid({ items }: { items: ExampleItem[] }) {
         <p className="text-[16px] font-medium text-[#F5F5F3]">No examples yet</p>
         <p className="mx-auto mt-2 max-w-sm text-[14px] leading-6 text-white/[0.58]">
           Fresh generations will appear here. Only real creations made with
-          VILISH are shown — nothing staged, nothing stock.
+          Vidish are shown — nothing staged, nothing stock.
         </p>
       </div>
     );

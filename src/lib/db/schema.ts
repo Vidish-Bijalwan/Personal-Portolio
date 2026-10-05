@@ -1,5 +1,5 @@
 /**
- * VILISH Studio — Drizzle schema (Postgres).
+ * Vidish Studio — Drizzle schema (Postgres).
  * LAW: table/column names are fixed; API/payments/auth agents code against these.
  * Money: INTEGER PAISE everywhere.
  */
