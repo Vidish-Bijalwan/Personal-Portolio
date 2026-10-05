@@ -1,6 +1,7 @@
 import React from "react"
 import "./globals.css"
 import { IBM_Plex_Sans, IBM_Plex_Mono } from "next/font/google"
+import { AuthSessionProvider } from "@/components/vilish/session-provider"
 
 const ibmPlexSans = IBM_Plex_Sans({
   subsets: ["latin"],
@@ -16,31 +17,26 @@ const ibmPlexMono = IBM_Plex_Mono({
   display: "swap",
 })
 
+export const viewport = {
+  themeColor: "#080808",
+};
+
 export const metadata = {
-  title: "Vidish Bijalwan — AI Systems Engineer",
+  title: "Vidish — One creation. One price.",
   description:
-    "A living engineering archive documenting the evolution of an AI engineer building retrieval systems, autonomous workflows, and intelligence infrastructure.",
-  keywords: [
-    "AI Engineer",
-    "Machine Learning",
-    "RAG",
-    "Retrieval Systems",
-    "AI Infrastructure",
-    "Python",
-    "LangChain",
-  ],
-  authors: [{ name: "Vidish Bijalwan", url: "https://vidish.me" }],
+    "Generate AI images without another monthly subscription. See the exact price before you pay — from ₹29.",
   openGraph: {
-    title: "Vidish Bijalwan — AI Systems Engineer",
-    description: "A cinematic engineering archive. Building retrieval systems, AI agents, and intelligence infrastructure.",
-    url: "https://vidish.me",
-    siteName: "Vidish Bijalwan",
+    title: "Vidish — One creation. One price.",
+    description:
+      "Generate AI images without another monthly subscription. See the exact price before you pay — from ₹29.",
+    siteName: "Vidish",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Vidish Bijalwan — AI Systems Engineer",
-    description: "Building retrieval systems, AI agents, and intelligence infrastructure.",
+    title: "Vidish — One creation. One price.",
+    description:
+      "Generate AI images without another monthly subscription. See the exact price before you pay — from ₹29.",
   },
 }
 
@@ -51,7 +47,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         className={`${ibmPlexSans.variable} ${ibmPlexMono.variable} font-sans`}
         suppressHydrationWarning
       >
-        {children}
+        <AuthSessionProvider>{children}</AuthSessionProvider>
       </body>
     </html>
   )

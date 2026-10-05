@@ -27,6 +27,10 @@ const nextConfig = {
     parallelServerBuildTraces: true,
     parallelServerCompiles: true,
   },
+  // PGlite (WASM Postgres) must NOT be webpack-bundled: bundling mangles
+  // its internal file-URL resolution ("path argument ... Received an
+  // instance of URL"). Keep it as a runtime require from node_modules.
+  serverExternalPackages: ['@electric-sql/pglite'],
 }
 
 if (userConfig) {
