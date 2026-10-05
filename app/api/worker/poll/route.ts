@@ -259,7 +259,7 @@ export async function POST(req: NextRequest) {
     .orderBy(asc(schema.generationJobs.createdAt))
     .limit(5);
   const jobs = candidates.filter((j: any) =>
-    isWorkerEligible(j.state as JobState)
+    isWorkerEligible({ state: j.state as JobState, fulfillmentMode: j.fulfillmentMode ?? 'operator' })
   );
 
   const results: JobResult[] = [];
