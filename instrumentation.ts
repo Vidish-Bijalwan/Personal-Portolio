@@ -10,13 +10,14 @@
  *   concurrent cold starts race safely on "already exists" codes.
  */
 export async function register() {
-  if (process.env.NEXT_RUNTIME === 'nodejs') {
-    const { runMigrations } = await import('./src/lib/db/client');
-    try {
-      await runMigrations();
-    } catch (err) {
-      console.error('[instrumentation] runMigrations failed:', err);
-      throw err;
-    }
+  // register() only ever runs in the Node.js runtime (instrumentation does
+  // not execute on the Edge), so no NEXT_RUNTIME guard — migrations must run
+  // unconditionally here.
+  const { runMigrations } = await import('./src/lib/db/client');
+  try {
+    await runMigrations();
+  } catch (err) {
+    console.error('[instrumentation] runMigrations failed:', err);
+    throw err;
   }
 }
