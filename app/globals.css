@@ -486,3 +486,150 @@
 @media (prefers-reduced-motion: reduce) {
   .v-price-swap, .v-gen-glow { animation: none; }
 }
+/**
+ * Vidish watch-room animations — burger grill + popcorn projector.
+ * All classes are prefixed fg- and scoped to the watch room.
+ * Motion theme: acid-lime #D7FF3F, cyan #00F0FF, magenta #FF2D78.
+ */
+
+/* ── heat glow on the grill ─────────────────────────────────────────── */
+.fg-glow {
+  animation: fg-glow-pulse 2.2s ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+@keyframes fg-glow-pulse {
+  0%, 100% { opacity: 0.5; transform: scaleX(1); }
+  50% { opacity: 0.95; transform: scaleX(1.08); }
+}
+
+/* ── rising embers ──────────────────────────────────────────────────── */
+.fg-ember {
+  animation: fg-ember-rise 2.8s ease-in infinite;
+  opacity: 0;
+}
+@keyframes fg-ember-rise {
+  0% { transform: translateY(0) scale(1); opacity: 0; }
+  15% { opacity: 0.9; }
+  100% { transform: translateY(-90px) scale(0.3); opacity: 0; }
+}
+
+/* ── burger layers drop in when a new stage frame arrives ───────────── */
+.fg-drop {
+  animation: fg-drop-in 0.7s cubic-bezier(0.2, 1.4, 0.4, 1) both;
+}
+@keyframes fg-drop-in {
+  0% { transform: translateY(-160px); opacity: 0; }
+  60% { opacity: 1; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+/* ── steam wisps above the patty ────────────────────────────────────── */
+.fg-steam {
+  animation: fg-steam-rise 2.4s ease-in-out infinite;
+  opacity: 0;
+}
+@keyframes fg-steam-rise {
+  0% { transform: translateY(8px); opacity: 0; }
+  40% { opacity: 0.7; }
+  100% { transform: translateY(-34px); opacity: 0; }
+}
+
+/* ── sizzle flicker ─────────────────────────────────────────────────── */
+.fg-sizzle {
+  animation: fg-sizzle-flick 0.5s ease-in-out infinite alternate;
+}
+@keyframes fg-sizzle-flick {
+  from { opacity: 0.3; }
+  to { opacity: 1; }
+}
+
+/* ── indeterminate progress bar segment ─────────────────────────────── */
+.fg-bar {
+  animation: fg-slide 1.6s ease-in-out infinite;
+}
+@keyframes fg-slide {
+  0% { transform: translateX(-120%); }
+  100% { transform: translateX(340%); }
+}
+
+/* ── caption swap ───────────────────────────────────────────────────── */
+.fg-caption {
+  animation: fg-caption-in 0.45s ease both;
+}
+@keyframes fg-caption-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* ── spinning film reels ────────────────────────────────────────────── */
+.fg-reel {
+  animation: fg-reel-spin 6s linear infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+@keyframes fg-reel-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── popping popcorn kernels ────────────────────────────────────────── */
+.fg-pop {
+  animation: fg-pop 1.8s ease-in infinite;
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+@keyframes fg-pop {
+  0% { transform: translate(0, 0) scale(0.4); opacity: 0; }
+  12% { opacity: 1; }
+  55% { transform: translate(var(--px, 0px), -70px) scale(1); opacity: 1; }
+  100% { transform: translate(calc(var(--px, 0px) * 1.4), 34px) scale(0.9); opacity: 0; }
+}
+
+/* ── projector spotlight beams ──────────────────────────────────────── */
+.fg-beam {
+  animation: fg-beam-sway 5s ease-in-out infinite alternate;
+  transform-box: fill-box;
+  transform-origin: top center;
+}
+@keyframes fg-beam-sway {
+  from { transform: rotate(-7deg); opacity: 0.22; }
+  to { transform: rotate(7deg); opacity: 0.42; }
+}
+
+/* ── clapper board snap ─────────────────────────────────────────────── */
+.fg-clap {
+  animation: fg-clap 2.6s ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: left center;
+}
+@keyframes fg-clap {
+  0%, 58%, 100% { transform: rotate(0deg); }
+  68%, 82% { transform: rotate(-18deg); }
+}
+
+/* ── sparkle twinkle around the finished plate ──────────────────────── */
+.fg-twinkle {
+  animation: fg-twinkle 1.4s ease-in-out infinite alternate;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+@keyframes fg-twinkle {
+  from { opacity: 0.15; transform: scale(0.7); }
+  to { opacity: 1; transform: scale(1.15); }
+}
+
+/* ── reduced motion: calm static grill + text status, no loops ──────── */
+@media (prefers-reduced-motion: reduce) {
+  .fg-animated,
+  .fg-animated * {
+    animation: none !important;
+  }
+  .fg-ambient {
+    display: none;
+  }
+  .fg-drop {
+    opacity: 1;
+    transform: none;
+  }
+}

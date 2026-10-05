@@ -17,6 +17,7 @@ import {
   buildUpiUri,
   isValidUtr,
   newOrderCode,
+  newShortCode,
   normalizeUtr,
   type PaymentOrderState,
   type PaymentProvider,
@@ -107,6 +108,33 @@ async function getOrderByCode(code: string) {
 }
 
 /**
+ * Lookup by full code (VLSH-XXXXXX) or the 4-char short code (A3F9).
+ * Used by the owner's phone-ping confirm flow, which only sees the
+ * short code.
+ */
+async function getOrderByCodeOrShort(codeOrShort: string) {
+  const [order] = await db
+    .select()
+    .from(orders)
+    .where(eq(orders.code, codeOrShort))
+    .limit(1);
+  if (order) return order;
+  const [byShort] = await db
+    .select()
+    .from(orders)
+    .where(eq(orders.shortCode, codeOrShort))
+    .limit(1);
+  if (!byShort) {
+    throw new PaymentHttpError(
+      404,
+      'ORDER_NOT_FOUND',
+      `No order ${codeOrShort}`
+    );
+  }
+  return byShort;
+}
+
+/**
  * Create a PAYMENT_PENDING manual-UPI order. Amount comes from the server
  * (the job's customerPrice) — never from the client.
  */
@@ -123,12 +151,25 @@ export async function createManualPaymentOrder(input: {
     );
   }
   const code = newOrderCode();
+  // 4-char human code for the owner's phone ping (YES <code> / NO <code>).
+  // 31^4 combos; retry a few times on the rare collision.
+  let shortCode = newShortCode();
+  for (let i = 0; i < 5; i++) {
+    const [existing] = await db
+      .select({ id: orders.id })
+      .from(orders)
+      .where(eq(orders.shortCode, shortCode))
+      .limit(1);
+    if (!existing) break;
+    shortCode = newShortCode();
+  }
   const checkout = await new ManualUpiProvider().createCheckout({
     code,
     amountPaise: input.amountPaise,
   });
   await db.insert(orders).values({
     code,
+    shortCode,
     jobId: input.jobId,
     userId: input.userId,
     provider: 'manual_upi',
@@ -137,12 +178,69 @@ export async function createManualPaymentOrder(input: {
     status: 'PAYMENT_PENDING',
     expiresAt: new Date(checkout.expiresAt),
   });
-  return { code, amountPaise: input.amountPaise, ...checkout };
+  return { code, shortCode, amountPaise: input.amountPaise, ...checkout };
+}
+
+/**
+ * Payment-claim flow: the user paid in their UPI app and tapped "I've paid".
+ * No UTR, no screenshot — the owner gets a phone ping and confirms.
+ * Ownership, expiry validated server-side. Idempotent: claiming an already
+ * claimed order returns the current state instead of erroring.
+ */
+export async function claimPaymentPaid(input: {
+  code: string;
+  userId: string | null;
+}) {
+  const order = await getOrderByCode(input.code);
+  if (order.userId !== input.userId) {
+    throw new PaymentHttpError(
+      403,
+      'FORBIDDEN',
+      'Order does not belong to this user.'
+    );
+  }
+  if (order.status === 'PAYMENT_AWAITING_OWNER') {
+    return {
+      status: 'PAYMENT_AWAITING_OWNER' as PaymentOrderState,
+      shortCode: order.shortCode,
+    };
+  }
+  if (order.status !== 'PAYMENT_PENDING') {
+    throw new PaymentHttpError(
+      409,
+      'ORDER_NOT_PENDING',
+      `Order is ${order.status}; cannot claim payment.`
+    );
+  }
+  if (order.expiresAt && order.expiresAt.getTime() < Date.now()) {
+    await db
+      .update(orders)
+      .set({ status: 'PAYMENT_EXPIRED' })
+      .where(eq(orders.id, order.id));
+    throw new PaymentHttpError(
+      410,
+      'ORDER_EXPIRED',
+      'Payment window expired; please create a new order.'
+    );
+  }
+  await db
+    .update(orders)
+    .set({
+      status: 'PAYMENT_AWAITING_OWNER',
+      ownerPingedAt: null,
+      pingCount: 0,
+    })
+    .where(eq(orders.id, order.id));
+  return {
+    status: 'PAYMENT_AWAITING_OWNER' as PaymentOrderState,
+    shortCode: order.shortCode,
+  };
 }
 
 /**
  * Customer submits their UTR + optional screenshot asset.
  * Ownership, expiry, and format are validated server-side.
+ * (Legacy path — the payment modal now uses claimPaymentPaid instead.)
  */
 export async function submitPaymentUtr(input: {
   code: string;
@@ -214,8 +312,11 @@ export async function submitPaymentUtr(input: {
 }
 
 /**
- * Admin confirms payment after MANUAL verification (bank statement / UPI app).
+ * Admin confirms payment after MANUAL verification (bank statement / UPI app,
+ * or the owner's YES reply to the phone ping).
  * NEVER auto-verify from screenshots, app-returns, timers, or SMS.
+ * Accepts both the legacy PAYMENT_SUBMITTED (UTR flow) and the
+ * PAYMENT_AWAITING_OWNER (claim flow) states.
  */
 export async function verifyPaymentOrder(input: {
   code: string;
@@ -223,8 +324,11 @@ export async function verifyPaymentOrder(input: {
   verifiedAmountPaise?: number;
   acknowledgeDuplicate?: boolean;
 }) {
-  const order = await getOrderByCode(input.code);
-  if (order.status !== 'PAYMENT_SUBMITTED') {
+  const order = await getOrderByCodeOrShort(input.code);
+  if (
+    order.status !== 'PAYMENT_SUBMITTED' &&
+    order.status !== 'PAYMENT_AWAITING_OWNER'
+  ) {
     throw new PaymentHttpError(
       409,
       'ORDER_NOT_SUBMITTED',
@@ -311,7 +415,7 @@ export async function rejectPaymentOrder(input: {
   adminUserId: string;
   reason?: string;
 }) {
-  const order = await getOrderByCode(input.code);
+  const order = await getOrderByCodeOrShort(input.code);
   await db
     .update(orders)
     .set({ status: 'PAYMENT_REJECTED' })
@@ -322,4 +426,59 @@ export async function rejectPaymentOrder(input: {
     target: { code: order.code, reason: input.reason ?? null },
   });
   return { status: 'PAYMENT_REJECTED' as PaymentOrderState };
+}
+
+/**
+ * Owner replied YES to the phone ping. Single place that flips an
+ * awaiting-owner order to paid: delegates to verifyPaymentOrder, so the
+ * generations-unlock hook and audit trail run exactly as the manual
+ * admin-verify path.
+ */
+export async function setOrderPaidByOwner(input: { code: string }) {
+  const order = await getOrderByCodeOrShort(input.code);
+  return verifyPaymentOrder({ code: order.code, adminUserId: 'owner' });
+}
+
+/**
+ * Owner replied NO to the phone ping (payment not received). The order
+ * goes back to PAYMENT_PENDING — NOT PAYMENT_REJECTED — so the user can
+ * check their UPI app and tap "I've paid" again. Ping throttle resets
+ * so the re-claim pings the owner again.
+ */
+export async function rejectOrderPayment(input: { code: string }) {
+  const order = await getOrderByCodeOrShort(input.code);
+  if (order.status !== 'PAYMENT_AWAITING_OWNER') {
+    throw new PaymentHttpError(
+      409,
+      'ORDER_NOT_AWAITING_OWNER',
+      `Order is ${order.status}; cannot send back to pending.`
+    );
+  }
+  await db
+    .update(orders)
+    .set({ status: 'PAYMENT_PENDING', ownerPingedAt: null, pingCount: 0 })
+    .where(eq(orders.id, order.id));
+  await db.insert(auditLogs).values({
+    actorUserId: 'owner',
+    action: 'payment.claim_rejected',
+    target: { code: order.code, shortCode: order.shortCode },
+  });
+  return { status: 'PAYMENT_PENDING' as PaymentOrderState };
+}
+
+/** Phone-ping throttle: ping at most every 4 minutes, max 5 pings per order. */
+export const OWNER_PING_INTERVAL_MS = 4 * 60 * 1000;
+export const OWNER_PING_MAX = 5;
+
+/**
+ * Pure predicate the payment-watch cron uses to decide whether an
+ * awaiting-owner order needs another phone ping right now.
+ */
+export function shouldPingOwner(
+  order: { ownerPingedAt: Date | null; pingCount: number },
+  now: number = Date.now()
+): boolean {
+  if (order.pingCount >= OWNER_PING_MAX) return false;
+  if (!order.ownerPingedAt) return true;
+  return now - order.ownerPingedAt.getTime() >= OWNER_PING_INTERVAL_MS;
 }

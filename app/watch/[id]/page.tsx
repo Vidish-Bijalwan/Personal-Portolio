@@ -21,7 +21,6 @@ import PaymentModal from "@/components/vilish/payment-modal";
 import AuthModal from "@/components/vilish/auth-modal";
 import { videoPaymentStorageKey } from "@/components/vilish/free-tier";
 import type { ManualPayment } from "@/components/vilish/payment";
-import "./watch.css";
 
 interface GenStatus {
   media_type: "image" | "video";

@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic';
 
 import { NextRequest, NextResponse } from 'next/server';
-import { desc, eq } from 'drizzle-orm';
+import { desc, eq, inArray } from 'drizzle-orm';
 import { db } from '@/lib/db/client';
 import { generationJobs, orders, users } from '@/lib/db/schema';
 
@@ -17,17 +17,19 @@ export async function GET(req: NextRequest) {
   const rows = await db
     .select({
       code: orders.code,
+      shortCode: orders.shortCode,
       userEmail: users.email,
       jobPrompt: generationJobs.prompt,
       amountPaise: orders.amountPaise,
       utrReference: orders.utrReference,
       duplicateFlag: orders.duplicateFlag,
       submittedAt: orders.updatedAt,
+      status: orders.status,
     })
     .from(orders)
     .leftJoin(users, eq(orders.userId, users.id))
     .leftJoin(generationJobs, eq(orders.jobId, generationJobs.id))
-    .where(eq(orders.status, 'PAYMENT_SUBMITTED'))
+    .where(inArray(orders.status, ['PAYMENT_SUBMITTED', 'PAYMENT_AWAITING_OWNER']))
     .orderBy(desc(orders.updatedAt));
   return NextResponse.json(rows, { status: 200 });
 }

@@ -359,6 +359,11 @@ export const orders = pgTable('orders', {
   screenshotAssetId: uuid('screenshot_asset_id').references(() => assets.id, {
     onDelete: 'set null',
   }),
+  /** Payment-claim flow: user tapped "I've paid", owner pinged on phone. */
+  ownerPingedAt: timestamp('owner_pinged_at', { withTimezone: true }),
+  pingCount: integer('ping_count').notNull().default(0),
+  /** 4-char human code shown in the owner's ping (reply YES <code>). */
+  shortCode: text('short_code').unique(),
   verifiedAt: timestamp('verified_at', { withTimezone: true }),
   verifiedByUserId: text('verified_by_user_id'),
   verifiedAmountPaise: integer('verified_amount_paise'),
