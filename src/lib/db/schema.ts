@@ -13,7 +13,12 @@ import {
   jsonb,
   primaryKey,
 } from 'drizzle-orm/pg-core';
-import type { JobState, PaymentOrderState } from '../vilish/types';
+import type {
+  JobState,
+  PaymentOrderState,
+  FulfillmentMode,
+  JobKind,
+} from '../vilish/types';
 
 const id = () =>
   uuid('id')
@@ -128,6 +133,24 @@ export const generationJobs = pgTable('generation_jobs', {
   errorMessage: text('error_message'),
   retryCount: integer('retry_count').notNull().default(0),
   parentJobId: uuid('parent_job_id'), // set for remakes
+  /* ---- phase 2: operator fulfillment (§4) ---- */
+  /** 'operator' | 'provider'. LAW default: 'operator'. */
+  fulfillmentMode: text('fulfillment_mode')
+    .notNull()
+    .default('operator')
+    .$type<FulfillmentMode>(),
+  /** 'operator' when the result was delivered by the operator pipeline. */
+  fulfillmentSource: text('fulfillment_source'),
+  /** 'generation' | 'remake' | 'edit'. */
+  jobKind: text('job_kind').notNull().default('generation').$type<JobKind>(),
+  /** Internal operator notes; COPIED to child jobs on remake/edit. */
+  operatorNotes: text('operator_notes'),
+  /** Customer-visible clarification thread. */
+  clarificationRequest: text('clarification_request'),
+  clarificationResponse: text('clarification_response'),
+  /** Internal QC notes. */
+  qcNotes: text('qc_notes'),
+  deliveredAt: timestamp('delivered_at', { withTimezone: true }),
   createdAt: createdAt(),
   updatedAt: updatedAt(),
 });
@@ -152,6 +175,33 @@ export const promptVersions = pgTable('prompt_versions', {
     .notNull()
     .references(() => generationJobs.id, { onDelete: 'cascade' }),
   spec: jsonb('spec').notNull(),
+  createdAt: createdAt(),
+});
+
+/* ---- phase 2: operator fulfillment results (§4) ---- */
+
+/** Uploaded operator deliverables ("takes") for a generation job. */
+export const fulfillmentResults = pgTable('fulfillment_results', {
+  id: id(),
+  jobId: uuid('job_id')
+    .notNull()
+    .references(() => generationJobs.id, { onDelete: 'cascade' }),
+  takeLabel: text('take_label').notNull().default('Take 01'),
+  assetId: uuid('asset_id').references(() => assets.id, {
+    onDelete: 'set null',
+  }),
+  /** 'video' | 'image' */
+  resultType: text('result_type').notNull(),
+  notes: text('notes'),
+  toolUsed: text('tool_used'),
+  durationSeconds: integer('duration_seconds'),
+  width: integer('width'),
+  height: integer('height'),
+  /** internal operator cost, integer paise */
+  estCostPaise: integer('est_cost_paise'),
+  /** internal operator generation time */
+  generationTimeSeconds: integer('generation_time_seconds'),
+  uploadedBy: text('uploaded_by'),
   createdAt: createdAt(),
 });
 

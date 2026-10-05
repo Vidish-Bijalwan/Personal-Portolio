@@ -2,11 +2,11 @@ export const dynamic = 'force-dynamic';
 
 import { NextResponse, type NextRequest } from 'next/server';
 import { db } from '@/lib/db/client';
-import * as schema from '@/src/lib/db/schema';
+import * as schema from '@/lib/db/schema';
 import { eq, and, isNull, asc } from 'drizzle-orm';
 import { getSessionUser } from '@/lib/auth';
 import { remakePrice } from '@/lib/pricing/engine';
-import type { PriceBreakdown } from '@/src/lib/vilish/types';
+import type { PriceBreakdown } from '@/lib/vilish/types';
 
 /**
  * POST /api/generation/[id]/remake

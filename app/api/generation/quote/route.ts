@@ -2,10 +2,10 @@ export const dynamic = 'force-dynamic';
 
 import { NextResponse, type NextRequest } from 'next/server';
 import { db } from '@/lib/db/client';
-import * as schema from '@/src/lib/db/schema';
+import * as schema from '@/lib/db/schema';
 import { quotePrice, ladderPrice } from '@/lib/pricing/engine';
 import { getGenerationService } from '@/lib/providers/registry';
-import type { CreativeSpec } from '@/src/lib/vilish/types';
+import type { CreativeSpec } from '@/lib/vilish/types';
 
 const TASKS = ['text_to_image', 'image_to_image'];
 const ASPECTS = ['1:1', '4:5', '9:16', '16:9'];

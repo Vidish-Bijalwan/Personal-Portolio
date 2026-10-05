@@ -16,11 +16,14 @@ const ibmPlexMono = IBM_Plex_Mono({
   display: "swap",
 })
 
+export const viewport = {
+  themeColor: "#080808",
+};
+
 export const metadata = {
   title: "VILISH — One creation. One price.",
   description:
     "Generate AI images without another monthly subscription. See the exact price before you pay — from ₹29.",
-  themeColor: "#080808",
   openGraph: {
     title: "VILISH — One creation. One price.",
     description:

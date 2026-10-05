@@ -173,6 +173,10 @@ describe('seed idempotency', () => {
     const byKey = Object.fromEntries(cfg.map((c) => [c.key, c.value]));
     expect(Object.keys(byKey).sort()).toEqual(
       [
+        'FULFILLMENT_MODE',
+        'MAX_OPERATOR_ORDERS_PER_DAY',
+        'OPERATOR_ESTIMATED_TURNAROUND',
+        'ORDERS_ACCEPTING',
         'ladder',
         'payments:feeBps',
         'payments:provider',
@@ -186,6 +190,16 @@ describe('seed idempotency', () => {
     );
     expect(byKey['pricing:marginBps']).toBe(6000);
     expect(byKey['payments:provider']).toBe('manual_upi');
+    // phase 2: operator fulfillment config seeds
+    expect(byKey['FULFILLMENT_MODE']).toBe('operator');
+    // NOTE: seeded as the string 'true'; drizzle-orm's jsonb
+    // mapFromDriverValue double-parses on read (JSON.parse('true') -> true),
+    // so it round-trips as boolean true. getFulfillmentConfig() accepts both.
+    expect(byKey['ORDERS_ACCEPTING']).toBe(true);
+    expect(byKey['MAX_OPERATOR_ORDERS_PER_DAY']).toBeNull();
+    expect(byKey['OPERATOR_ESTIMATED_TURNAROUND']).toBe(
+      'Typical processing time: 30 minutes – several hours'
+    );
     expect(byKey['ladder']).toEqual({
       singleImage: 2900,
       fourPack: 7900,

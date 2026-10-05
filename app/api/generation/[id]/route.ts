@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic';
 
 import { NextResponse, type NextRequest } from 'next/server';
 import { db } from '@/lib/db/client';
-import * as schema from '@/src/lib/db/schema';
+import * as schema from '@/lib/db/schema';
 import { eq, desc } from 'drizzle-orm';
 
 /**

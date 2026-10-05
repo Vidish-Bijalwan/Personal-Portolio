@@ -14,7 +14,7 @@ import type {
   JobState,
   QualityTier,
   TaskType,
-} from '@/src/lib/vilish/types';
+} from '@/lib/vilish/types';
 
 /* ------------------------------------------------------------------ */
 /* auth                                                                */

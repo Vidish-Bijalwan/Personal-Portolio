@@ -2,7 +2,7 @@
  * VILISH Studio — idempotent seed.
  * Safe to run any number of times: rows are inserted only when missing.
  */
-import { eq, and } from 'drizzle-orm';
+import { eq, and, sql } from 'drizzle-orm';
 import { getDb } from './client';
 import { providers, modelCatalog, adminConfig } from './schema';
 
@@ -60,7 +60,21 @@ const ADMIN_CONFIG_SEEDS: Record<string, unknown> = {
     remake: 1900,
   },
   'usd:inr': 88,
+  /* ---- phase 2: operator fulfillment (§4) ---- */
+  FULFILLMENT_MODE: 'operator',
+  ORDERS_ACCEPTING: 'true',
+  OPERATOR_ESTIMATED_TURNAROUND:
+    'Typical processing time: 30 minutes – several hours',
 };
+
+/**
+ * MAX_OPERATOR_ORDERS_PER_DAY = NULL (no cap when null), stored as jsonb null.
+ * NOT NULL on admin_config.value forbids SQL NULL, and the query builder binds
+ * JS null as SQL NULL, so this key is seeded with raw SQL as 'null'::jsonb.
+ */
+const NULL_CAP_SEED_SQL = sql`INSERT INTO "admin_config" ("key", "value")
+  VALUES ('MAX_OPERATOR_ORDERS_PER_DAY', 'null'::jsonb)
+  ON CONFLICT ("key") DO NOTHING`;
 
 export async function seed(): Promise<void> {
   const db = getDb();
@@ -93,4 +107,6 @@ export async function seed(): Promise<void> {
       .values({ key, value })
       .onConflictDoNothing();
   }
+  // MAX_OPERATOR_ORDERS_PER_DAY as jsonb null (see NULL_CAP_SEED_SQL)
+  await db.execute(NULL_CAP_SEED_SQL);
 }

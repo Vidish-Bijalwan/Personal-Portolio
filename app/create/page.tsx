@@ -1,6 +1,7 @@
 import VilishNav from "@/components/vilish/nav";
 import VilishFooter from "@/components/vilish/footer";
 import Composer from "@/components/vilish/composer";
+import FulfillmentNotices from "@/components/vilish/fulfillment-notices";
 
 export default function CreatePage() {
   return (
@@ -14,7 +15,8 @@ export default function CreatePage() {
           Describe what you want. You&apos;ll see the exact price before anything
           is charged.
         </p>
-        <div className="mt-8">
+        <FulfillmentNotices />
+        <div className="mt-6">
           <Composer variant="page" />
         </div>
         <p className="mt-6 text-[13px] leading-6 text-white/40">

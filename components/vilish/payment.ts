@@ -24,6 +24,7 @@ export interface StartResult {
 export type StartError =
   | { kind: 'unauthorized' }
   | { kind: 'intl' }
+  | { kind: 'paused' }
   | { kind: 'failed'; message: string };
 
 export async function startManualPayment(
@@ -39,6 +40,9 @@ export async function startManualPayment(
   if (res.status === 401) return { ok: false, error: { kind: 'unauthorized' } };
 
   const body = await res.json().catch(() => null);
+  if (res.status === 403 && (body?.error === 'ORDERS_PAUSED' || body?.code === 'ORDERS_PAUSED')) {
+    return { ok: false, error: { kind: 'paused' } };
+  }
   if (res.status === 400 && body?.code === 'INTL_PAYMENTS_COMING_SOON') {
     return { ok: false, error: { kind: 'intl' } };
   }

@@ -3,12 +3,15 @@ export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { eq } from 'drizzle-orm';
 import { db } from '@/lib/db/client';
-import { generationJobs, orders } from '@/lib/db/schema';
+import { generationJobs, orders, auditLogs } from '@/lib/db/schema';
 import {
   PaymentHttpError,
   verifyPaymentOrder,
 } from '@/lib/payments/manual-upi';
 import { canTransition } from '@/lib/vilish/types';
+import { canTransitionState } from '@/lib/fulfillment/guards';
+import { getFulfillmentConfig } from '@/lib/fulfillment/config';
+import { patchJob } from '@/lib/fulfillment/job';
 
 function unauthorized(req: NextRequest): boolean {
   return req.headers.get('x-admin-token') !== process.env.ADMIN_TOKEN;
@@ -16,8 +19,9 @@ function unauthorized(req: NextRequest): boolean {
 
 /**
  * POST {verifiedAmountPaise?, acknowledgeDuplicate?}
- * On PAYMENT_VERIFIED the job moves PAYMENT_PENDING → PAID → QUEUED
- * (sequentially, skipping gracefully when a transition is illegal).
+ * On PAYMENT_VERIFIED the job moves PAYMENT_PENDING → PAID, then routes by
+ * fulfillmentMode (contract §5): operator → AWAITING_OPERATOR_REVIEW,
+ * provider → QUEUED (sequentially, skipping gracefully when illegal).
  */
 export async function POST(
   req: NextRequest,
@@ -51,18 +55,40 @@ export async function POST(
       .from(generationJobs)
       .where(eq(generationJobs.id, result.jobId))
       .limit(1);
+    // Phase 2 contract §5: fulfillmentMode decides post-payment routing.
+    // Set at job start (/api/generation/start); fall back to config for jobs
+    // created before the column existed.
+    const cfg = await getFulfillmentConfig();
+    const mode = job?.fulfillmentMode ?? cfg.FULFILLMENT_MODE;
     let queued = false;
     if (job && canTransition(job.state, 'PAID')) {
-      await db
-        .update(generationJobs)
-        .set({ state: 'PAID' })
-        .where(eq(generationJobs.id, job.id));
-      if (canTransition('PAID', 'QUEUED')) {
-        await db
-          .update(generationJobs)
-          .set({ state: 'QUEUED' })
-          .where(eq(generationJobs.id, job.id));
-        queued = true;
+      await patchJob(job.id, { state: 'PAID' });
+      if (mode === 'operator') {
+        // Operator fulfillment: PAID → AWAITING_OPERATOR_REVIEW (NOT QUEUED).
+        if (canTransitionState('PAID', 'AWAITING_OPERATOR_REVIEW')) {
+          await patchJob(job.id, { state: 'AWAITING_OPERATOR_REVIEW' });
+          await db.insert(auditLogs).values({
+            actorUserId: 'admin',
+            action: 'fulfillment.routed',
+            target: {
+              code,
+              jobId: job.id,
+              mode: 'operator',
+              to: 'AWAITING_OPERATOR_REVIEW',
+            },
+          });
+        }
+        // Order stays PAYMENT_VERIFIED in operator mode — there is no
+        // provider queue; the operator picks the job up from the review queue.
+      } else {
+        // Provider path preserved: PAID → QUEUED.
+        if (canTransition('PAID', 'QUEUED')) {
+          await db
+            .update(generationJobs)
+            .set({ state: 'QUEUED' })
+            .where(eq(generationJobs.id, job.id));
+          queued = true;
+        }
       }
     }
     if (queued) {

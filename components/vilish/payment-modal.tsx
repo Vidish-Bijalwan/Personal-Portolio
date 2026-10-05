@@ -225,7 +225,11 @@ export default function PaymentModal({ jobId, initialPayment, onClose, navigate 
               I&apos;ve paid
             </button>
             <p className="mt-3 text-center text-[12px] text-white/35">
-              Pay the exact amount, then tap “I&apos;ve paid”.
+              Pay the exact amount, then tap &ldquo;I&apos;ve paid&rdquo;.
+            </p>
+            <p className="mt-2 text-center text-[12px] leading-5 text-white/35">
+              AI generation with human quality review — every paid generation is
+              reviewed before delivery.
             </p>
           </>
         )}
@@ -295,7 +299,7 @@ export default function PaymentModal({ jobId, initialPayment, onClose, navigate 
             </div>
             <p className="mt-4 text-[14px] leading-6 text-[#F5F5F3]">
               Payment submitted — waiting for confirmation. Your creation enters
-              the generation queue after confirmation.
+              creative review after confirmation.
             </p>
             <p className="mt-2 text-[12px] text-white/40 tabular-nums">Order {payment.code}</p>
             {statusMsg && <p className="mt-3 text-[13px] text-amber-200/80">{statusMsg}</p>}

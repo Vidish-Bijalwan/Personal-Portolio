@@ -58,7 +58,21 @@ export default function Composer({ variant = "hero", className }: ComposerProps)
   const [status, setStatus] = useState("");
   const [authNeeded, setAuthNeeded] = useState(false);
   const [modal, setModal] = useState<{ jobId: string; payment: ManualPayment } | null>(null);
+  const [ordersAccepting, setOrdersAccepting] = useState<boolean | null>(null);
+  const [turnaround, setTurnaround] = useState("");
   const abortRef = useRef<AbortController | null>(null);
+
+  // public fulfillment config: turnaround copy + paused gate
+  useEffect(() => {
+    fetch("/api/config/public", { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((b) => {
+        if (!b) return;
+        setOrdersAccepting(b.ordersAccepting !== false);
+        if (typeof b.turnaround === "string") setTurnaround(b.turnaround);
+      })
+      .catch(() => {});
+  }, []);
 
   const runQuote = useCallback(async (text: string, q: QualityTier, ar: AspectRatio) => {
     abortRef.current?.abort();
@@ -127,10 +141,16 @@ export default function Composer({ variant = "hero", className }: ComposerProps)
     setStatus("");
     setAuthNeeded(false);
     try {
+      if (ordersAccepting === false) {
+        setStatus("New generation orders are temporarily paused.");
+        return;
+      }
       const res = await startManualPayment(quote.quoteId);
       if (!res.ok) {
         if (res.error.kind === "unauthorized") {
           setAuthNeeded(true);
+        } else if (res.error.kind === "paused") {
+          setStatus("New generation orders are temporarily paused.");
         } else if (res.error.kind === "intl") {
           setStatus("International payments coming soon — India (UPI) only for now.");
         } else {
@@ -144,7 +164,7 @@ export default function Composer({ variant = "hero", className }: ComposerProps)
     }
   };
 
-  const canGenerate = phase === "quoted" && !!quote && !starting;
+  const canGenerate = phase === "quoted" && !!quote && !starting && ordersAccepting !== false;
 
   return (
     <div
@@ -276,8 +296,20 @@ export default function Composer({ variant = "hero", className }: ComposerProps)
         </p>
       )}
       {phase === "quoted" && quote && (
-        <p className="mt-3 text-[12px] text-white/35">
-          No subscription · Pay once for this render · Failed renders refunded
+        <>
+          <p className="mt-3 text-[12px] text-white/35">
+            No subscription · Pay once for this render · Failed renders refunded
+          </p>
+          <p className="mt-1.5 text-[12px] leading-5 text-white/35">
+            AI generation with human quality review — every paid generation is
+            reviewed before delivery.
+            {turnaround ? ` ${turnaround}` : ""}
+          </p>
+        </>
+      )}
+      {ordersAccepting === false && (
+        <p className="mt-3 text-[13px] font-medium text-amber-200/90" role="status">
+          New generation orders are temporarily paused.
         </p>
       )}
 

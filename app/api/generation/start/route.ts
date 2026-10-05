@@ -3,10 +3,34 @@ export const dynamic = 'force-dynamic';
 import { NextResponse, type NextRequest } from 'next/server';
 import { db } from '@/lib/db/client';
 import * as schema from '@/lib/db/schema';
-import { eq } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import { getSessionUser } from '@/lib/auth';
 import { createManualPaymentOrder } from '@/lib/payments/manual-upi';
-import { canTransition } from '@/src/lib/vilish/types';
+import { canTransition } from '@/lib/vilish/types';
+import { getFulfillmentConfig } from '@/lib/fulfillment/config';
+import { isAdminOverride } from '@/lib/fulfillment/guards';
+
+/** Start of the current day in Asia/Kolkata, as a UTC Date. */
+function istDayStart(now: Date): Date {
+  const IST_MS = 5.5 * 3600 * 1000;
+  const ist = new Date(now.getTime() + IST_MS);
+  ist.setUTCHours(0, 0, 0, 0);
+  return new Date(ist.getTime() - IST_MS);
+}
+
+/** Count operator-mode jobs created today with state NOT IN DRAFT. */
+async function countOperatorJobsToday(): Promise<number> {
+  const dayStart = istDayStart(new Date());
+  const res = (await db.execute(
+    sql`select count(*)::int as n from generation_jobs
+        where fulfillment_mode = 'operator'
+          and state <> 'DRAFT'
+          and created_at >= ${dayStart}`
+  )) as unknown;
+  if (Array.isArray(res)) return Number((res[0] as { n?: unknown })?.n ?? 0);
+  const rows = (res as { rows?: { n?: unknown }[] })?.rows;
+  return Number(rows?.[0]?.n ?? 0);
+}
 
 /**
  * POST /api/generation/start
@@ -88,6 +112,23 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  // Phase 2 contract §5: capacity gates BEFORE order creation.
+  // Valid x-admin-token bypasses both.
+  const fulfillmentCfg = await getFulfillmentConfig();
+  const fulfillmentMode = fulfillmentCfg.FULFILLMENT_MODE;
+  if (fulfillmentMode === 'operator' && !isAdminOverride(req)) {
+    if (!fulfillmentCfg.ORDERS_ACCEPTING) {
+      return NextResponse.json({ error: 'ORDERS_PAUSED' }, { status: 403 });
+    }
+    const cap = fulfillmentCfg.MAX_OPERATOR_ORDERS_PER_DAY;
+    if (cap !== null) {
+      const today = await countOperatorJobsToday();
+      if (today >= cap) {
+        return NextResponse.json({ error: 'DAILY_CAP_REACHED' }, { status: 403 });
+      }
+    }
+  }
+
   let payment: {
     code: string;
     upiUri: string;
@@ -119,7 +160,13 @@ export async function POST(req: NextRequest) {
   }
   await db
     .update(schema.generationJobs)
-    .set({ state: 'PAYMENT_PENDING', updatedAt: new Date() })
+    // fulfillmentMode is stamped at job start (contract §5). Cast: the
+    // Phase-2 column types land with the parallel schema migration.
+    .set({
+      state: 'PAYMENT_PENDING',
+      updatedAt: new Date(),
+      fulfillmentMode,
+    } as never)
     .where(eq(schema.generationJobs.id, job.id));
 
   return NextResponse.json({

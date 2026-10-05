@@ -109,8 +109,10 @@ describe('VILISH slice E2E', () => {
 
   it('HARD RULE: worker-eligible states exclude PAYMENT_PENDING', async () => {
     const { isWorkerEligible } = await import('@/lib/jobs');
-    expect(isWorkerEligible('PAYMENT_PENDING')).toBe(false);
-    expect(isWorkerEligible('QUEUED')).toBe(true);
+    expect(isWorkerEligible({ state: 'PAYMENT_PENDING', fulfillmentMode: 'provider' })).toBe(false);
+    expect(isWorkerEligible({ state: 'QUEUED', fulfillmentMode: 'provider' })).toBe(true);
+    // operator mode: worker never touches jobs
+    expect(isWorkerEligible({ state: 'QUEUED', fulfillmentMode: 'operator' })).toBe(false);
   });
 
   it('UTR submit → PAYMENT_SUBMITTED', async () => {
