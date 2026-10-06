@@ -8,7 +8,6 @@ import { motion } from "framer-motion";
 import { Stagger, StaggerItem } from "@/components/motion/Stagger";
 import { usePrefersReducedMotion } from "@/src/lib/motion/theme";
 import Lightbox from "@/components/vilish/lightbox";
-import { useRotatedPool } from "@/src/lib/vilish/showcase-rotation";
 import {
   CATEGORY_LABEL,
   exampleHref,
@@ -142,10 +141,6 @@ export default function ExamplesGrid({ items }: { items: ExampleItem[] }) {
     [items, active],
   );
 
-  // Rotation: the grid reshuffles on every visit and every tab switch, so
-  // repeat visitors don't see the same order again and again.
-  const visible = useRotatedPool(filtered);
-
   const emptyLabel =
     active === "all"
       ? "No examples yet — check back soon."
@@ -192,7 +187,7 @@ export default function ExamplesGrid({ items }: { items: ExampleItem[] }) {
         })}
       </div>
 
-      {visible.length === 0 ? (
+      {filtered.length === 0 ? (
         <div className="mt-8 rounded-[16px] border border-white/[0.08] bg-[#121214] px-6 py-16 text-center">
           <p className="text-[16px] font-medium text-[#F5F5F3]">{emptyLabel}</p>
           <p className="mx-auto mt-2 max-w-sm text-[14px] leading-6 text-white/[0.58]">
@@ -202,12 +197,12 @@ export default function ExamplesGrid({ items }: { items: ExampleItem[] }) {
         </div>
       ) : (
         <Stagger key={active} className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2">
-          {visible.map((item, visibleIndex) => (
+          {filtered.map((item, filteredIndex) => (
             <StaggerItem key={item.src}>
               <div className="group overflow-hidden rounded-[16px] border border-white/[0.08] bg-[#121214] transition-all duration-200 hover:-translate-y-1 hover:border-white/[0.16] hover:shadow-[0_20px_50px_-20px_rgba(0,0,0,0.8)] motion-reduce:transition-none motion-reduce:hover:translate-y-0">
                 <button
                   type="button"
-                  onClick={() => setOpenIndex(visibleIndex)}
+                  onClick={() => setOpenIndex(filteredIndex)}
                   aria-label={`Open example: ${item.prompt}`}
                   className="block w-full text-left"
                 >
@@ -256,9 +251,9 @@ export default function ExamplesGrid({ items }: { items: ExampleItem[] }) {
         </Stagger>
       )}
 
-      {openIndex !== null && visible[openIndex] && (
+      {openIndex !== null && filtered[openIndex] && (
         <Lightbox
-          items={visible.map(toLightboxItem)}
+          items={filtered.map(toLightboxItem)}
           index={openIndex}
           onClose={() => setOpenIndex(null)}
           onIndex={(next) => setOpenIndex(next)}

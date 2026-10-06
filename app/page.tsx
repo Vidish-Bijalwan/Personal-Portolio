@@ -43,8 +43,6 @@ import { Stagger, StaggerItem } from "@/components/motion/Stagger";
 import MagneticButton from "@/components/motion/MagneticButton";
 import { EASE_OUT, MOTION, usePrefersReducedMotion } from "@/src/lib/motion/theme";
 import SectionHeader from "@/components/vilish/section-header";
-import CategoryMarquee from "@/components/vilish/category-marquee";
-import { useRotatedPool } from "@/src/lib/vilish/showcase-rotation";
 import { toolsByGroup } from "@/src/lib/tools/directory";
 
 const TRUST = [
@@ -75,10 +73,6 @@ interface HomeExample {
   /** Optional object-position override (e.g. "center 40%") for frames whose
    *  aspect ratio crops the subject badly at the default center. */
   pos?: string;
-  /** One-line brief of what was asked for — travels with the item through
-   *  rotation (no invented clients or jobs). Required on showcase-pool
-   *  items; the reel set doesn't use it. */
-  brief?: string;
 }
 
 /** Showreel: six unique examples, zero overlap with the Showcase section (9, 10, 1, 2).
@@ -161,19 +155,13 @@ const SHOWREEL: HomeExample[] = [
 /** Accent rotation across the reel: lime → cyan → magenta. */
 const REEL_ACCENTS = ["#D7FF3F", "#00F0FF", "#FF2D78"];
 
-/**
- * Homepage showcase pool — 12 pieces (4 originals + 8 new). The grid shows
- * 4 per visit via useRotatedPool, so repeat visits surface different work
- * instead of the same four every time. Briefs travel with their item.
- */
-const SHOWCASE_POOL: HomeExample[] = [
+const SHOWCASE: HomeExample[] = [
   {
     src: "/examples/9-fashion-editorial.webp",
     width: 1280,
     height: 1920,
     alt: "High-fashion model with sculptural black spiked hair in a charcoal studio — AI-generated example",
     caption: "Fashion editorial, sculptural hair",
-    brief: "High-fashion editorial — sculptural spiked hair, charcoal studio, hard rim light.",
     price: formatINR(priceOf("single-image")),
     service: "single-image",
   },
@@ -183,7 +171,6 @@ const SHOWCASE_POOL: HomeExample[] = [
     height: 1600,
     alt: "Faceted glass perfume bottle with golden liquid — AI-generated example",
     caption: "Golden perfume, faceted glass",
-    brief: "Luxury product shot — faceted glass, golden liquid, macro detail.",
     price: formatINR(priceOf("product-photo")),
     service: "product-photo",
   },
@@ -193,7 +180,6 @@ const SHOWCASE_POOL: HomeExample[] = [
     height: 1280,
     alt: "Sneaker floating in a dark studio with dramatic rim lighting — AI-generated example",
     caption: "Floating sneaker, studio shot",
-    brief: "E-commerce hero — floating sneaker, dark studio, dramatic rim light.",
     price: formatINR(priceOf("single-image")),
     service: "single-image",
   },
@@ -203,51 +189,10 @@ const SHOWCASE_POOL: HomeExample[] = [
     height: 1920,
     alt: "Stylized portrait with neon city lights reflected in her eyes — AI-generated example",
     caption: "Neon portrait, city lights",
-    brief: "Stylized portrait — neon city reflections, cinematic grade.",
     price: formatINR(priceOf("single-image")),
     service: "single-image",
     // Portrait source in a 21/8 banner: bias the crop window up so the eyes stay in frame.
     pos: "center 40%",
-  },
-  {
-    src: "/examples/21-coffee-splash.webp",
-    width: 1920,
-    height: 1280,
-    alt: "Coffee liquid crown splash frozen mid-air with amber-lit droplets — AI-generated example",
-    caption: "Coffee splash, frozen crown",
-    brief: "High-speed macro — coffee crown splash, amber droplets on black.",
-    price: formatINR(priceOf("single-image")),
-    service: "single-image",
-  },
-  {
-    src: "/examples/22-jellyfish-portrait.webp",
-    width: 1280,
-    height: 1920,
-    alt: "Ethereal underwater portrait surrounded by glowing jellyfish — AI-generated example",
-    caption: "Jellyfish portrait, deep glow",
-    brief: "Underwater portrait — bioluminescent jellyfish, cyan and violet glow.",
-    price: formatINR(priceOf("single-image")),
-    service: "single-image",
-  },
-  {
-    src: "/examples/23-chess-knight.webp",
-    width: 1600,
-    height: 1600,
-    alt: "Extreme macro of a bronze chess knight in dramatic chiaroscuro — AI-generated example",
-    caption: "Chess knight, macro drama",
-    brief: "Macro still life — bronze knight, chiaroscuro light, dark ground.",
-    price: formatINR(priceOf("single-image")),
-    service: "single-image",
-  },
-  {
-    src: "/examples/24-balloon-canyon.webp",
-    width: 1920,
-    height: 1280,
-    alt: "Hot air balloons drifting over a desert canyon at dawn — AI-generated example",
-    caption: "Balloons over the canyon",
-    brief: "Epic landscape — hot air balloons, desert canyon at dawn.",
-    price: formatINR(priceOf("single-image")),
-    service: "single-image",
   },
 ];
 
@@ -258,8 +203,12 @@ const REEL_ITEMS: LightboxItem[] = SHOWREEL.map((ex) => ({
   price: ex.price,
   alt: ex.alt,
 }));
-/** Case lightbox items are derived from the rotated showcase pool inside
- *  VilishLanding (caseItems) so the lightbox matches the visible grid. */
+const CASE_ITEMS: LightboxItem[] = SHOWCASE.map((ex) => ({
+  src: ex.src,
+  caption: ex.caption,
+  price: ex.price,
+  alt: ex.alt,
+}));
 
 interface Capability {
   icon: LucideIcon;
@@ -345,7 +294,7 @@ const FAQ_JSON_LD = {
 
 /** Video section: three themed categories, one clip each, each with its own
  *  accent color and motion treatment. Clips are honest AI video examples. */
-const VIDEO_POOL = [
+const VIDEO_CATS = [
   {
     id: "portraits",
     label: "Portraits",
@@ -390,8 +339,16 @@ const VIDEO_POOL = [
   },
 ];
 
-/** Video lightbox items are derived from the rotated reel pool inside
- *  VideoShowcase (videoItems) so the player matches the visible tabs. */
+/** Lightbox items for the three video examples (arrows move within the set). */
+const VIDEO_ITEMS: LightboxItem[] = VIDEO_CATS.map((c) => ({
+  src: c.clip.src,
+  poster: c.clip.poster,
+  caption: c.clip.caption,
+  price: c.clip.price,
+  alt: c.clip.alt,
+  badge: "5s clip",
+  kind: "video",
+}));
 
 /**
  * One themed video card: poster paints first (preload="metadata"), the clip
@@ -403,7 +360,7 @@ function VideoCard({
   accent,
   onOpen,
 }: {
-  clip: (typeof VIDEO_POOL)[number]["clip"];
+  clip: (typeof VIDEO_CATS)[number]["clip"];
   accent: string;
   onOpen: () => void;
 }) {
@@ -518,24 +475,10 @@ function Perforation({ position }: { position: "top" | "bottom" }) {
  */
 function VideoShowcase() {
   const reduced = usePrefersReducedMotion();
-  // Reel rotation: 3 of the 7-clip pool per visit, reshuffled on mount.
-  const cats = useRotatedPool(VIDEO_POOL, 3);
-  const [activeId, setActiveId] = useState<string | null>(null);
+  const [activeId, setActiveId] = useState(VIDEO_CATS[0].id);
   const [openIdx, setOpenIdx] = useState<number | null>(null);
-  const active = cats.find((c) => c.id === activeId) ?? cats[0];
-  const activeIdx = Math.max(
-    0,
-    cats.findIndex((c) => c.id === active.id),
-  );
-  const videoItems: LightboxItem[] = cats.map((c) => ({
-    src: c.clip.src,
-    poster: c.clip.poster,
-    caption: c.clip.caption,
-    price: c.clip.price,
-    alt: c.clip.alt,
-    badge: "5s clip",
-    kind: "video",
-  }));
+  const activeIdx = VIDEO_CATS.findIndex((c) => c.id === activeId);
+  const active = VIDEO_CATS[activeIdx] ?? VIDEO_CATS[0];
 
   const panel = (
     <div key={active.id} className="grid grid-cols-1 items-center gap-10 lg:grid-cols-[300px_1fr] lg:gap-14">
@@ -619,7 +562,7 @@ function VideoShowcase() {
           aria-label="Video reels"
           className="mt-6 flex gap-2 overflow-x-auto pb-1"
         >
-          {cats.map((c, ci) => {
+          {VIDEO_CATS.map((c, ci) => {
             const selected = c.id === activeId;
             return (
               <button
@@ -663,9 +606,9 @@ function VideoShowcase() {
       </div>
       <Perforation position="bottom" />
 
-      {openIdx !== null && videoItems[openIdx] && (
+      {openIdx !== null && VIDEO_ITEMS[openIdx] && (
         <Lightbox
-          items={videoItems}
+          items={VIDEO_ITEMS}
           index={openIdx}
           onClose={() => setOpenIdx(null)}
           onIndex={setOpenIdx}
@@ -1150,9 +1093,18 @@ function PipelineSteps() {
   );
 }
 
-/** Editorial spans for the four showcase slots: one tall feature, two
- *  stacked, one wide banner. Reads like a magazine spread, not a slider.
- *  Slots are positional; the rotating items flow through them. */
+/** Honest one-line briefs for the four showcase pieces — what was asked
+ *  for, not who ordered it. Keeps the editorial framing without inventing
+ *  clients or jobs. */
+const SHOWCASE_BRIEFS = [
+  "High-fashion editorial — sculptural spiked hair, charcoal studio, hard rim light.",
+  "Luxury product shot — faceted glass, golden liquid, macro detail.",
+  "E-commerce hero — floating sneaker, dark studio, dramatic rim light.",
+  "Stylized portrait — neon city reflections, cinematic grade.",
+];
+
+/** Editorial spans for the four showcase pieces: one tall feature, two
+ *  stacked, one wide banner. Reads like a magazine spread, not a slider. */
 const SHOWCASE_SPANS = [
   "sm:col-span-5 sm:row-span-2",
   "sm:col-span-7",
@@ -1172,16 +1124,10 @@ const SHOWCASE_ASPECTS = [
  * ("what was asked for"), its exact price, and a direct CTA. Click opens the
  * lightbox.
  */
-function ShowcaseGrid({
-  items,
-  onOpen,
-}: {
-  items: HomeExample[];
-  onOpen: (index: number) => void;
-}) {
+function ShowcaseGrid({ onOpen }: { onOpen: (index: number) => void }) {
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-12 sm:gap-5">
-      {items.map((ex, i) => (
+      {SHOWCASE.map((ex, i) => (
         <Reveal key={ex.src} delay={Math.min(i * 0.06, 0.18)} className={SHOWCASE_SPANS[i]}>
           <figure className="h-full">
             <div
@@ -1219,7 +1165,7 @@ function ShowcaseGrid({
                   {ex.caption}
                 </span>
                 <span className="pointer-events-none mt-1 block text-[12.5px] leading-5 text-white/60">
-                  {ex.brief}
+                  {SHOWCASE_BRIEFS[i]}
                 </span>
                 <Link
                   href={exampleHref(ex)}
@@ -1286,15 +1232,6 @@ export default function VilishLanding() {
   // Lightbox open indexes — one per image set so arrows navigate within the set.
   const [reelOpen, setReelOpen] = useState<number | null>(null);
   const [caseOpen, setCaseOpen] = useState<number | null>(null);
-
-  // Showcase rotation: 4 of the 12-piece pool per visit, reshuffled on mount.
-  const showcaseItems = useRotatedPool(SHOWCASE_POOL, 4);
-  const caseItems: LightboxItem[] = showcaseItems.map((ex) => ({
-    src: ex.src,
-    caption: ex.caption,
-    price: ex.price,
-    alt: ex.alt,
-  }));
 
   return (
     <div className="min-h-screen bg-[#080808] font-sans text-[#F5F5F3] antialiased">
@@ -1392,9 +1329,6 @@ export default function VilishLanding() {
           </div>
         </section>
 
-        {/* ── honest lively banner: real creation categories, flowing ── */}
-        <CategoryMarquee />
-
         {/* ── showcase ─────────────────────────────────────── */}
         <section aria-label="Example creations" className="cv-auto border-b border-white/[0.08] py-20 sm:py-28">
           <div className="mx-auto max-w-5xl px-4">
@@ -1409,7 +1343,7 @@ export default function VilishLanding() {
             />
           </div>
           <div className="mx-auto mt-10 max-w-5xl px-4">
-            <ShowcaseGrid items={showcaseItems} onOpen={(i) => setCaseOpen(i)} />
+            <ShowcaseGrid onOpen={(i) => setCaseOpen(i)} />
           </div>
           <Reveal delay={0.15} className="mt-8 text-center">
             <Link
@@ -1707,9 +1641,9 @@ export default function VilishLanding() {
           onIndex={setReelOpen}
         />
       )}
-      {caseOpen !== null && caseItems[caseOpen] && (
+      {caseOpen !== null && CASE_ITEMS[caseOpen] && (
         <Lightbox
-          items={caseItems}
+          items={CASE_ITEMS}
           index={caseOpen}
           onClose={() => setCaseOpen(null)}
           onIndex={setCaseOpen}
