@@ -765,7 +765,7 @@ function ShowreelCarousel({
     "flex h-11 w-11 items-center justify-center rounded-full border border-white/[0.12] bg-white/[0.03] text-white/70 transition-all hover:border-[#D7FF3F]/50 hover:text-[#D7FF3F] disabled:opacity-30 disabled:hover:border-white/[0.12] disabled:hover:text-white/70";
 
   return (
-    <div>
+    <div className="mx-auto max-w-5xl px-4">
       <div className="mb-5 flex items-center justify-end gap-2">
         <button
           type="button"
@@ -789,7 +789,7 @@ function ShowreelCarousel({
       <div
         ref={trackRef}
         onScroll={update}
-        className="-mx-4 flex snap-x snap-mandatory gap-5 overflow-x-auto px-4 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="flex snap-x snap-mandatory gap-5 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
         {SHOWREEL.map((ex, i) => (
           <ReelCard key={ex.src} ex={ex} index={i} onOpen={() => onOpen(i)} />
