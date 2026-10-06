@@ -11,8 +11,12 @@ import { cn } from "@/lib/utils";
  *   frame 2 — "Cooking your creation": patty sizzles (steam + grill marks)
  *   frame 3 — "Plating it up": cheese / tomato / lettuce / top bun stack
  *
- * prefers-reduced-motion: watch.css kills the loops, leaving a calm static
- * burger + text status.
+ * The scene: layered flame tongues lick up through the grate from a bed of
+ * pulsing coals; every burger layer carries its own gradient + highlight so
+ * it reads crafted, not clip-art.
+ *
+ * prefers-reduced-motion: watch.css kills the loops (fg-animated *),
+ * leaving a calm static grill + text status.
  */
 export function burgerFrameForStage(stage: string | null): number {
   const s = (stage ?? "").toLowerCase();
@@ -39,11 +43,40 @@ const STEAM = [
   { d: "M254,64 q8,-14 0,-28 q-8,-14 0,-28", delay: "-1.7s" },
 ];
 
-const FLAMES = [
-  { d: "M120,298 q-10,-22 0,-36 q10,14 0,36", delay: "0s", fill: "#FF9F1C" },
-  { d: "M210,300 q-12,-26 0,-44 q12,18 0,44", delay: "-0.6s", fill: "#FFB627" },
-  { d: "M300,298 q-10,-22 0,-36 q10,14 0,36", delay: "-1.1s", fill: "#FF9F1C" },
+/** Flame tongues: center-x, tip height, half-width, flicker timing. */
+const TONGUES = [
+  { cx: 96, tip: 226, w: 20, delay: "0s", dur: "0.55s" },
+  { cx: 138, tip: 198, w: 24, delay: "-0.2s", dur: "0.42s" },
+  { cx: 182, tip: 216, w: 21, delay: "-0.35s", dur: "0.62s" },
+  { cx: 226, tip: 190, w: 25, delay: "-0.1s", dur: "0.48s" },
+  { cx: 270, tip: 214, w: 21, delay: "-0.45s", dur: "0.58s" },
+  { cx: 314, tip: 224, w: 19, delay: "-0.28s", dur: "0.5s" },
 ];
+
+const COALS = [
+  { cx: 96, cy: 326, rx: 30, ry: 13, delay: "0s" },
+  { cx: 140, cy: 332, rx: 34, ry: 14, delay: "-0.4s" },
+  { cx: 186, cy: 325, rx: 28, ry: 12, delay: "-0.8s" },
+  { cx: 228, cy: 331, rx: 33, ry: 14, delay: "-0.2s" },
+  { cx: 272, cy: 326, rx: 29, ry: 12, delay: "-0.6s" },
+  { cx: 314, cy: 331, rx: 32, ry: 13, delay: "-1s" },
+];
+
+const EMBERS = [
+  { cx: 120, cy: 296, r: 3.5, delay: "0s" },
+  { cx: 190, cy: 300, r: 2.8, delay: "-1.1s" },
+  { cx: 250, cy: 294, r: 3.2, delay: "-2s" },
+  { cx: 305, cy: 298, r: 2.6, delay: "-0.6s" },
+  { cx: 160, cy: 302, r: 2.4, delay: "-1.7s" },
+];
+
+function tonguePath(cx: number, tip: number, w: number, base: number): string {
+  return (
+    `M ${cx},${base} ` +
+    `C ${cx - w},${base - 18} ${cx - w * 0.85},${tip + 34} ${cx},${tip} ` +
+    `C ${cx + w * 0.85},${tip + 34} ${cx + w},${base - 18} ${cx},${base} Z`
+  );
+}
 
 export default function BurgerGrill({
   frame,
@@ -54,65 +87,123 @@ export default function BurgerGrill({
 }) {
   return (
     <svg
-      viewBox="0 0 420 340"
+      viewBox="0 0 420 360"
       className={cn("fg-animated w-full max-w-[420px]", className)}
       role="img"
       aria-label="A burger being grilled, assembling layer by layer"
     >
       <defs>
         <linearGradient id="fg-bun" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#FFD98A" />
-          <stop offset="100%" stopColor="#EE9F3A" />
+          <stop offset="0%" stopColor="#FFE7AE" />
+          <stop offset="55%" stopColor="#F7B04A" />
+          <stop offset="100%" stopColor="#DE8A26" />
         </linearGradient>
         <linearGradient id="fg-patty" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#7A4A22" />
-          <stop offset="100%" stopColor="#4E2C12" />
+          <stop offset="0%" stopColor="#8F5A28" />
+          <stop offset="50%" stopColor="#6B3F1A" />
+          <stop offset="100%" stopColor="#472712" />
         </linearGradient>
+        <linearGradient id="fg-cheese" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#FFD84D" />
+          <stop offset="100%" stopColor="#F0A92E" />
+        </linearGradient>
+        <radialGradient id="fg-tomato" cx="50%" cy="38%" r="65%">
+          <stop offset="0%" stopColor="#F66166" />
+          <stop offset="100%" stopColor="#C93237" />
+        </radialGradient>
+        <linearGradient id="fg-flame-outer" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#FF8A2A" />
+          <stop offset="100%" stopColor="#D63A0C" />
+        </linearGradient>
+        <linearGradient id="fg-flame-inner" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#FFE66D" />
+          <stop offset="100%" stopColor="#FFB627" />
+        </linearGradient>
+        <radialGradient id="fg-coal" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="#FF8A3D" />
+          <stop offset="60%" stopColor="#C44A12" stopOpacity="0.85" />
+          <stop offset="100%" stopColor="#7A2408" stopOpacity="0" />
+        </radialGradient>
         <radialGradient id="fg-emberglow" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="#FF7A1A" stopOpacity="0.55" />
+          <stop offset="0%" stopColor="#FF7A1A" stopOpacity="0.5" />
           <stop offset="100%" stopColor="#FF7A1A" stopOpacity="0" />
         </radialGradient>
       </defs>
 
-      {/* ember glow under the grill */}
-      <ellipse cx="210" cy="306" rx="150" ry="20" fill="url(#fg-emberglow)" className="fg-glow" />
+      {/* ambient heat glow under everything */}
+      <ellipse cx="210" cy="322" rx="165" ry="26" fill="url(#fg-emberglow)" className="fg-glow" />
 
-      {/* flames */}
+      {/* coal bed */}
+      <g>
+        {COALS.map((c, i) => (
+          <g key={i}>
+            <ellipse cx={c.cx} cy={c.cy} rx={c.rx} ry={c.ry} fill="#241009" />
+            <ellipse
+              cx={c.cx}
+              cy={c.cy - 2}
+              rx={c.rx * 0.62}
+              ry={c.ry * 0.6}
+              fill="url(#fg-coal)"
+              className="fg-sizzle"
+              style={{ animationDelay: c.delay }}
+            />
+          </g>
+        ))}
+      </g>
+
+      {/* layered flames licking up through the grate */}
       <g className="fg-ambient">
-        {FLAMES.map((f, i) => (
-          <path
+        {TONGUES.map((t, i) => (
+          <g
             key={i}
-            d={f.d}
-            fill={f.fill}
-            opacity="0.85"
+            className="fg-sizzle"
+            style={{ animationDelay: t.delay, animationDuration: t.dur }}
+          >
+            <path d={tonguePath(t.cx, t.tip, t.w, 312)} fill="url(#fg-flame-outer)" opacity="0.92" />
+            <path
+              d={tonguePath(t.cx, t.tip + 26, t.w * 0.52, 312)}
+              fill="url(#fg-flame-inner)"
+              opacity="0.95"
+            />
+          </g>
+        ))}
+        {/* rising ember sparks */}
+        {EMBERS.map((e, i) => (
+          <circle
+            key={`e${i}`}
+            cx={e.cx}
+            cy={e.cy}
+            r={e.r}
+            fill="#FFB627"
             className="fg-ember"
-            style={{ animationDelay: f.delay }}
+            style={{ animationDelay: e.delay }}
           />
         ))}
       </g>
 
       {/* grill grate */}
-      <rect x="60" y="288" width="300" height="26" rx="13" fill="#1B1B1F" stroke="#3A3A42" strokeWidth="2" />
+      <rect x="60" y="282" width="300" height="26" rx="13" fill="#141416" stroke="#33333A" strokeWidth="2" />
       {Array.from({ length: 11 }, (_, i) => (
         <line
           key={i}
           x1={84 + i * 25}
-          y1="292"
+          y1="287"
           x2={84 + i * 25}
-          y2="310"
+          y2="303"
           stroke="#4A4A55"
           strokeWidth="4"
           strokeLinecap="round"
         />
       ))}
-      <rect x="92" y="314" width="14" height="18" rx="7" fill="#2A2A30" />
-      <rect x="314" y="314" width="14" height="18" rx="7" fill="#2A2A30" />
+      <rect x="92" y="308" width="14" height="20" rx="7" fill="#232329" />
+      <rect x="314" y="308" width="14" height="20" rx="7" fill="#232329" />
 
       {/* frame 1: bottom bun */}
       {frame >= 1 && (
         <g className="fg-drop">
-          <rect x="105" y="252" width="210" height="36" rx="18" fill="url(#fg-bun)" stroke="#C77B24" strokeWidth="2" />
-          <rect x="125" y="260" width="170" height="8" rx="4" fill="#FFD98A" opacity="0.5" />
+          <rect x="105" y="252" width="210" height="36" rx="18" fill="url(#fg-bun)" stroke="#B96A1B" strokeWidth="2" />
+          <rect x="125" y="259" width="170" height="7" rx="3.5" fill="#FFF3D6" opacity="0.55" />
+          <rect x="105" y="280" width="210" height="8" rx="4" fill="#B96A1B" opacity="0.35" />
         </g>
       )}
 
@@ -135,14 +226,15 @@ export default function BurgerGrill({
             ))}
           </g>
           <rect x="95" y="218" width="230" height="36" rx="18" fill="url(#fg-patty)" stroke="#3A2010" strokeWidth="2" />
+          <rect x="115" y="224" width="190" height="6" rx="3" fill="#C98F4E" opacity="0.5" />
           {[130, 175, 220, 265].map((x) => (
             <line
               key={x}
               x1={x}
-              y1="224"
+              y1="226"
               x2={x + 14}
               y2="248"
-              stroke="#8A5A2E"
+              stroke="#A06A35"
               strokeWidth="6"
               strokeLinecap="round"
               opacity="0.8"
@@ -156,28 +248,29 @@ export default function BurgerGrill({
         <g>
           <g className="fg-drop" style={{ animationDelay: "0.2s" }}>
             <g transform="rotate(-4 210 200)">
-              <rect x="100" y="192" width="220" height="22" rx="8" fill="#FFC93C" stroke="#D99A1F" strokeWidth="2" />
-              <path d="M140,214 q2,12 -6,18 q-10,-4 -8,-18 z" fill="#FFC93C" />
-              <path d="M225,214 q2,14 -6,20 q-10,-4 -8,-20 z" fill="#FFC93C" />
-              <path d="M290,214 q2,10 -5,15 q-9,-3 -7,-15 z" fill="#FFC93C" />
+              <rect x="100" y="192" width="220" height="22" rx="8" fill="url(#fg-cheese)" stroke="#C98A1A" strokeWidth="2" />
+              <rect x="112" y="195" width="196" height="5" rx="2.5" fill="#FFE9A8" opacity="0.7" />
+              <path d="M140,214 q2,12 -6,18 q-10,-4 -8,-18 z" fill="#F0A92E" />
+              <path d="M225,214 q2,14 -6,20 q-10,-4 -8,-20 z" fill="#F0A92E" />
+              <path d="M290,214 q2,10 -5,15 q-9,-3 -7,-15 z" fill="#F0A92E" />
             </g>
           </g>
           <g className="fg-drop" style={{ animationDelay: "0.32s" }}>
-            <ellipse cx="210" cy="184" rx="98" ry="15" fill="#E5484D" stroke="#B23236" strokeWidth="2" />
-            <ellipse cx="210" cy="182" rx="78" ry="9" fill="#F2736A" opacity="0.65" />
+            <ellipse cx="210" cy="184" rx="98" ry="15" fill="url(#fg-tomato)" stroke="#A82A2E" strokeWidth="2" />
+            <ellipse cx="210" cy="181" rx="70" ry="6.5" fill="#FF9A9E" opacity="0.5" />
           </g>
           <g className="fg-drop" style={{ animationDelay: "0.44s" }}>
             <path
               d="M104,168 q21,-15 42,0 t42,0 t42,0 t42,0 t42,0"
               fill="none"
-              stroke="#7BC96F"
+              stroke="#6FBE62"
               strokeWidth="13"
               strokeLinecap="round"
             />
             <path
-              d="M104,168 q21,-15 42,0 t42,0 t42,0 t42,0 t42,0"
+              d="M104,166 q21,-15 42,0 t42,0 t42,0 t42,0 t42,0"
               fill="none"
-              stroke="#A5E09B"
+              stroke="#A8E6A1"
               strokeWidth="5"
               strokeLinecap="round"
             />
@@ -186,8 +279,16 @@ export default function BurgerGrill({
             <path
               d="M104,166 C104,104 150,72 210,72 C270,72 316,104 316,166 Z"
               fill="url(#fg-bun)"
-              stroke="#C77B24"
+              stroke="#B96A1B"
               strokeWidth="2"
+            />
+            <path
+              d="M130,150 C140,110 170,88 210,84"
+              fill="none"
+              stroke="#FFF3D6"
+              strokeWidth="10"
+              strokeLinecap="round"
+              opacity="0.35"
             />
             {SESAME.map((s, i) => (
               <ellipse

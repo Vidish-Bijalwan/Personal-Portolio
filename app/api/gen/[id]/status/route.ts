@@ -1,6 +1,9 @@
 export const dynamic = 'force-dynamic';
 
 import { NextResponse, type NextRequest } from 'next/server';
+import { and, eq, lt, sql } from 'drizzle-orm';
+import { db } from '@/lib/db/client';
+import { generations } from '@/lib/db/schema';
 import { requireSession } from '@/lib/auth';
 import { getOwnedGeneration } from '@/lib/free/access';
 import {
@@ -8,6 +11,7 @@ import {
   isStuck,
   suggestSaferPrompt,
 } from '@/lib/free/policy';
+import { promptInsight } from '@/lib/vilish/prompt-insight';
 
 /**
  * GET /api/gen/[id]/status
@@ -19,6 +23,13 @@ import {
  * when the heuristic has nothing to offer), so the watch room can show
  * a one-tap "Try a safer rephrase" recovery. `stuck: true` flags
  * queued/generating rows with no progress for 15+ minutes.
+ *
+ * Waiting-room transparency fields (all derived, no migration):
+ * - created_at: the row's creation timestamp (ISO) — drives the elapsed timer.
+ * - queue_position: when queued, 1 + the number of queued generations
+ *   created earlier (1 = next up); null otherwise.
+ * - prompt_insight: honest keyword read of the prompt { subject, styles, mood }.
+ * - prompt: the owner's own prompt (needed for the remix buttons).
  */
 export async function GET(
   _req: NextRequest,
@@ -34,12 +45,35 @@ export async function GET(
   const refused = gen.errorCode === 'content_refused';
   const safer = refused ? suggestSaferPrompt(gen.prompt) : null;
 
+  const createdAt =
+    gen.createdAt instanceof Date
+      ? gen.createdAt.toISOString()
+      : new Date(gen.createdAt).toISOString();
+
+  let queuePosition: number | null = null;
+  if (gen.status === 'queued') {
+    const rows = await db
+      .select({ n: sql<number>`count(*)::int` })
+      .from(generations)
+      .where(
+        and(
+          eq(generations.status, 'queued'),
+          lt(generations.createdAt, gen.createdAt)
+        )
+      );
+    queuePosition = (rows[0]?.n ?? 0) + 1;
+  }
+
   return NextResponse.json({
     media_type: gen.mediaType,
     tier: gen.tier,
     status: gen.status,
     stage: gen.stage,
     unlocked: gen.unlocked,
+    created_at: createdAt,
+    queue_position: queuePosition,
+    prompt_insight: promptInsight(gen.prompt),
+    prompt: gen.prompt,
     ...(isGenerationErrorCode(gen.errorCode)
       ? { error_code: gen.errorCode }
       : {}),

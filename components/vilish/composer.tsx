@@ -86,6 +86,9 @@ interface ComposerProps {
   /** Trend-template deep link, e.g. /create?template=neon-noir-portrait —
    *  pre-fills the prompt and aspect. The service comes from the template. */
   initialTemplate?: Template;
+  /** Raw prompt deep link, e.g. /create?prompt=... from the watch-room remix
+   *  fallback — pre-fills the prompt box. Template wins when both are set. */
+  initialPrompt?: string;
 }
 
 const ACCEPT_ATTR = ".png,.jpg,.jpeg,.webp,.gif,.pdf,.doc,.docx,.txt,.md";
@@ -96,9 +99,9 @@ function formatBytes(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-export default function Composer({ variant = "hero", className, initialMedia = "image", initialService, initialTemplate }: ComposerProps) {
+export default function Composer({ variant = "hero", className, initialMedia = "image", initialService, initialTemplate, initialPrompt }: ComposerProps) {
   const router = useRouter();
-  const [prompt, setPrompt] = useState(initialTemplate?.prompt ?? "");
+  const [prompt, setPrompt] = useState(initialTemplate?.prompt ?? initialPrompt ?? "");
   const [quality, setQuality] = useState<QualityTier>("studio");
   const [aspectRatio, setAspectRatio] = useState<AspectRatio>(
     initialTemplate?.aspect ?? (initialMedia === "video" ? "9:16" : "1:1")

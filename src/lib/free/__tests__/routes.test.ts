@@ -300,6 +300,63 @@ describe('GET /api/gen/[id]/status', () => {
     );
     expect(body.error).toBe('provider timeout');
   });
+
+  it('returns waiting-room transparency fields (created_at, queue_position, prompt_insight)', async () => {
+    const get = h('GET', FILE);
+    const call = (id: string) =>
+      get(req('GET', `/api/gen/${id}/status`), { params: Promise.resolve({ id }) });
+
+    // Dedicated user: these queued rows must not consume user-1's free cap
+    // (a later end-to-end test asserts on it).
+    await seedUser('queue-user');
+    mockAuth.userId = 'queue-user';
+    // Fixed past timestamps: every other insert in this file uses "now",
+    // which is always later — so the queue math below is deterministic.
+    await insertGeneration('queue-user', {
+      prompt: 'cinematic photo of a sneaker, dramatic light',
+      status: 'queued',
+      createdAt: new Date('2026-10-06T10:00:00Z'),
+    });
+    const second = await insertGeneration('queue-user', {
+      prompt: 'a red bicycle',
+      status: 'queued',
+      createdAt: new Date('2026-10-06T10:01:00Z'),
+    });
+
+    const { body } = await json(await call(second.id));
+    expect(body.created_at).toBe('2026-10-06T10:01:00.000Z');
+    expect(body.queue_position).toBe(2);
+    expect(body.prompt_insight).toMatchObject({
+      subject: 'red bicycle',
+      styles: [],
+      mood: null,
+    });
+    expect(body.prompt).toBe('a red bicycle');
+
+    const first = await json(
+      await call((await insertGeneration('queue-user', {
+        prompt: 'cinematic photo of a sneaker, dramatic light',
+        status: 'queued',
+        createdAt: new Date('2026-10-06T09:59:00Z'),
+      })).id)
+    );
+    expect(first.body.queue_position).toBe(1);
+    expect(first.body.prompt_insight).toMatchObject({
+      subject: 'sneaker light',
+      styles: ['Cinematic', 'Photo'],
+      mood: 'Dramatic',
+    });
+
+    // Non-queued rows carry no queue position.
+    const done = await insertGeneration('queue-user', {
+      status: 'done',
+      createdAt: new Date('2026-10-06T10:02:00Z'),
+    });
+    const doneBody = (await json(await call(done.id))).body;
+    expect(doneBody.queue_position).toBeNull();
+    expect(doneBody.created_at).toBe('2026-10-06T10:02:00.000Z');
+    mockAuth.userId = 'user-1';
+  });
 });
 
 describe('free image end-to-end: deliver → preview → unlock → clean', () => {

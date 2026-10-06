@@ -51,7 +51,7 @@ function Eyebrow({ children }: { children: string }) {
 export default async function CreatePage({
   searchParams,
 }: {
-  searchParams: Promise<{ media?: string; service?: string; template?: string }>;
+  searchParams: Promise<{ media?: string; service?: string; template?: string; prompt?: string }>;
 }) {
   const sp = await searchParams;
   // Trend-template deep link, e.g. /create?service=pack-4&template=diwali-night.
@@ -128,7 +128,7 @@ export default async function CreatePage({
                   className="v-iris-bg pointer-events-none absolute -inset-px rounded-[22px] opacity-30 blur-md sm:opacity-35 sm:blur-xl"
                 />
                 <div className="v-iris-border relative rounded-[20px] border bg-[#0C0C0E] p-4 sm:p-7">
-                  <Composer variant="page" initialMedia={initialMedia} initialService={initialService} initialTemplate={template ?? undefined} />
+                  <Composer variant="page" initialMedia={initialMedia} initialService={initialService} initialTemplate={template ?? undefined} initialPrompt={typeof sp?.prompt === "string" ? sp.prompt.slice(0, 2000) : undefined} />
                 </div>
               </div>
             </Reveal>

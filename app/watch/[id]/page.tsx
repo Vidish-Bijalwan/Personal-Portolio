@@ -17,6 +17,8 @@ import VilishNav from "@/components/vilish/nav";
 import VilishFooter from "@/components/vilish/footer";
 import BurgerGrill, { burgerFrameForStage } from "@/components/vilish/burger-grill";
 import PopcornReel, { reelFrameForStage } from "@/components/vilish/popcorn-reel";
+import WaitingPanel from "@/components/vilish/waiting-panel";
+import type { PromptInsight } from "@/src/lib/vilish/prompt-insight";
 import { progressForStage } from "@/src/lib/vilish/progress";
 import PaymentModal from "@/components/vilish/payment-modal";
 import AuthModal from "@/components/vilish/auth-modal";
@@ -33,6 +35,21 @@ interface GenStatus {
   error_code?: "content_refused" | "technical";
   stuck?: boolean;
   suggested_prompt?: string;
+  /** Waiting-room transparency fields (from /api/gen/[id]/status). */
+  created_at: string;
+  queue_position: number | null;
+  prompt_insight: PromptInsight | null;
+  /** The owner's own prompt — powers the remix buttons. */
+  prompt?: string | null;
+}
+
+/** "1m 23s" / "45s" / "2h 4m" — honest elapsed time, never a promise. */
+function formatElapsed(ms: number): string {
+  const s = Math.max(0, Math.floor(ms / 1000));
+  if (s < 60) return `${s}s`;
+  const m = Math.floor(s / 60);
+  if (m < 60) return `${m}m ${String(s % 60).padStart(2, "0")}s`;
+  return `${Math.floor(m / 60)}h ${String(m % 60).padStart(2, "0")}m`;
 }
 
 const IMAGE_CAPTIONS = [
@@ -71,6 +88,72 @@ export default function WatchRoomPage() {
   // retry flow: mint a fresh attempt (same prompt, or the safer rephrase)
   const [retrying, setRetrying] = useState<null | "same" | "safe">(null);
   const [retryError, setRetryError] = useState("");
+
+  // waiting-room transparency: ticking elapsed clock (from created_at)
+  const [nowMs, setNowMs] = useState(() => Date.now());
+  useEffect(() => {
+    const t = setInterval(() => setNowMs(Date.now()), 1000);
+    return () => clearInterval(t);
+  }, [id]);
+
+  // remix flow: same prompt + a style preset → new free generation
+  const [remixBusy, setRemixBusy] = useState<string | null>(null);
+  const [remixError, setRemixError] = useState("");
+  const [pendingRemix, setPendingRemix] = useState<string | null>(null);
+
+  const submitRemix = async (styledPrompt: string) => {
+    setRemixError("");
+    try {
+      const r = await fetch("/api/free/generate", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ prompt: styledPrompt }),
+      });
+      if (r.status === 401) {
+        setPendingRemix(styledPrompt);
+        setAuthNeeded(true);
+        return;
+      }
+      const b = (await r.json().catch(() => null)) as {
+        id?: string;
+        code?: string;
+        error?: string;
+      } | null;
+      if (r.status === 429 || b?.code === "FREE_CAP_REACHED") {
+        // Free tries used up — hand the styled prompt to the composer
+        // (paid flow) instead of failing.
+        router.push(`/create?prompt=${encodeURIComponent(styledPrompt)}`);
+        return;
+      }
+      if (!r.ok || !b?.id) {
+        setRemixError(
+          typeof b?.error === "string" && b.error
+            ? b.error
+            : "Could not start that remix. Please try again."
+        );
+        return;
+      }
+      router.push(`/watch/${b.id}`);
+    } catch {
+      setRemixError("Could not start that remix. Please try again.");
+    }
+  };
+
+  const handleRemix = async (suffix: string) => {
+    const base = (dataRef.current?.prompt ?? "").trim();
+    if (!base) {
+      setRemixError("We couldn't read your original prompt — please try again.");
+      return;
+    }
+    // Server caps prompts at 2000 chars; keep the style suffix intact.
+    const styled = `${base}, ${suffix}`.slice(0, 2000);
+    setRemixBusy(suffix);
+    try {
+      await submitRemix(styled);
+    } finally {
+      setRemixBusy(null);
+    }
+  };
 
   const handleRetry = async (safer: boolean) => {
     setRetryError("");
@@ -209,7 +292,7 @@ export default function WatchRoomPage() {
   return (
     <div className="flex min-h-screen flex-col bg-[#080808] font-sans text-[#F5F5F3] antialiased">
       <VilishNav />
-      <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col px-4 pb-16 pt-8 sm:pt-12">
+      <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col px-4 pb-16 pt-8 sm:pt-12">
         <Link
           href="/create"
           className="inline-flex w-fit items-center gap-1.5 text-[13px] text-white/50 hover:text-white/85"
@@ -383,82 +466,108 @@ export default function WatchRoomPage() {
           </section>
         )}
 
-        {/* cooking / generating */}
+        {/* cooking / generating — the waiting room */}
         {data &&
           data.status !== "failed" &&
           data.status !== "done" &&
           !(data.tier === "paid" && !data.unlocked) && (
-            <section className="flex flex-1 flex-col items-center py-8 text-center" aria-live="polite">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#D7FF3F]">
-                {data.tier === "free" ? "Free preview" : "Paid order"} · AI-generated
-              </p>
-              <h1 className="font-display mt-2 text-[26px] font-semibold tracking-[-0.02em] sm:text-[32px]">
-                {isVideo ? "Your clip is in the projector" : "Your creation is on the grill"}
-              </h1>
-
-              <div className="mt-6 w-full max-w-[420px]">
-                {isVideo ? (
-                  <PopcornReel frame={reelFrameForStage(data.stage)} />
-                ) : (
-                  <BurgerGrill frame={burgerFrameForStage(data.stage)} />
-                )}
-              </div>
-
-              <p className="font-display mt-4 text-[16px] font-medium text-[#F5F5F3]">
-                {stageText}
-              </p>
-              <p key={captionIdx} className="fg-caption mt-1.5 h-6 text-[13px] text-white/45">
-                {caption}
-              </p>
-
-              {/* real progress: reflects the pipeline stage, not a fixed width */}
-              <div
-                className="mt-6 w-full max-w-[320px]"
-                role="progressbar"
-                aria-label="Generation progress"
-                aria-valuenow={progress}
-                aria-valuemin={0}
-                aria-valuemax={100}
-              >
-                <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/[0.08]">
-                  <div
-                    className="h-full rounded-full bg-gradient-to-r from-[#D7FF3F] via-[#00F0FF] to-[#FF2D78] transition-[width] duration-700 ease-out motion-reduce:transition-none"
-                    style={{ width: `${progress}%` }}
-                  />
-                </div>
-                <p className="mt-2 text-[12px] font-medium tabular-nums text-white/45">
-                  {progress}% · {stageText}
-                </p>
-              </div>
-              {fetchError && (
-                <p className="mt-3 text-[12px] text-white/40">{fetchError}</p>
-              )}
-              {data.stuck && (
-                <div className="mt-5 w-full max-w-[420px] rounded-[14px] border border-amber-200/25 bg-amber-200/[0.06] px-5 py-4">
-                  <p className="text-[13px] leading-6 text-amber-100/90">
-                    Pixaura&apos;s kitchen looks backed up — this one&apos;s taking
-                    longer than usual.
+            <section aria-live="polite" className="w-full py-8">
+              <div className="grid gap-8 lg:grid-cols-[1fr_340px] lg:items-start">
+                {/* left: the showpiece + live status */}
+                <div className="flex flex-col items-center text-center">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#D7FF3F]">
+                    {data.tier === "free" ? "Free preview" : "Paid order"} · AI-generated
                   </p>
-                  <button
-                    type="button"
-                    onClick={() => void handleRetry(false)}
-                    disabled={retrying !== null}
-                    className="mt-3 inline-flex items-center gap-2 rounded-[10px] border border-white/[0.12] bg-[#18181B] px-4 py-2.5 text-[13px] font-medium hover:border-white/30 disabled:opacity-60"
-                  >
-                    {retrying === "same" ? (
-                      <Loader2 className="h-4 w-4 animate-spin motion-reduce:animate-none" />
+                  <h1 className="font-display mt-2 text-[26px] font-semibold tracking-[-0.02em] sm:text-[32px]">
+                    {isVideo ? "Your clip is in the projector" : "Your creation is on the grill"}
+                  </h1>
+
+                  <div className="mt-6 w-full max-w-[520px]">
+                    {isVideo ? (
+                      <PopcornReel frame={reelFrameForStage(data.stage)} />
                     ) : (
-                      <RefreshCcw className="h-4 w-4" />
+                      <BurgerGrill frame={burgerFrameForStage(data.stage)} className="max-w-[520px]" />
                     )}
-                    Re-queue this request
-                  </button>
-                  {retryError && (
-                    <p className="mt-2 text-[12px] text-red-300/80" role="alert">
-                      {retryError}
+                  </div>
+
+                  <p className="font-display mt-4 text-[16px] font-medium text-[#F5F5F3]">
+                    {stageText}
+                  </p>
+                  <p key={captionIdx} className="fg-caption mt-1.5 h-6 text-[13px] text-white/45">
+                    {caption}
+                  </p>
+
+                  {/* real progress: reflects the pipeline stage, not a fixed width */}
+                  <div
+                    className="mt-6 w-full max-w-[320px]"
+                    role="progressbar"
+                    aria-label="Generation progress"
+                    aria-valuenow={progress}
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                  >
+                    <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/[0.08]">
+                      <div
+                        className="h-full rounded-full bg-gradient-to-r from-[#D7FF3F] via-[#00F0FF] to-[#FF2D78] transition-[width] duration-700 ease-out motion-reduce:transition-none"
+                        style={{ width: `${progress}%` }}
+                      />
+                    </div>
+                    <p className="mt-2 text-[12px] font-medium tabular-nums text-white/45">
+                      {progress}% · {stageText}
+                    </p>
+                  </div>
+
+                  {/* honest transparency: elapsed time + queue position */}
+                  {data.created_at && (
+                    <p className="mt-3 text-[12.5px] tabular-nums text-white/45">
+                      Waiting {formatElapsed(nowMs - new Date(data.created_at).getTime())}
+                      {data.status === "queued" && data.queue_position != null && (
+                        <>
+                          {" "}· You&apos;re #{data.queue_position} in the grill queue
+                        </>
+                      )}
                     </p>
                   )}
+                  {fetchError && (
+                    <p className="mt-3 text-[12px] text-white/40">{fetchError}</p>
+                  )}
+                  {data.stuck && (
+                    <div className="mt-5 w-full max-w-[420px] rounded-[14px] border border-amber-200/25 bg-amber-200/[0.06] px-5 py-4">
+                      <p className="text-[13px] leading-6 text-amber-100/90">
+                        Pixaura&apos;s kitchen looks backed up — this one&apos;s taking
+                        longer than usual.
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => void handleRetry(false)}
+                        disabled={retrying !== null}
+                        className="mt-3 inline-flex items-center gap-2 rounded-[10px] border border-white/[0.12] bg-[#18181B] px-4 py-2.5 text-[13px] font-medium hover:border-white/30 disabled:opacity-60"
+                      >
+                        {retrying === "same" ? (
+                          <Loader2 className="h-4 w-4 animate-spin motion-reduce:animate-none" />
+                        ) : (
+                          <RefreshCcw className="h-4 w-4" />
+                        )}
+                        Re-queue this request
+                      </button>
+                      {retryError && (
+                        <p className="mt-2 text-[12px] text-red-300/80" role="alert">
+                          {retryError}
+                        </p>
+                      )}
+                    </div>
+                  )}
                 </div>
-              )}
+
+                {/* right: while you wait */}
+                <WaitingPanel
+                  insight={data.prompt_insight}
+                  showRemix={!isVideo}
+                  busyPreset={remixBusy}
+                  remixError={remixError}
+                  onRemix={(suffix) => void handleRemix(suffix)}
+                />
+              </div>
             </section>
           )}
 
@@ -587,6 +696,12 @@ export default function WatchRoomPage() {
           if (pendingUnlock) {
             setPendingUnlock(false);
             void handleUnlock();
+          }
+          if (pendingRemix) {
+            const styled = pendingRemix;
+            setPendingRemix(null);
+            setRemixBusy("auth");
+            void submitRemix(styled).finally(() => setRemixBusy(null));
           }
         }}
       />
