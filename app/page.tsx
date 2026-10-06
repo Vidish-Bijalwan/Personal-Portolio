@@ -744,17 +744,16 @@ function ShowreelCarousel({
     const onLoad = () => update();
     window.addEventListener("resize", update);
     window.addEventListener("load", onLoad);
-    // Images/fonts can change the track's scrollWidth after mount — re-measure
-    // when the track resizes and once more after load settles.
-    const ro =
-      typeof ResizeObserver !== "undefined" ? new ResizeObserver(update) : null;
-    if (ro && trackRef.current) ro.observe(trackRef.current);
-    const t = window.setTimeout(update, 600);
+    // next/image lazy-loads below-the-fold artwork AFTER window load, and each
+    // load grows the track's scrollWidth without resizing its border box — so a
+    // ResizeObserver on the track alone never fires. Poll until layout settles.
+    const iv = window.setInterval(update, 400);
+    const stop = window.setTimeout(() => window.clearInterval(iv), 12000);
     return () => {
       window.removeEventListener("resize", update);
       window.removeEventListener("load", onLoad);
-      ro?.disconnect();
-      window.clearTimeout(t);
+      window.clearInterval(iv);
+      window.clearTimeout(stop);
     };
   }, []);
 
