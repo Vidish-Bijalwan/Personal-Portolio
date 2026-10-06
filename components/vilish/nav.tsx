@@ -158,9 +158,24 @@ export default function VilishNav() {
   // re-composite on every scroll frame on phone GPUs. Desktop keeps glass.
   return (
     <header className="sticky top-0 z-40 border-b border-white/[0.08] bg-[#080808] sm:bg-[#080808]/95 sm:backdrop-blur">
-      <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4 sm:px-6">
-        <Link href="/" aria-label="Pixaura — home">
-          <Wordmark size={22} />
+      {/* brand hairline */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[#D7FF3F]/40 via-[#00F0FF]/25 to-transparent"
+      />
+      <div className="mx-auto flex h-16 min-h-[64px] max-w-6xl items-center justify-between px-4 sm:h-[72px] sm:px-6">
+        <Link
+          href="/"
+          aria-label="Pixaura — home"
+          className="group relative shrink-0 outline-none"
+        >
+          <span
+            aria-hidden
+            className="absolute -inset-1.5 rounded-2xl bg-gradient-to-r from-[#D7FF3F]/0 via-[#D7FF3F]/[0.12] to-[#00F0FF]/[0.12] opacity-0 blur-lg transition-opacity duration-300 group-hover:opacity-100 group-focus-visible:opacity-100 motion-reduce:transition-none"
+          />
+          <span className="relative flex items-center rounded-2xl border border-white/[0.12] bg-gradient-to-b from-white/[0.06] to-white/[0.015] px-3.5 py-2 shadow-[0_0_24px_-8px_rgba(215,255,63,0.35)] transition-colors duration-300 group-hover:border-[#D7FF3F]/40 motion-reduce:transition-none">
+            <Wordmark size={26} />
+          </span>
         </Link>
         <nav aria-label="Primary" className="hidden items-center gap-5 sm:flex lg:gap-6">
           <ToolsMegaDropdown />
@@ -179,7 +194,7 @@ export default function VilishNav() {
         </nav>
         <Link
           href="/create"
-          className="v-iris-bg inline-flex min-h-[40px] items-center rounded-[10px] px-4 py-2 text-[13px] font-semibold text-[#080808] transition-opacity hover:opacity-95"
+          className="v-iris-bg inline-flex min-h-[44px] items-center rounded-[12px] px-5 py-2.5 text-[14px] font-semibold text-[#080808] shadow-[0_10px_32px_-12px_rgba(215,255,63,0.6)] transition-all hover:shadow-[0_10px_40px_-8px_rgba(215,255,63,0.75)]"
         >
           Create
         </Link>

@@ -34,6 +34,9 @@ export const metadata = {
   title: "AI Image Generator India — ₹29 per Creation | Pixaura",
   description:
     "Generate custom AI images for a fixed ₹29 each. No subscription, pay with UPI, human-reviewed quality. Portraits, product photos, posters & more.",
+  icons: {
+    icon: "/icon.svg",
+  },
   openGraph: {
     title: "AI Image Generator India — ₹29 per Creation | Pixaura",
     description:

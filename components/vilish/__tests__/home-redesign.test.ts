@@ -1,0 +1,68 @@
+/**
+ * Homepage redesign gate (2026-10-06): section-by-section rework.
+ *
+ * - No hardcoded ₹ literals in the reworked homepage, nav, or footer —
+ *   every displayed price must come from the pricing catalog.
+ * - The "Why pay-per-creation" pillars must contain zero invented numbers
+ *   (no fake stats, no fake counts of any kind).
+ * - Capability cards must pin real catalog services for their prices.
+ */
+import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import { dirname, join } from "node:path";
+import { PRICE_CATALOG, priceOf } from "../../../src/lib/pricing/catalog";
+
+const here = dirname(fileURLToPath(import.meta.url));
+const root = join(here, "..", "..", "..");
+const pageSrc = readFileSync(join(root, "app", "page.tsx"), "utf8");
+const navSrc = readFileSync(join(root, "components", "vilish", "nav.tsx"), "utf8");
+const footerSrc = readFileSync(join(root, "components", "vilish", "footer.tsx"), "utf8");
+
+const HARDCODED_RUPEE = /₹\s*\d/;
+
+describe("homepage redesign: no hardcoded prices", () => {
+  it("app/page.tsx has zero hardcoded ₹ amounts", () => {
+    expect(pageSrc).not.toMatch(HARDCODED_RUPEE);
+  });
+
+  it("nav and footer have zero hardcoded ₹ amounts", () => {
+    expect(navSrc).not.toMatch(HARDCODED_RUPEE);
+    expect(footerSrc).not.toMatch(HARDCODED_RUPEE);
+  });
+
+  it("every homepage price call resolves against the catalog", () => {
+    const ids = new Set(PRICE_CATALOG.map((p) => p.id));
+    const calls = [...pageSrc.matchAll(/priceOf\("([^"]+)"\)/g)].map((m) => m[1]);
+    expect(calls.length).toBeGreaterThan(0);
+    for (const id of calls) {
+      expect(ids.has(id as never)).toBe(true);
+      expect(() => priceOf(id as never)).not.toThrow();
+    }
+  });
+});
+
+describe("homepage redesign: no invented numbers", () => {
+  it("why-pay-per-creation pillar copy contains no digits at all", () => {
+    const m = pageSrc.match(/const WHY_PILLARS = \[([\s\S]*?)\n\];/);
+    expect(m).not.toBeNull();
+    const copies = [...m![1].matchAll(/copy:\s*"([^"]+)"/g)].map((x) => x[1]);
+    expect(copies.length).toBe(4);
+    for (const copy of copies) {
+      expect(copy).not.toMatch(/\d/);
+    }
+  });
+
+  it("no fake social-proof vocabulary in the reworked sections", () => {
+    const hay = pageSrc + navSrc + footerSrc;
+    for (const phrase of [
+      "creations delivered",
+      "happy customers",
+      "trusted by",
+      "join thousands",
+      "users",
+    ]) {
+      expect(hay.toLowerCase()).not.toContain(phrase);
+    }
+  });
+});
