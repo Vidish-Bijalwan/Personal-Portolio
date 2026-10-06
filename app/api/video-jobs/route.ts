@@ -8,13 +8,16 @@ import { requireSession } from '@/lib/auth';
 import { mimeForMagic } from '@/lib/free/policy';
 import { toBuffer } from '@/lib/free/access';
 import {
+  audioMimeForMagic,
   isValidTool,
+  validateAudioFile,
   validateInputFile,
   validateToolParams,
   type TtsParams,
 } from '@/lib/video/validate';
 import { createVideoJobOrder } from '@/lib/video/orders';
 import {
+  TOOL_OUTPUT_MIME,
   VIDEO_JOB_PRICE_PAISE,
   type VideoTool,
 } from '@/lib/video/constants';
@@ -24,14 +27,16 @@ const UUID_RE =
 
 /**
  * POST /api/video-jobs
- * Multipart form: tool ('tts' | 'caption' | 'trim'), params (JSON string),
- * video (File, video/mp4 ≤50MB, required unless tts uses a generated clip),
+ * Multipart form: tool ('tts' | 'caption' | 'trim' | 'compress' |
+ * 'convert' | 'gif' | 'add-audio' | 'denoise'), params (JSON string),
+ * video (File, video/mp4 ≤50MB, required unless tts uses a generated
+ * clip), audio (File, .mp3/.wav/.m4a ≤20MB, required for add-audio),
  * generationId (optional — tts clip source).
  * Auth required. Creates a queued video_jobs row + a ₹49 (4900 paise)
  * manual-UPI order via the existing order flow (pay-ping: "I've paid" →
  * owner ping → verify → clean unlock). The watcher processes the job
  * immediately (watermarked preview while payment pends); the verify hook
- * flips video_jobs.unlocked so the clean mp4 opens.
+ * flips video_jobs.unlocked so the clean file opens.
  * Returns 201 { id, tool, status, pricePaise, watchUrl, payment }.
  */
 export async function POST(req: NextRequest) {
@@ -51,7 +56,11 @@ export async function POST(req: NextRequest) {
   const toolRaw = form.get('tool');
   if (!isValidTool(toolRaw)) {
     return NextResponse.json(
-      { code: 'INVALID_TOOL', error: 'tool must be tts, caption or trim' },
+      {
+        code: 'INVALID_TOOL',
+        error:
+          'tool must be tts, caption, trim, compress, convert, gif, add-audio or denoise',
+      },
       { status: 400 }
     );
   }
@@ -80,6 +89,8 @@ export async function POST(req: NextRequest) {
   // ---- acquire the input video ----
   let inputBytes: Buffer | null = null;
   let inputMime: string | null = null;
+  let input2Bytes: Buffer | null = null;
+  let input2Mime: string | null = null;
 
   const ttsParams = tool === 'tts' ? (params as TtsParams) : null;
 
@@ -147,6 +158,37 @@ export async function POST(req: NextRequest) {
     inputMime = 'video/mp4';
   }
 
+  // ---- acquire the audio track (add-audio second upload) ----
+  if (tool === 'add-audio') {
+    const audioFile = form.get('audio');
+    if (!(audioFile instanceof File)) {
+      return NextResponse.json(
+        { code: 'MISSING_AUDIO', error: 'Attach an audio file (.mp3, .wav or .m4a, up to 20MB)' },
+        { status: 400 }
+      );
+    }
+    const audioErr = validateAudioFile({
+      mime: audioFile.type || null,
+      bytes: audioFile.size,
+    });
+    if (audioErr) {
+      return NextResponse.json(
+        { code: audioErr.code, error: audioErr.error },
+        { status: 400 }
+      );
+    }
+    const audioBytes = Buffer.from(await audioFile.arrayBuffer());
+    const audioMagic = audioMimeForMagic(audioBytes);
+    if (!audioMagic) {
+      return NextResponse.json(
+        { code: 'INVALID_FILE_TYPE', error: 'Audio must be .mp3, .wav or .m4a' },
+        { status: 400 }
+      );
+    }
+    input2Bytes = audioBytes;
+    input2Mime = audioMagic;
+  }
+
   const [job] = await db
     .insert(videoJobs)
     .values({
@@ -155,7 +197,9 @@ export async function POST(req: NextRequest) {
       params,
       input: inputBytes,
       inputMime,
-      mime: 'video/mp4',
+      input2: input2Bytes,
+      input2Mime,
+      mime: TOOL_OUTPUT_MIME[tool],
       priceCents: VIDEO_JOB_PRICE_PAISE,
       status: 'queued',
       unlocked: false,

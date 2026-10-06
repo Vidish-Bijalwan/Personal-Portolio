@@ -328,10 +328,11 @@ export const generationOrders = pgTable('generation_orders', {
  * Pixaura — Video Studio tools.
  *
  * Queue-backed video processing jobs (voice-over/TTS, captions,
- * trim & text). Mirrors the `generations` queue pattern: rows move
+ * trim & text, plus the Phase 4 real tools: compress, convert, gif,
+ * add-audio, denoise). Mirrors the `generations` queue pattern: rows move
  * queued → processing → done | failed, a watcher (which cannot reach
  * Postgres directly) claims work over the HTTPS admin API, and
- * delivers watermarked + clean mp4 bytea via the deliver endpoint.
+ * delivers watermarked + clean bytea via the deliver endpoint.
  * Money: integer PAISE everywhere (price_cents stores paise despite
  * the name — 4900 paise = ₹49).
  */
@@ -340,7 +341,7 @@ export const videoJobs = pgTable('video_jobs', {
   userId: text('user_id')
     .notNull()
     .references(() => users.id, { onDelete: 'cascade' }),
-  /** tts | caption | trim */
+  /** tts | caption | trim | compress | convert | gif | add-audio | denoise */
   tool: text('tool').notNull(),
   /** queued | processing | done | failed */
   status: text('status').notNull().default('queued'),
@@ -351,6 +352,9 @@ export const videoJobs = pgTable('video_jobs', {
   /** uploaded source video bytes (tool input) */
   input: bytea('input'),
   inputMime: text('input_mime'),
+  /** second input slot: audio track for add-audio (see 0010_video_tools) */
+  input2: bytea('input2'),
+  input2Mime: text('input2_mime'),
   attempts: integer('attempts').notNull().default(0),
   watermarked: bytea('watermarked'),
   clean: bytea('clean'),

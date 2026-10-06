@@ -31,6 +31,13 @@ export function progressForStage(
   if (t.includes("caption") || t.includes("listen")) return 50; // "Listening and captioning"
   if (t.includes("cut")) return 65; // "Cutting your clip"
 
+  // Phase 4 real-tool stages (set by the watcher).
+  if (t.includes("compress")) return 60; // "Compressing your video"
+  if (t.includes("extract")) return 60; // "Extracting your audio"
+  if (t.includes("gif")) return 60; // "Building your GIF"
+  if (t.includes("mix")) return 60; // "Mixing in your audio"
+  if (t.includes("noise")) return 55; // "Cleaning background noise"
+
   // Image-generation pipeline stages (keyword-tolerant).
   if (t.includes("warm") || t.includes("grill") || t.includes("setup")) return 20;
   if (t.includes("generat") || t.includes("render") || t.includes("creat")) return 55;

@@ -6,18 +6,24 @@ import { db } from '@/lib/db/client';
 import { videoJobs } from '@/lib/db/schema';
 import { adminAuthFail } from '@/lib/fulfillment/guards';
 import { mimeForMagic } from '@/lib/free/policy';
-import { decodeB64Strict } from '@/lib/video/validate';
-import { canTransitionVideoJob } from '@/lib/video/constants';
+import {
+  audioMimeForMagic,
+  decodeB64Strict,
+  gifMimeForMagic,
+} from '@/lib/video/validate';
+import { canTransitionVideoJob, OUTPUT_MIMES, type OutputMime } from '@/lib/video/constants';
 
-/** Max deliverable bytes per mp4 file: 50MB. */
+/** Max deliverable bytes per file: 50MB. */
 const OUTPUT_MAX_BYTES = 50 * 1024 * 1024;
 
 /**
  * POST /api/admin/video-jobs/deliver
  * Admin token auth. Body: { id, watermarked_b64, clean_b64, mime }.
- * Stores the watcher deliverables (watermarked + clean mp4) on a
- * video_jobs row and marks it done. Both files must be video/mp4
- * (magic-byte validated) and ≤50MB each. Does NOT touch `unlocked` —
+ * Stores the watcher deliverables (watermarked + clean) on a
+ * video_jobs row and marks it done. mime is one of video/mp4,
+ * audio/mpeg (convert tool — the preview IS the mp3; the download is
+ * the paywalled part), or image/gif (gif tool). Both files are
+ * magic-byte validated and ≤50MB each. Does NOT touch `unlocked` —
  * that flips only via the payment verify hook (purpose='video_studio').
  * Walks the state machine to 'done' through legal hops
  * (queued → processing → done).
@@ -65,11 +71,14 @@ export async function POST(req: NextRequest) {
     from = to;
   }
 
-  const claimedMime: string | undefined =
-    typeof body?.mime === 'string' ? body.mime : undefined;
-  if (claimedMime !== undefined && claimedMime !== 'video/mp4') {
+  const claimedMime: OutputMime | undefined =
+    typeof body?.mime === 'string' &&
+    (OUTPUT_MIMES as readonly string[]).includes(body.mime)
+      ? (body.mime as OutputMime)
+      : undefined;
+  if (!claimedMime) {
     return NextResponse.json(
-      { code: 'INVALID_MIME', error: 'mime must be video/mp4' },
+      { code: 'INVALID_MIME', error: 'mime must be video/mp4, audio/mpeg or image/gif' },
       { status: 400 }
     );
   }
@@ -92,12 +101,16 @@ export async function POST(req: NextRequest) {
       { status: 400 }
     );
   }
-  if (
-    mimeForMagic(watermarked) !== 'video/mp4' ||
-    mimeForMagic(clean) !== 'video/mp4'
-  ) {
+
+  const magicOk = (b: Buffer): boolean =>
+    claimedMime === 'video/mp4'
+      ? mimeForMagic(b) === 'video/mp4'
+      : claimedMime === 'audio/mpeg'
+        ? audioMimeForMagic(b) === 'audio/mpeg'
+        : gifMimeForMagic(b) === 'image/gif';
+  if (!magicOk(watermarked) || !magicOk(clean)) {
     return NextResponse.json(
-      { code: 'INVALID_FILE_TYPE', error: 'Deliverables must be .mp4 files' },
+      { code: 'INVALID_FILE_TYPE', error: `Deliverables must match ${claimedMime}` },
       { status: 400 }
     );
   }
@@ -107,7 +120,7 @@ export async function POST(req: NextRequest) {
     .set({
       watermarked,
       clean,
-      mime: 'video/mp4',
+      mime: claimedMime,
       status: 'done',
       stage: null,
       updatedAt: new Date(),

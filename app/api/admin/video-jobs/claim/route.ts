@@ -19,8 +19,9 @@ const MAX_ATTEMPTS = 3;
  *   'processing' for >45 min (back to queued, or failed after 3
  *   attempts), then atomically moves the oldest `limit` queued rows to
  *   processing (FOR UPDATE SKIP LOCKED) and returns them WITHOUT the
- *   bytea blobs (tool, params, input_mime included; the input video is
- *   fetched via GET /api/admin/video-jobs/[id]/input).
+ *   bytea blobs (tool, params, input_mime, input2_mime included; the
+ *   input bytes are fetched via GET /api/admin/video-jobs/[id]/input,
+ *   the second input (add-audio track) via ?which=2).
  * { action: 'stage', id, stage } — updates the waiting-room progress label.
  * { action: 'fail', id, error? } — marks a row failed (user-safe message).
  */
@@ -57,7 +58,7 @@ export async function POST(req: NextRequest) {
         FOR UPDATE SKIP LOCKED
       ) AS q
       WHERE v.id = q.id
-      RETURNING v.id, v.user_id, v.tool, v.params, v.input_mime, v.attempts
+      RETURNING v.id, v.user_id, v.tool, v.params, v.input_mime, v.input2_mime, v.attempts
     `)) as unknown as { rows?: unknown[] } | unknown[];
     const claimed = Array.isArray(raw) ? raw : raw.rows ?? [];
     return NextResponse.json({ claimed });

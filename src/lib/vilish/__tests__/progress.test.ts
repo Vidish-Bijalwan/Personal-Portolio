@@ -20,6 +20,14 @@ describe("progressForStage", () => {
     expect(progressForStage("Polishing the final cut", "processing")).toBe(88);
   });
 
+  it("maps the Phase 4 real-tool watcher stages", () => {
+    expect(progressForStage("Compressing your video", "processing")).toBe(60);
+    expect(progressForStage("Extracting your audio", "processing")).toBe(60);
+    expect(progressForStage("Building your GIF", "processing")).toBe(60);
+    expect(progressForStage("Mixing in your audio", "processing")).toBe(60);
+    expect(progressForStage("Cleaning background noise", "processing")).toBe(55);
+  });
+
   it("is case-insensitive", () => {
     expect(progressForStage("RECORDING YOUR VOICE-OVER", "processing")).toBe(30);
   });
