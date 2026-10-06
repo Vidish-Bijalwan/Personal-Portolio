@@ -154,6 +154,15 @@ export default async function TrendsPage({
                   <ArrowRight className="h-4 w-4" />
                 </Link>
               </div>
+              {t.followUp && (
+                <Link
+                  href={t.followUp.href}
+                  className="mt-3 inline-flex min-h-[36px] items-center gap-1 text-[12.5px] font-medium text-[#00F0FF] transition-opacity hover:opacity-80"
+                >
+                  {t.followUp.label}
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </Link>
+              )}
             </article>
           ))}
         </div>

@@ -4,6 +4,7 @@ import {
   nextLightboxIndex,
 } from "../lightbox-logic";
 import {
+  examplePrice,
   resolveOpenLightbox,
   toLightboxItem,
   type ExampleItem,
@@ -13,21 +14,21 @@ const MANIFEST: ExampleItem[] = [
   {
     src: "/examples/1-sneaker-ad.webp",
     prompt: "Floating sneaker, studio shot",
-    price: "₹29",
+    service: "single-image",
     model: "flux-2",
     category: "ad",
   },
   {
     src: "/examples/2-neon-portrait.webp",
     prompt: "Neon portrait, city lights",
-    price: "₹29",
+    service: "single-image",
     model: "flux-2",
     category: "image",
   },
   {
     src: "/examples/6-movie-poster.webp",
     prompt: "Astronaut before the monolith",
-    price: "₹29",
+    service: "single-image",
     model: "flux-2",
     category: "image",
   },
@@ -38,7 +39,7 @@ describe("toLightboxItem (thumbnail click → lightbox data)", () => {
     expect(toLightboxItem(MANIFEST[0])).toEqual({
       src: "/examples/1-sneaker-ad.webp",
       caption: "Floating sneaker, studio shot",
-      price: "₹29",
+      price: examplePrice({ service: "single-image" }),
       model: "flux-2",
       badge: "Ad",
       alt: "Floating sneaker, studio shot",
@@ -52,7 +53,7 @@ describe("toLightboxItem (thumbnail click → lightbox data)", () => {
       toLightboxItem({
         src: "/examples/videos/clip-1-portrait.mp4",
         prompt: "AI video example — animated neon portrait loop",
-        price: "₹99",
+        service: "clip-5s",
         model: "5s clip",
         category: "video",
         poster: "/examples/videos/poster-1-portrait.jpg",
@@ -61,7 +62,7 @@ describe("toLightboxItem (thumbnail click → lightbox data)", () => {
     ).toEqual({
       src: "/examples/videos/clip-1-portrait.mp4",
       caption: "AI video example — animated neon portrait loop",
-      price: "₹99",
+      price: examplePrice({ service: "clip-5s" }),
       model: "5s clip",
       badge: "Video",
       alt: "AI-generated video example: neon portrait",
@@ -99,7 +100,7 @@ describe("resolveOpenLightbox (grid click wiring)", () => {
     expect(opened!.items[2]).toMatchObject({
       src: "/examples/6-movie-poster.webp",
       caption: "Astronaut before the monolith",
-      price: "₹29",
+      price: examplePrice({ service: "single-image" }),
     });
     // …and the other items keep their own data (no cross-contamination):
     expect(opened!.items[0].caption).toBe("Floating sneaker, studio shot");
