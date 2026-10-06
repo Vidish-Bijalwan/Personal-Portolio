@@ -6,21 +6,26 @@ import Image from "next/image";
 import {
   ArrowRight,
   BadgeCheck,
+  Ban,
+  ChevronLeft,
+  ChevronRight,
+  Clapperboard,
+  Download,
+  FileDown,
   Image as ImageIcon,
+  MessageSquareText,
   Play,
   RefreshCcw,
   ShieldCheck,
   SlidersHorizontal,
   Sparkles,
   Tag,
+  Wallet,
   type LucideIcon,
 } from "lucide-react";
 import {
   AnimatePresence,
   motion,
-  useReducedMotion,
-  useScroll,
-  useSpring,
 } from "framer-motion";
 import VilishNav from "@/components/vilish/nav";
 import VilishFooter from "@/components/vilish/footer";
@@ -35,9 +40,7 @@ import HeroAurora, { HeroCollage } from "@/components/motion/HeroAurora";
 import FlyingElements from "@/components/motion/FlyingElements";
 import Reveal from "@/components/motion/Reveal";
 import { Stagger, StaggerItem } from "@/components/motion/Stagger";
-import Marquee from "@/components/motion/Marquee";
 import MagneticButton from "@/components/motion/MagneticButton";
-import Carousel from "@/components/motion/Carousel";
 import { EASE_OUT, MOTION, usePrefersReducedMotion } from "@/src/lib/motion/theme";
 import SectionHeader from "@/components/vilish/section-header";
 
@@ -207,6 +210,8 @@ interface Capability {
   desc: string;
   price: string;
   href: string;
+  img: string;
+  imgAlt: string;
 }
 
 const CAPABILITIES: Capability[] = [
@@ -216,6 +221,8 @@ const CAPABILITIES: Capability[] = [
     desc: "Anything you can describe — portraits, posters, concepts, scenes. Studio-grade renders, priced per piece.",
     price: `from ${formatINR(priceOf("single-image"))}`,
     href: "/create",
+    img: "/examples/2-neon-portrait.webp",
+    imgAlt: "AI-generated example: stylized neon portrait",
   },
   {
     icon: SlidersHorizontal,
@@ -223,6 +230,8 @@ const CAPABILITIES: Capability[] = [
     desc: "Retouch, restyle, recolor, remove backgrounds. Your photo, transformed exactly as you brief it.",
     price: `from ${formatINR(priceOf("single-image"))}`,
     href: "/create",
+    img: "/examples/9-fashion-editorial.webp",
+    imgAlt: "AI-generated example: high-fashion editorial portrait",
   },
   {
     icon: Sparkles,
@@ -230,107 +239,10 @@ const CAPABILITIES: Capability[] = [
     desc: "Product shots and campaign creatives that look shot in a studio — without booking a studio.",
     price: `from ${formatINR(priceOf("product-photo"))}`,
     href: "/create",
+    img: "/examples/10-perfume-ad.webp",
+    imgAlt: "AI-generated example: luxury perfume product shot",
   },
 ];
-
-const FORMATS = [
-  { ratio: "1:1", w: 1, h: 1, tag: "Feed & profile", dims: "1080 × 1080", accent: "#D7FF3F" },
-  { ratio: "4:5", w: 4, h: 5, tag: "Portraits", dims: "1080 × 1350", accent: "#00F0FF" },
-  { ratio: "9:16", w: 9, h: 16, tag: "Reels & stories", dims: "1080 × 1920", accent: "#FF2D78" },
-  { ratio: "16:9", w: 16, h: 9, tag: "Banners & covers", dims: "1920 × 1080", accent: "#D7FF3F" },
-];
-
-/**
- * Interactive ratio picker: each card stages an animated frame that morphs
- * (spring-animated width/height) to the format's true ratio on hover or
- * select, lit in the format's accent color. The readout below stays live so
- * the choice always has context. Reduced motion → static frames, same info.
- */
-function FormatLab() {
-  const reduced = usePrefersReducedMotion();
-  const [activeIdx, setActiveIdx] = useState(2);
-  const active = FORMATS[activeIdx];
-
-  return (
-    <div>
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4" role="group" aria-label="Choose an aspect ratio">
-        {FORMATS.map((f, i) => {
-          const selected = i === activeIdx;
-          // Fit the true ratio inside a fixed stage budget.
-          const s = Math.min(118 / f.w, 92 / f.h);
-          const bw = Math.max(18, Math.round(f.w * s));
-          const bh = Math.max(18, Math.round(f.h * s));
-          const frame = reduced ? (
-            <span
-              className="relative rounded-[5px] border-2"
-              style={{
-                width: bw,
-                height: bh,
-                borderColor: selected ? f.accent : "rgba(255,255,255,0.20)",
-                background: `${f.accent}14`,
-                boxShadow: selected ? `0 0 26px -6px ${f.accent}99` : "none",
-              }}
-            />
-          ) : (
-            <motion.span
-              className="relative rounded-[5px] border-2"
-              initial={false}
-              animate={{
-                width: bw,
-                height: bh,
-                borderColor: selected ? f.accent : "rgba(255,255,255,0.20)",
-                backgroundColor: selected ? `${f.accent}22` : `${f.accent}0d`,
-                boxShadow: selected
-                  ? `0 0 26px -6px ${f.accent}99, inset 0 0 20px -12px ${f.accent}`
-                  : "0 0 0px 0px rgba(0,0,0,0), inset 0 0 0px 0px rgba(0,0,0,0)",
-              }}
-              transition={MOTION.springs.ui}
-              style={{ display: "block" }}
-            />
-          );
-          return (
-            <button
-              key={f.ratio}
-              type="button"
-              onClick={() => setActiveIdx(i)}
-              onMouseEnter={() => setActiveIdx(i)}
-              onFocus={() => setActiveIdx(i)}
-              aria-pressed={selected}
-              aria-label={`Aspect ratio ${f.ratio}, ${f.tag}`}
-              className={`group flex flex-col items-center rounded-2xl border bg-white/[0.02] px-3 pb-4 pt-5 outline-none transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-[#D7FF3F] motion-reduce:transition-none ${
-                selected ? "border-white/[0.22] bg-white/[0.045]" : "border-white/[0.08] hover:border-white/[0.18]"
-              }`}
-            >
-              <span className="flex h-[104px] items-center justify-center" aria-hidden>
-                {frame}
-              </span>
-              <span className="mt-3 text-[15px] font-semibold tabular-nums text-[#F5F5F3]">
-                {f.ratio}
-              </span>
-              <span className="mt-0.5 text-[12px] text-white/50">{f.tag}</span>
-            </button>
-          );
-        })}
-      </div>
-      <div aria-live="polite" className="mt-7 text-center">
-        <p className="flex flex-wrap items-baseline justify-center gap-x-3 gap-y-1">
-          <span
-            className="font-display text-[17px] font-semibold tabular-nums"
-            style={{ color: active.accent }}
-          >
-            {active.ratio}
-          </span>
-          <span className="text-[13.5px] text-white/60">
-            {active.tag} · {active.dims} px
-          </span>
-        </p>
-        <p className="mt-2 text-[12px] text-white/35">
-          Pick the ratio when you order — no resizes, no surprises.
-        </p>
-      </div>
-    </div>
-  );
-}
 
 const FAQS = [
   {
@@ -529,10 +441,31 @@ function VideoCard({
   );
 }
 
+/** Film-perforation strip: sprocket holes along the top/bottom of the
+ *  screening-room frame. Pure CSS, decorative. */
+function Perforation({ position }: { position: "top" | "bottom" }) {
+  return (
+    <div
+      aria-hidden
+      className={`h-[26px] shrink-0 bg-black ${
+        position === "top" ? "border-b border-white/[0.08]" : "border-t border-white/[0.08]"
+      }`}
+      style={{
+        backgroundImage:
+          "radial-gradient(circle, rgba(255,255,255,0.22) 3px, transparent 3.5px)",
+        backgroundSize: "22px 26px",
+        backgroundPosition: "center",
+        backgroundRepeat: "repeat-x",
+      }}
+    />
+  );
+}
+
 /**
- * Tabbed video showcase: Portraits / Product / Cinematic, each themed with
- * its own accent color and glow. Tab switch cross-fades the panel; the
- * accent-tinted frame re-themes with it. Mobile: scrollable tab row.
+ * Screening room: the video examples play inside a cinema frame with
+ * perforation strips, a "NOW SCREENING" header, and numbered reel select —
+ * distinctive art direction instead of a plain tab panel. Same honest data
+ * (5s loops at the catalog clip price), same hover-preview + lightbox.
  */
 function VideoShowcase() {
   const reduced = usePrefersReducedMotion();
@@ -542,44 +475,59 @@ function VideoShowcase() {
   const active = VIDEO_CATS[activeIdx] ?? VIDEO_CATS[0];
 
   const panel = (
-    <div key={active.id} className="grid grid-cols-1 items-center gap-8 sm:grid-cols-[250px_1fr] sm:gap-12">
-      <div className="flex justify-center sm:justify-start">
-        <VideoCard
-          clip={active.clip}
-          accent={active.accent}
-          onOpen={() => setOpenIdx(activeIdx)}
+    <div key={active.id} className="grid grid-cols-1 items-center gap-10 lg:grid-cols-[300px_1fr] lg:gap-14">
+      {/* the screen */}
+      <div className="relative mx-auto w-full max-w-[300px]">
+        <div
+          aria-hidden
+          className="absolute -inset-6 rounded-[28px] blur-3xl transition-colors duration-500 motion-reduce:transition-none"
+          style={{ background: `${active.accent}26` }}
         />
+        <div className="relative">
+          <VideoCard
+            clip={active.clip}
+            accent={active.accent}
+            onOpen={() => setOpenIdx(activeIdx)}
+          />
+          {/* screen reflection */}
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-x-8 -bottom-10 h-16 rounded-[50%] bg-black/60 blur-2xl"
+          />
+        </div>
       </div>
+      {/* reel info */}
       <div>
-        <p
-          className="text-[11px] font-semibold uppercase tracking-[0.3em]"
-          style={{ color: active.accent }}
-        >
-          {active.label}
+        <p className="flex items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.3em]">
+          <span
+            className="inline-block h-2 w-2 animate-pulse rounded-full motion-reduce:animate-none"
+            style={{ background: active.accent, boxShadow: `0 0 10px ${active.accent}` }}
+            aria-hidden
+          />
+          <span style={{ color: active.accent }}>Reel {String(activeIdx + 1).padStart(2, "0")}</span>
+          <span className="text-white/35">— {active.label}</span>
         </p>
-        <h3 className="font-display mt-2 text-[22px] font-semibold tracking-[-0.01em] text-[#F5F5F3] sm:text-[26px]">
+        <h3 className="font-display mt-3 text-[24px] font-semibold tracking-[-0.01em] text-[#F5F5F3] sm:text-[30px]">
           {active.clip.caption}
         </h3>
         <p className="mt-2 max-w-md text-[14px] leading-6 text-white/55">
           {active.blurb}
         </p>
-        <ul className="mt-4 space-y-2">
+        <ul className="mt-5 flex flex-wrap gap-2">
           {active.bullets.map((b) => (
-            <li key={b} className="flex items-center gap-2.5 text-[13.5px] text-white/65">
-              <span
-                aria-hidden
-                className="h-1.5 w-1.5 shrink-0 rounded-full"
-                style={{ background: active.accent, boxShadow: `0 0 8px ${active.accent}` }}
-              />
+            <li
+              key={b}
+              className="rounded-full border border-white/[0.1] bg-white/[0.03] px-3.5 py-1.5 text-[12.5px] text-white/65"
+            >
               {b}
             </li>
           ))}
         </ul>
-        <div className="mt-6">
+        <div className="mt-7">
           <Link
             href="/create?media=video"
-            className="inline-flex items-center gap-2 rounded-[12px] px-6 py-3 text-[14px] font-semibold text-[#080808] transition-transform duration-200 hover:scale-[1.03] motion-reduce:transition-none"
-            style={{ background: active.accent }}
+            className="inline-flex min-h-[48px] items-center gap-2 rounded-[12px] px-7 py-3 text-[14px] font-semibold text-[#080808] transition-transform duration-200 hover:scale-[1.03] motion-reduce:transition-none"
+            style={{ background: active.accent, boxShadow: `0 14px 44px -14px ${active.accent}99` }}
           >
             Make yours — {formatINR(priceOf("clip-5s"))} <ArrowRight className="h-4 w-4" strokeWidth={2} />
           </Link>
@@ -589,70 +537,68 @@ function VideoShowcase() {
   );
 
   return (
-    <div>
-      {/* tab row */}
-      <div
-        role="tablist"
-        aria-label="Video categories"
-        className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:justify-center sm:px-0"
-      >
-        {VIDEO_CATS.map((c) => {
-          const selected = c.id === activeId;
-          return (
-            <button
-              key={c.id}
-              role="tab"
-              aria-selected={selected}
-              onClick={() => setActiveId(c.id)}
-              className={`relative shrink-0 rounded-full px-5 py-2.5 text-[13.5px] font-medium outline-none transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-[#D7FF3F] motion-reduce:transition-none ${
-                selected ? "text-[#080808]" : "text-white/60 hover:text-white/90"
-              }`}
-            >
-              {selected && !reduced && (
-                <motion.span
-                  layoutId="video-tab-pill"
-                  className="absolute inset-0 rounded-full"
-                  style={{ background: c.accent }}
-                  transition={MOTION.springs.snap}
-                />
-              )}
-              {selected && reduced && (
-                <span
-                  aria-hidden
-                  className="absolute inset-0 rounded-full"
-                  style={{ background: c.accent }}
-                />
-              )}
-              {!selected && (
-                <span
-                  aria-hidden
-                  className="absolute inset-0 rounded-full border border-white/[0.12] bg-white/[0.03]"
-                />
-              )}
-              <span className="relative">{c.label}</span>
-            </button>
-          );
-        })}
+    <div className="overflow-hidden rounded-3xl border border-white/[0.1] bg-[#0A0A0B] shadow-[0_40px_100px_-40px_rgba(0,0,0,0.9)]">
+      <Perforation position="top" />
+      <div className="px-5 pb-10 pt-7 sm:px-10 sm:pt-9">
+        {/* marquee header */}
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <p className="font-display flex items-center gap-2.5 text-[13px] font-bold uppercase tracking-[0.28em] text-white/80">
+            <Clapperboard className="h-4 w-4 text-[#D7FF3F]" strokeWidth={2} aria-hidden />
+            Now screening
+          </p>
+          <span className="rounded-full border border-white/[0.12] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-white/50">
+            5s loop · {formatINR(priceOf("clip-5s"))} each
+          </span>
+        </div>
+        {/* reel selector */}
+        <div
+          role="tablist"
+          aria-label="Video reels"
+          className="mt-6 flex gap-2 overflow-x-auto pb-1"
+        >
+          {VIDEO_CATS.map((c, ci) => {
+            const selected = c.id === activeId;
+            return (
+              <button
+                key={c.id}
+                role="tab"
+                aria-selected={selected}
+                onClick={() => setActiveId(c.id)}
+                className={`relative min-h-[44px] shrink-0 rounded-xl px-5 py-2.5 text-[13px] font-semibold outline-none transition-all duration-200 focus-visible:ring-2 focus-visible:ring-[#D7FF3F] motion-reduce:transition-none ${
+                  selected
+                    ? "text-[#080808]"
+                    : "border border-white/[0.12] bg-white/[0.03] text-white/60 hover:border-white/[0.25] hover:text-white/90"
+                }`}
+                style={selected ? { background: c.accent } : undefined}
+              >
+                Reel {String(ci + 1).padStart(2, "0")}
+                <span className={`ml-2 font-normal ${selected ? "text-black/60" : "text-white/35"}`}>
+                  {c.label}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+        {/* stage */}
+        <div className="mt-8 sm:mt-10">
+          {reduced ? (
+            panel
+          ) : (
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={active.id}
+                initial={{ opacity: 0, y: 18 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -12 }}
+                transition={{ duration: MOTION.durations.base, ease: EASE_OUT }}
+              >
+                {panel}
+              </motion.div>
+            </AnimatePresence>
+          )}
+        </div>
       </div>
-
-      {/* panel */}
-      <div className="mt-10 sm:mt-12">
-        {reduced ? (
-          panel
-        ) : (
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={active.id}
-              initial={{ opacity: 0, y: 18 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -12 }}
-              transition={{ duration: MOTION.durations.base, ease: EASE_OUT }}
-            >
-              {panel}
-            </motion.div>
-          </AnimatePresence>
-        )}
-      </div>
+      <Perforation position="bottom" />
 
       {openIdx !== null && VIDEO_ITEMS[openIdx] && (
         <Lightbox
@@ -676,9 +622,10 @@ function Eyebrow({ children }: { children: string }) {
 }
 
 /**
- * One showreel card: a clickable example frame with hover physics (springy
- * lift + accent glow) and a hover overlay that reveals the original prompt
- * plus the price. Reduced motion → static card, still clickable.
+ * One showreel card: fixed uniform frame (no more ragged heights), index
+ * badge + price chip on top, persistent caption bar below the image so the
+ * card reads on touch devices too. Hover reveals the original prompt.
+ * Click opens the full-screen lightbox.
  */
 function ReelCard({
   ex,
@@ -693,61 +640,64 @@ function ReelCard({
   const accent = REEL_ACCENTS[index % REEL_ACCENTS.length];
 
   const card = (
-    <figure className="w-[200px] shrink-0 sm:w-[260px]">
+    <figure className="w-[240px] shrink-0 snap-start sm:w-[280px]">
       <button
         type="button"
         onClick={onOpen}
         aria-label={`Open example: ${ex.caption}`}
-        className="group block w-full cursor-pointer rounded-xl text-left outline-none focus-visible:ring-2 focus-visible:ring-[#D7FF3F] focus-visible:ring-offset-2 focus-visible:ring-offset-[#080808]"
+        className="group relative block h-[340px] w-full cursor-pointer overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.03] text-left outline-none transition-colors duration-300 focus-visible:ring-2 focus-visible:ring-[#D7FF3F] focus-visible:ring-offset-2 focus-visible:ring-offset-[#080808] group-hover:border-white/[0.22] sm:h-[380px] motion-reduce:transition-none"
       >
-        <span
-          className={`relative block ${ex.frame} overflow-hidden rounded-xl border border-white/[0.08] bg-white/[0.03] transition-colors duration-300 group-hover:border-white/[0.22] motion-reduce:transition-none`}
-        >
-          <Image
-            src={ex.src}
-            alt={ex.alt ?? ex.caption}
-            width={ex.width}
-            height={ex.height}
-            sizes="(max-width: 640px) 200px, 260px"
-            loading="lazy"
-            className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.07] motion-reduce:transition-none"
-          />
-          {/* hover caption: the prompt that made it + its price */}
+        <Image
+          src={ex.src}
+          alt={ex.alt ?? ex.caption}
+          width={ex.width}
+          height={ex.height}
+          sizes="(max-width: 640px) 240px, 280px"
+          loading="lazy"
+          className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.06] motion-reduce:transition-none"
+        />
+        {/* top badges */}
+        <span className="absolute left-3 top-3 flex items-center gap-2">
           <span
-            aria-hidden
-            className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black/92 via-black/40 to-transparent p-3 opacity-0 transition-opacity duration-250 group-hover:opacity-100 group-focus-visible:opacity-100 motion-reduce:transition-none"
+            className="rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-[#080808]"
+            style={{ background: accent }}
           >
-            <span
-              className="text-[10px] font-semibold uppercase tracking-[0.16em]"
-              style={{ color: accent }}
-            >
-              Prompt
-            </span>
-            <span className="mt-1 line-clamp-3 text-[11.5px] leading-5 text-white/85">
-              {ex.prompt}
-            </span>
-            <span className="mt-2 flex items-center justify-between">
-              <span className="rounded-full bg-white/10 px-2 py-0.5 text-[11px] font-semibold tabular-nums text-white backdrop-blur-sm">
-                {ex.price}
-              </span>
-              <span className="text-[11px] font-medium text-white/70">⤢ View</span>
-            </span>
+            {String(index + 1).padStart(2, "0")}
           </span>
-        </span>
-      </button>
-      <figcaption className="mt-2.5 px-0.5">
-        <span className="flex items-center justify-between gap-2">
-          <span className="truncate text-[12px] text-white/50">{ex.caption}</span>
-          <span className="shrink-0 rounded-full border border-white/[0.12] px-2 py-px text-[11px] font-semibold tabular-nums text-[#F5F5F3]">
+          <span className="rounded-full border border-white/[0.14] bg-black/70 px-2.5 py-1 text-[11px] font-semibold tabular-nums text-white backdrop-blur-sm">
             {ex.price}
           </span>
         </span>
+        {/* hover: the prompt that made it */}
+        <span
+          aria-hidden
+          className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black/95 via-black/50 to-transparent p-4 opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-focus-visible:opacity-100 motion-reduce:transition-none"
+        >
+          <span
+            className="text-[10px] font-semibold uppercase tracking-[0.18em]"
+            style={{ color: accent }}
+          >
+            The brief
+          </span>
+          <span className="mt-1.5 line-clamp-4 text-[12px] leading-5 text-white/85">
+            {ex.prompt}
+          </span>
+          <span className="mt-2 text-[11px] font-medium text-white/70">⤢ View full-screen</span>
+        </span>
+        {/* persistent caption bar */}
+        <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 via-black/55 to-transparent p-4 pt-10 transition-opacity duration-300 group-hover:opacity-0">
+          <span className="block truncate text-[13px] font-medium text-white/90">
+            {ex.caption}
+          </span>
+        </span>
+      </button>
+      <figcaption className="mt-3 px-0.5">
         <Link
           href={exampleHref(ex)}
           aria-label={`Make one like this: ${ex.caption}`}
-          className="mt-0.5 inline-flex min-h-[32px] items-center gap-1 text-[11px] font-semibold text-[#D7FF3F] transition-opacity hover:opacity-80"
+          className="inline-flex min-h-[40px] items-center gap-1.5 text-[12.5px] font-semibold text-[#D7FF3F] transition-opacity hover:opacity-80"
         >
-          Make one like this <ArrowRight className="h-3 w-3" strokeWidth={2.2} />
+          Make one like this <ArrowRight className="h-3.5 w-3.5" strokeWidth={2.2} />
         </Link>
       </figcaption>
     </figure>
@@ -757,27 +707,146 @@ function ReelCard({
 
   return (
     <motion.div
-      whileHover={{
-        y: -8,
-        scale: 1.025,
-        boxShadow: `0 22px 60px -20px ${accent}73`,
-      }}
+      whileHover={{ y: -8 }}
       transition={MOTION.springs.ui}
-      style={{ boxShadow: "0 0px 0px 0px rgba(0,0,0,0)", borderRadius: 14 }}
-      className="shrink-0"
+      className="shrink-0 snap-start"
     >
       {card}
     </motion.div>
   );
 }
 
+/**
+ * Showreel carousel: uniform cards on a snap-scrolling track with arrow
+ * controls and a progress rail — a designed gallery, not a raw image strip.
+ */
+function ShowreelCarousel({
+  onOpen,
+}: {
+  onOpen: (index: number) => void;
+}) {
+  const trackRef = useRef<HTMLDivElement>(null);
+  const [progress, setProgress] = useState(0);
+  const [canLeft, setCanLeft] = useState(false);
+  const [canRight, setCanRight] = useState(true);
+
+  const update = () => {
+    const el = trackRef.current;
+    if (!el) return;
+    const max = el.scrollWidth - el.clientWidth;
+    setProgress(max > 0 ? el.scrollLeft / max : 0);
+    setCanLeft(el.scrollLeft > 8);
+    setCanRight(el.scrollLeft < max - 8);
+  };
+
+  useEffect(() => {
+    update();
+    const onLoad = () => update();
+    window.addEventListener("resize", update);
+    window.addEventListener("load", onLoad);
+    // next/image lazy-loads below-the-fold artwork AFTER window load, and each
+    // load grows the track's scrollWidth without resizing its border box — so a
+    // ResizeObserver on the track alone never fires. Poll until layout settles.
+    const iv = window.setInterval(update, 400);
+    const stop = window.setTimeout(() => window.clearInterval(iv), 12000);
+    return () => {
+      window.removeEventListener("resize", update);
+      window.removeEventListener("load", onLoad);
+      window.clearInterval(iv);
+      window.clearTimeout(stop);
+    };
+  }, []);
+
+  const nudge = (dir: 1 | -1) => {
+    trackRef.current?.scrollBy({ left: dir * 600, behavior: "smooth" });
+  };
+
+  const arrowCls =
+    "flex h-11 w-11 items-center justify-center rounded-full border border-white/[0.12] bg-white/[0.03] text-white/70 transition-all hover:border-[#D7FF3F]/50 hover:text-[#D7FF3F] disabled:opacity-30 disabled:hover:border-white/[0.12] disabled:hover:text-white/70";
+
+  return (
+    <div className="mx-auto max-w-5xl px-4">
+      <div className="mb-5 flex items-center justify-end gap-2">
+        <button
+          type="button"
+          onClick={() => nudge(-1)}
+          disabled={!canLeft}
+          aria-label="Scroll showreel left"
+          className={arrowCls}
+        >
+          <ChevronLeft className="h-5 w-5" strokeWidth={2} />
+        </button>
+        <button
+          type="button"
+          onClick={() => nudge(1)}
+          disabled={!canRight}
+          aria-label="Scroll showreel right"
+          className={arrowCls}
+        >
+          <ChevronRight className="h-5 w-5" strokeWidth={2} />
+        </button>
+      </div>
+      <div
+        ref={trackRef}
+        onScroll={update}
+        className="flex snap-x snap-mandatory gap-5 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      >
+        {SHOWREEL.map((ex, i) => (
+          <ReelCard key={ex.src} ex={ex} index={i} onOpen={() => onOpen(i)} />
+        ))}
+      </div>
+      {/* progress rail */}
+      <div
+        aria-hidden
+        className="mx-auto mt-6 h-[3px] w-full max-w-md overflow-hidden rounded-full bg-white/[0.08]"
+      >
+        <div
+          className="h-full rounded-full bg-gradient-to-r from-[#D7FF3F] via-[#00F0FF] to-[#FF2D78] transition-[width] duration-150"
+          style={{ width: `${Math.max(8, progress * 100)}%`, marginLeft: `${progress * 88}%` }}
+        />
+      </div>
+    </div>
+  );
+}
+
+/** Why pay-per-creation: four honest differentiators. Every claim is a
+ *  verifiable property of the product — no invented numbers, no fake
+ *  social proof. */
+const WHY_PILLARS = [
+  {
+    icon: Tag,
+    accent: "#D7FF3F",
+    title: "Exact price first",
+    copy: "You see the precise cost before you pay. The number at checkout is the number you approved — GST included.",
+  },
+  {
+    icon: Ban,
+    accent: "#00F0FF",
+    title: "No subscriptions",
+    copy: "No monthly plans, no credit packs, no auto-renewals. Pay for one creation at a time, whenever you want one.",
+  },
+  {
+    icon: ShieldCheck,
+    accent: "#FF2D78",
+    title: "Human QC",
+    copy: "Every creation is reviewed by a real person before it's delivered. If it fails, it's remade or refunded.",
+  },
+  {
+    icon: FileDown,
+    accent: "#D7FF3F",
+    title: "Yours to keep",
+    copy: "You get the full-resolution file with no watermark. Use it anywhere, forever.",
+  },
+];
+
 /** Per-card accent: Image → lime, Edit → cyan, Ad → magenta. */
 const CAP_ACCENTS = ["#D7FF3F", "#00F0FF", "#FF2D78"];
 
 /**
- * Capability portal card: gradient border, oversized glowing icon, and an
- * accent-wash "portal" glow that floods the card on hover. Stepping in takes
- * you to /create. Reduced motion → static card, still a real link.
+ * Capability card with real example imagery: the photograph fills the card,
+ * the copy floats over a cinematic gradient, and hover pushes the image
+ * deeper (scale) while the CTA slides forward. Rich, tactile, alive.
+ * Reduced motion → static card, still a real link.
  */
 function BentoCard({ cap, accent }: { cap: Capability; accent: string }) {
   const reduced = usePrefersReducedMotion();
@@ -786,50 +855,53 @@ function BentoCard({ cap, accent }: { cap: Capability; accent: string }) {
     <Link
       href={cap.href}
       aria-label={`Create: ${cap.title}`}
-      className="group relative block h-full rounded-2xl p-px outline-none focus-visible:ring-2 focus-visible:ring-[#D7FF3F] focus-visible:ring-offset-2 focus-visible:ring-offset-[#080808]"
-      style={{
-        background: `linear-gradient(140deg, ${accent}66 0%, rgba(255,255,255,0.09) 36%, rgba(255,255,255,0.04) 64%, ${accent}40 100%)`,
-      }}
+      className="group relative block h-[440px] overflow-hidden rounded-2xl border border-white/[0.08] outline-none transition-colors duration-300 focus-visible:ring-2 focus-visible:ring-[#D7FF3F] focus-visible:ring-offset-2 focus-visible:ring-offset-[#080808] hover:border-white/[0.22] motion-reduce:transition-none sm:h-[480px]"
     >
-      <span className="relative flex h-full flex-col justify-between overflow-hidden rounded-[15px] bg-[#0B0B0C] p-6 sm:p-7">
-        {/* portal glow: accent wash blooming from the corner on hover */}
+      <Image
+        src={cap.img}
+        alt={cap.imgAlt}
+        fill
+        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+        loading="lazy"
+        className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.08] motion-reduce:transition-none"
+      />
+      {/* cinematic gradient: readable copy, visible image */}
+      <span
+        aria-hidden
+        className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/35 to-black/10"
+      />
+      <span
+        aria-hidden
+        className="absolute inset-x-0 bottom-0 h-1 opacity-0 transition-opacity duration-500 group-hover:opacity-100 motion-reduce:transition-none"
+        style={{ background: `linear-gradient(90deg, ${accent}, transparent)` }}
+      />
+      {/* top row: price */}
+      <span className="absolute left-5 right-5 top-5 flex items-start justify-between">
+        <span
+          className="flex h-12 w-12 items-center justify-center rounded-2xl border bg-black/55 backdrop-blur-sm transition-transform duration-300 group-hover:-translate-y-1 motion-reduce:transition-none"
+          style={{ borderColor: `${accent}66`, boxShadow: `0 0 24px -6px ${accent}88` }}
+        >
+          <cap.icon className="h-6 w-6" style={{ color: accent }} strokeWidth={1.8} aria-hidden />
+        </span>
+        <span className="rounded-full border border-white/[0.16] bg-black/60 px-3.5 py-1.5 text-[13px] font-semibold tabular-nums text-white backdrop-blur-sm">
+          {cap.price}
+        </span>
+      </span>
+      {/* bottom copy */}
+      <span className="absolute inset-x-0 bottom-0 p-6 sm:p-7">
         <span
           aria-hidden
-          className="pointer-events-none absolute -right-20 -top-20 h-56 w-56 rounded-full opacity-0 blur-3xl transition-opacity duration-500 group-hover:opacity-100 motion-reduce:transition-none"
-          style={{ background: `${accent}38` }}
-        />
-        <span
-          aria-hidden
-          className="pointer-events-none absolute inset-x-8 bottom-0 h-px opacity-0 transition-opacity duration-500 group-hover:opacity-100 motion-reduce:transition-none"
-          style={{ background: `linear-gradient(90deg, transparent, ${accent}88, transparent)` }}
-        />
-        <span className="relative flex items-start justify-between">
-          <span
-            className="flex h-14 w-14 items-center justify-center rounded-2xl border bg-white/[0.03] transition-transform duration-300 ease-out group-hover:-translate-y-1.5 group-hover:scale-[1.06] motion-reduce:transition-none"
-            style={{
-              borderColor: `${accent}59`,
-              boxShadow: `0 0 28px -8px ${accent}73`,
-            }}
-          >
-            <cap.icon
-              className="h-7 w-7"
-              style={{ color: accent }}
-              strokeWidth={1.6}
-              aria-hidden
-            />
-          </span>
-          <span className="rounded-full border border-white/[0.12] bg-white/[0.03] px-3 py-1 text-[13px] font-semibold tabular-nums text-[#F5F5F3]">
-            {cap.price}
-          </span>
+          className="mb-3 block text-[10.5px] font-bold uppercase tracking-[0.22em]"
+          style={{ color: accent }}
+        >
+          {cap.title === "Image" ? "Generate" : cap.title === "Edit" ? "Transform" : "Sell"}
         </span>
-        <span className="relative mt-10 block">
-          <h3 className="font-display text-[21px] font-semibold tracking-[-0.01em] text-[#F5F5F3]">
-            {cap.title}
-          </h3>
-          <p className="mt-2 text-[14px] leading-6 text-white/55">{cap.desc}</p>
-        </span>
+        <h3 className="font-display text-[26px] font-semibold tracking-[-0.01em] text-white">
+          {cap.title}
+        </h3>
+        <p className="mt-2 max-w-[30ch] text-[13.5px] leading-6 text-white/65">{cap.desc}</p>
         <span
-          className="relative mt-10 inline-flex items-center gap-2 text-[14px] font-semibold"
+          className="mt-5 inline-flex min-h-[44px] items-center gap-2 text-[14px] font-semibold"
           style={{ color: accent }}
         >
           Step in
@@ -848,7 +920,7 @@ function BentoCard({ cap, accent }: { cap: Capability; accent: string }) {
   return (
     <motion.div
       className="h-full"
-      whileHover={{ y: -8, scale: 1.015 }}
+      whileHover={{ y: -8 }}
       transition={MOTION.springs.ui}
     >
       {card}
@@ -856,42 +928,173 @@ function BentoCard({ cap, accent }: { cap: Capability; accent: string }) {
   );
 }
 
-function HowItWorksProgress() {
-  const ref = useRef<HTMLDivElement>(null);
-  const reduced = useReducedMotion();
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ["start 0.85", "end 0.55"],
-  });
-  const scaleX = useSpring(scrollYProgress, { stiffness: 140, damping: 30, mass: 0.4 });
+const PIPELINE_META = [
+  { icon: MessageSquareText, accent: "#D7FF3F" },
+  { icon: Tag, accent: "#00F0FF" },
+  { icon: Wallet, accent: "#FF2D78" },
+  { icon: Download, accent: "#D7FF3F" },
+];
 
+/**
+ * "From words to file" — the four-step pipeline as a connected assembly
+ * line. Desktop: horizontal cards joined by a glowing spine with node dots.
+ * Mobile: a vertical timeline with the same spine on the left. Each stage is
+ * a real card (icon, ghost number, copy), not a bare numbered column.
+ */
+function PipelineSteps() {
   return (
-    <div ref={ref} className="relative">
-      {/* progress line (desktop) */}
+    <div className="relative">
+      {/* spine (desktop horizontal) */}
       <div
         aria-hidden
-        className="absolute inset-x-0 top-[26px] hidden h-px bg-white/[0.08] sm:block"
-      >
-        {reduced ? (
-          <div className="h-full w-full bg-[#D7FF3F]" />
-        ) : (
-          <motion.div className="h-full w-full origin-left bg-[#D7FF3F]" style={{ scaleX }} />
-        )}
-      </div>
-      <Stagger className="grid grid-cols-1 gap-10 sm:grid-cols-4 sm:gap-6">
-        {FLOW.map((f, i) => (
-          <StaggerItem key={f.step} className="relative">
-            <span
-              aria-hidden
-              className="relative z-10 inline-block bg-[#080808] pr-4 text-[44px] font-semibold leading-none tracking-[-0.02em] text-white/[0.92] tabular-nums sm:text-[52px]"
-            >
-              {String(i + 1).padStart(2, "0")}
-            </span>
-            <h3 className="mt-4 text-[17px] font-semibold text-[#F5F5F3]">{f.step}</h3>
-            <p className="mt-1.5 max-w-[26ch] text-[14px] leading-6 text-white/55">{f.desc}</p>
-          </StaggerItem>
-        ))}
+        className="absolute left-0 right-0 top-[52px] hidden h-px bg-gradient-to-r from-[#D7FF3F]/60 via-[#00F0FF]/60 to-[#FF2D78]/60 sm:block"
+      />
+      {/* spine (mobile vertical) */}
+      <div
+        aria-hidden
+        className="absolute bottom-4 left-[27px] top-4 w-px bg-gradient-to-b from-[#D7FF3F]/60 via-[#00F0FF]/60 to-[#FF2D78]/60 sm:hidden"
+      />
+      <Stagger className="relative grid grid-cols-1 gap-8 sm:grid-cols-4 sm:gap-5">
+        {FLOW.map((f, i) => {
+          const meta = PIPELINE_META[i % PIPELINE_META.length];
+          const Icon = meta.icon;
+          return (
+            <StaggerItem key={f.step} className="relative">
+              <div className="group relative flex gap-5 sm:block">
+                {/* node */}
+                <span
+                  aria-hidden
+                  className="relative z-10 flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border bg-[#0B0B0C] transition-transform duration-300 group-hover:-translate-y-1 motion-reduce:transition-none sm:mb-6"
+                  style={{
+                    borderColor: `${meta.accent}55`,
+                    boxShadow: `0 0 30px -10px ${meta.accent}88`,
+                  }}
+                >
+                  <Icon className="h-6 w-6" style={{ color: meta.accent }} strokeWidth={1.8} />
+                  <span
+                    aria-hidden
+                    className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold text-[#080808]"
+                    style={{ background: meta.accent }}
+                  >
+                    {i + 1}
+                  </span>
+                </span>
+                <span className="min-w-0 sm:block">
+                  <span
+                    aria-hidden
+                    className="font-display pointer-events-none absolute -top-3 right-2 hidden select-none text-[64px] font-bold leading-none text-white/[0.05] lg:block"
+                  >
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                  <h3 className="text-[17px] font-semibold text-[#F5F5F3]">{f.step}</h3>
+                  <p className="mt-1.5 max-w-[28ch] text-[14px] leading-6 text-white/55">
+                    {f.desc}
+                  </p>
+                </span>
+              </div>
+            </StaggerItem>
+          );
+        })}
       </Stagger>
+      <Reveal delay={0.12}>
+        <p className="mt-10 text-center text-[13px] text-white/40">
+          No account needed to look around —{" "}
+          <Link href="/create" className="font-medium text-[#D7FF3F] hover:opacity-80">
+            describe your first creation
+          </Link>
+          .
+        </p>
+      </Reveal>
+    </div>
+  );
+}
+
+/** Honest one-line briefs for the four showcase pieces — what was asked
+ *  for, not who ordered it. Keeps the editorial framing without inventing
+ *  clients or jobs. */
+const SHOWCASE_BRIEFS = [
+  "High-fashion editorial — sculptural spiked hair, charcoal studio, hard rim light.",
+  "Luxury product shot — faceted glass, golden liquid, macro detail.",
+  "E-commerce hero — floating sneaker, dark studio, dramatic rim light.",
+  "Stylized portrait — neon city reflections, cinematic grade.",
+];
+
+/** Editorial spans for the four showcase pieces: one tall feature, two
+ *  stacked, one wide banner. Reads like a magazine spread, not a slider. */
+const SHOWCASE_SPANS = [
+  "sm:col-span-5 sm:row-span-2",
+  "sm:col-span-7",
+  "sm:col-span-7",
+  "sm:col-span-12",
+];
+const SHOWCASE_ASPECTS = [
+  "aspect-[4/5] sm:aspect-auto sm:h-full sm:min-h-[560px]",
+  "aspect-[16/10]",
+  "aspect-[16/10]",
+  "aspect-[16/10] sm:aspect-[21/8]",
+];
+
+/**
+ * Showcase as an editorial grid: a tall feature, two stacked frames, and a
+ * wide banner — dense, crafted, magazine-like. Each frame carries its brief
+ * ("what was asked for"), its exact price, and a direct CTA. Click opens the
+ * lightbox.
+ */
+function ShowcaseGrid({ onOpen }: { onOpen: (index: number) => void }) {
+  return (
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-12 sm:gap-5">
+      {SHOWCASE.map((ex, i) => (
+        <Reveal key={ex.src} delay={Math.min(i * 0.06, 0.18)} className={SHOWCASE_SPANS[i]}>
+          <figure className="h-full">
+            <div
+              className={`group relative w-full overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.03] transition-colors duration-300 hover:border-white/[0.22] motion-reduce:transition-none ${SHOWCASE_ASPECTS[i]}`}
+            >
+              <Image
+                src={ex.src}
+                alt={ex.alt ?? ex.caption}
+                width={ex.width}
+                height={ex.height}
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 40vw"
+                loading="lazy"
+                className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.05] motion-reduce:transition-none"
+              />
+              {/* click layer: opens the lightbox */}
+              <button
+                type="button"
+                onClick={() => onOpen(i)}
+                aria-label={`Open example: ${ex.caption}`}
+                className="absolute inset-0 z-10 cursor-pointer rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#D7FF3F]"
+              />
+              {/* top row: index + price */}
+              <span className="pointer-events-none absolute left-4 top-4 z-20 flex items-center gap-2">
+                <span className="rounded-full bg-black/70 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-white/85 backdrop-blur-sm">
+                  No. {String(i + 1).padStart(2, "0")}
+                </span>
+                <span className="rounded-full border border-white/[0.14] bg-black/70 px-2.5 py-1 text-[11px] font-semibold tabular-nums text-white backdrop-blur-sm">
+                  {ex.price}
+                </span>
+              </span>
+              {/* bottom: editorial caption block */}
+              <span className="absolute inset-x-0 bottom-0 z-20 bg-gradient-to-t from-black/95 via-black/60 to-transparent p-5 pt-14">
+                <span className="pointer-events-none block text-[15px] font-semibold text-white sm:text-[16px]">
+                  {ex.caption}
+                </span>
+                <span className="pointer-events-none mt-1 block text-[12.5px] leading-5 text-white/60">
+                  {SHOWCASE_BRIEFS[i]}
+                </span>
+                <Link
+                  href={exampleHref(ex)}
+                  aria-label={`Make one like this: ${ex.caption}`}
+                  className="mt-3 inline-flex min-h-[36px] items-center gap-1.5 text-[12.5px] font-semibold text-[#D7FF3F] transition-opacity hover:opacity-80"
+                >
+                  Make one like this
+                  <ArrowRight className="h-3.5 w-3.5" strokeWidth={2.2} />
+                </Link>
+              </span>
+            </div>
+          </figure>
+        </Reveal>
+      ))}
     </div>
   );
 }
@@ -966,11 +1169,7 @@ export default function VilishLanding() {
             />
           </div>
           <Reveal delay={0.1} className="mt-8">
-            <Marquee speed={44} gap={16}>
-              {SHOWREEL.map((ex, i) => (
-                <ReelCard key={ex.src} ex={ex} index={i} onOpen={() => setReelOpen(i)} />
-              ))}
-            </Marquee>
+            <ShowreelCarousel onOpen={(i) => setReelOpen(i)} />
           </Reveal>
           <p className="mt-6 text-center text-[12px] text-white/35">
             Example creations from Pixaura. Hover any frame for its prompt — tap to inspect it full-screen.
@@ -991,12 +1190,12 @@ export default function VilishLanding() {
                 <span aria-hidden className="h-px flex-1 bg-white/[0.08]" />
                 <Eyebrow>How it works</Eyebrow>
               </div>
-              <h2 className="font-display mt-6 max-w-[20ch] text-[30px] font-semibold leading-[1.12] tracking-[-0.01em] sm:text-[40px]">
-                Four steps. <span className="text-[#00F0FF]">Zero commitment.</span>
+              <h2 className="font-display mt-6 max-w-[22ch] text-[30px] font-semibold leading-[1.12] tracking-[-0.01em] sm:text-[40px]">
+                From words to file, <span className="text-[#00F0FF]">in four moves.</span>
               </h2>
             </Reveal>
             <div className="mt-12">
-              <HowItWorksProgress />
+              <PipelineSteps />
             </div>
           </div>
         </section>
@@ -1011,58 +1210,12 @@ export default function VilishLanding() {
                   Made here, <span className="text-[#FF2D78]">priced per piece.</span>
                 </>
               }
-              subtitle="Every piece below was ordered, reviewed by a human, and delivered. Yours can look like yours."
+              subtitle="Every piece below was ordered, reviewed by a human, and delivered — each with the brief that made it."
             />
           </div>
-          <Reveal delay={0.1} className="mt-10">
-            <Carousel ariaLabel="Example creations">
-              {SHOWCASE.map((ex, i) => (
-                <figure key={ex.src} className="w-[78vw] max-w-[420px] shrink-0 sm:w-[380px]">
-                  <button
-                    type="button"
-                    onClick={() => setCaseOpen(i)}
-                    aria-label={`Open example: ${ex.caption}`}
-                    className="group block w-full cursor-pointer rounded-2xl text-left outline-none focus-visible:ring-2 focus-visible:ring-[#D7FF3F] focus-visible:ring-offset-2 focus-visible:ring-offset-[#080808]"
-                  >
-                    <span className="relative block aspect-[4/3] overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.03] transition-colors group-hover:border-white/[0.2]">
-                      <Image
-                        src={ex.src}
-                        alt={ex.alt ?? ex.caption}
-                        width={ex.width}
-                        height={ex.height}
-                        sizes="(max-width: 640px) 78vw, 380px"
-                        priority={i === 0}
-                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.04] motion-reduce:transition-none"
-                      />
-                      <span
-                        aria-hidden
-                        className="absolute inset-0 flex items-end justify-end p-3 opacity-0 transition-opacity duration-200 group-focus-visible:opacity-100 group-hover:opacity-100 motion-reduce:transition-none"
-                      >
-                        <span className="rounded-full bg-black/70 px-2.5 py-1 text-[11px] font-medium text-white/90 backdrop-blur-sm">
-                          ⤢ Inspect
-                        </span>
-                      </span>
-                    </span>
-                  </button>
-                  <figcaption className="mt-3 px-1">
-                    <span className="flex items-baseline justify-between gap-3">
-                      <span className="truncate text-[13px] text-white/55">{ex.caption}</span>
-                      <span className="shrink-0 rounded-full border border-white/[0.12] px-2.5 py-0.5 text-[12px] font-semibold tabular-nums text-[#F5F5F3]">
-                        {ex.price}
-                      </span>
-                    </span>
-                    <Link
-                      href={exampleHref(ex)}
-                      aria-label={`Make one like this: ${ex.caption}`}
-                      className="mt-1 inline-flex min-h-[36px] items-center gap-1 text-[12px] font-semibold text-[#D7FF3F] transition-opacity hover:opacity-80"
-                    >
-                      Make one like this <ArrowRight className="h-3.5 w-3.5" strokeWidth={2.2} />
-                    </Link>
-                  </figcaption>
-                </figure>
-              ))}
-            </Carousel>
-          </Reveal>
+          <div className="mt-10">
+            <ShowcaseGrid onOpen={(i) => setCaseOpen(i)} />
+          </div>
           <Reveal delay={0.15} className="mt-8 text-center">
             <Link
               href="/examples"
@@ -1085,8 +1238,8 @@ export default function VilishLanding() {
               }
               subtitle={
                 <>
-                  AI video examples from Pixaura — 5s clips at {formatINR(priceOf("clip-5s"))} each. Hover to
-                  preview, tap a category to switch lanes, click to watch full-screen.
+                  Real 5s clips at {formatINR(priceOf("clip-5s"))} each — hover to preview, pick a reel,
+                  tap to watch full-screen.
                 </>
               }
             />
@@ -1132,20 +1285,65 @@ export default function VilishLanding() {
 
         
 
-        {/* ── formats: interactive ratio lab ───────────────── */}
-        <section aria-label="Supported formats" className="cv-auto border-b border-white/[0.08] py-16 sm:py-24">
-          <div className="mx-auto max-w-5xl px-4">
+        {/* ── why pay-per-creation: the honest differentiator ── */}
+        <section aria-label="Why pay per creation" className="cv-auto relative overflow-hidden border-b border-white/[0.08]">
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -left-40 top-0 h-96 w-96 rounded-full bg-[#D7FF3F]/[0.05] blur-3xl"
+          />
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -right-40 bottom-0 h-96 w-96 rounded-full bg-[#00F0FF]/[0.05] blur-3xl"
+          />
+          <div className="relative mx-auto max-w-5xl px-4 py-20 sm:py-28">
             <SectionHeader
-              kicker="Formats"
+              kicker="Why Pixaura"
               title={
                 <>
-                  Every creation, <span className="text-[#00F0FF]">every ratio.</span>
+                  Subscriptions sell you access.{" "}
+                  <span className="text-[#D7FF3F]">We sell you the thing.</span>
                 </>
               }
-              subtitle="Touch a ratio — the frame morphs to its true shape, lit in its own color. What you pick is what renders."
+              titleClassName="max-w-[24ch]"
+              subtitle="Four reasons creators pick pay-per-creation over another monthly plan."
             />
-            <Reveal delay={0.1} className="mt-10">
-              <FormatLab />
+            <Stagger className="mt-12 grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-4">
+              {WHY_PILLARS.map((w, i) => (
+                <StaggerItem key={w.title}>
+                  <div className="group relative h-full border-t-2 pt-6 transition-colors duration-300" style={{ borderColor: `${w.accent}55` }}>
+                    <span
+                      aria-hidden
+                      className="font-display pointer-events-none absolute -top-2 right-0 select-none text-[56px] font-bold leading-none text-white/[0.05] transition-colors duration-300 group-hover:text-white/[0.09] motion-reduce:transition-none"
+                    >
+                      {String(i + 1).padStart(2, "0")}
+                    </span>
+                    <span
+                      className="flex h-12 w-12 items-center justify-center rounded-2xl border bg-white/[0.03] transition-transform duration-300 group-hover:-translate-y-1 motion-reduce:transition-none"
+                      style={{ borderColor: `${w.accent}44`, boxShadow: `0 0 24px -8px ${w.accent}77` }}
+                    >
+                      <w.icon className="h-6 w-6" style={{ color: w.accent }} strokeWidth={1.8} aria-hidden />
+                    </span>
+                    <h3 className="font-display mt-5 text-[18px] font-semibold tracking-[-0.01em] text-[#F5F5F3]">
+                      {w.title}
+                    </h3>
+                    <p className="mt-2 text-[13.5px] leading-6 text-white/55">{w.copy}</p>
+                  </div>
+                </StaggerItem>
+              ))}
+            </Stagger>
+            <Reveal delay={0.12}>
+              <div className="mt-12 flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <p className="max-w-[46ch] text-[14px] leading-6 text-white/50">
+                  No free-credit maze, no expiring packs — one honest price per
+                  creation, shown before you pay.
+                </p>
+                <Link
+                  href="/pricing"
+                  className="inline-flex min-h-[48px] shrink-0 items-center gap-2 rounded-[12px] border border-[#D7FF3F]/40 px-6 py-3 text-[14px] font-semibold text-[#D7FF3F] transition-colors hover:bg-[#D7FF3F]/[0.08]"
+                >
+                  See full pricing <ArrowRight className="h-4 w-4" strokeWidth={2} />
+                </Link>
+              </div>
             </Reveal>
           </div>
         </section>
