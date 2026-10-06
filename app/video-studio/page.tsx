@@ -5,16 +5,21 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   ArrowLeft,
+  AudioLines,
   Captions,
   Check,
   ChevronRight,
   FileVideo,
+  ImagePlay,
   Loader2,
   Mic,
+  Minimize2,
+  Music,
   Scissors,
   ShieldCheck,
   Sparkles,
   Upload,
+  Waves,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -23,7 +28,14 @@ import VilishFooter from "@/components/vilish/footer";
 import AuthModal from "@/components/vilish/auth-modal";
 import Reveal from "@/components/motion/Reveal";
 import { Stagger, StaggerItem } from "@/components/motion/Stagger";
+import { priceOf } from "@/lib/pricing/catalog";
+import { formatINR } from "@/src/lib/vilish/types";
 import {
+  ADD_AUDIO_MODES,
+  COMPRESS_QUALITIES,
+  DENOISE_STRENGTHS,
+  GIF_FPS,
+  GIF_WIDTHS,
   SCRIPT_MAX,
   TEXT_POSITIONS,
   TTS_VOICES,
@@ -31,6 +43,10 @@ import {
 } from "@/lib/video/constants";
 
 const MAX_FILE_BYTES = 50 * 1024 * 1024;
+const MAX_AUDIO_BYTES = 20 * 1024 * 1024;
+
+/** Live catalog price for every Video Studio job — never hardcoded. */
+const JOB_PRICE = formatINR(priceOf("video-studio"));
 
 interface ToolMeta {
   id: VideoTool;
@@ -40,10 +56,13 @@ interface ToolMeta {
   desc: string;
   accent: string;
   border: string;
+  /** Honest badge: AI-powered vs real processing. */
+  badge: string;
 }
 
 const TOOLS: ToolMeta[] = [
   {
+    badge: "AI-generated",
     id: "tts",
     label: "Voice-over",
     icon: Mic,
@@ -53,6 +72,7 @@ const TOOLS: ToolMeta[] = [
     border: "border-[#D7FF3F]/40",
   },
   {
+    badge: "AI-generated",
     id: "caption",
     label: "Captions",
     icon: Captions,
@@ -62,6 +82,7 @@ const TOOLS: ToolMeta[] = [
     border: "border-[#00F0FF]/40",
   },
   {
+    badge: "AI-generated",
     id: "trim",
     label: "Trim & text",
     icon: Scissors,
@@ -69,6 +90,56 @@ const TOOLS: ToolMeta[] = [
     desc: "Set start and end seconds, add an optional title-card text overlay in three positions.",
     accent: "text-[#FF2D78]",
     border: "border-[#FF2D78]/40",
+  },
+  {
+    badge: "Real processing",
+    id: "compress",
+    label: "Compressor",
+    icon: Minimize2,
+    tagline: "Shrink the file, keep the video",
+    desc: "Re-encode to H.264 at a smaller size — pick how aggressive the squeeze is.",
+    accent: "text-[#00F0FF]",
+    border: "border-[#00F0FF]/40",
+  },
+  {
+    badge: "Real processing",
+    id: "convert",
+    label: "MP4 → MP3",
+    icon: Music,
+    tagline: "Pull the audio out as MP3",
+    desc: "Extract your video's soundtrack as a 128kbps MP3 — ringtones, voice notes, podcast cuts.",
+    accent: "text-[#D7FF3F]",
+    border: "border-[#D7FF3F]/40",
+  },
+  {
+    badge: "Real processing",
+    id: "gif",
+    label: "GIF maker",
+    icon: ImagePlay,
+    tagline: "Clip → shareable GIF",
+    desc: "Turn up to 10 seconds into an optimized looping GIF — palette-tuned, sized for sharing.",
+    accent: "text-[#FF2D78]",
+    border: "border-[#FF2D78]/40",
+  },
+  {
+    badge: "Real processing",
+    id: "add-audio",
+    label: "Add audio",
+    icon: AudioLines,
+    tagline: "Lay music or VO over video",
+    desc: "Upload an MP3/WAV/M4A track and mix it over your video — or replace its audio entirely.",
+    accent: "text-[#00F0FF]",
+    border: "border-[#00F0FF]/40",
+  },
+  {
+    badge: "Real processing",
+    id: "denoise",
+    label: "Noise reducer",
+    icon: Waves,
+    tagline: "Tame hum, hiss and rumble",
+    desc: "Reduce steady background noise from your video's audio. Honest cleanup — not a studio remaster.",
+    accent: "text-[#D7FF3F]",
+    border: "border-[#D7FF3F]/40",
   },
 ];
 
@@ -85,10 +156,16 @@ function FilePicker({
   file,
   onPick,
   error,
+  accept = "video/mp4,.mp4",
+  emptyTitle = "Upload your video",
+  emptyHint = "MP4 · up to 50MB",
 }: {
   file: File | null;
   onPick: (f: File | null) => void;
   error: string;
+  accept?: string;
+  emptyTitle?: string;
+  emptyHint?: string;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   return (
@@ -123,10 +200,10 @@ function FilePicker({
           ) : (
             <>
               <span className="block text-[13px] font-medium text-[#F5F5F3]">
-                Upload your video
+                {emptyTitle}
               </span>
               <span className="block text-[12px] text-white/45">
-                MP4 · up to 50MB
+                {emptyHint}
               </span>
             </>
           )}
@@ -135,7 +212,7 @@ function FilePicker({
       <input
         ref={inputRef}
         type="file"
-        accept="video/mp4,.mp4"
+        accept={accept}
         className="hidden"
         onChange={(e) => onPick(e.target.files?.[0] ?? null)}
       />
@@ -193,6 +270,35 @@ export default function VideoStudioPage() {
   const [trimText, setTrimText] = useState("");
   const [trimPos, setTrimPos] = useState("bottom");
 
+  // compress
+  const [compFile, setCompFile] = useState<File | null>(null);
+  const [compFileError, setCompFileError] = useState("");
+  const [compQuality, setCompQuality] = useState("balanced");
+
+  // convert
+  const [convFile, setConvFile] = useState<File | null>(null);
+  const [convFileError, setConvFileError] = useState("");
+
+  // gif
+  const [gifFile, setGifFile] = useState<File | null>(null);
+  const [gifFileError, setGifFileError] = useState("");
+  const [gifStart, setGifStart] = useState("");
+  const [gifEnd, setGifEnd] = useState("");
+  const [gifFps, setGifFps] = useState("12");
+  const [gifWidth, setGifWidth] = useState("480");
+
+  // add-audio
+  const [aaFile, setAaFile] = useState<File | null>(null);
+  const [aaFileError, setAaFileError] = useState("");
+  const [aaAudio, setAaAudio] = useState<File | null>(null);
+  const [aaAudioError, setAaAudioError] = useState("");
+  const [aaMode, setAaMode] = useState("mix");
+
+  // denoise
+  const [dnFile, setDnFile] = useState<File | null>(null);
+  const [dnFileError, setDnFileError] = useState("");
+  const [dnStrength, setDnStrength] = useState("medium");
+
   useEffect(() => {
     if (tool !== "tts" || ttsSource !== "clip" || clips.length > 0 || clipsLoading)
       return;
@@ -234,9 +340,36 @@ export default function VideoStudioPage() {
       setFile(f);
     };
 
+  const pickAudioFile =
+    (setFile: (f: File | null) => void, setErr: (s: string) => void) =>
+    (f: File | null) => {
+      setErr("");
+      if (!f) {
+        setFile(null);
+        return;
+      }
+      const isAudio =
+        f.type.startsWith("audio/") ||
+        /\.(mp3|wav|m4a)$/i.test(f.name) ||
+        f.type === "";
+      if (!isAudio) {
+        setErr("Only .mp3, .wav or .m4a audio files are accepted.");
+        return;
+      }
+      if (f.size > MAX_AUDIO_BYTES) {
+        setErr("That audio file is over 20MB — pick a shorter one.");
+        return;
+      }
+      setFile(f);
+    };
+
   const activeMeta = TOOLS.find((t) => t.id === tool)!;
 
-  const buildPayload = (): { params: unknown; file: File | null } | null => {
+  const buildPayload = (): {
+    params: unknown;
+    file: File | null;
+    audioFile: File | null;
+  } | null => {
     if (tool === "tts") {
       if (!script.trim() || script.trim().length > SCRIPT_MAX) {
         setSubmitError(`Script must be 1–${SCRIPT_MAX} characters.`);
@@ -250,6 +383,7 @@ export default function VideoStudioPage() {
         return {
           params: { script: script.trim(), voice, sourceKind: "upload" },
           file: ttsFile,
+          audioFile: null,
         };
       }
       if (!clipId) {
@@ -264,6 +398,7 @@ export default function VideoStudioPage() {
           generationId: clipId,
         },
         file: null,
+        audioFile: null,
       };
     }
     if (tool === "caption") {
@@ -281,33 +416,96 @@ export default function VideoStudioPage() {
             ? { mode: "auto" }
             : { mode: "script", text: capText.trim() },
         file: capFile,
+        audioFile: null,
       };
     }
-    // trim
-    if (!trimFile) {
-      setSubmitError("Upload a video to trim.");
+    if (tool === "trim") {
+      if (!trimFile) {
+        setSubmitError("Upload a video to trim.");
+        return null;
+      }
+      const start = Number(trimStart);
+      const end = Number(trimEnd);
+      if (!Number.isFinite(start) || start < 0 || !Number.isFinite(end) || end <= 0) {
+        setSubmitError("Enter start and end in seconds (end after start).");
+        return null;
+      }
+      if (end <= start) {
+        setSubmitError("End must be after start.");
+        return null;
+      }
+      return {
+        params: {
+          start,
+          end,
+          ...(trimText.trim()
+            ? { text: trimText.trim(), position: trimPos }
+            : {}),
+        },
+        file: trimFile,
+        audioFile: null,
+      };
+    }
+    if (tool === "compress") {
+      if (!compFile) {
+        setSubmitError("Upload a video to compress.");
+        return null;
+      }
+      return { params: { quality: compQuality }, file: compFile, audioFile: null };
+    }
+    if (tool === "convert") {
+      if (!convFile) {
+        setSubmitError("Upload a video to convert.");
+        return null;
+      }
+      return { params: {}, file: convFile, audioFile: null };
+    }
+    if (tool === "gif") {
+      if (!gifFile) {
+        setSubmitError("Upload a video to make a GIF from.");
+        return null;
+      }
+      const start = Number(gifStart);
+      const end = Number(gifEnd);
+      if (!Number.isFinite(start) || start < 0 || !Number.isFinite(end) || end <= 0) {
+        setSubmitError("Enter start and end in seconds (end after start).");
+        return null;
+      }
+      if (end <= start) {
+        setSubmitError("End must be after start.");
+        return null;
+      }
+      if (end - start > 10) {
+        setSubmitError("GIF clips are capped at 10 seconds.");
+        return null;
+      }
+      return {
+        params: { start, end, fps: Number(gifFps), width: Number(gifWidth) },
+        file: gifFile,
+        audioFile: null,
+      };
+    }
+    if (tool === "add-audio") {
+      if (!aaFile) {
+        setSubmitError("Upload the video first.");
+        return null;
+      }
+      if (!aaAudio) {
+        setSubmitError("Upload the audio track to add.");
+        return null;
+      }
+      return {
+        params: { mode: aaMode },
+        file: aaFile,
+        audioFile: aaAudio,
+      };
+    }
+    // denoise
+    if (!dnFile) {
+      setSubmitError("Upload a video to clean up.");
       return null;
     }
-    const start = Number(trimStart);
-    const end = Number(trimEnd);
-    if (!Number.isFinite(start) || start < 0 || !Number.isFinite(end) || end <= 0) {
-      setSubmitError("Enter start and end in seconds (end after start).");
-      return null;
-    }
-    if (end <= start) {
-      setSubmitError("End must be after start.");
-      return null;
-    }
-    return {
-      params: {
-        start,
-        end,
-        ...(trimText.trim()
-          ? { text: trimText.trim(), position: trimPos }
-          : {}),
-      },
-      file: trimFile,
-    };
+    return { params: { strength: dnStrength }, file: dnFile, audioFile: null };
   };
 
   const submit = async () => {
@@ -320,6 +518,7 @@ export default function VideoStudioPage() {
       fd.append("tool", tool);
       fd.append("params", JSON.stringify(payload.params));
       if (payload.file) fd.append("video", payload.file);
+      if (payload.audioFile) fd.append("audio", payload.audioFile);
       const res = await fetch("/api/video-jobs", { method: "POST", body: fd });
       if (res.status === 401) {
         setPendingSubmit(true);
@@ -355,21 +554,21 @@ export default function VideoStudioPage() {
       <main className="mx-auto w-full max-w-3xl flex-1 px-4 pb-20 pt-8 sm:pt-12">
         <Reveal>
           <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#00F0FF]">
-            Pixaura · Video Studio · AI-generated
+            Pixaura · Video Studio · AI + real tools
           </p>
           <h1 className="font-display mt-2 text-[30px] font-semibold tracking-[-0.02em] sm:text-[40px]">
             Give your video a <span className="v-iris-bg bg-clip-text text-transparent">studio finish</span>
           </h1>
           <p className="mt-3 max-w-xl text-[14px] leading-6 text-white/60">
-            Three AI-powered video tools, queue-backed like everything else in
-            Pixaura. <span className="text-white/85">₹49 per finished video</span> —
+            Eight real video tools, queue-backed like everything else in
+            Pixaura. <span className="text-white/85">{JOB_PRICE} per finished video</span> —
             one UPI payment, no subscription. A watermarked preview plays while
-            you wait; the clean HD file unlocks after payment.
+            you wait; the clean file unlocks after payment.
           </p>
         </Reveal>
 
         {/* tool picker */}
-        <Stagger className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <Stagger className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {TOOLS.map((t) => {
             const Icon = t.icon;
             const active = tool === t.id;
@@ -423,7 +622,7 @@ export default function VideoStudioPage() {
               </h2>
               <span className="ml-auto inline-flex items-center gap-1 rounded-full border border-white/[0.12] px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.08em] text-white/45">
                 <Sparkles className="h-3 w-3" />
-                AI-generated
+                {activeMeta.badge}
               </span>
             </div>
             <p className="mt-2 text-[13px] leading-6 text-white/55">
@@ -703,6 +902,252 @@ export default function VideoStudioPage() {
                   </div>
                 </>
               )}
+
+              {tool === "compress" && (
+                <>
+                  <FilePicker
+                    file={compFile}
+                    onPick={pickFile(setCompFile, setCompFileError)}
+                    error={compFileError}
+                  />
+                  <div>
+                    <p className="mb-2 text-[12px] font-semibold uppercase tracking-[0.1em] text-white/50">
+                      Compression strength
+                    </p>
+                    <div className="grid gap-2">
+                      {COMPRESS_QUALITIES.map((q) => (
+                        <button
+                          key={q.id}
+                          type="button"
+                          onClick={() => setCompQuality(q.id)}
+                          aria-pressed={compQuality === q.id}
+                          className={cn(
+                            "rounded-[10px] border px-3.5 py-2.5 text-left transition-colors",
+                            compQuality === q.id
+                              ? "border-[#00F0FF]/50 bg-[#00F0FF]/[0.08]"
+                              : "border-white/[0.1] hover:border-white/25",
+                          )}
+                        >
+                          <span className="block text-[13px] font-semibold text-[#F5F5F3]">
+                            {q.label}
+                          </span>
+                          <span className="block text-[11px] text-white/45">
+                            {q.desc}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {tool === "convert" && (
+                <>
+                  <FilePicker
+                    file={convFile}
+                    onPick={pickFile(setConvFile, setConvFileError)}
+                    error={convFileError}
+                  />
+                  <p className="rounded-[10px] border border-[#D7FF3F]/20 bg-[#D7FF3F]/[0.04] px-4 py-3 text-[12px] leading-5 text-white/55">
+                    Extracts the full audio track as a 128kbps MP3 — same
+                    length as your video. The preview streams the audio;
+                    the download unlocks after payment.
+                  </p>
+                </>
+              )}
+
+              {tool === "gif" && (
+                <>
+                  <FilePicker
+                    file={gifFile}
+                    onPick={pickFile(setGifFile, setGifFileError)}
+                    error={gifFileError}
+                  />
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label
+                        htmlFor="gif-start"
+                        className="mb-2 block text-[12px] font-semibold uppercase tracking-[0.1em] text-white/50"
+                      >
+                        Start (sec)
+                      </label>
+                      <input
+                        id="gif-start"
+                        inputMode="decimal"
+                        value={gifStart}
+                        onChange={(e) => setGifStart(e.target.value)}
+                        placeholder="0"
+                        className="w-full rounded-[10px] border border-white/[0.12] bg-[#0c0c0e] px-3.5 py-2.5 text-[14px] text-[#F5F5F3] placeholder:text-white/30 focus:border-[#FF2D78]/60 focus:outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label
+                        htmlFor="gif-end"
+                        className="mb-2 block text-[12px] font-semibold uppercase tracking-[0.1em] text-white/50"
+                      >
+                        End (sec)
+                      </label>
+                      <input
+                        id="gif-end"
+                        inputMode="decimal"
+                        value={gifEnd}
+                        onChange={(e) => setGifEnd(e.target.value)}
+                        placeholder="5"
+                        className="w-full rounded-[10px] border border-white/[0.12] bg-[#0c0c0e] px-3.5 py-2.5 text-[14px] text-[#F5F5F3] placeholder:text-white/30 focus:border-[#FF2D78]/60 focus:outline-none"
+                      />
+                    </div>
+                  </div>
+                  <p className="-mt-3 text-[11px] text-white/35">
+                    Max 10 seconds — longer clips make huge GIFs.
+                  </p>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <p className="mb-2 text-[12px] font-semibold uppercase tracking-[0.1em] text-white/50">
+                        Frame rate
+                      </p>
+                      <div className="flex gap-2">
+                        {GIF_FPS.map((f) => (
+                          <button
+                            key={f.id}
+                            type="button"
+                            onClick={() => setGifFps(f.id)}
+                            aria-pressed={gifFps === f.id}
+                            className={cn(
+                              "rounded-[8px] border px-3 py-1.5 text-[12px] font-medium transition-colors",
+                              gifFps === f.id
+                                ? "border-[#FF2D78]/50 bg-[#FF2D78]/[0.1] text-[#F5F5F3]"
+                                : "border-white/[0.1] text-white/55 hover:border-white/25",
+                            )}
+                          >
+                            {f.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    <div>
+                      <p className="mb-2 text-[12px] font-semibold uppercase tracking-[0.1em] text-white/50">
+                        Size
+                      </p>
+                      <div className="flex gap-2">
+                        {GIF_WIDTHS.map((w) => (
+                          <button
+                            key={w.id}
+                            type="button"
+                            onClick={() => setGifWidth(w.id)}
+                            aria-pressed={gifWidth === w.id}
+                            className={cn(
+                              "rounded-[8px] border px-3 py-1.5 text-[12px] font-medium transition-colors",
+                              gifWidth === w.id
+                                ? "border-[#FF2D78]/50 bg-[#FF2D78]/[0.1] text-[#F5F5F3]"
+                                : "border-white/[0.1] text-white/55 hover:border-white/25",
+                            )}
+                          >
+                            {w.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {tool === "add-audio" && (
+                <>
+                  <div>
+                    <p className="mb-2 text-[12px] font-semibold uppercase tracking-[0.1em] text-white/50">
+                      1 · Your video
+                    </p>
+                    <FilePicker
+                      file={aaFile}
+                      onPick={pickFile(setAaFile, setAaFileError)}
+                      error={aaFileError}
+                    />
+                  </div>
+                  <div>
+                    <p className="mb-2 text-[12px] font-semibold uppercase tracking-[0.1em] text-white/50">
+                      2 · Audio track
+                    </p>
+                    <FilePicker
+                      file={aaAudio}
+                      onPick={pickAudioFile(setAaAudio, setAaAudioError)}
+                      error={aaAudioError}
+                      accept="audio/mpeg,audio/wav,audio/mp4,.mp3,.wav,.m4a"
+                      emptyTitle="Upload your audio"
+                      emptyHint="MP3 · WAV · M4A · up to 20MB"
+                    />
+                  </div>
+                  <div>
+                    <p className="mb-2 text-[12px] font-semibold uppercase tracking-[0.1em] text-white/50">
+                      How to combine
+                    </p>
+                    <div className="grid gap-2">
+                      {ADD_AUDIO_MODES.map((m) => (
+                        <button
+                          key={m.id}
+                          type="button"
+                          onClick={() => setAaMode(m.id)}
+                          aria-pressed={aaMode === m.id}
+                          className={cn(
+                            "rounded-[10px] border px-3.5 py-2.5 text-left transition-colors",
+                            aaMode === m.id
+                              ? "border-[#00F0FF]/50 bg-[#00F0FF]/[0.08]"
+                              : "border-white/[0.1] hover:border-white/25",
+                          )}
+                        >
+                          <span className="block text-[13px] font-semibold text-[#F5F5F3]">
+                            {m.label}
+                          </span>
+                          <span className="block text-[11px] text-white/45">
+                            {m.desc}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {tool === "denoise" && (
+                <>
+                  <FilePicker
+                    file={dnFile}
+                    onPick={pickFile(setDnFile, setDnFileError)}
+                    error={dnFileError}
+                  />
+                  <div>
+                    <p className="mb-2 text-[12px] font-semibold uppercase tracking-[0.1em] text-white/50">
+                      Cleanup strength
+                    </p>
+                    <div className="grid gap-2">
+                      {DENOISE_STRENGTHS.map((s) => (
+                        <button
+                          key={s.id}
+                          type="button"
+                          onClick={() => setDnStrength(s.id)}
+                          aria-pressed={dnStrength === s.id}
+                          className={cn(
+                            "rounded-[10px] border px-3.5 py-2.5 text-left transition-colors",
+                            dnStrength === s.id
+                              ? "border-[#D7FF3F]/50 bg-[#D7FF3F]/[0.08]"
+                              : "border-white/[0.1] hover:border-white/25",
+                          )}
+                        >
+                          <span className="block text-[13px] font-semibold text-[#F5F5F3]">
+                            {s.label}
+                          </span>
+                          <span className="block text-[11px] text-white/45">
+                            {s.desc}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                    <p className="mt-2 text-[11px] text-white/35">
+                      Reduces steady background noise — it won&apos;t fix
+                      clipping, wind gusts or very loud rooms.
+                    </p>
+                  </div>
+                </>
+              )}
             </div>
 
             {/* price + submit */}
@@ -710,12 +1155,12 @@ export default function VideoStudioPage() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-[13px] text-white/60">
                   <ShieldCheck className="h-4 w-4 text-[#D7FF3F]" />
-                  ₹49 flat · one UPI payment · no subscription
+                  {JOB_PRICE} flat · one UPI payment · no subscription
                 </div>
               </div>
               <p className="mt-1.5 text-[12px] leading-5 text-white/40">
                 The job starts right away — a watermarked preview plays while
-                you wait. The clean HD file unlocks after your payment is
+                you wait. The clean file unlocks after your payment is
                 confirmed. Nothing is charged if the job fails.
               </p>
               <button
@@ -734,7 +1179,7 @@ export default function VideoStudioPage() {
                   </>
                 ) : (
                   <>
-                    Start {activeMeta.label} — ₹49
+                    Start {activeMeta.label} — {JOB_PRICE}
                     <ChevronRight className="h-4 w-4" />
                   </>
                 )}

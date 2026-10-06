@@ -5,15 +5,20 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import {
   ArrowLeft,
+  AudioLines,
   Captions,
   Check,
   Download,
+  ImagePlay,
   Loader2,
   Mic,
+  Minimize2,
+  Music,
   RefreshCcw,
   Scissors,
   Sparkles,
   TriangleAlert,
+  Waves,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -21,10 +26,15 @@ import VilishNav from "@/components/vilish/nav";
 import VilishFooter from "@/components/vilish/footer";
 import PopcornReel, { reelFrameForStage } from "@/components/vilish/popcorn-reel";
 import { progressForStage } from "@/src/lib/vilish/progress";
+import { formatINR } from "@/src/lib/vilish/types";
+import { priceOf } from "@/lib/pricing/catalog";
 import PaymentModal from "@/components/vilish/payment-modal";
 import AuthModal from "@/components/vilish/auth-modal";
 import type { ManualPayment } from "@/components/vilish/payment";
 import type { VideoTool } from "@/lib/video/constants";
+
+/** Live catalog price — never hardcoded. */
+const JOB_PRICE = formatINR(priceOf("video-studio"));
 
 interface JobStatus {
   tool: VideoTool;
@@ -35,7 +45,10 @@ interface JobStatus {
   error?: string;
 }
 
-const TOOL_META: Record<VideoTool, { label: string; icon: LucideIcon; captions: string[] }> = {
+const TOOL_META: Record<
+  VideoTool,
+  { label: string; icon: LucideIcon; captions: string[]; badge: string; fileNoun: string }
+> = {
   tts: {
     label: "Voice-over",
     icon: Mic,
@@ -45,6 +58,8 @@ const TOOL_META: Record<VideoTool, { label: string; icon: LucideIcon; captions: 
       "Ducking the music…",
       "Mixing the final cut…",
     ],
+    badge: "AI-generated",
+    fileNoun: "video",
   },
   caption: {
     label: "Captions",
@@ -55,6 +70,8 @@ const TOOL_META: Record<VideoTool, { label: string; icon: LucideIcon; captions: 
       "Styling the captions…",
       "Burning them in…",
     ],
+    badge: "AI-generated",
+    fileNoun: "video",
   },
   trim: {
     label: "Trim & text",
@@ -65,6 +82,68 @@ const TOOL_META: Record<VideoTool, { label: string; icon: LucideIcon; captions: 
       "Setting the title card…",
       "Exporting the final cut…",
     ],
+    badge: "AI-generated",
+    fileNoun: "video",
+  },
+  compress: {
+    label: "Compressor",
+    icon: Minimize2,
+    captions: [
+      "Reading the frames…",
+      "Squeezing the file…",
+      "Keeping the detail…",
+      "Writing the final cut…",
+    ],
+    badge: "Real processing",
+    fileNoun: "video",
+  },
+  convert: {
+    label: "MP4 → MP3",
+    icon: Music,
+    captions: [
+      "Reading the video…",
+      "Extracting the audio…",
+      "Encoding the MP3…",
+      "Finishing the track…",
+    ],
+    badge: "Real processing",
+    fileNoun: "audio",
+  },
+  gif: {
+    label: "GIF maker",
+    icon: ImagePlay,
+    captions: [
+      "Finding the frames…",
+      "Tuning the palette…",
+      "Looping the moment…",
+      "Writing the GIF…",
+    ],
+    badge: "Real processing",
+    fileNoun: "GIF",
+  },
+  "add-audio": {
+    label: "Add audio",
+    icon: AudioLines,
+    captions: [
+      "Loading your track…",
+      "Mixing the audio…",
+      "Syncing the sound…",
+      "Writing the final cut…",
+    ],
+    badge: "Real processing",
+    fileNoun: "video",
+  },
+  denoise: {
+    label: "Noise reducer",
+    icon: Waves,
+    captions: [
+      "Listening to the noise…",
+      "Filtering the hum…",
+      "Keeping the voices…",
+      "Writing the final cut…",
+    ],
+    badge: "Real processing",
+    fileNoun: "video",
   },
 };
 
@@ -136,7 +215,7 @@ export default function VideoStudioWatchPage() {
     return () => clearInterval(t);
   }, []);
 
-  /** Open the ₹49 payment: stored payment first, then server resume. */
+  /** Open the job payment (catalog ₹49): stored payment first, then server resume. */
   const openPayment = async () => {
     setPayBusy(true);
     setPayError("");
@@ -251,7 +330,7 @@ export default function VideoStudioWatchPage() {
         {data && data.status !== "failed" && data.status !== "done" && (
           <section className="flex flex-1 flex-col items-center py-8 text-center" aria-live="polite">
             <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#00F0FF]">
-              {meta.label} · ₹49 · AI-generated
+              {meta.label} · {JOB_PRICE} · {meta.badge}
             </p>
             <h1 className="font-display mt-2 text-[26px] font-semibold tracking-[-0.02em] sm:text-[32px]">
               Your video is in the studio
@@ -291,7 +370,7 @@ export default function VideoStudioWatchPage() {
             {/* pay-ping: payment can be completed while the job runs */}
             <div className="mt-8 w-full max-w-md rounded-[14px] border border-white/[0.08] bg-white/[0.02] p-4 text-left">
               <p className="text-[13px] font-semibold text-[#F5F5F3]">
-                Pay ₹49 while you wait
+                Pay {JOB_PRICE} while you wait
               </p>
               <p className="mt-1 text-[12px] leading-5 text-white/50">
                 One UPI payment, no subscription. Tap “I&apos;ve paid” after
@@ -308,7 +387,7 @@ export default function VideoStudioWatchPage() {
                 )}
               >
                 {payBusy && <Loader2 className="h-4 w-4 animate-spin" />}
-                Open payment — ₹49
+                Open payment — {JOB_PRICE}
               </button>
               {payError && (
                 <p className="mt-2 text-[12px] text-red-300/80" role="alert">
@@ -325,33 +404,46 @@ export default function VideoStudioWatchPage() {
           <section className="flex flex-1 flex-col items-center py-8 text-center">
             <span className="inline-flex items-center gap-1.5 rounded-full border border-[#00F0FF]/40 bg-[#00F0FF]/[0.08] px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.1em] text-[#00F0FF]">
               <Sparkles className="h-3.5 w-3.5" />
-              Your {meta.label.toLowerCase()} preview — AI-generated
+              Your {meta.label.toLowerCase()} preview — {meta.badge}
             </span>
 
             <div className="mt-6 w-full max-w-md overflow-hidden rounded-[16px] border border-white/[0.1]">
               {previewOk ? (
-                <video
-                  src={previewUrl}
-                  muted
-                  loop
-                  playsInline
-                  autoPlay
-                  controls
-                  className="block aspect-video w-full bg-black object-cover"
-                  onError={() => setPreviewOk(false)}
-                />
+                meta.fileNoun === "audio" ? (
+                  <audio
+                    src={previewUrl}
+                    controls
+                    className="block w-full bg-[#121214] px-4 py-6"
+                    onError={() => setPreviewOk(false)}
+                  />
+                ) : (
+                  <video
+                    src={previewUrl}
+                    muted
+                    loop
+                    playsInline
+                    autoPlay
+                    controls
+                    className="block aspect-video w-full bg-black object-cover"
+                    onError={() => setPreviewOk(false)}
+                  />
+                )
               ) : (
                 <p className="px-6 py-12 text-[13px] text-white/45">
                   The preview file isn&apos;t ready to show yet — try refreshing in a moment.
                 </p>
               )}
               <p className="border-t border-white/[0.08] bg-[#121214] px-4 py-2 text-[11px] uppercase tracking-[0.08em] text-white/40">
-                Watermarked preview · AI-generated
+                {meta.fileNoun === "audio"
+                  ? "Audio preview · listen before you unlock"
+                  : `Watermarked preview · ${meta.badge}`}
               </p>
             </div>
 
             <p className="mt-5 max-w-md text-[14px] leading-6 text-white/60">
-              Watermarked preview. The clean HD file is yours for ₹49.
+              {meta.fileNoun === "audio"
+                ? `Listen to your MP3 above — the download is yours for ${JOB_PRICE}.`
+                : `Watermarked preview. The clean ${meta.fileNoun} is yours for ${JOB_PRICE}.`}
             </p>
 
             <button
@@ -364,7 +456,7 @@ export default function VideoStudioWatchPage() {
               )}
             >
               {payBusy && <Loader2 className="h-4 w-4 animate-spin" />}
-              Unlock clean HD — ₹49
+              Unlock clean {meta.fileNoun} — {JOB_PRICE}
             </button>
             {payError && (
               <p className="mt-3 max-w-md text-[13px] text-red-300/80" role="alert">
@@ -385,13 +477,17 @@ export default function VideoStudioWatchPage() {
               Unlocked!
             </span>
             <h1 className="font-display mt-3 text-[26px] font-semibold tracking-[-0.02em] sm:text-[32px]">
-              Your clean HD video is ready
+              Your clean {meta.fileNoun} is ready
             </h1>
 
             <div className="mt-6 w-full max-w-md overflow-hidden rounded-[16px] border border-white/[0.1]">
-              <video src={cleanUrl} controls playsInline className="block aspect-video w-full bg-black object-cover" />
+              {meta.fileNoun === "audio" ? (
+                <audio src={cleanUrl} controls className="block w-full bg-[#121214] px-4 py-6" />
+              ) : (
+                <video src={cleanUrl} controls playsInline className="block aspect-video w-full bg-black object-cover" />
+              )}
               <p className="border-t border-white/[0.08] bg-[#121214] px-4 py-2 text-[11px] uppercase tracking-[0.08em] text-white/40">
-                AI-generated
+                {meta.badge}
               </p>
             </div>
 
@@ -401,7 +497,7 @@ export default function VideoStudioWatchPage() {
               className="mt-6 inline-flex items-center gap-2 rounded-[10px] bg-[#D7FF3F] px-6 py-3 text-[15px] font-semibold text-[#080808] hover:opacity-95"
             >
               <Download className="h-4 w-4" />
-              Download clean HD
+              Download clean {meta.fileNoun}
             </a>
             <Link
               href="/video-studio"
