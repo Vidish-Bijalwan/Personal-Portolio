@@ -11,6 +11,9 @@ const COLUMNS = [
       { href: "/tools", label: "All tools" },
       { href: "/examples", label: "Examples" },
       { href: "/pricing", label: "Pricing" },
+      { href: "/for-sellers", label: "For sellers" },
+      { href: "/for-creators", label: "For creators" },
+      { href: "/for-marketers", label: "For marketers" },
     ],
   },
   {
