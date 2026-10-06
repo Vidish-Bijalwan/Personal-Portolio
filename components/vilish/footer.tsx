@@ -17,6 +17,7 @@ const COLUMNS = [
     links: [
       { href: "/about", label: "About" },
       { href: "/blog", label: "Blog — guides & pricing explained" },
+      { href: "/trends", label: "Trends — ready-made templates" },
       { href: "/create", label: "Free trial — 3 images a day" },
       { href: "/#faq", label: "FAQ" },
     ],

@@ -6,7 +6,8 @@ import Composer from "@/components/vilish/composer";
 import FulfillmentNotices from "@/components/vilish/fulfillment-notices";
 import Reveal from "@/components/motion/Reveal";
 import { Stagger, StaggerItem } from "@/components/motion/Stagger";
-import { PRICE_CATALOG, composerServiceById, priceOf } from "@/src/lib/pricing/catalog";
+import { PRICE_CATALOG, composerServiceById, priceOf, type ComposerServiceId } from "@/src/lib/pricing/catalog";
+import { templateById } from "@/src/lib/trends/templates";
 import { formatINR } from "@/src/lib/vilish/types";
 
 const TRUST = [
@@ -50,15 +51,20 @@ function Eyebrow({ children }: { children: string }) {
 export default async function CreatePage({
   searchParams,
 }: {
-  searchParams: Promise<{ media?: string; service?: string }>;
+  searchParams: Promise<{ media?: string; service?: string; template?: string }>;
 }) {
   const sp = await searchParams;
-  const initialMedia = sp?.media === "video" ? "video" : "image";
+  // Trend-template deep link, e.g. /create?service=pack-4&template=diwali-night.
+  // The template's service is authoritative; video templates force video mode.
+  const template = templateById(sp?.template);
+  const templateIsVideo = template?.service === "clip-5s";
+  const initialMedia = templateIsVideo ? "video" : sp?.media === "video" ? "video" : "image";
   const isVideo = initialMedia === "video";
   // Deep link from pricing cards, e.g. /create?service=product-photo.
   // Invalid values fall back to single-image; ignored in video mode.
-  const initialService = !isVideo
-    ? (composerServiceById(sp?.service)?.id ?? undefined)
+  const initialService: ComposerServiceId | undefined = !isVideo
+    ? ((template && template.service !== "clip-5s" ? template.service : undefined) ??
+      composerServiceById(sp?.service)?.id ?? undefined)
     : undefined;
 
   return (
@@ -122,7 +128,7 @@ export default async function CreatePage({
                   className="v-iris-bg pointer-events-none absolute -inset-px rounded-[22px] opacity-30 blur-md sm:opacity-35 sm:blur-xl"
                 />
                 <div className="v-iris-border relative rounded-[20px] border bg-[#0C0C0E] p-4 sm:p-7">
-                  <Composer variant="page" initialMedia={initialMedia} initialService={initialService} />
+                  <Composer variant="page" initialMedia={initialMedia} initialService={initialService} initialTemplate={template ?? undefined} />
                 </div>
               </div>
             </Reveal>
