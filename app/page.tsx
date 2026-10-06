@@ -43,6 +43,7 @@ import { Stagger, StaggerItem } from "@/components/motion/Stagger";
 import MagneticButton from "@/components/motion/MagneticButton";
 import { EASE_OUT, MOTION, usePrefersReducedMotion } from "@/src/lib/motion/theme";
 import SectionHeader from "@/components/vilish/section-header";
+import { toolsByGroup } from "@/src/lib/tools/directory";
 
 const TRUST = [
   { icon: Tag, label: "No subscription" },
@@ -1099,6 +1100,50 @@ function ShowcaseGrid({ onOpen }: { onOpen: (index: number) => void }) {
   );
 }
 
+/**
+ * VEED-style pill directory: every working tool as a pill with its exact
+ * catalog price. All data comes from the canonical tool directory — 12 live
+ * tools only, zero invented entries, zero hardcoded prices.
+ */
+function ToolPillDirectory() {
+  const groups = [
+    { label: "Create", accent: "#D7FF3F", tools: toolsByGroup("create") },
+    { label: "Video Studio", accent: "#00F0FF", tools: toolsByGroup("video-studio") },
+  ];
+  return (
+    <div className="space-y-9">
+      {groups.map((g) => (
+        <div key={g.label}>
+          <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.2em] text-white/40">
+            {g.label}
+          </p>
+          <div className="flex flex-wrap gap-2.5">
+            {g.tools.map((t) => (
+              <Link
+                key={t.id}
+                href={t.href}
+                className="group inline-flex min-h-[44px] items-center gap-2 rounded-full border border-white/[0.10] bg-white/[0.03] px-5 py-2 text-[14px] font-medium text-white/80 transition-all duration-200 hover:-translate-y-0.5 hover:border-white/25 hover:bg-white/[0.06] hover:text-white motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+              >
+                {t.name}
+                <span
+                  className="text-[13px] font-semibold tabular-nums"
+                  style={{ color: g.accent }}
+                >
+                  {t.price}
+                </span>
+                <ArrowRight
+                  className="h-4 w-4 text-white/30 transition-all duration-200 group-hover:translate-x-0.5 group-hover:text-white/70 motion-reduce:transition-none"
+                  strokeWidth={2}
+                />
+              </Link>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default function VilishLanding() {
   // Lightbox open indexes — one per image set so arrows navigate within the set.
   const [reelOpen, setReelOpen] = useState<number | null>(null);
@@ -1459,6 +1504,27 @@ export default function VilishLanding() {
               >
                 See full pricing <ArrowRight className="h-4 w-4" strokeWidth={1.8} />
               </Link>
+            </Reveal>
+          </div>
+        </section>
+
+        {/* ── explore more tools ──────────────────────────── */}
+        <section
+          aria-label="Explore more tools"
+          className="cv-auto border-b border-white/[0.08] py-20 sm:py-24"
+        >
+          <div className="mx-auto max-w-5xl px-4">
+            <SectionHeader
+              kicker="Discover"
+              title={
+                <>
+                  Explore <span className="text-[#D7FF3F]">more tools.</span>
+                </>
+              }
+              subtitle="Every tool below is live right now — each pill opens the real thing at its exact price."
+            />
+            <Reveal delay={0.1} className="mt-10">
+              <ToolPillDirectory />
             </Reveal>
           </div>
         </section>
