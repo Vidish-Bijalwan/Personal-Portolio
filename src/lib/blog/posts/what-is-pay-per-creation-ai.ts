@@ -14,15 +14,15 @@ const post: BlogPost = {
     t("Pay-per-creation AI is a pricing model where each finished AI output — an image, a video clip, an edit — has one fixed price and you pay only for what you order. "),
     link("Pixaura", "/"),
     t(" works this way: "),
-    t("₹29 per image"),
+    t("₹19 per image"),
     t(", "),
-    t("₹79 for a 4-pack"),
+    t("₹69 for a 4-pack"),
     t(", "),
-    t("₹49 per product photo"),
+    t("₹39 per product photo"),
     t(", "),
-    t("₹99 per 5-second video clip"),
+    t("₹89 per 5-second video clip"),
     t(", and "),
-    t("₹49 per Video Studio job"),
+    t("₹39 per Video Studio job"),
     t(" — paid per order over UPI, with no subscription and nothing that expires."),
   ],
   sources: [
@@ -32,7 +32,7 @@ const post: BlogPost = {
   faqs: [
     {
       q: "How is pay-per-creation different from buying credits?",
-      a: "Credits are prepaid: you buy a bundle upfront and spend it down per render, with the price per render varying by settings. Pay-per-creation has no bundle — each order shows one fixed price (e.g. ₹29 for an image) and you pay exactly that, when you order.",
+      a: "Credits are prepaid: you buy a bundle upfront and spend it down per render, with the price per render varying by settings. Pay-per-creation has no bundle — each order shows one fixed price (e.g. ₹19 for an image) and you pay exactly that, when you order.",
     },
     {
       q: "Is there really no subscription with Pixaura?",
@@ -48,7 +48,7 @@ const post: BlogPost = {
     },
     {
       q: "Does pay-per-creation mean lower quality?",
-      a: "No — the pricing model and the quality pipeline are separate things. On Pixaura every creation passes a human quality check before delivery regardless of which product you ordered, and a ₹19 remake covers the cases where the first version misses.",
+      a: "No — the pricing model and the quality pipeline are separate things. On Pixaura every creation passes a human quality check before delivery regardless of which product you ordered, and a ₹9 remake covers the cases where the first version misses.",
     },
     {
       q: "Can businesses expense pay-per-creation orders easily?",
@@ -78,12 +78,12 @@ const post: BlogPost = {
     table(
       ["You order", "You pay (Pixaura)", "You don't pay"],
       [
-        ["1 AI image", "₹29", "Anything else, ever"],
-        ["4-pack of images", "₹79", "A monthly fee"],
-        ["1 product photo", "₹49", "Credits that expire"],
-        ["1 five-second AI clip", "₹99", "Seat licenses"],
-        ["1 video edit / voice-over / captions", "₹49", "Export upsells"],
-        ["A remake", "₹19", "—"],
+        ["1 AI image", "₹19", "Anything else, ever"],
+        ["4-pack of images", "₹69", "A monthly fee"],
+        ["1 product photo", "₹39", "Credits that expire"],
+        ["1 five-second AI clip", "₹89", "Seat licenses"],
+        ["1 video edit / voice-over / captions", "₹39", "Export upsells"],
+        ["A remake", "₹9", "—"],
       ]
     ),
     p(
@@ -118,7 +118,7 @@ const post: BlogPost = {
     ),
     p(
       t("On Pixaura the answers are short: "),
-      t("₹29"),
+      t("₹19"),
       t(" per image (and the other fixed prices on the "),
       link("pricing page", "/pricing"),
       t("), nothing in quiet months, nothing expires, nothing costs extra to download clean, and the "),

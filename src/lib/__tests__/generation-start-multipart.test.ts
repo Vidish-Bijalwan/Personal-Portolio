@@ -64,8 +64,8 @@ async function seedJobAndQuote(userId: string) {
     .insert(schema.quotes)
     .values({
       jobId: job.id,
-      breakdown: { base: 2900 },
-      totalPaise: 2900,
+      breakdown: { base: 1900 },
+      totalPaise: 1900,
       expiresAt: new Date(Date.now() + 3600_000),
     })
     .returning({ id: schema.quotes.id });

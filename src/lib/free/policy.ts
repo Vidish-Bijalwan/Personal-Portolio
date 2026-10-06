@@ -5,6 +5,8 @@
  * Unit-testable in isolation.
  */
 
+import { priceOf } from '../pricing/catalog';
+
 /** Max free image generations per user per IST day. */
 export const FREE_DAILY_CAP = 3;
 
@@ -12,10 +14,10 @@ export const FREE_DAILY_CAP = 3;
 export const PROMPT_MIN = 1;
 export const PROMPT_MAX = 2000;
 
-/** ₹29 clean-image unlock, integer paise. */
-export const UNLOCK_PRICE_PAISE = 2900;
-/** ₹99 paid 5s video clip, integer paise. */
-export const VIDEO_PRICE_PAISE = 9900;
+/** Clean-image unlock, integer paise — always the catalog single-image price. */
+export const UNLOCK_PRICE_PAISE = priceOf('single-image');
+/** Paid 5s video clip, integer paise — always the catalog clip price. */
+export const VIDEO_PRICE_PAISE = priceOf('clip-5s');
 
 export type GenerationStatus = 'queued' | 'generating' | 'done' | 'failed';
 export type MediaType = 'image' | 'video';

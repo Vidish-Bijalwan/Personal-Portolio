@@ -386,8 +386,8 @@ export async function verifyPaymentOrder(input: {
     target: { code: order.code, amountPaise: order.amountPaise },
   });
   // Free-tier / paid-video unlock side-effect: if this order is linked to a
-  // generations row (purpose 'unlock' = ₹29 clean-image unlock,
-  // purpose 'video' = ₹99 clip), flip its unlocked flag so the clean
+  // generations row (purpose 'unlock' = ₹19 clean-image unlock,
+  // purpose 'video' = ₹89 clip), flip its unlocked flag so the clean
   // download opens. Guarded: a missing generations table (legacy DB where
   // the 0004 migration hasn't applied) must NEVER break payment verify.
   try {
@@ -407,7 +407,7 @@ export async function verifyPaymentOrder(input: {
     console.error('[payments] generation unlock hook failed:', hookErr);
   }
   // Video Studio unlock side-effect (W2): if this order is linked to a
-  // video_jobs row (purpose 'video_studio' = ₹49 clean-video unlock),
+  // video_jobs row (purpose 'video_studio' = ₹39 clean-video unlock),
   // flip its unlocked flag so the clean mp4 opens. Same guard as above:
   // a missing video_jobs table must NEVER break payment verify.
   try {

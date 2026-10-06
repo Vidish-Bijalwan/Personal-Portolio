@@ -272,8 +272,8 @@ export const freeGenerationAttachments = pgTable(
 /**
  * Unified generations table for the free-tier image flow and paid video
  * clips. tier='free' + media_type='image': 3/day cap, watermarked preview,
- * clean download unlocks for ₹29 after manual-UPI verify. tier='paid' +
- * media_type='video': ₹99 per 5s clip, no daily cap; the watcher generates
+ * clean download unlocks for ₹19 after manual-UPI verify. tier='paid' +
+ * media_type='video': ₹89 per 5s clip, no daily cap; the watcher generates
  * immediately on order and the clean mp4 unlocks on payment verify.
  * (Paid operator images keep using generation_jobs — NOT this table.)
  */
@@ -308,8 +308,8 @@ export const generations = pgTable('generations', {
 });
 
 /**
- * Links a manual-UPI order to a generations row. purpose 'unlock': ₹29
- * clean-image download for a free generation. purpose 'video': ₹99 paid
+ * Links a manual-UPI order to a generations row. purpose 'unlock': ₹19
+ * clean-image download for a free generation. purpose 'video': ₹89 paid
  * clip. The payment-verify hook flips generations.unlocked from this link.
  */
 export const generationOrders = pgTable('generation_orders', {
@@ -334,7 +334,7 @@ export const generationOrders = pgTable('generation_orders', {
  * Postgres directly) claims work over the HTTPS admin API, and
  * delivers watermarked + clean bytea via the deliver endpoint.
  * Money: integer PAISE everywhere (price_cents stores paise despite
- * the name — 4900 paise = ₹49).
+ * the name — 3900 paise = ₹39).
  */
 export const videoJobs = pgTable('video_jobs', {
   id: id(),
@@ -359,8 +359,8 @@ export const videoJobs = pgTable('video_jobs', {
   watermarked: bytea('watermarked'),
   clean: bytea('clean'),
   mime: text('mime').notNull().default('video/mp4'),
-  /** integer paise; 4900 = ₹49 */
-  priceCents: integer('price_cents').notNull().default(4900),
+  /** integer paise; 3900 = ₹39 */
+  priceCents: integer('price_cents').notNull().default(3900),
   unlocked: boolean('unlocked').notNull().default(false),
   error: text('error'),
   createdAt: createdAt(),
@@ -369,7 +369,7 @@ export const videoJobs = pgTable('video_jobs', {
 
 /**
  * Links a manual-UPI order to a video_jobs row. purpose
- * 'video_studio': ₹49 clean-video unlock. The payment-verify hook flips
+ * 'video_studio': ₹39 clean-video unlock. The payment-verify hook flips
  * video_jobs.unlocked from this link (mirrors generation_orders).
  */
 export const videoJobOrders = pgTable('video_job_orders', {

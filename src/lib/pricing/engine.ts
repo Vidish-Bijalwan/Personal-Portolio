@@ -8,14 +8,18 @@
  */
 
 import type { PriceBreakdown } from '../vilish/types';
+import { priceOf } from './catalog';
 
-/** Admin-seeded retail ladder (paise). Matches the seeded admin config. */
+/**
+ * Retail ladder (paise), derived from the canonical PRICE_CATALOG.
+ * Never hardcode — the catalog is the single source of truth.
+ */
 export const PRICE_LADDER = {
-  singleImage: 2900,
-  fourPack: 7900,
-  productPhoto: 4900,
-  clip5s: 9900,
-  remake: 1900,
+  singleImage: priceOf('single-image'),
+  fourPack: priceOf('pack-4'),
+  productPhoto: priceOf('product-photo'),
+  clip5s: priceOf('clip-5s'),
+  remake: priceOf('remake'),
 } as const;
 
 /** Default payment gateway cost basis: 0 bps — manual UPI has no gateway fee.

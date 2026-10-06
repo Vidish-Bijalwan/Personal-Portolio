@@ -15,11 +15,11 @@ import {
 describe('PRICE_LADDER', () => {
   it('matches the sub-₹200 ladder (paise)', () => {
     expect(PRICE_LADDER).toEqual({
-      singleImage: 2900,
-      fourPack: 7900,
-      productPhoto: 4900,
-      clip5s: 9900,
-      remake: 1900,
+      singleImage: 1900,
+      fourPack: 6900,
+      productPhoto: 3900,
+      clip5s: 8900,
+      remake: 900,
     });
   });
 
@@ -29,7 +29,7 @@ describe('PRICE_LADDER', () => {
 });
 
 describe('quotePrice', () => {
-  it('₹29-image economics: providerCost 27paise quotes far under the ₹29 ladder with healthy margin', () => {
+  it('₹19-image economics: providerCost 27paise quotes far under the ₹19 ladder with healthy margin', () => {
     const q = quotePrice({ providerCostPaise: 27, feeBps: 0 });
     // marginTarget = ceil(27*6000*55/1_000_000) = ceil(8.91) = 9 -> min-margin floor 100
     // total = 27 + 50 + 0 + 0 + 100 = 177 -> rounds UP to 200 (₹2)
@@ -155,10 +155,10 @@ describe('remakePrice', () => {
 
 describe('ladderPrice', () => {
   it('returns the ladder price when it covers the floor (manual UPI default)', () => {
-    expect(ladderPrice('singleImage', 25)).toBe(2900);
-    expect(ladderPrice('fourPack', 100)).toBe(7900);
-    expect(ladderPrice('remake', 25)).toBe(1900);
-    expect(ladderPrice('clip5s', 25, 0)).toBe(9900);
+    expect(ladderPrice('singleImage', 25)).toBe(1900);
+    expect(ladderPrice('fourPack', 100)).toBe(6900);
+    expect(ladderPrice('remake', 25)).toBe(900);
+    expect(ladderPrice('clip5s', 25, 0)).toBe(8900);
   });
 
   it('never returns below the floor even when provider cost dwarfs the ladder', () => {
@@ -173,16 +173,19 @@ describe('ladderPrice', () => {
   });
 
   it('floor always wins at the boundary', () => {
-    // cost 2900, feeBps 0: floor = 2900 + 0 + 100 = 3000 > singleImage 2900
-    expect(ladderPrice('singleImage', 2900)).toBe(3000);
-    // cost 2700, feeBps 0: floor = 2700 + 0 + 100 = 2800 < 2900 -> ladder wins
-    expect(ladderPrice('singleImage', 2700)).toBe(2900);
+    // cost 1900, feeBps 0: floor = 1900 + 0 + 100 = 2000 > singleImage 1900
+    expect(ladderPrice('singleImage', 1900)).toBe(2000);
+    // cost 1700, feeBps 0: floor = 1700 + 0 + 100 = 1800 < 1900 -> ladder wins
+    expect(ladderPrice('singleImage', 1700)).toBe(1900);
   });
 
   it('feeBps parameter shifts the floor', () => {
-    // cost 2500: fee 0 -> floor 2600 < 2900 (ladder wins); fee 236 -> 2500+59+100 = 2659 (ladder still wins)
-    expect(ladderPrice('singleImage', 2500, 0)).toBe(2900);
-    expect(ladderPrice('singleImage', 2500, 236)).toBe(2900);
+    // cost 1500: fee 0 -> floor 1600 < 1900 ladder (ladder wins); fee 236 -> 1500+36+100 = 1636 (ladder still wins)
+    expect(ladderPrice('singleImage', 1500, 0)).toBe(1900);
+    expect(ladderPrice('singleImage', 1500, 236)).toBe(1900);
+    // cost 2500: fee 0 -> floor 2600 > 1900 ladder (floor wins); fee 236 -> 2500+59+100 = 2659
+    expect(ladderPrice('singleImage', 2500, 0)).toBe(2600);
+    expect(ladderPrice('singleImage', 2500, 236)).toBe(2659);
     // cost 5000: feeBps 0 -> floor 5100 > ladder; feeBps 236 -> 5000+118+100 = 5218
     expect(ladderPrice('singleImage', 5000, 0)).toBe(5100);
     expect(ladderPrice('singleImage', 5000, 236)).toBe(5218);

@@ -9,7 +9,7 @@ export interface LightboxItem {
   src: string;
   /** Caption shown under the image and used for the dialog label/alt fallback. */
   caption: string;
-  /** Price pill text, e.g. "₹29". */
+  /** Price pill text, e.g. "₹19". */
   price: string;
   /** Optional extra detail line (e.g. the model name on /examples). */
   model?: string;

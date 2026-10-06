@@ -66,7 +66,7 @@ describe('Pixaura slice E2E', () => {
     expect(breakdown.total % 100).toBe(0);
     // Slice retail mirrors the quote route: ladder price, floor-protected.
     const retailPaise = ladderPrice('singleImage', plan.estimatedCostPaise);
-    expect(retailPaise).toBe(2900);
+    expect(retailPaise).toBe(1900);
 
     const [job] = await db
       .insert(schema.generationJobs)

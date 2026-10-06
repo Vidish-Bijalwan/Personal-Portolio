@@ -30,12 +30,23 @@ describe("price catalog", () => {
   });
 
   it("matches the canonical prices", () => {
-    expect(priceOf("single-image")).toBe(2900);
-    expect(priceOf("pack-4")).toBe(7900);
-    expect(priceOf("product-photo")).toBe(4900);
-    expect(priceOf("clip-5s")).toBe(9900);
-    expect(priceOf("video-studio")).toBe(4900);
-    expect(priceOf("remake")).toBe(1900);
+    expect(priceOf("single-image")).toBe(1900);
+    expect(priceOf("pack-4")).toBe(6900);
+    expect(priceOf("product-photo")).toBe(3900);
+    expect(priceOf("clip-5s")).toBe(8900);
+    expect(priceOf("video-studio")).toBe(3900);
+    expect(priceOf("remake")).toBe(900);
+  });
+
+  it("equals exactly the October 2026 price-drop catalog", () => {
+    expect(PRICE_CATALOG.map((p) => [p.id, p.paise])).toEqual([
+      ["single-image", 1900],
+      ["pack-4", 6900],
+      ["product-photo", 3900],
+      ["clip-5s", 8900],
+      ["video-studio", 3900],
+      ["remake", 900],
+    ]);
   });
 
   it("throws on unknown ids instead of returning a wrong price", () => {
@@ -56,7 +67,7 @@ describe("composer service selector", () => {
   it("every service maps to a catalog product at the same live price", () => {
     for (const s of COMPOSER_SERVICES) {
       // The estimate shown in the composer MUST equal the catalog price —
-      // this is the structural fix for "pricing shows ₹29 for everything".
+      // this is the structural fix for "pricing shows ₹19 for everything".
       expect(servicePricePaise(s.id)).toBe(priceOf(s.id));
       expect(formatINR(servicePricePaise(s.id))).toBe(formatINR(priceOf(s.id)));
     }

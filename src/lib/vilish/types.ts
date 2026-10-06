@@ -142,7 +142,7 @@ export function canTransition(from: JobState, to: JobState): boolean {
   return (JOB_TRANSITIONS[from] ?? []).includes(to);
 }
 
-/** Format integer paise as ₹ string, e.g. 2900 -> "₹29". */
+/** Format integer paise as ₹ string, e.g. 1900 -> "₹19". */
 export function formatINR(paise: number): string {
   return '₹' + (paise / 100).toFixed(paise % 100 === 0 ? 0 : 2);
 }

@@ -342,7 +342,7 @@ export default function WatchRoomPage() {
               Your {isVideo ? "clip" : "creation"} is waiting on payment
             </h1>
             <p className="mt-3 max-w-md text-[14px] leading-6 text-white/60">
-              Complete your {isVideo ? "₹99" : "₹29"} payment to unlock the clean HD{" "}
+              Complete your {isVideo ? "₹89" : "₹19"} payment to unlock the clean HD{" "}
               {isVideo ? "clip" : "file"}. If you already paid, it unlocks here as
               soon as the payment is confirmed.
             </p>
@@ -500,7 +500,7 @@ export default function WatchRoomPage() {
 
             <p className="mt-5 max-w-md text-[14px] leading-6 text-white/60">
               Watermarked preview. The clean HD {isVideo ? "clip" : "file"} is yours
-              for {isVideo ? "₹99" : "₹29"}.
+              for {isVideo ? "₹89" : "₹19"}.
             </p>
 
             <button
@@ -513,7 +513,7 @@ export default function WatchRoomPage() {
               )}
             >
               {unlockBusy && <Loader2 className="h-4 w-4 animate-spin" />}
-              Unlock clean HD — {isVideo ? "₹99" : "₹29"}
+              Unlock clean HD — {isVideo ? "₹89" : "₹19"}
             </button>
             {unlockError && (
               <p className="mt-3 max-w-md text-[13px] text-red-300/80" role="alert">

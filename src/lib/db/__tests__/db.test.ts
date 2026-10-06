@@ -201,11 +201,11 @@ describe('seed idempotency', () => {
       'Typical processing time: 30 minutes – several hours'
     );
     expect(byKey['ladder']).toEqual({
-      singleImage: 2900,
-      fourPack: 7900,
-      productPhoto: 4900,
-      clip5s: 9900,
-      remake: 1900,
+      singleImage: 1900,
+      fourPack: 6900,
+      productPhoto: 3900,
+      clip5s: 8900,
+      remake: 900,
     });
   });
 });
