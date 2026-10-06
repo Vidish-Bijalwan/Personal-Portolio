@@ -10,6 +10,7 @@ const LINKS = [
   { href: "/video-studio", label: "Video Studio" },
   { href: "/examples", label: "Examples" },
   { href: "/pricing", label: "Pricing" },
+  { href: "/blog", label: "Blog" },
   { href: "/about", label: "About" },
 ];
 
