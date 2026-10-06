@@ -12,8 +12,11 @@ import { cn } from "@/lib/utils";
  *   frame 3 — "Plating it up": cheese / tomato / lettuce / top bun stack
  *
  * The scene: layered flame tongues lick up through the grate from a bed of
- * pulsing coals; every burger layer carries its own gradient + highlight so
- * it reads crafted, not clip-art.
+ * pulsing coals — 4-stop gradients (pale-hot base → deep-red tip), a static
+ * blurred bloom halo behind the crisp tongues, off-center side licks and
+ * per-tongue lean so no two flames match, plus heat-shimmer wisps; every
+ * burger layer carries its own gradient + highlight so it reads crafted,
+ * not clip-art.
  *
  * prefers-reduced-motion: watch.css kills the loops (fg-animated *),
  * leaving a calm static grill + text status.
@@ -43,17 +46,25 @@ const STEAM = [
   { d: "M254,64 q8,-14 0,-28 q-8,-14 0,-28", delay: "-1.7s" },
 ];
 
-/** Flame tongues: center-x, tip height, half-width, flicker timing.
+/** Flame tongues: center-x, tip height, half-width, lean (tip x-offset for
+ * asymmetry), flicker timing.
  * The outer pair sits OUTSIDE the burger width (burger spans x 95-325) so
  * flames stay visible licking up beside the food in frames 2-3; the inner
  * tongues show through while the burger is still assembling (frames 0-1). */
 const TONGUES = [
-  { cx: 70, tip: 196, w: 20, delay: "0s", dur: "0.55s" },
-  { cx: 138, tip: 198, w: 24, delay: "-0.2s", dur: "0.42s" },
-  { cx: 182, tip: 216, w: 21, delay: "-0.35s", dur: "0.62s" },
-  { cx: 226, tip: 190, w: 25, delay: "-0.1s", dur: "0.48s" },
-  { cx: 270, tip: 214, w: 21, delay: "-0.45s", dur: "0.58s" },
-  { cx: 350, tip: 192, w: 20, delay: "-0.28s", dur: "0.5s" },
+  { cx: 70, tip: 188, w: 22, lean: -9, delay: "0s", dur: "0.55s" },
+  { cx: 138, tip: 206, w: 18, lean: 7, delay: "-0.2s", dur: "0.42s" },
+  { cx: 182, tip: 178, w: 26, lean: -6, delay: "-0.35s", dur: "0.62s" },
+  { cx: 226, tip: 198, w: 20, lean: 10, delay: "-0.1s", dur: "0.48s" },
+  { cx: 270, tip: 212, w: 17, lean: -8, delay: "-0.45s", dur: "0.58s" },
+  { cx: 350, tip: 184, w: 23, lean: 9, delay: "-0.28s", dur: "0.5s" },
+];
+
+/** Heat-shimmer wisps rising off the coal bed. */
+const SHIMMER = [
+  { d: "M150,296 q7,-16 -2,-32 q-8,-15 3,-30", delay: "0s" },
+  { d: "M228,298 q-7,-16 3,-32 q8,-15 -3,-30", delay: "-1.2s" },
+  { d: "M298,296 q7,-16 -2,-32 q-8,-15 3,-30", delay: "-2.1s" },
 ];
 
 const COALS = [
@@ -73,11 +84,12 @@ const EMBERS = [
   { cx: 160, cy: 302, r: 2.4, delay: "-1.7s" },
 ];
 
-function tonguePath(cx: number, tip: number, w: number, base: number): string {
+function tonguePath(cx: number, tip: number, w: number, base: number, lean = 0): string {
+  const tx = cx + lean;
   return (
-    `M ${cx},${base} ` +
-    `C ${cx - w},${base - 18} ${cx - w * 0.85},${tip + 34} ${cx},${tip} ` +
-    `C ${cx + w * 0.85},${tip + 34} ${cx + w},${base - 18} ${cx},${base} Z`
+    `M ${cx - w * 0.55},${base} ` +
+    `C ${cx - w * 1.05},${base - 16} ${tx - w * 0.75},${tip + 44} ${tx},${tip} ` +
+    `C ${tx + w * 0.55},${tip + 44} ${cx + w * 0.9},${base - 16} ${cx + w * 0.55},${base} Z`
   );
 }
 
@@ -114,27 +126,52 @@ export default function BurgerGrill({
           <stop offset="0%" stopColor="#F66166" />
           <stop offset="100%" stopColor="#C93237" />
         </radialGradient>
-        <linearGradient id="fg-flame-outer" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#FF8A2A" />
-          <stop offset="100%" stopColor="#D63A0C" />
+        <linearGradient id="fg-flame-outer" x1="0" y1="1" x2="0" y2="0">
+          <stop offset="0%" stopColor="#FFE9A8" />
+          <stop offset="38%" stopColor="#FFB627" />
+          <stop offset="70%" stopColor="#FF7A1A" />
+          <stop offset="100%" stopColor="#C22E08" />
         </linearGradient>
-        <linearGradient id="fg-flame-inner" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#FFE66D" />
-          <stop offset="100%" stopColor="#FFB627" />
+        <linearGradient id="fg-flame-mid" x1="0" y1="1" x2="0" y2="0">
+          <stop offset="0%" stopColor="#FFFDF4" />
+          <stop offset="50%" stopColor="#FFE66D" />
+          <stop offset="100%" stopColor="#FFC93C" />
         </linearGradient>
+        <linearGradient id="fg-flame-core" x1="0" y1="1" x2="0" y2="0">
+          <stop offset="0%" stopColor="#FFFFFF" />
+          <stop offset="60%" stopColor="#FFF6C9" />
+          <stop offset="100%" stopColor="#FFDD55" />
+        </linearGradient>
+        <radialGradient id="fg-fireglow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="#FF7A1A" stopOpacity="0.5" />
+          <stop offset="60%" stopColor="#E8490F" stopOpacity="0.18" />
+          <stop offset="100%" stopColor="#E8490F" stopOpacity="0" />
+        </radialGradient>
+        <filter id="fg-soft" x="-60%" y="-60%" width="220%" height="220%">
+          <feGaussianBlur stdDeviation="7" />
+        </filter>
+        <filter id="fg-soft2" x="-60%" y="-60%" width="220%" height="220%">
+          <feGaussianBlur stdDeviation="2.4" />
+        </filter>
         <radialGradient id="fg-coal" cx="50%" cy="50%" r="50%">
           <stop offset="0%" stopColor="#FF8A3D" />
           <stop offset="60%" stopColor="#C44A12" stopOpacity="0.85" />
           <stop offset="100%" stopColor="#7A2408" stopOpacity="0" />
         </radialGradient>
         <radialGradient id="fg-emberglow" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="#FF7A1A" stopOpacity="0.5" />
+          <stop offset="0%" stopColor="#FF7A1A" stopOpacity="0.62" />
           <stop offset="100%" stopColor="#FF7A1A" stopOpacity="0" />
         </radialGradient>
       </defs>
 
       {/* ambient heat glow under everything */}
       <ellipse cx="210" cy="322" rx="165" ry="26" fill="url(#fg-emberglow)" className="fg-glow" />
+
+      {/* hot spots blooming behind the coals (static blur = cheap) */}
+      <g filter="url(#fg-soft)" className="fg-glow" opacity="0.7">
+        <ellipse cx="140" cy="328" rx="46" ry="14" fill="#FF5A12" />
+        <ellipse cx="265" cy="329" rx="52" ry="15" fill="#FF5A12" />
+      </g>
 
       {/* coal bed */}
       <g>
@@ -154,22 +191,63 @@ export default function BurgerGrill({
         ))}
       </g>
 
+      {/* back row of flames — darker, softer, offset for depth */}
+      <g filter="url(#fg-soft2)" opacity="0.75">
+        {TONGUES.map((t, i) => (
+          <path
+            key={`b${i}`}
+            d={tonguePath(t.cx + 13, t.tip + 34, t.w * 0.8, 314, -t.lean * 0.5)}
+            fill="url(#fg-flame-outer)"
+          />
+        ))}
+      </g>
+
+      {/* static bloom copy of the flame row — soft halo behind the crisp tongues */}
+      <g filter="url(#fg-soft)" opacity="0.55" className="fg-glow">
+        {TONGUES.map((t, i) => (
+          <path
+            key={i}
+            d={tonguePath(t.cx, t.tip - 10, t.w * 1.08, 314, t.lean)}
+            fill="#FF7A1A"
+          />
+        ))}
+      </g>
+
       {/* layered flames licking up through the grate */}
       <g className="fg-ambient">
-        {TONGUES.map((t, i) => (
-          <g
-            key={i}
-            className="fg-sizzle"
-            style={{ animationDelay: t.delay, animationDuration: t.dur }}
-          >
-            <path d={tonguePath(t.cx, t.tip, t.w, 312)} fill="url(#fg-flame-outer)" opacity="0.92" />
-            <path
-              d={tonguePath(t.cx, t.tip + 26, t.w * 0.52, 312)}
-              fill="url(#fg-flame-inner)"
-              opacity="0.95"
-            />
-          </g>
-        ))}
+        {TONGUES.map((t, i) => {
+          const dir = i % 2 === 0 ? 1 : -1;
+          const lickCx = t.cx + dir * t.w * 0.78;
+          return (
+            <g
+              key={i}
+              className="fg-sizzle"
+              style={{ animationDelay: t.delay, animationDuration: t.dur }}
+            >
+              <path
+                d={tonguePath(t.cx, t.tip, t.w, 312, t.lean)}
+                fill="url(#fg-flame-outer)"
+                opacity="0.95"
+              />
+              <path
+                d={tonguePath(t.cx, t.tip + 22, t.w * 0.62, 312, t.lean * 0.7)}
+                fill="url(#fg-flame-mid)"
+                opacity="0.95"
+              />
+              <path
+                d={tonguePath(t.cx, t.tip + 46, t.w * 0.4, 312, t.lean * 0.4)}
+                fill="url(#fg-flame-core)"
+                opacity="0.9"
+              />
+              {/* off-center side lick breaks the teardrop symmetry */}
+              <path
+                d={tonguePath(lickCx, t.tip + 56, t.w * 0.38, 312, -t.lean * 0.6)}
+                fill="url(#fg-flame-mid)"
+                opacity="0.8"
+              />
+            </g>
+          );
+        })}
         {/* rising ember sparks */}
         {EMBERS.map((e, i) => (
           <circle
@@ -180,6 +258,22 @@ export default function BurgerGrill({
             fill="#FFB627"
             className="fg-ember"
             style={{ animationDelay: e.delay }}
+          />
+        ))}
+      </g>
+
+      {/* heat shimmer rising off the coals */}
+      <g opacity="0.28">
+        {SHIMMER.map((s, i) => (
+          <path
+            key={i}
+            d={s.d}
+            fill="none"
+            stroke="#FFD9A8"
+            strokeWidth="6"
+            strokeLinecap="round"
+            className="fg-steam"
+            style={{ animationDelay: s.delay }}
           />
         ))}
       </g>
