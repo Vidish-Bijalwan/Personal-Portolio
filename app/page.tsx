@@ -31,6 +31,7 @@ import { PRICE_CATALOG, priceOf } from "@/src/lib/pricing/catalog";
 import { formatINR } from "@/src/lib/vilish/types";
 import GenerativeField from "@/components/motion/GenerativeField";
 import HeroVideo from "@/components/motion/HeroVideo";
+import HeroAurora, { HeroCollage } from "@/components/motion/HeroAurora";
 import FlyingElements from "@/components/motion/FlyingElements";
 import Reveal from "@/components/motion/Reveal";
 import { Stagger, StaggerItem } from "@/components/motion/Stagger";
@@ -39,6 +40,7 @@ import Marquee from "@/components/motion/Marquee";
 import MagneticButton from "@/components/motion/MagneticButton";
 import Carousel from "@/components/motion/Carousel";
 import { EASE_OUT, MOTION, usePrefersReducedMotion } from "@/src/lib/motion/theme";
+import SectionHeader from "@/components/vilish/section-header";
 
 const TRUST = [
   { icon: Tag, label: "No subscription" },
@@ -53,14 +55,6 @@ const FLOW = [
   { step: "Pay once", desc: "One UPI payment. No subscription." },
   { step: "Download", desc: "Download your creation once it passes QC." },
 ];
-
-/* Rendered from the canonical price catalog — never hardcode prices here. */
-const TEASER = PRICE_CATALOG.filter((p) =>
-  ["single-image", "pack-4", "product-photo", "clip-5s", "video-studio"].includes(p.id),
-).map((p) => ({
-  label: p.id === "video-studio" ? "Video Studio job" : p.label,
-  price: formatINR(p.paise),
-}));
 
 /** Homepage example — service pins the catalog product the price/CTA derive from. */
 interface HomeExample {
@@ -921,8 +915,10 @@ export default function VilishLanding() {
       <main>
         {/* ── hero ─────────────────────────────────────────── */}
         <section className="relative flex min-h-[100svh] flex-col overflow-hidden">
-          {/* Video owns the hero — GenerativeField moved to the closing CTA. */}
-          <HeroVideo className="absolute inset-0" />
+          {/* Desktop keeps the ambient video loop; mobile gets the aurora +
+              example collage — the video never worked on phone GPUs. */}
+          <HeroVideo className="absolute inset-0 hidden sm:block" />
+          <HeroAurora className="absolute inset-0 sm:hidden" />
           <FlyingElements className="absolute inset-0 z-[1]" density={0.7} />
 
           <div className="relative z-10 mx-auto flex w-full max-w-3xl flex-1 flex-col items-center justify-center px-4 pb-16 pt-28 text-center sm:pt-32">
@@ -938,7 +934,7 @@ export default function VilishLanding() {
               <StaggerItem>
                 <p className="mx-auto mt-5 max-w-xl text-[15px] leading-7 text-white/[0.62] sm:text-[17px]">
                   Generate AI images without another monthly subscription. See the exact
-                  price before you pay — from {formatINR(priceOf("single-image"))}.
+                  price before you pay.
                 </p>
               </StaggerItem>
               <StaggerItem>
@@ -959,18 +955,22 @@ export default function VilishLanding() {
             <Reveal delay={0.35} className="mt-9 w-full max-w-2xl">
               <Composer variant="hero" />
             </Reveal>
+
+            <HeroCollage />
           </div>
         </section>
 
         {/* ── showreel strip ───────────────────────────────── */}
         <section aria-label="Example showreel" className="cv-auto border-b border-white/[0.08] py-10 sm:py-14">
           <div className="mx-auto max-w-5xl px-4">
-            <Reveal>
-              <Eyebrow>Showreel</Eyebrow>
-              <h2 className="font-display mt-3 text-[26px] font-semibold tracking-[-0.01em] sm:text-[34px]">
-                Fresh out of the <span className="text-[#D7FF3F]">render queue.</span>
-              </h2>
-            </Reveal>
+            <SectionHeader
+              kicker="Showreel"
+              title={
+                <>
+                  Fresh out of the <span className="text-[#D7FF3F]">render queue.</span>
+                </>
+              }
+            />
           </div>
           <Reveal delay={0.1} className="mt-8">
             <Marquee speed={44} gap={16}>
@@ -1011,16 +1011,15 @@ export default function VilishLanding() {
         {/* ── showcase ─────────────────────────────────────── */}
         <section aria-label="Example creations" className="cv-auto border-b border-white/[0.08] py-20 sm:py-28">
           <div className="mx-auto max-w-5xl px-4">
-            <Reveal>
-              <Eyebrow>Showcase</Eyebrow>
-              <h2 className="font-display mt-3 text-[26px] font-semibold tracking-[-0.01em] sm:text-[34px]">
-                Made here, <span className="text-[#FF2D78]">priced per piece.</span>
-              </h2>
-              <p className="mt-3 max-w-lg text-[14px] leading-6 text-white/50">
-                Every piece below was ordered, reviewed by a human, and delivered.
-                Yours can look like yours.
-              </p>
-            </Reveal>
+            <SectionHeader
+              kicker="Showcase"
+              title={
+                <>
+                  Made here, <span className="text-[#FF2D78]">priced per piece.</span>
+                </>
+              }
+              subtitle="Every piece below was ordered, reviewed by a human, and delivered. Yours can look like yours."
+            />
           </div>
           <Reveal delay={0.1} className="mt-10">
             <Carousel ariaLabel="Example creations">
@@ -1084,16 +1083,20 @@ export default function VilishLanding() {
         {/* ── motion showcase (AI video examples, tabbed) ─── */}
         <section aria-label="AI video examples" className="cv-auto border-b border-white/[0.08] py-16 sm:py-20">
           <div className="mx-auto max-w-5xl px-4">
-            <Reveal>
-              <Eyebrow>Motion</Eyebrow>
-              <h2 className="font-display mt-3 text-[26px] font-semibold tracking-[-0.01em] sm:text-[34px]">
-                Stills are the warm-up. <span className="text-[#00F0FF]">Video is live.</span>
-              </h2>
-              <p className="mt-3 max-w-xl text-[14px] leading-6 text-white/50">
-                AI video examples from Pixaura — 5s clips at {formatINR(priceOf("clip-5s"))} each. Hover to
-                preview, tap a category to switch lanes, click to watch full-screen.
-              </p>
-            </Reveal>
+            <SectionHeader
+              kicker="Motion"
+              title={
+                <>
+                  Stills are the warm-up. <span className="text-[#00F0FF]">Video is live.</span>
+                </>
+              }
+              subtitle={
+                <>
+                  AI video examples from Pixaura — 5s clips at {formatINR(priceOf("clip-5s"))} each. Hover to
+                  preview, tap a category to switch lanes, click to watch full-screen.
+                </>
+              }
+            />
             <Reveal delay={0.1} className="mt-8">
               <VideoShowcase />
             </Reveal>
@@ -1102,12 +1105,15 @@ export default function VilishLanding() {
 
         {/* ── capability bento ─────────────────────────────── */}
         <section aria-label="What you can create" className="cv-auto mx-auto max-w-5xl px-4 py-20 sm:py-28">
-          <Reveal>
-            <Eyebrow>Capabilities</Eyebrow>
-            <h2 className="font-display mt-3 max-w-[22ch] text-[26px] font-semibold tracking-[-0.01em] sm:text-[34px]">
-              One studio, <span className="text-[#D7FF3F]">three ways to create.</span>
-            </h2>
-          </Reveal>
+          <SectionHeader
+            kicker="Capabilities"
+            title={
+              <>
+                One studio, <span className="text-[#D7FF3F]">three ways to create.</span>
+              </>
+            }
+            titleClassName="max-w-[22ch]"
+          />
           <Stagger className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {CAPABILITIES.map((cap, i) => (
               <StaggerItem key={cap.title} className="h-full">
@@ -1161,47 +1167,17 @@ export default function VilishLanding() {
         {/* ── formats: interactive ratio lab ───────────────── */}
         <section aria-label="Supported formats" className="cv-auto border-b border-white/[0.08] py-16 sm:py-24">
           <div className="mx-auto max-w-5xl px-4">
-            <Reveal>
-              <Eyebrow>Formats</Eyebrow>
-              <h2 className="font-display mt-3 text-[26px] font-semibold tracking-[-0.01em] sm:text-[34px]">
-                Every creation, <span className="text-[#00F0FF]">every ratio.</span>
-              </h2>
-              <p className="mt-3 max-w-lg text-[14px] leading-6 text-white/50">
-                Touch a ratio — the frame morphs to its true shape, lit in its
-                own color. What you pick is what renders.
-              </p>
-            </Reveal>
+            <SectionHeader
+              kicker="Formats"
+              title={
+                <>
+                  Every creation, <span className="text-[#00F0FF]">every ratio.</span>
+                </>
+              }
+              subtitle="Touch a ratio — the frame morphs to its true shape, lit in its own color. What you pick is what renders."
+            />
             <Reveal delay={0.1} className="mt-10">
               <FormatLab />
-            </Reveal>
-          </div>
-        </section>
-
-        {/* ── pricing teaser (tinted band) ──────────────────── */}
-        <section aria-label="Pricing teaser" className="cv-auto border-y border-white/[0.08] bg-[#0B0B0C]">
-          <div className="mx-auto max-w-3xl px-4 py-16 text-center sm:py-20">
-            <Reveal>
-              <Eyebrow>Pricing</Eyebrow>
-            </Reveal>
-            <Stagger className="mt-6 flex flex-wrap items-center justify-center gap-x-10 gap-y-3">
-              {TEASER.map((t) => (
-                <StaggerItem key={t.label}>
-                  <p className="text-[13px] text-white/55">
-                    {t.label}{" "}
-                    <span className="font-semibold tabular-nums text-[#F5F5F3]">
-                      {t.price}
-                    </span>
-                  </p>
-                </StaggerItem>
-              ))}
-            </Stagger>
-            <Reveal delay={0.1} className="mt-7">
-              <Link
-                href="/pricing"
-                className="inline-flex items-center gap-1.5 text-[14px] font-medium text-[#F5F5F3] underline decoration-white/25 underline-offset-4 hover:decoration-white/60"
-              >
-                See full pricing <ArrowRight className="h-4 w-4" strokeWidth={1.8} />
-              </Link>
             </Reveal>
           </div>
         </section>
@@ -1212,12 +1188,15 @@ export default function VilishLanding() {
           aria-label="Frequently asked questions"
           className="cv-auto mx-auto max-w-5xl scroll-mt-24 px-4 py-20 sm:py-28"
         >
-          <Reveal>
-            <Eyebrow>FAQ</Eyebrow>
-            <h2 className="font-display mt-3 max-w-[24ch] text-[26px] font-semibold tracking-[-0.01em] sm:text-[34px]">
-              Questions, <span className="text-[#D7FF3F]">answered straight.</span>
-            </h2>
-          </Reveal>
+          <SectionHeader
+            kicker="FAQ"
+            title={
+              <>
+                Questions, <span className="text-[#D7FF3F]">answered straight.</span>
+              </>
+            }
+            titleClassName="max-w-[24ch]"
+          />
           <div className="mt-10 grid grid-cols-1 gap-3 sm:gap-4">
             {FAQS.map((f, i) => (
               <Reveal key={f.q} delay={Math.min(i * 0.04, 0.2)}>
@@ -1261,20 +1240,20 @@ export default function VilishLanding() {
             className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_55%_at_50%_50%,transparent_0%,rgba(8,8,8,0.6)_100%)]"
           />
           <div className="relative mx-auto max-w-3xl px-4 pb-24 pt-20 text-center sm:pb-32 sm:pt-28">
-            <Reveal>
-              <Eyebrow>The deal</Eyebrow>
-            </Reveal>
-            <Reveal delay={0.06}>
-              <h2 className="font-display mt-5 text-[36px] font-semibold leading-[1.06] tracking-[-0.02em] sm:text-[56px]">
-                Pay per creation, <span className="v-iris-text">not per month.</span>
-              </h2>
-            </Reveal>
-            <Reveal delay={0.12}>
-              <p className="mx-auto mt-5 max-w-xl text-[15px] leading-7 text-white/[0.60]">
-                No subscriptions. No credit packs. No renewals. The price you see
-                is the price you pay — GST included.
-              </p>
-            </Reveal>
+            {/* The ONE pricing section on the homepage: the full pay-per-creation
+                pitch. Prices appear once here (and on /pricing), not repeated
+                in strips across the page. */}
+            <SectionHeader
+              align="center"
+              size="lg"
+              kicker="The deal"
+              title={
+                <>
+                  Pay per creation, <span className="v-iris-text">not per month.</span>
+                </>
+              }
+              subtitle="No subscriptions. No credit packs. No renewals. The price you see is the price you pay — GST included."
+            />
             <Stagger
               className="mt-8 flex flex-wrap items-center justify-center gap-2.5"
               aria-label="Price list"
@@ -1284,6 +1263,7 @@ export default function VilishLanding() {
                 { label: "Product shot", price: formatINR(priceOf("product-photo")) },
                 { label: "4-pack", price: formatINR(priceOf("pack-4")) },
                 { label: "5s video", price: formatINR(priceOf("clip-5s")) },
+                { label: "Studio job", price: formatINR(priceOf("video-studio")) },
                 { label: "Remake", price: formatINR(priceOf("remake")) },
               ].map((c) => (
                 <StaggerItem key={c.label}>

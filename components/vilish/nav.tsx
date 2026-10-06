@@ -3,70 +3,61 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ChevronDown } from "lucide-react";
+import { ArrowRight, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { priceOf } from "@/lib/pricing/catalog";
-import { formatINR } from "@/lib/vilish/types";
 import Wordmark from "./wordmark";
+import {
+  TOOL_DIRECTORY,
+  toolsByGroup,
+  type ToolEntry,
+} from "@/src/lib/tools/directory";
 
 /**
- * Tools dropdown — ONLY working destinations. No dead items, no "coming soon".
- * Every price is derived from the catalog (never hardcoded).
+ * Tools mega-dropdown (TalkPix/VEED-inspired) — ONLY working tools.
+ * Desktop: left intro panel + grouped columns (Create / Video Studio),
+ * each row an icon + name + one-liner + catalog-derived price.
+ * Mobile: tap-to-expand grouped list, 44px targets.
  */
-const TOOLS: {
-  href: string;
-  label: string;
-  blurb: string;
-  price?: string;
-}[] = [
-  {
-    href: "/create",
-    label: "AI Image",
-    blurb: "Text to image, your aspect, your quality",
-    price: formatINR(priceOf("single-image")),
-  },
-  {
-    href: "/create?media=video",
-    label: "5s Video Clip",
-    blurb: "Prompt to video, made for reels",
-    price: formatINR(priceOf("clip-5s")),
-  },
-  {
-    href: "/create?service=product-photo",
-    label: "Product Photo",
-    blurb: "Studio-grade shots for sellers",
-    price: formatINR(priceOf("product-photo")),
-  },
-  {
-    href: "/video-studio",
-    label: "Video Studio",
-    blurb: "Voice-over, captions, trim + text",
-    price: `${formatINR(priceOf("video-studio"))}/job`,
-  },
-  {
-    href: "/trends",
-    label: "Trends",
-    blurb: "Ready-made templates, exact prices",
-  },
-  {
-    href: "/pricing",
-    label: "Pricing",
-    blurb: "Pay per creation, no subscription",
-  },
-  {
-    href: "/blog",
-    label: "Blog",
-    blurb: "Guides & honest cost breakdowns",
-  },
+const GROUP_META = [
+  { id: "create" as const, label: "Create" },
+  { id: "video-studio" as const, label: "Video Studio" },
 ];
 
 /** Flat links that stay outside the dropdown. */
 const FLAT_LINKS = [
+  { href: "/trends", label: "Trends" },
   { href: "/examples", label: "Examples" },
+  { href: "/pricing", label: "Pricing" },
+  { href: "/blog", label: "Blog" },
   { href: "/about", label: "About" },
 ];
 
-function ToolsDropdown() {
+function ToolRow({ tool, onNavigate }: { tool: ToolEntry; onNavigate: () => void }) {
+  const Icon = tool.icon;
+  return (
+    <Link
+      href={tool.href}
+      role="menuitem"
+      onClick={onNavigate}
+      className="flex min-h-[44px] items-center gap-3 rounded-[10px] px-3 py-2 transition-colors hover:bg-white/[0.05] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D7FF3F]"
+    >
+      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] border border-white/[0.08] bg-white/[0.03] text-[#D7FF3F]">
+        <Icon className="h-4 w-4" strokeWidth={1.8} />
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block truncate text-[13.5px] font-semibold text-[#F5F5F3]">
+          {tool.name}
+        </span>
+        <span className="block truncate text-[12px] text-white/45">{tool.tagline}</span>
+      </span>
+      <span className="shrink-0 rounded-full border border-white/[0.12] px-2 py-0.5 text-[11px] font-semibold tabular-nums text-[#D7FF3F]">
+        {tool.price}
+      </span>
+    </Link>
+  );
+}
+
+function ToolsMegaDropdown() {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
 
@@ -81,9 +72,12 @@ function ToolsDropdown() {
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, [open ]);
+  }, [open]);
 
-  const active = TOOLS.some((t) => pathname === t.href.split("?")[0]);
+  const active =
+    pathname === "/create" ||
+    pathname === "/video-studio" ||
+    pathname === "/tools";
 
   return (
     <div
@@ -108,33 +102,48 @@ function ToolsDropdown() {
         />
       </button>
       {open && (
-        <div className="absolute left-1/2 top-full z-50 w-[300px] -translate-x-1/2 pt-2">
+        <div className="absolute left-1/2 top-full z-50 w-[720px] -translate-x-1/2 pt-2">
           <div
             role="menu"
             aria-label="Tools"
-            className="overflow-hidden rounded-[14px] border border-white/[0.1] bg-[#101012] shadow-[0_24px_60px_-12px_rgba(0,0,0,0.85)]"
+            className="grid grid-cols-[220px_1fr] overflow-hidden rounded-[16px] border border-white/[0.1] bg-[#101012] shadow-[0_32px_80px_-12px_rgba(0,0,0,0.9)]"
           >
-            {TOOLS.map((t) => (
+            {/* intro panel */}
+            <div className="flex flex-col justify-between border-r border-white/[0.07] bg-white/[0.015] p-5">
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/40">
+                  {TOOL_DIRECTORY.length} tools
+                </p>
+                <p className="font-display mt-3 text-[18px] font-semibold leading-snug">
+                  Everything in the studio, <span className="text-[#D7FF3F]">nothing dead.</span>
+                </p>
+                <p className="mt-2 text-[12.5px] leading-5 text-white/50">
+                  Every tool on this menu is live right now — pick one and start.
+                </p>
+              </div>
               <Link
-                key={t.href}
-                href={t.href}
-                role="menuitem"
+                href="/tools"
                 onClick={() => setOpen(false)}
-                className="flex min-h-[44px] items-center justify-between gap-3 px-4 py-2.5 transition-colors hover:bg-white/[0.05]"
+                className="mt-6 inline-flex min-h-[44px] items-center gap-1.5 text-[13px] font-semibold text-[#D7FF3F] transition-opacity hover:opacity-80"
               >
-                <span>
-                  <span className="block text-[13.5px] font-semibold text-[#F5F5F3]">
-                    {t.label}
-                  </span>
-                  <span className="block text-[12px] text-white/45">{t.blurb}</span>
-                </span>
-                {t.price && (
-                  <span className="shrink-0 rounded-full border border-white/[0.12] px-2 py-0.5 text-[11px] font-semibold tabular-nums text-[#D7FF3F]">
-                    {t.price}
-                  </span>
-                )}
+                Browse all tools <ArrowRight className="h-4 w-4" strokeWidth={2} />
               </Link>
-            ))}
+            </div>
+            {/* grouped columns */}
+            <div className="grid grid-cols-2 gap-x-2 p-4">
+              {GROUP_META.map((group) => (
+                <div key={group.id}>
+                  <p className="px-3 pb-1.5 pt-1 text-[10.5px] font-bold uppercase tracking-[0.18em] text-white/35">
+                    {group.label}
+                  </p>
+                  <div className="space-y-0.5">
+                    {toolsByGroup(group.id).map((tool) => (
+                      <ToolRow key={tool.id} tool={tool} onNavigate={() => setOpen(false)} />
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       )}
@@ -153,8 +162,8 @@ export default function VilishNav() {
         <Link href="/" aria-label="Pixaura — home">
           <Wordmark size={22} />
         </Link>
-        <nav aria-label="Primary" className="hidden items-center gap-6 sm:flex">
-          <ToolsDropdown />
+        <nav aria-label="Primary" className="hidden items-center gap-5 sm:flex lg:gap-6">
+          <ToolsMegaDropdown />
           {FLAT_LINKS.map((l) => (
             <Link
               key={l.href}
@@ -211,27 +220,47 @@ export default function VilishNav() {
           ))}
         </nav>
         {mobileTools && (
-          <nav aria-label="Tools mobile" className="border-t border-white/[0.06] px-4 pb-3 pt-1">
-            {TOOLS.map((t) => (
-              <Link
-                key={t.href}
-                href={t.href}
-                onClick={() => setMobileTools(false)}
-                className="flex min-h-[44px] items-center justify-between gap-3 border-b border-white/[0.04] py-2 last:border-0"
-              >
-                <span>
-                  <span className="block text-[14px] font-semibold text-[#F5F5F3]">
-                    {t.label}
-                  </span>
-                  <span className="block text-[12px] text-white/45">{t.blurb}</span>
-                </span>
-                {t.price && (
-                  <span className="shrink-0 rounded-full border border-white/[0.12] px-2 py-0.5 text-[11px] font-semibold tabular-nums text-[#D7FF3F]">
-                    {t.price}
-                  </span>
-                )}
-              </Link>
+          <nav aria-label="Tools mobile" className="border-t border-white/[0.06] px-4 pb-4 pt-2">
+            {GROUP_META.map((group) => (
+              <div key={group.id} className="mt-1">
+                <p className="px-1 pb-1 pt-2 text-[10.5px] font-bold uppercase tracking-[0.18em] text-white/35">
+                  {group.label}
+                </p>
+                {toolsByGroup(group.id).map((tool) => {
+                  const Icon = tool.icon;
+                  return (
+                    <Link
+                      key={tool.id}
+                      href={tool.href}
+                      onClick={() => setMobileTools(false)}
+                      className="flex min-h-[44px] items-center gap-3 border-b border-white/[0.04] py-2 last:border-0"
+                    >
+                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] border border-white/[0.08] bg-white/[0.03] text-[#D7FF3F]">
+                        <Icon className="h-4 w-4" strokeWidth={1.8} />
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block text-[14px] font-semibold text-[#F5F5F3]">
+                          {tool.name}
+                        </span>
+                        <span className="block truncate text-[12px] text-white/45">
+                          {tool.tagline}
+                        </span>
+                      </span>
+                      <span className="shrink-0 rounded-full border border-white/[0.12] px-2 py-0.5 text-[11px] font-semibold tabular-nums text-[#D7FF3F]">
+                        {tool.price}
+                      </span>
+                    </Link>
+                  );
+                })}
+              </div>
             ))}
+            <Link
+              href="/tools"
+              onClick={() => setMobileTools(false)}
+              className="mt-2 inline-flex min-h-[44px] items-center gap-1.5 px-1 text-[13px] font-semibold text-[#D7FF3F]"
+            >
+              Browse all tools <ArrowRight className="h-4 w-4" strokeWidth={2} />
+            </Link>
           </nav>
         )}
       </div>
