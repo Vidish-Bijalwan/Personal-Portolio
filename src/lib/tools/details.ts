@@ -56,7 +56,7 @@ export const TOOL_DETAILS: Record<string, ToolDetail> = {
     faqs: [
       {
         q: "How long does it take?",
-        a: "Most image orders are delivered within 24 hours of payment confirmation. You'll see live progress stages while you wait.",
+        a: "Orders are fulfilled by an operator after payment confirmation — you pay, we generate, a human reviews it before delivery. You'll see live progress stages while you wait.",
       },
       {
         q: "Can I send a reference photo?",
@@ -97,7 +97,7 @@ export const TOOL_DETAILS: Record<string, ToolDetail> = {
       },
       {
         q: "How long does it take?",
-        a: "Most 4-pack orders are delivered within 24 hours of payment confirmation.",
+        a: "The 4-pack is fulfilled by an operator after payment confirmation, and every take passes human QC before delivery.",
       },
       {
         q: "Can I get four completely different ideas?",
@@ -173,7 +173,7 @@ export const TOOL_DETAILS: Record<string, ToolDetail> = {
       },
       {
         q: "How long does it take?",
-        a: "Most clip orders are delivered within 24 hours of payment confirmation.",
+        a: "Clips are fulfilled by an operator after payment confirmation, and nothing ships until it passes human QC.",
       },
     ],
     cta: "Start creating",
@@ -292,7 +292,7 @@ export const TOOL_DETAILS: Record<string, ToolDetail> = {
     faqs: [
       {
         q: "How much smaller will my file get?",
-        a: "It depends on the source, but Small typically cuts 60–80% off a phone recording. Balanced keeps near-original quality at roughly half the size.",
+        a: "Small is the most aggressive — big savings with some visible softening. Balanced is the sweet spot for most videos: much smaller files that still look sharp on phones and feeds.",
       },
       {
         q: "Will it still look good?",

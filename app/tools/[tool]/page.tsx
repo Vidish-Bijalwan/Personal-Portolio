@@ -22,8 +22,13 @@ export function generateStaticParams() {
   return TOOL_DIRECTORY.map((t) => ({ tool: t.id }));
 }
 
-export function generateMetadata({ params }: { params: { tool: string } }): Metadata {
-  const tool = toolById(params.tool);
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ tool: string }>;
+}): Promise<Metadata> {
+  const { tool: toolId } = await params;
+  const tool = toolById(toolId);
   if (!tool) return { title: "Tool not found | Pixaura" };
   return {
     title: `${tool.name} — ${tool.price} per ${tool.group === "create" ? "creation" : "job"} | Pixaura`,
@@ -32,9 +37,14 @@ export function generateMetadata({ params }: { params: { tool: string } }): Meta
   };
 }
 
-export default function ToolDetailPage({ params }: { params: { tool: string } }) {
-  const tool = toolById(params.tool);
-  const detail = toolDetail(params.tool);
+export default async function ToolDetailPage({
+  params,
+}: {
+  params: Promise<{ tool: string }>;
+}) {
+  const { tool: toolId } = await params;
+  const tool = toolById(toolId);
+  const detail = toolDetail(toolId);
   if (!tool || !detail) notFound();
 
   const Icon = tool.icon;

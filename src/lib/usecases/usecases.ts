@@ -162,7 +162,7 @@ export const USE_CASES: readonly UseCase[] = [
       },
       {
         q: "How fast is turnaround?",
-        a: "Most orders are delivered within 24 hours of payment confirmation, with live progress stages while you wait.",
+        a: "Orders are fulfilled by an operator after payment confirmation — you pay, we make it, a human reviews it before delivery. You'll see live progress stages while you wait.",
       },
     ],
     accent: "#00F0FF",
