@@ -101,7 +101,7 @@ export default async function CreatePage({
               <StaggerItem>
                 <p className="mx-auto mt-5 max-w-xl text-[15px] leading-7 text-white/[0.62] sm:text-[16px]">
                   {isVideo
-                    ? `Describe the 5-second clip. ${formatINR(priceOf("clip-5s"))}, made for you in minutes — exact price shown before you pay.`
+                    ? `Describe the 5-second clip. ${formatINR(priceOf("clip-5s"))} — exact price shown before you pay, fulfilled by an operator with human QC.`
                     : "Type what you want in plain words — you see the exact price before anything is charged. One UPI payment, human quality review, your finished piece to download."}
                 </p>
               </StaggerItem>

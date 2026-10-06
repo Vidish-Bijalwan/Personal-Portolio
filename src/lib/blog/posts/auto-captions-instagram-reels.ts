@@ -3,22 +3,22 @@ import { t, link, p, h2, list, table, callout, cta } from "./_helpers";
 
 const post: BlogPost = {
   slug: "auto-captions-instagram-reels",
-  title: "Auto Captions for Instagram Reels: Why They Matter",
+  title: "Captions for Instagram Reels: Why They Matter",
   description:
-    "Most reels are watched muted first. Learn why auto captions lift watch time, how AI captioning works, and how to get captions burned in for ₹49 per video.",
+    "Most reels are watched muted first. Learn why captions lift watch time, how captioning works, and how to get styled captions burned in for ₹49 per video.",
   date: "2026-10-06",
   category: "Creators",
   tags: ["captions", "reels", "Instagram", "accessibility", "Video Studio"],
   readingMinutes: 5,
   answer: [
-    t("Auto captions are AI-generated subtitles burned into your video — critical because most social video starts muted. AI captioning transcribes your audio and styles the text for readability. On "),
+    t("Captions are styled subtitles burned into your video — critical because most social video starts muted. Good captioning turns your script into readable, well-timed text. On "),
     link("Pixaura's Video Studio", "/video-studio"),
-    t(", auto-captioning costs a flat "),
+    t(", captioning costs a flat "),
     t("₹49 per finished video"),
-    t(": upload your clip, and the captioned video is delivered with styled, readable subtitles."),
+    t(": upload your clip, paste your script, and the captioned video is delivered with styled, readable subtitles."),
   ],
   sources: [
-    { label: "Pixaura Video Studio — auto-captioning at ₹49/job", url: "https://vidish.me/pricing" },
+    { label: "Pixaura Video Studio — captions at ₹49/job", url: "https://vidish.me/pricing" },
     { label: "VEED tools — subtitle and caption generators", url: "https://www.veed.io/tools/ai-video" },
   ],
   faqs: [
@@ -27,8 +27,8 @@ const post: BlogPost = {
       a: "A large share of social video is first watched with sound off — in feeds, offices, and public transport. Captions let muted viewers follow the content instead of scrolling past, which directly affects watch time and completion rate.",
     },
     {
-      q: "How does AI auto-captioning work?",
-      a: "A speech-recognition engine transcribes your video's audio into timed text, which is then styled and burned into the video frames. You can also supply your own script text instead of auto-transcription for full control over wording.",
+      q: "How does captioning work on Pixaura?",
+      a: "You paste your script; it's turned into timed text, styled, and burned into the video frames. Fully automatic transcription isn't available right now — script mode keeps the wording exact.",
     },
     {
       q: "What's the difference between auto captions and manual subtitles?",
@@ -44,7 +44,7 @@ const post: BlogPost = {
     },
     {
       q: "How long does captioning take?",
-      a: "The AI transcription itself takes minutes. On Pixaura, the captioned video is delivered after processing as part of the ₹49 job — most orders complete within 24 hours including the human quality check.",
+      a: "On Pixaura, captions are built from your script — paste your text and the captioned video is delivered after processing as part of the ₹49 job, with a human quality check before download.",
     },
     {
       q: "Can captions be styled to match my brand?",
@@ -73,13 +73,13 @@ const post: BlogPost = {
       [t("Accessibility: deaf and hard-of-hearing viewers get the full video.")],
       [t("Searchability: the words in your video become indexable text where platforms support it.")],
     ),
-    h2("How AI captioning works"),
+    h2("How captioning works"),
     p(
-      t("Upload your video. A transcription engine converts speech to timed text. The text is styled — font, size, position, contrast — and composited onto each frame. Pixaura's "),
+      t("Upload your video and paste your script. The text is timed, styled — font, size, position, contrast — and composited onto each frame. Pixaura's "),
       link("Video Studio", "/video-studio"),
       t(" does this as a "),
       t("₹49"),
-      t(" flat job: one finished video, captions included. If you already have exact wording (a script, a quote), you can supply the text directly instead of auto-transcription.")
+      t(" flat job: one finished video, captions included. Script mode keeps every word exactly as you wrote it.")
     ),
     h2("What good captions look like"),
     table(
@@ -97,9 +97,9 @@ const post: BlogPost = {
     callout("tip",
       t("Caption your highest-traffic video first, not your newest. Back-catalog views compound — one captioned evergreen video keeps earning muted viewers for months.")
     ),
-    h2("Auto vs manual: the honest tradeoff"),
+    h2("Script-based: the honest tradeoff"),
     p(
-      t("Manual subtitling is pixel-perfect and slow; auto captioning is minutes-fast with occasional transcription slips on names, slang, or heavy accents. For reels, the right workflow is auto-generate, then skim the preview and fix the two or three words that matter. Perfectionism that delays posting costs more reach than a typo ever will.")
+      t("Manual subtitling is pixel-perfect and slow. On Pixaura, captioning is script-based: you supply the exact words, we time and style them. That skips transcription slips on names, slang, or heavy accents entirely — the wording is yours from the start.")
     ),
     h2("Beyond reels: where else captions pay off"),
     p(

@@ -93,7 +93,7 @@ export default function Wordmark({ size = 22, tone = "light", className }: Wordm
 
       {/* ── word: PIXAURA, X as gradient cross ── */}
       <span aria-hidden="true" className="ml-[0.42em] font-display font-bold tracking-[0.18em]">
-        {"PIX".split("").map((ch, i) => (
+        {"PI".split("").map((ch, i) => (
           <span key={i}>{ch}</span>
         ))}
         <span className="px-aura-text">X</span>

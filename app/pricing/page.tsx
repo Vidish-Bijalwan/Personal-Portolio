@@ -46,7 +46,7 @@ const TIER_META: Record<PriceEntry["id"], TierMeta> = {
   },
   "clip-5s": {
     blurb:
-      "A 5-second AI video clip from your description. Made for you in minutes, not 24 hours.",
+      "A 5-second AI video clip from your description. Fulfilled by an operator and human-reviewed before delivery.",
     action: { label: "Create a clip", href: "/create?media=video" },
   },
   "video-studio": {

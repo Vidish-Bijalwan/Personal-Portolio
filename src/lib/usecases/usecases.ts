@@ -58,7 +58,7 @@ export const USE_CASES: readonly UseCase[] = [
     title: "Product shots",
     titleAccent: "that sell.",
     subtitle:
-      "Studio-grade product photography and ad creatives without booking a studio. Show your product, see the exact price, pay once — list it the same day.",
+      "Studio-grade product photography and ad creatives without booking a studio. Show your product, see the exact price, pay once — then download and list.",
     heroImage: "/examples/10-perfume-ad.webp",
     heroImageAlt: "Luxury perfume product shot — AI-generated example",
     toolIds: ["product-photo", "pack-4", "clip-5s"],

@@ -268,7 +268,7 @@ const FAQS = [
   },
   {
     q: "How long does it take to get my image?",
-    a: "Most orders are delivered within 24 hours. Every creation passes a human quality check before download, so you're never stuck with a bad render.",
+    a: "Every creation passes a human quality check before download — track live progress in your dashboard.",
   },
   {
     q: "Can I use my own photo as a reference?",
@@ -868,7 +868,7 @@ const MADE_FOR = [
   {
     href: "/for-marketers",
     title: "Marketers",
-    copy: "Campaign creatives and ad variants on demand — no retainer, no timeline.",
+    copy: "Campaign creatives and ad variants on demand — no retainer, pay per piece.",
     img: "/examples/1-sneaker-ad.webp",
     imgAlt: "Cinematic sneaker product photograph — AI-generated example",
     accent: "#FF2D78",
@@ -1333,7 +1333,7 @@ export default function VilishLanding() {
                   Made here, <span className="text-[#FF2D78]">priced per piece.</span>
                 </>
               }
-              subtitle="Every piece below was ordered, reviewed by a human, and delivered — each with the brief that made it."
+              subtitle="Every piece below was made with Pixaura and reviewed by a human — each with the brief that made it."
             />
           </div>
           <div className="mx-auto mt-10 max-w-5xl px-4">
@@ -1395,7 +1395,7 @@ export default function VilishLanding() {
               <span className="rounded-full border border-[#D7FF3F]/40 px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#D7FF3F]">
                 Now live
               </span>
-              Video — 5s motion clips at {formatINR(priceOf("clip-5s"))} each, made in minutes. Every
+              Video — 5s motion clips at {formatINR(priceOf("clip-5s"))} each, human-reviewed before delivery. Every
               frame you see here is still a single creation.
             </p>
           </Reveal>

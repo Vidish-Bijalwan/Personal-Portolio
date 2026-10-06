@@ -100,7 +100,7 @@ const post: BlogPost = {
       [t("Describe what you want on the "), link("create page", "/create"), t(" or in "), link("Video Studio", "/video-studio"), t(".")],
       [t("See the exact price up front — the estimate is shown before you commit.")],
       [t("Pay with UPI and tap “I've paid”.")],
-      [t("Your creation is made, passes a human quality check, and is delivered — most orders within 24 hours.")],
+      [t("Your creation is made, passes a human quality check, and is delivered — track live progress in your dashboard while you wait.")],
     ),
     callout("note",
       t("“Pay per creation” is not “free trial with a catch”. There's no trial converting to a paid plan, because there's no plan at all.")

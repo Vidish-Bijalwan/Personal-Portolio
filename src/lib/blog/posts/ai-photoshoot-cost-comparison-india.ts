@@ -17,7 +17,7 @@ const post: BlogPost = {
     t("₹29 per image"),
     t(" or "),
     t("₹49 per product photo"),
-    t(", with most orders delivered within 24 hours. AI wins on cost and speed for catalog and concept work; traditional shoots still win for campaigns needing real people, real places, and art direction."),
+    t(", with every order human-reviewed before delivery. AI wins on cost and speed for catalog and concept work; traditional shoots still win for campaigns needing real people, real places, and art direction."),
   ],
   sources: [
     { label: "Pixaura pricing — ₹29 images, ₹49 product photos", url: "https://vidish.me/pricing" },
@@ -38,7 +38,7 @@ const post: BlogPost = {
     },
     {
       q: "How fast is AI vs a photoshoot?",
-      a: "Pixaura delivers most orders within 24 hours of payment confirmation. A traditional shoot needs scheduling, the shoot day itself, and editing turnaround — typically days to weeks.",
+      a: "Pixaura orders are fulfilled by an operator after payment confirmation, with every image human-reviewed before delivery. A traditional shoot needs scheduling, the shoot day itself, and editing turnaround — typically days to weeks.",
     },
     {
       q: "Is AI-generated imagery legal for commercial use in India?",
@@ -75,7 +75,7 @@ const post: BlogPost = {
       [
         ["Per finished photo", "Day-rate ÷ usable shots", "₹29 (image) / ₹49 (product photo)"],
         ["Revisions", "Reshoot fees + scheduling", "₹19 remake"],
-        ["Turnaround", "Days to weeks", "Most orders within 24 hours"],
+        ["Turnaround", "Days to weeks", "Operator-fulfilled, human-reviewed"],
         ["Minimum batch", "The whole shoot day", "One single image"],
         ["Style variants", "More shoot time", "New prompt, same price"],
       ]

@@ -625,7 +625,7 @@ export default function Composer({ variant = "hero", className, initialMedia = "
       )}
       {mediaMode === "video" && (
         <p className="mb-4 text-[12px] leading-5 text-white/40">
-          {formatINR(priceOf("clip-5s"))} per 5s clip — made for you in minutes. AI-generated; a watermarked
+          {formatINR(priceOf("clip-5s"))} per 5s clip — fulfilled by an operator with human QC. AI-generated; a watermarked
           preview shows until you unlock the clean HD file.
         </p>
       )}

@@ -15,7 +15,7 @@ const post: BlogPost = {
     link("Pixaura", "/"),
     t(", a product photo costs a flat "),
     t("₹49"),
-    t(" — you describe the product and the look you want, pay over UPI, and receive a human-reviewed image, most orders within 24 hours. It suits sellers who need clean catalog shots fast; it doesn't replace a full brand campaign shoot."),
+    t(" — you describe the product and the look you want, pay over UPI, and receive a human-reviewed image. It suits sellers who need clean catalog shots fast; it doesn't replace a full brand campaign shoot."),
   ],
   sources: [
     { label: "Pixaura pricing — product photo ₹49", url: "https://vidish.me/pricing" },
@@ -76,7 +76,7 @@ const post: BlogPost = {
       ["", "AI product photo (Pixaura)", "Traditional photoshoot"],
       [
         ["Cost", "₹49 per finished photo", "Photographer day-rate + studio + editing"],
-        ["Turnaround", "Most orders within 24 hours", "Days to weeks"],
+        ["Turnaround", "Operator-fulfilled, human-reviewed", "Days to weeks"],
         ["Revisions", "Remake for ₹19", "Reshoot scheduling + fees"],
         ["Consistency across SKUs", "Same prompt template, repeatable", "Depends on the shoot day"],
         ["Physical props & models", "Simulated", "Real — better for complex scenes"],
