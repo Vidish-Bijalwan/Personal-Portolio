@@ -43,14 +43,17 @@ const STEAM = [
   { d: "M254,64 q8,-14 0,-28 q-8,-14 0,-28", delay: "-1.7s" },
 ];
 
-/** Flame tongues: center-x, tip height, half-width, flicker timing. */
+/** Flame tongues: center-x, tip height, half-width, flicker timing.
+ * The outer pair sits OUTSIDE the burger width (burger spans x 95-325) so
+ * flames stay visible licking up beside the food in frames 2-3; the inner
+ * tongues show through while the burger is still assembling (frames 0-1). */
 const TONGUES = [
-  { cx: 96, tip: 226, w: 20, delay: "0s", dur: "0.55s" },
+  { cx: 70, tip: 196, w: 20, delay: "0s", dur: "0.55s" },
   { cx: 138, tip: 198, w: 24, delay: "-0.2s", dur: "0.42s" },
   { cx: 182, tip: 216, w: 21, delay: "-0.35s", dur: "0.62s" },
   { cx: 226, tip: 190, w: 25, delay: "-0.1s", dur: "0.48s" },
   { cx: 270, tip: 214, w: 21, delay: "-0.45s", dur: "0.58s" },
-  { cx: 314, tip: 224, w: 19, delay: "-0.28s", dur: "0.5s" },
+  { cx: 350, tip: 192, w: 20, delay: "-0.28s", dur: "0.5s" },
 ];
 
 const COALS = [
