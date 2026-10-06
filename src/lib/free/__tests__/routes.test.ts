@@ -378,7 +378,7 @@ describe('free image end-to-end: deliver → preview → unlock → clean', () =
     expect(locked.status).toBe(402);
     expect(locked.body.code).toBe('LOCKED');
 
-    // unlock creates the ₹29 order
+    // unlock creates the ₹19 order
     const unlock = await json(
       await h('POST', 'app/api/gen/[id]/unlock/route.ts')(
         req('POST', `/api/gen/${id}/unlock`),
@@ -386,7 +386,7 @@ describe('free image end-to-end: deliver → preview → unlock → clean', () =
       )
     );
     expect(unlock.status).toBe(201);
-    expect(unlock.body.payment.amountPaise).toBe(2900);
+    expect(unlock.body.payment.amountPaise).toBe(1900);
     expect(unlock.body.payment.code).toBeTruthy();
     expect(unlock.body.payment.upiUri).toContain('upi://pay');
     const orderCode = unlock.body.payment.code as string;
@@ -465,7 +465,7 @@ describe('free image end-to-end: deliver → preview → unlock → clean', () =
 describe('POST /api/video/order', () => {
   const FILE = 'app/api/video/order/route.ts';
 
-  it('creates a paid video row + ₹99 order link, uncapped', async () => {
+  it('creates a paid video row + ₹89 order link, uncapped', async () => {
     mockAuth.userId = 'user-1';
     const db = client.getDb();
     let lastId = '';
@@ -477,7 +477,7 @@ describe('POST /api/video/order', () => {
         )
       );
       expect(status).toBe(201);
-      expect(body.payment.amountPaise).toBe(9900);
+      expect(body.payment.amountPaise).toBe(8900);
       expect(body.payment.code).toBeTruthy();
       lastId = body.id;
     }
@@ -503,7 +503,7 @@ describe('POST /api/video/order', () => {
       .select()
       .from(schema.orders)
       .where(eq(schema.orders.id, links[0].orderId));
-    expect(order.amountPaise).toBe(9900);
+    expect(order.amountPaise).toBe(8900);
     expect(order.provider).toBe('manual_upi');
   });
 
@@ -581,7 +581,7 @@ describe('paid video clean 402 → 200 after the verify hook', () => {
     );
     expect(noUnlock.status).toBe(400);
 
-    // …the ₹99 payment verify flips unlocked instead
+    // …the ₹89 payment verify flips unlocked instead
     await manualUpi.submitPaymentUtr({
       code: orderCode,
       utrReference: 'VIDEOUTR999001',
@@ -626,7 +626,7 @@ describe('GET /api/gen/[id]/payment', () => {
     expect(withOrder.body.order).toMatchObject({
       code: unlocked.body.payment.code,
       status: 'PAYMENT_PENDING',
-      amountPaise: 2900,
+      amountPaise: 1900,
       purpose: 'unlock',
     });
     expect(withOrder.body.order.expiresAt).toBeTruthy();

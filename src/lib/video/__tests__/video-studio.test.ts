@@ -114,7 +114,7 @@ describe('video tool params validation', () => {
     expect(canTransitionVideoJob('processing', 'done')).toBe(true);
     expect(canTransitionVideoJob('processing', 'queued')).toBe(false);
     expect(canTransitionVideoJob('done', 'failed')).toBe(false);
-    expect(VIDEO_JOB_PRICE_PAISE).toBe(4900);
+    expect(VIDEO_JOB_PRICE_PAISE).toBe(3900);
   });
 
   it('decodes strict base64', () => {
@@ -256,21 +256,21 @@ describe('POST /api/video-jobs', () => {
     mockAuth.userId = 'vuser-1';
   });
 
-  it('creates a queued tts job + ₹49 order', async () => {
+  it('creates a queued tts job + ₹39 order', async () => {
     mockAuth.userId = 'vuser-1';
     const res = await h('POST', FILE)(ttsForm(), { params: Promise.resolve({}) });
     const { status, body } = await json(res);
     expect(status).toBe(201);
     expect(body.id).toBeTruthy();
     expect(body.tool).toBe('tts');
-    expect(body.pricePaise).toBe(4900);
+    expect(body.pricePaise).toBe(3900);
     expect(body.watchUrl).toContain('/video-studio/watch/');
     expect(body.payment?.code).toBeTruthy();
-    expect(body.payment?.amountPaise).toBe(4900);
+    expect(body.payment?.amountPaise).toBe(3900);
 
     const db = client.getDb();
     const rows = await db.select().from(schema.videoJobs).where(eq(schema.videoJobs.id, body.id));
-    expect(rows[0]).toMatchObject({ userId: 'vuser-1', tool: 'tts', status: 'queued', unlocked: false, priceCents: 4900 });
+    expect(rows[0]).toMatchObject({ userId: 'vuser-1', tool: 'tts', status: 'queued', unlocked: false, priceCents: 3900 });
     const links = await db.select().from(schema.videoJobOrders).where(eq(schema.videoJobOrders.videoJobId, body.id));
     expect(links[0]?.purpose).toBe('video_studio');
   });

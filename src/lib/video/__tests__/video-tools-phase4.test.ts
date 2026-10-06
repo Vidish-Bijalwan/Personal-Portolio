@@ -59,8 +59,8 @@ describe('phase 4 tool registry', () => {
 
   it('prices every tool from the real catalog — no hardcoded paise', () => {
     expect(VIDEO_JOB_PRICE_PAISE).toBe(priceOf('video-studio'));
-    expect(VIDEO_JOB_PRICE_PAISE).toBe(4900);
-    expect(formatINR(priceOf('video-studio'))).toBe('₹49');
+    expect(VIDEO_JOB_PRICE_PAISE).toBe(3900);
+    expect(formatINR(priceOf('video-studio'))).toBe('₹39');
   });
 
   it('maps each tool to its real output mime', () => {
@@ -333,10 +333,10 @@ describe('POST /api/video-jobs — phase 4 tools', () => {
       const { status, body } = await json(res);
       expect(status).toBe(201);
       expect(body.tool).toBe(tool);
-      expect(body.pricePaise).toBe(4900);
+      expect(body.pricePaise).toBe(3900);
       const db = client.getDb();
       const rows = await db.select().from(schema.videoJobs).where(eq(schema.videoJobs.id, body.id));
-      expect(rows[0]).toMatchObject({ tool, mime, status: 'queued', priceCents: 4900 });
+      expect(rows[0]).toMatchObject({ tool, mime, status: 'queued', priceCents: 3900 });
     }
   });
 

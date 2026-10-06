@@ -5,7 +5,7 @@ const post: BlogPost = {
   slug: "ai-photoshoot-cost-comparison-india",
   title: "AI vs Traditional Photoshoot: Honest Cost Comparison (India)",
   description:
-    "What does a photoshoot cost in India vs AI generation? Compare real line items — photographer, studio, editing — against ₹29 AI images and ₹49 product photos.",
+    "What does a photoshoot cost in India vs AI generation? Compare real line items — photographer, studio, editing — against ₹19 AI images and ₹39 product photos.",
   date: "2026-10-06",
   category: "Comparisons",
   tags: ["cost comparison", "photoshoot", "AI", "India", "photography"],
@@ -14,13 +14,13 @@ const post: BlogPost = {
     t("A traditional photoshoot in India involves photographer fees, studio/location rental, styling, and editing time — costs that scale per shoot day regardless of how many usable shots you get. AI generation on "),
     link("Pixaura", "/"),
     t(" costs "),
-    t("₹29 per image"),
+    t("₹19 per image"),
     t(" or "),
-    t("₹49 per product photo"),
+    t("₹39 per product photo"),
     t(", with every order human-reviewed before delivery. AI wins on cost and speed for catalog and concept work; traditional shoots still win for campaigns needing real people, real places, and art direction."),
   ],
   sources: [
-    { label: "Pixaura pricing — ₹29 images, ₹49 product photos", url: "https://vidish.me/pricing" },
+    { label: "Pixaura pricing — ₹19 images, ₹39 product photos", url: "https://vidish.me/pricing" },
     { label: "VEED AI tools — AI production vs traditional workflows", url: "https://www.veed.io/tools/ai-video" },
   ],
   faqs: [
@@ -30,7 +30,7 @@ const post: BlogPost = {
     },
     {
       q: "What does the same work cost with AI?",
-      a: "On Pixaura: ₹29 per AI image, ₹49 per product photo, ₹19 for a remake if the first version misses. Ten product shots cost ten times ₹49 — no day-rates, no rental, no editing queue.",
+      a: "On Pixaura: ₹19 per AI image, ₹39 per product photo, ₹9 for a remake if the first version misses. Ten product shots cost ten times ₹39 — no day-rates, no rental, no editing queue.",
     },
     {
       q: "Can AI fully replace a photoshoot?",
@@ -73,15 +73,15 @@ const post: BlogPost = {
     table(
       ["Cost driver", "Traditional shoot", "Pixaura AI"],
       [
-        ["Per finished photo", "Day-rate ÷ usable shots", "₹29 (image) / ₹49 (product photo)"],
-        ["Revisions", "Reshoot fees + scheduling", "₹19 remake"],
+        ["Per finished photo", "Day-rate ÷ usable shots", "₹19 (image) / ₹39 (product photo)"],
+        ["Revisions", "Reshoot fees + scheduling", "₹9 remake"],
         ["Turnaround", "Days to weeks", "Operator-fulfilled, human-reviewed"],
         ["Minimum batch", "The whole shoot day", "One single image"],
         ["Style variants", "More shoot time", "New prompt, same price"],
       ]
     ),
     callout("tip",
-      t("The killer AI advantage isn't just price — it's batch size one. Need a single Diwali banner at 11pm? That's a ₹29 order, not a rescheduled shoot.")
+      t("The killer AI advantage isn't just price — it's batch size one. Need a single Diwali banner at 11pm? That's a ₹19 order, not a rescheduled shoot.")
     ),
     h2("Where traditional still wins"),
     p(
@@ -93,7 +93,7 @@ const post: BlogPost = {
     h2("A decision framework: which projects go where"),
     p(
       t("Run every upcoming visual need through three questions. Is the subject real and specific — your storefront, your team, your exact prototype? Traditional. Is it conceptual or catalog — a mood, a variant, a product on a clean background? AI, starting at "),
-      t("₹29"),
+      t("₹19"),
       t(" on the "),
       link("create page", "/create"),
       t(". Is it the hero campaign the brand will be judged on? Traditional, with AI-generated concepts as the brief.")
@@ -105,7 +105,7 @@ const post: BlogPost = {
     list(
       [t("AI for the long tail: catalog shots, color variants, seasonal refreshes, ad test creatives — see our "), link("product photography guide", "/blog/ai-product-photography-india-sellers"), t(".")],
       [t("Traditional for the tentpoles: brand campaign, lookbook, launch event.")],
-      [t("AI for pre-visualization: generate the concept for ₹29, then brief the photographer with exactly what you want — fewer surprises on shoot day.")],
+      [t("AI for pre-visualization: generate the concept for ₹19, then brief the photographer with exactly what you want — fewer surprises on shoot day.")],
     ),
     p(
       t("This is also where "),
@@ -114,7 +114,7 @@ const post: BlogPost = {
     ),
     cta(
       "Price your next shoot in AI terms",
-      "One product photo: ₹49. One concept image: ₹29. Do the math.",
+      "One product photo: ₹39. One concept image: ₹19. Do the math.",
       "View pricing",
       "/pricing"
     ),

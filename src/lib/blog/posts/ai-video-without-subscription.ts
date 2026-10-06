@@ -5,7 +5,7 @@ const post: BlogPost = {
   slug: "ai-video-without-subscription",
   title: "AI Video Without a Subscription: What Pay-Per-Clip Costs",
   description:
-    "Can you make AI videos without a monthly plan? Yes — pay-per-clip pricing explained: what ₹99 gets you on Pixaura, when subscriptions win, and traps to avoid.",
+    "Can you make AI videos without a monthly plan? Yes — pay-per-clip pricing explained: what ₹89 gets you on Pixaura, when subscriptions win, and traps to avoid.",
   date: "2026-10-06",
   category: "Pricing",
   tags: ["AI video", "no subscription", "pay per clip", "India"],
@@ -14,9 +14,9 @@ const post: BlogPost = {
     t("Yes — several AI video tools work without a subscription. "),
     link("Pixaura", "/"),
     t(" charges a flat "),
-    t("₹99 per 5-second AI video clip"),
+    t("₹89 per 5-second AI video clip"),
     t(" and "),
-    t("₹49 per Video Studio job"),
+    t("₹39 per Video Studio job"),
     t(" (voice-over, captions, or trim + text), paid per order over UPI. Credit-pack tools like "),
     link("TalkPix", "https://www.talkpix.ai/pricing"),
     t(" are also subscription-free but require buying credits upfront. Subscriptions only win for daily high-volume producers."),
@@ -28,7 +28,7 @@ const post: BlogPost = {
   faqs: [
     {
       q: "Do I need a subscription to generate AI videos?",
-      a: "No. Pay-per-clip services (Pixaura: ₹99 per 5-second clip) and credit-pack tools (TalkPix) both work without any monthly plan. You pay only for what you render.",
+      a: "No. Pay-per-clip services (Pixaura: ₹89 per 5-second clip) and credit-pack tools (TalkPix) both work without any monthly plan. You pay only for what you render.",
     },
     {
       q: "What's the catch with no-subscription AI video?",
@@ -36,7 +36,7 @@ const post: BlogPost = {
     },
     {
       q: "Can I edit videos without a subscription too?",
-      a: "Yes. Pixaura's Video Studio does voice-over/TTS, auto-captioning, and trim + text overlay at ₹49 per finished video — one job, one price, no plan.",
+      a: "Yes. Pixaura's Video Studio does voice-over/TTS, auto-captioning, and trim + text overlay at ₹39 per finished video — one job, one price, no plan.",
     },
     {
       q: "Can I mix subscription and pay-per-clip tools?",
@@ -66,10 +66,10 @@ const post: BlogPost = {
     table(
       ["", "Flat per-clip (Pixaura)", "Credit packs (e.g. TalkPix)"],
       [
-        ["You pay", "₹99 per 5s clip, when you order", "Upfront for a pack of credits"],
+        ["You pay", "₹89 per 5s clip, when you order", "Upfront for a pack of credits"],
         ["Price per render", "Fixed and shown before you commit", "Varies by length × resolution × model"],
         ["Expiry", "Nothing to expire", "Usually none — but cash is locked in credits"],
-        ["Budgeting", "Trivial: clips × ₹99", "Requires the provider's credit table"],
+        ["Budgeting", "Trivial: clips × ₹89", "Requires the provider's credit table"],
       ]
     ),
     p(
@@ -77,16 +77,16 @@ const post: BlogPost = {
       link("its pricing page", "https://www.talkpix.ai/pricing"),
       t(" — the good kind of transparency to demand from any credit system.")
     ),
-    h2("What ₹99 actually buys"),
+    h2("What ₹89 actually buys"),
     p(
       t("A 5-second AI video clip generated from your description. You write the prompt on the "),
       link("create page", "/create?media=video"),
       t(", the estimate shows "),
-      t("₹99"),
+      t("₹89"),
       t(" before you pay, and that's the whole transaction. Need it polished? A "),
       link("Video Studio", "/video-studio"),
       t(" job — voice-over, captions, or trim + text — is a flat "),
-      t("₹49"),
+      t("₹39"),
       t(" per finished video.")
     ),
     callout("tip",
@@ -95,7 +95,7 @@ const post: BlogPost = {
     h2("What about free AI video tools?"),
     p(
       t("Free tiers exist, and they're fine for experiments. The economics are straightforward: free tiers are marketing — watermarks, low resolution, slow queues, and tight monthly caps are the norm. They're designed to convert you, not to serve you. Use them to learn what AI video can do; when a video matters (a client, a launch, a paid ad), pay the "),
-      t("₹99"),
+      t("₹89"),
       t(" for a clean, full-quality clip with no watermark and no strings.")
     ),
     h2("The quiet-month test"),
@@ -106,7 +106,7 @@ const post: BlogPost = {
     ),
     h2("When you should subscribe after all"),
     p(
-      t("If you're an agency rendering client videos every working day, do the subscription math honestly: monthly fee ÷ videos produced = your real per-video cost. If that number beats ₹99 and you'll sustain the volume, subscribe. Everyone else is subsidizing the heavy users.")
+      t("If you're an agency rendering client videos every working day, do the subscription math honestly: monthly fee ÷ videos produced = your real per-video cost. If that number beats ₹89 and you'll sustain the volume, subscribe. Everyone else is subsidizing the heavy users.")
     ),
     h2("Traps that look subscription-free but aren't"),
     list(
@@ -116,7 +116,7 @@ const post: BlogPost = {
       [t("Per-export fees: the render is cheap, downloading it isn't.")],
     ),
     cta(
-      "One clip, one price: ₹99",
+      "One clip, one price: ₹89",
       "No plan, no credits, no trial that converts. Just the clip.",
       "Make your clip",
       "/create?media=video"

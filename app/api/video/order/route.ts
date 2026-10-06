@@ -12,7 +12,7 @@ import { createGenerationOrder } from '@/lib/free/orders';
  * POST /api/video/order
  * Body: { prompt (1..2000), aspectRatio? }
  * Auth required. Creates a paid video generation (tier='paid',
- * media_type='video', ₹99 = 9900 paise) + a manual-UPI order linked with
+ * media_type='video', ₹89 = 8900 paise) + a manual-UPI order linked with
  * purpose='video'. No daily cap. The watcher generates the clip
  * immediately on order (before payment); the watermarked preview shows
  * while payment is pending and the clean mp4 unlocks on owner verify.

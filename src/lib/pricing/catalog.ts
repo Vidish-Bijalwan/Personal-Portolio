@@ -23,12 +23,12 @@ export interface PriceEntry {
 }
 
 export const PRICE_CATALOG: readonly PriceEntry[] = [
-  { id: "single-image", label: "Single image", paise: 2900 },
-  { id: "pack-4", label: "4-pack", paise: 7900 },
-  { id: "product-photo", label: "Product photo", paise: 4900 },
-  { id: "clip-5s", label: "5s clip", paise: 9900 },
-  { id: "video-studio", label: "Video Studio", paise: 4900 },
-  { id: "remake", label: "Remake", paise: 1900 },
+  { id: "single-image", label: "Single image", paise: 1900 },
+  { id: "pack-4", label: "4-pack", paise: 6900 },
+  { id: "product-photo", label: "Product photo", paise: 3900 },
+  { id: "clip-5s", label: "5s clip", paise: 8900 },
+  { id: "video-studio", label: "Video Studio", paise: 3900 },
+  { id: "remake", label: "Remake", paise: 900 },
 ] as const;
 
 export function priceOf(id: PriceEntry["id"]): number {

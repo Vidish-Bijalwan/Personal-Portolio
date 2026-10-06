@@ -5,7 +5,7 @@ const post: BlogPost = {
   slug: "ai-voice-over-reels-india",
   title: "AI Voice-Over for Reels: A Creator's Guide for India",
   description:
-    "Add AI voice-over to your reels without a studio or mic. How TTS voice-over works, what it costs (₹49/job on Pixaura), and how to write scripts that sound natural.",
+    "Add AI voice-over to your reels without a studio or mic. How TTS voice-over works, what it costs (₹39/job on Pixaura), and how to write scripts that sound natural.",
   date: "2026-10-06",
   category: "Creators",
   tags: ["voice-over", "TTS", "reels", "Video Studio", "India"],
@@ -14,17 +14,17 @@ const post: BlogPost = {
     t("AI voice-over (text-to-speech) turns a written script into spoken audio you can lay over your video — no microphone or recording setup needed. On "),
     link("Pixaura's Video Studio", "/video-studio"),
     t(", a voice-over job costs a flat "),
-    t("₹49 per finished video"),
+    t("₹39 per finished video"),
     t(": you upload your clip, paste your script (up to 2000 characters), pick a voice vibe — Warm, Energetic, Calm, or Bold — and the finished video is delivered with the voice-over mixed in."),
   ],
   sources: [
-    { label: "Pixaura Video Studio — voice-over & TTS at ₹49/job", url: "https://vidish.me/pricing" },
+    { label: "Pixaura Video Studio — voice-over & TTS at ₹39/job", url: "https://vidish.me/pricing" },
     { label: "VEED AI tools — voice generation and audio tools", url: "https://www.veed.io/tools/ai-video" },
   ],
   faqs: [
     {
       q: "How does AI voice-over work?",
-      a: "You provide a script as text and choose a voice style. A text-to-speech engine generates the spoken audio, which is then mixed with your video — the original audio is ducked (lowered) under the voice so both are audible. Pixaura's Video Studio does this at ₹49 per finished video.",
+      a: "You provide a script as text and choose a voice style. A text-to-speech engine generates the spoken audio, which is then mixed with your video — the original audio is ducked (lowered) under the voice so both are audible. Pixaura's Video Studio does this at ₹39 per finished video.",
     },
     {
       q: "How long a script can I use?",
@@ -40,7 +40,7 @@ const post: BlogPost = {
     },
     {
       q: "What if I don't like the first voice-over?",
-      a: "Rewrite the weak lines first — most “bad AI voice” problems are script problems. If the delivery itself misses, Pixaura's Video Studio jobs are priced per finished video (₹49), so re-running with a different vibe is a contained cost, not a sunk subscription.",
+      a: "Rewrite the weak lines first — most “bad AI voice” problems are script problems. If the delivery itself misses, Pixaura's Video Studio jobs are priced per finished video (₹39), so re-running with a different vibe is a contained cost, not a sunk subscription.",
     },
     {
       q: "Which voice vibe should I pick?",
@@ -63,7 +63,7 @@ const post: BlogPost = {
       t("A "),
       link("Video Studio", "/video-studio"),
       t(" voice-over job is one finished video for "),
-      t("₹49"),
+      t("₹39"),
       t(": your uploaded clip + generated speech mixed professionally (original audio ducked underneath), delivered after processing. No subscription, no per-minute metering — the job price is the price.")
     ),
     h2("Writing scripts that don't sound like a robot"),
@@ -79,7 +79,7 @@ const post: BlogPost = {
     ),
     h2("Voice-over vs recording yourself"),
     table(
-      ["", "AI voice-over (₹49/job)", "Record yourself"],
+      ["", "AI voice-over (₹39/job)", "Record yourself"],
       [
         ["Setup", "None — script in, video out", "Mic, quiet room, retakes"],
         ["Consistency", "Identical delivery every take", "Varies with energy and day"],
@@ -92,7 +92,7 @@ const post: BlogPost = {
     list(
       [t("Upload your clip (or your generated one) in "), link("Video Studio", "/video-studio"), t(".")],
       [t("Paste your script — up to 2000 characters — and pick a voice vibe.")],
-      [t("Start the job (₹49 flat) and wait for processing.")],
+      [t("Start the job (₹39 flat) and wait for processing.")],
       [t("Preview the result. The voice sits over your video with the original audio lowered beneath it.")],
     ),
     callout("tip",
@@ -101,11 +101,11 @@ const post: BlogPost = {
     h2("Where voice-over fits in your content stack"),
     p(
       t("Voice-over is one step in a pipeline. The typical stack: generate or shoot the visual (an AI image from "),
-      t("₹29"),
+      t("₹19"),
       t(" on the "),
       link("create page", "/create"),
       t(", or a 5-second AI clip at "),
-      t("₹99"),
+      t("₹89"),
       t("), add the voice-over, then captions. Each step is priced separately on the "),
       link("pricing page", "/pricing"),
       t(" — which means you only pay for the steps you need. A talking-head video you shot yourself skips straight to captions; a faceless explainer uses the full stack.")
@@ -118,11 +118,11 @@ const post: BlogPost = {
       t("Most reel viewers watch muted first. A voice-over plus burned-in captions covers both audiences — sound-on gets the narration, sound-off gets the text. Pixaura's Video Studio also does "),
       link("auto-captioning", "/blog/auto-captions-instagram-reels"),
       t(" at the same "),
-      t("₹49 per finished video"),
+      t("₹39 per finished video"),
       t(", and you can combine voice-over and captions across jobs for a fully finished reel.")
     ),
     cta(
-      "Add a voice-over for ₹49",
+      "Add a voice-over for ₹39",
       "Script in, finished video out. Four voice vibes to choose from.",
       "Open Video Studio",
       "/video-studio"

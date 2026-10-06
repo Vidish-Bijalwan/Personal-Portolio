@@ -10,7 +10,7 @@ import { createGenerationOrder, findPendingOrderLink } from '@/lib/free/orders';
  * POST /api/gen/[id]/unlock
  * Owner-gated. FREE-TIER IMAGES ONLY (tier='free'): paid video rows are
  * rejected — their payment was already taken at /api/video/order time.
- * Requires status=done and unlocked=false. Creates a ₹29 (2900 paise)
+ * Requires status=done and unlocked=false. Creates a ₹19 (1900 paise)
  * manual-UPI order via the existing payment flow and links it with
  * purpose='unlock'. Idempotent: a still-pending unlock order is resumed
  * instead of duplicated. Returns { id, payment } in the payment-modal

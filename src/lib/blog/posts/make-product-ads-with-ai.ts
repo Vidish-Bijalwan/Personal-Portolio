@@ -5,18 +5,18 @@ const post: BlogPost = {
   slug: "make-product-ads-with-ai",
   title: "How to Make Product Ads with AI: Photo to Finished Video",
   description:
-    "Turn a product photo into a finished video ad with AI: script, voice-over, captions, trim. A step-by-step workflow with Pixaura's ₹49 product photos.",
+    "Turn a product photo into a finished video ad with AI: script, voice-over, captions, trim. A step-by-step workflow with Pixaura's ₹39 product photos.",
   date: "2026-10-06",
   category: "Sellers",
   tags: ["product ads", "video ads", "AI", "Video Studio", "sellers"],
   readingMinutes: 6,
   answer: [
     t("An AI product ad workflow has four steps: (1) generate a studio-grade product photo ("),
-    t("₹49 on Pixaura"),
+    t("₹39 on Pixaura"),
     t("), (2) generate or shoot a short product clip, (3) add an AI voice-over and auto captions in "),
     link("Video Studio", "/video-studio"),
     t(" ("),
-    t("₹49 per finished video"),
+    t("₹39 per finished video"),
     t("), and (4) trim with a text overlay for the hook. Total: a finished ad for a few hundred rupees — no shoot, no editor, no subscription."),
   ],
   sources: [
@@ -26,7 +26,7 @@ const post: BlogPost = {
   faqs: [
     {
       q: "What do I need to start making AI product ads?",
-      a: "A product (or a clear description of it) and a 30–60 second script. Pixaura handles the rest: ₹49 for the product photo, ₹99 if you want a 5-second AI clip generated, and ₹49 per Video Studio job for voice-over, captions, or trim + text.",
+      a: "A product (or a clear description of it) and a 30–60 second script. Pixaura handles the rest: ₹39 for the product photo, ₹89 if you want a 5-second AI clip generated, and ₹39 per Video Studio job for voice-over, captions, or trim + text.",
     },
     {
       q: "How long does it take to make an AI product ad?",
@@ -60,12 +60,12 @@ const post: BlogPost = {
       link("Pixaura", "/"),
       t("'s actual products and prices.")
     ),
-    h2("Step 1 — The product photo (₹49)"),
+    h2("Step 1 — The product photo (₹39)"),
     p(
       t("Everything starts with a strong still. Order a "),
       link("product photo", "/create?service=product-photo"),
       t(" for "),
-      t("₹49"),
+      t("₹39"),
       t(": describe the product, the surface, the light. Our "),
       link("product photography guide", "/blog/ai-product-photography-india-sellers"),
       t(" covers briefing in detail. This one image becomes your ad's hero frame, thumbnail, and catalog shot — triple duty.")
@@ -73,12 +73,12 @@ const post: BlogPost = {
     h2("Step 2 — The clip"),
     p(
       t("Two options. Generate a 5-second AI clip from a description for "),
-      t("₹99"),
+      t("₹89"),
       t(" on the "),
       link("create page", "/create?media=video"),
       t(" — good for cinematic product reveals — or shoot 10 seconds on your phone. Phone footage is fine; the AI polish in step 3 does the heavy lifting.")
     ),
-    h2("Step 3 — Voice-over + captions (₹49/job)"),
+    h2("Step 3 — Voice-over + captions (₹39/job)"),
     p(
       t("Write a 40–60 word script: hook in the first line, one benefit per sentence, call to action last. Then in "),
       link("Video Studio", "/video-studio"),
@@ -87,34 +87,34 @@ const post: BlogPost = {
       t(" (pick Warm for friendly, Energetic for launches) and "),
       link("auto captions", "/blog/auto-captions-instagram-reels"),
       t(" — each a "),
-      t("₹49"),
+      t("₹39"),
       t(" job. Sound-on viewers get the narration; muted scrollers get the text.")
     ),
     callout("tip",
       t("The first 2 seconds decide everything. Open with the product in motion or a bold claim on screen — never a logo sting. Logos go at the end.")
     ),
-    h2("Step 4 — Trim + text overlay (₹49/job)"),
+    h2("Step 4 — Trim + text overlay (₹39/job)"),
     p(
       t("Cut the dead air, then burn in your hook as text: the price, the offer, the CTA. A "),
       link("Video Studio", "/video-studio"),
       t(" trim + text job is "),
-      t("₹49"),
+      t("₹39"),
       t(". Keep total runtime under 30 seconds for reels and shorts.")
     ),
     h2("The full budget"),
     table(
       ["Step", "What", "Cost"],
       [
-        ["1", "AI product photo", "₹49"],
-        ["2", "5s AI clip (or phone footage)", "₹99 (or free)"],
-        ["3", "Voice-over job", "₹49"],
-        ["3", "Captions job", "₹49"],
-        ["4", "Trim + text job", "₹49"],
+        ["1", "AI product photo", "₹39"],
+        ["2", "5s AI clip (or phone footage)", "₹89 (or free)"],
+        ["3", "Voice-over job", "₹39"],
+        ["3", "Captions job", "₹39"],
+        ["4", "Trim + text job", "₹39"],
         ["Total", "Finished video ad", "A few hundred rupees — less with phone footage"],
       ]
     ),
     callout("tip",
-      t("Make the thumbnail from the product photo, not a video frame — the ₹49 still is higher resolution than any extracted frame and looks sharper in feeds.")
+      t("Make the thumbnail from the product photo, not a video frame — the ₹39 still is higher resolution than any extracted frame and looks sharper in feeds.")
     ),
     h2("Distribution checklist: where the ad goes"),
     p(
@@ -131,10 +131,10 @@ const post: BlogPost = {
       [t("Show the product in the first frame — no mystery openings.")],
       [t("Price or offer on screen, not just in the caption.")],
       [t("Native format: 9:16, captions burned in, under 30 seconds.")],
-      [t("Test variants: the ₹49 price point makes A/B testing thumbnails and hooks genuinely cheap.")],
+      [t("Test variants: the ₹39 price point makes A/B testing thumbnails and hooks genuinely cheap.")],
     ),
     cta(
-      "Start your ad with a ₹49 product photo",
+      "Start your ad with a ₹39 product photo",
       "The hero frame everything else builds on.",
       "Create a product photo",
       "/create?service=product-photo"

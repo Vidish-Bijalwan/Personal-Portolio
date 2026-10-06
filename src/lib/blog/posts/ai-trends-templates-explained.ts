@@ -96,16 +96,16 @@ const post: BlogPost = {
       t("Pixaura is building its template gallery on the same principle as everything else: the price shown is the price charged. Templates will open directly in the "),
       link("composer", "/create"),
       t(" with the matching service preselected — so a product template lands on the "),
-      t("₹49 product photo"),
+      t("₹39 product photo"),
       t(" service, and the estimate matches the template's advertised price. No credit math, no surprises.")
     ),
     p(
       t("Until the gallery launches, the building blocks are all live: "),
-      link("AI images from ₹29", "/pricing"),
+      link("AI images from ₹19", "/pricing"),
       t(", "),
-      link("5-second clips at ₹99", "/create?media=video"),
+      link("5-second clips at ₹89", "/create?media=video"),
       t(", and "),
-      link("Video Studio edits at ₹49", "/video-studio"),
+      link("Video Studio edits at ₹39", "/video-studio"),
       t(".")
     ),
     cta(
