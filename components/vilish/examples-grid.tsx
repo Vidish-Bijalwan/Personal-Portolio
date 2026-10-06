@@ -2,12 +2,16 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
 import { Stagger, StaggerItem } from "@/components/motion/Stagger";
 import { usePrefersReducedMotion } from "@/src/lib/motion/theme";
 import Lightbox from "@/components/vilish/lightbox";
 import {
   CATEGORY_LABEL,
+  exampleHref,
+  examplePrice,
   toLightboxItem,
   type ExampleCategory,
   type ExampleItem,
@@ -195,11 +199,12 @@ export default function ExamplesGrid({ items }: { items: ExampleItem[] }) {
         <Stagger key={active} className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2">
           {filtered.map((item, filteredIndex) => (
             <StaggerItem key={item.src}>
-              <button
-                type="button"
-                onClick={() => setOpenIndex(filteredIndex)}
-                aria-label={`Open example: ${item.prompt}`}
-                  className="group block w-full overflow-hidden rounded-[16px] border border-white/[0.08] bg-[#121214] text-left transition-all duration-200 hover:-translate-y-1 hover:border-white/[0.16] hover:shadow-[0_20px_50px_-20px_rgba(0,0,0,0.8)] motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+              <div className="group overflow-hidden rounded-[16px] border border-white/[0.08] bg-[#121214] transition-all duration-200 hover:-translate-y-1 hover:border-white/[0.16] hover:shadow-[0_20px_50px_-20px_rgba(0,0,0,0.8)] motion-reduce:transition-none motion-reduce:hover:translate-y-0">
+                <button
+                  type="button"
+                  onClick={() => setOpenIndex(filteredIndex)}
+                  aria-label={`Open example: ${item.prompt}`}
+                  className="block w-full text-left"
                 >
                   <span className="relative block aspect-[4/3] overflow-hidden">
                     {item.category === "video" ? (
@@ -220,9 +225,6 @@ export default function ExamplesGrid({ items }: { items: ExampleItem[] }) {
                     <span className="absolute right-3 top-3">
                       <CategoryChip category={item.category} />
                     </span>
-                    <span className="absolute bottom-3 right-3 rounded-full bg-black/70 px-3 py-1 text-[13px] font-semibold tabular-nums text-[#F5F5F3] backdrop-blur-sm">
-                      {item.price}
-                    </span>
                     <span className="pointer-events-none absolute inset-x-0 bottom-0 translate-y-3 bg-gradient-to-t from-black/90 via-black/55 to-transparent px-4 pb-4 pt-10 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100 motion-reduce:transition-none">
                       <span className="line-clamp-2 text-[13px] leading-5 text-white/[0.92]">
                         {item.prompt}
@@ -230,6 +232,20 @@ export default function ExamplesGrid({ items }: { items: ExampleItem[] }) {
                     </span>
                   </span>
                 </button>
+                <div className="flex min-h-[44px] items-center justify-between gap-2 border-t border-white/[0.06] px-4 py-2">
+                  <span className="text-[13px] font-semibold tabular-nums text-[#F5F5F3]">
+                    {examplePrice(item)}
+                  </span>
+                  <Link
+                    href={exampleHref(item)}
+                    aria-label={`Make one like this: ${item.prompt.slice(0, 60)}`}
+                    className="inline-flex min-h-[44px] items-center gap-1 text-[13px] font-semibold text-[#D7FF3F] transition-opacity hover:opacity-80"
+                  >
+                    Make one like this
+                    <ArrowRight className="h-3.5 w-3.5" strokeWidth={2.2} />
+                  </Link>
+                </div>
+              </div>
             </StaggerItem>
           ))}
         </Stagger>

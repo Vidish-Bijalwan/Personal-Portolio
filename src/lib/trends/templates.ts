@@ -64,6 +64,12 @@ export interface Template {
   /** ISO date (YYYY-MM-DD) the template was added. Drives "newest" order. */
   addedOn: string;
   badge?: "New" | "Popular" | "Staff pick";
+  /**
+   * Optional second step rendered on the card — e.g. product-ad templates
+   * that continue into Video Studio to be animated. Must be a real,
+   * working destination (no dead links).
+   */
+  followUp?: { label: string; href: string };
 }
 
 /** Honest "last updated" stamp shown on /trends. Bump when adding templates. */
@@ -152,6 +158,55 @@ export const TEMPLATES: readonly Template[] = [
     aspect: "9:16",
     photoSlots: [],
     addedOn: "2026-10-02",
+  },
+  /* ── Products: video-ad track ────────────────────────────────────
+   * Product Video Ad templates: the ad creative starts as a product photo
+   * (₹49); the card's follow-up routes into Video Studio to animate it.
+   * Honest framing — curated briefs over real services, not separate models. */
+  {
+    id: "billboard-launch",
+    name: "Billboard Launch",
+    theme: "Products",
+    description:
+      "Your product towering on a giant city billboard at night — then animate it.",
+    service: "product-photo",
+    prompt:
+      "Massive city billboard at night displaying the product from the reference photo, glowing against the dark skyline, street lights below, tiny crowd for scale, cinematic advertising photography",
+    aspect: "16:9",
+    photoSlots: ["Your product"],
+    addedOn: "2026-10-06",
+    badge: "New",
+    followUp: { label: "Animate it in Video Studio", href: "/video-studio" },
+  },
+  {
+    id: "unboxing-spotlight",
+    name: "Unboxing Spotlight",
+    theme: "Products",
+    description:
+      "Your product emerging from its box under one dramatic spotlight.",
+    service: "product-photo",
+    prompt:
+      "Premium product launch shot: the product from the reference photo emerging from an open matte-black box, single dramatic spotlight from above, dark background, floating dust particles, luxury unboxing aesthetic",
+    aspect: "1:1",
+    photoSlots: ["Your product"],
+    addedOn: "2026-10-06",
+    badge: "New",
+    followUp: { label: "Animate it in Video Studio", href: "/video-studio" },
+  },
+  {
+    id: "ad-remix-pack",
+    name: "Ad Remix Pack",
+    theme: "Products",
+    description:
+      "Four ad-ready takes of your product — studio, lifestyle, macro, drama.",
+    service: "pack-4",
+    prompt:
+      "Four advertising variations of the product in the reference photo: clean studio shot, lifestyle scene in use, extreme macro detail, dramatic dark-mood shot, professional e-commerce campaign",
+    aspect: "1:1",
+    photoSlots: ["Your product"],
+    addedOn: "2026-10-06",
+    badge: "New",
+    followUp: { label: "Animate them in Video Studio", href: "/video-studio" },
   },
   /* ── Pets ──────────────────────────────────────────────────── */
   {
@@ -346,6 +401,20 @@ export function validateTemplate(t: Template, knownIds: string[]): string[] {
     errors.push(`addedOn after TRENDS_UPDATED: ${t.id}`);
   if (t.badge && !["New", "Popular", "Staff pick"].includes(t.badge))
     errors.push(`bad badge: ${t.id}`);
+  if (t.followUp !== undefined) {
+    if (
+      typeof t.followUp.label !== "string" ||
+      !t.followUp.label ||
+      t.followUp.label.length > 60
+    )
+      errors.push(`bad followUp label: ${t.id}`);
+    if (
+      typeof t.followUp.href !== "string" ||
+      !t.followUp.href.startsWith("/") ||
+      t.followUp.href.length > 200
+    )
+      errors.push(`bad followUp href: ${t.id}`);
+  }
   // The price must come from the catalog — this throws on unknown ids.
   try {
     templatePricePaise(t);

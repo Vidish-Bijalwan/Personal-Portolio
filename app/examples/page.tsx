@@ -5,12 +5,10 @@ import { ArrowRight } from "lucide-react";
 import VilishNav from "@/components/vilish/nav";
 import VilishFooter from "@/components/vilish/footer";
 import ExamplesGrid, {
-  type ExampleCategory,
   type ExampleItem,
 } from "@/components/vilish/examples-grid";
+import { isExampleItem } from "@/components/vilish/examples";
 import Reveal from "@/components/motion/Reveal";
-
-const VALID_CATEGORIES: ExampleCategory[] = ["image", "video", "edit", "ad"];
 
 function loadManifest(): ExampleItem[] {
   try {
@@ -18,14 +16,9 @@ function loadManifest(): ExampleItem[] {
     const raw = fs.readFileSync(p, "utf-8");
     const data = JSON.parse(raw);
     if (!Array.isArray(data)) return [];
-    return data.filter(
-      (d): d is ExampleItem =>
-        d &&
-        typeof d.src === "string" &&
-        typeof d.prompt === "string" &&
-        typeof d.price === "string" &&
-        VALID_CATEGORIES.includes(d.category),
-    );
+    // isExampleItem drops anything whose service doesn't resolve to a real
+    // catalog product — no guessed prices, ever.
+    return data.filter(isExampleItem);
   } catch {
     return [];
   }

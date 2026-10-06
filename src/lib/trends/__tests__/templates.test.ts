@@ -123,3 +123,57 @@ describe("validateTemplate rejects bad data", () => {
     ).toBeGreaterThan(0);
   });
 });
+
+describe("product video-ad track (Phase 3)", () => {
+  const AD_IDS = ["billboard-launch", "unboxing-spotlight", "ad-remix-pack"];
+
+  it("ships the product-ad templates under Products", () => {
+    for (const id of AD_IDS) {
+      const t = templateById(id);
+      expect(t).toBeDefined();
+      expect(t!.theme).toBe("Products");
+      expect(t!.badge).toBe("New");
+    }
+  });
+
+  it("ad templates map to real catalog services with real prices", () => {
+    for (const id of AD_IDS) {
+      const t = templateById(id)!;
+      expect(validateTemplate(t, allIds().filter((i) => i !== id))).toEqual([]);
+      expect(templatePricePaise(t)).toBe(priceOf(t.service));
+    }
+  });
+
+  it("every ad template routes product-photo → video-studio via followUp", () => {
+    for (const id of AD_IDS) {
+      const t = templateById(id)!;
+      expect(t.followUp).toBeDefined();
+      expect(t.followUp!.href).toBe("/video-studio");
+      expect(t.followUp!.label.length).toBeGreaterThan(0);
+      // No dead destinations, no placeholder hrefs.
+      expect(t.followUp!.href).not.toMatch(/#|coming-soon|tbd/i);
+    }
+  });
+
+  it("rejects bad followUp data", () => {
+    const good: Template = { ...TEMPLATES[0] };
+    expect(
+      validateTemplate(
+        { ...good, id: "x-f1", followUp: { label: "", href: "/video-studio" } },
+        [],
+      ).length,
+    ).toBeGreaterThan(0);
+    expect(
+      validateTemplate(
+        { ...good, id: "x-f2", followUp: { label: "Ok", href: "https://x.com" } },
+        [],
+      ).length,
+    ).toBeGreaterThan(0);
+    expect(
+      validateTemplate(
+        { ...good, id: "x-f3", followUp: { label: "Ok", href: "/video-studio" } },
+        [],
+      ),
+    ).toEqual([]);
+  });
+});

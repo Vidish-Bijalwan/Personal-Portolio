@@ -26,6 +26,7 @@ import VilishNav from "@/components/vilish/nav";
 import VilishFooter from "@/components/vilish/footer";
 import Composer from "@/components/vilish/composer";
 import Lightbox, { type LightboxItem } from "@/components/vilish/lightbox";
+import { exampleHref, type ExampleServiceId } from "@/components/vilish/examples";
 import { PRICE_CATALOG, priceOf } from "@/src/lib/pricing/catalog";
 import { formatINR } from "@/src/lib/vilish/types";
 import GenerativeField from "@/components/motion/GenerativeField";
@@ -61,9 +62,22 @@ const TEASER = PRICE_CATALOG.filter((p) =>
   price: formatINR(p.paise),
 }));
 
+/** Homepage example — service pins the catalog product the price/CTA derive from. */
+interface HomeExample {
+  src: string;
+  caption: string;
+  prompt?: string;
+  price: string;
+  service: ExampleServiceId;
+  width?: number;
+  height?: number;
+  alt?: string;
+  frame?: string;
+}
+
 /** Showreel: six unique examples, zero overlap with the Showcase section (9, 10, 1, 2).
  *  Frames vary in height so the strip reads as a living reel, not a tile grid. */
-const SHOWREEL = [
+const SHOWREEL: HomeExample[] = [
   {
     src: "/examples/5-watch-ad.webp",
     width: 1920,
@@ -73,6 +87,7 @@ const SHOWREEL = [
     prompt:
       "Studio product shot of a steel chronograph floating in a dark studio, dramatic rim light tracing the case, deep shadows, luxury watch advertising.",
     price: formatINR(priceOf("product-photo")),
+    service: "product-photo",
     frame: "h-36 sm:h-48",
   },
   {
@@ -84,6 +99,7 @@ const SHOWREEL = [
     prompt:
       "Painterly 1980s movie poster of a lone astronaut standing before a colossal alien monolith, dramatic scale, retro sci-fi illustration style.",
     price: formatINR(priceOf("single-image")),
+    service: "single-image",
     frame: "h-52 sm:h-72",
   },
   {
@@ -95,6 +111,7 @@ const SHOWREEL = [
     prompt:
       "Fine-art studio portrait of a golden retriever in a dark room, Rembrandt lighting sculpting the fur, soulful eyes, museum-grade pet photography.",
     price: formatINR(priceOf("single-image")),
+    service: "single-image",
     frame: "h-44 sm:h-60",
   },
   {
@@ -106,6 +123,7 @@ const SHOWREEL = [
     prompt:
       "Sports car parked on a rain-wet street at night, neon signs reflected in the wet asphalt, cinematic night photography, moody atmosphere.",
     price: formatINR(priceOf("single-image")),
+    service: "single-image",
     frame: "h-32 sm:h-44",
   },
   {
@@ -117,6 +135,7 @@ const SHOWREEL = [
     prompt:
       "Epic travel poster of Himalayan peaks at dawn, dramatic clouds, tiny trekker silhouette, vintage adventure poster aesthetic.",
     price: formatINR(priceOf("single-image")),
+    service: "single-image",
     frame: "h-48 sm:h-64",
   },
   {
@@ -128,6 +147,7 @@ const SHOWREEL = [
     prompt:
       "Overhead food photography of a gourmet burger with melting cheese on dark slate, dramatic side lighting, restaurant advertising style.",
     price: formatINR(priceOf("product-photo")),
+    service: "product-photo",
     frame: "h-44 sm:h-60",
   },
 ];
@@ -135,7 +155,7 @@ const SHOWREEL = [
 /** Accent rotation across the reel: lime → cyan → magenta. */
 const REEL_ACCENTS = ["#D7FF3F", "#00F0FF", "#FF2D78"];
 
-const SHOWCASE = [
+const SHOWCASE: HomeExample[] = [
   {
     src: "/examples/9-fashion-editorial.webp",
     width: 1280,
@@ -143,6 +163,7 @@ const SHOWCASE = [
     alt: "High-fashion model with sculptural black spiked hair in a charcoal studio — AI-generated example",
     caption: "Fashion editorial, sculptural hair",
     price: formatINR(priceOf("single-image")),
+    service: "single-image",
   },
   {
     src: "/examples/10-perfume-ad.webp",
@@ -151,6 +172,7 @@ const SHOWCASE = [
     alt: "Faceted glass perfume bottle with golden liquid — AI-generated example",
     caption: "Golden perfume, faceted glass",
     price: formatINR(priceOf("product-photo")),
+    service: "product-photo",
   },
   {
     src: "/examples/1-sneaker-ad.webp",
@@ -159,6 +181,7 @@ const SHOWCASE = [
     alt: "Sneaker floating in a dark studio with dramatic rim lighting — AI-generated example",
     caption: "Floating sneaker, studio shot",
     price: formatINR(priceOf("single-image")),
+    service: "single-image",
   },
   {
     src: "/examples/2-neon-portrait.webp",
@@ -167,6 +190,7 @@ const SHOWCASE = [
     alt: "Stylized portrait with neon city lights reflected in her eyes — AI-generated example",
     caption: "Neon portrait, city lights",
     price: formatINR(priceOf("single-image")),
+    service: "single-image",
   },
 ];
 
@@ -566,7 +590,7 @@ function VideoShowcase() {
         </ul>
         <div className="mt-6">
           <Link
-            href="/create"
+            href="/create?media=video"
             className="inline-flex items-center gap-2 rounded-[12px] px-6 py-3 text-[14px] font-semibold text-[#080808] transition-transform duration-200 hover:scale-[1.03] motion-reduce:transition-none"
             style={{ background: active.accent }}
           >
@@ -694,7 +718,7 @@ function ReelCard({
         >
           <Image
             src={ex.src}
-            alt={ex.alt}
+            alt={ex.alt ?? ex.caption}
             width={ex.width}
             height={ex.height}
             sizes="(max-width: 640px) 200px, 260px"
@@ -724,11 +748,20 @@ function ReelCard({
           </span>
         </span>
       </button>
-      <figcaption className="mt-2.5 flex items-center justify-between gap-2 px-0.5">
-        <span className="truncate text-[12px] text-white/50">{ex.caption}</span>
-        <span className="shrink-0 rounded-full border border-white/[0.12] px-2 py-px text-[11px] font-semibold tabular-nums text-[#F5F5F3]">
-          {ex.price}
+      <figcaption className="mt-2.5 px-0.5">
+        <span className="flex items-center justify-between gap-2">
+          <span className="truncate text-[12px] text-white/50">{ex.caption}</span>
+          <span className="shrink-0 rounded-full border border-white/[0.12] px-2 py-px text-[11px] font-semibold tabular-nums text-[#F5F5F3]">
+            {ex.price}
+          </span>
         </span>
+        <Link
+          href={exampleHref(ex)}
+          aria-label={`Make one like this: ${ex.caption}`}
+          className="mt-0.5 inline-flex min-h-[32px] items-center gap-1 text-[11px] font-semibold text-[#D7FF3F] transition-opacity hover:opacity-80"
+        >
+          Make one like this <ArrowRight className="h-3 w-3" strokeWidth={2.2} />
+        </Link>
       </figcaption>
     </figure>
   );
@@ -1002,7 +1035,7 @@ export default function VilishLanding() {
                     <span className="relative block aspect-[4/3] overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.03] transition-colors group-hover:border-white/[0.2]">
                       <Image
                         src={ex.src}
-                        alt={ex.alt}
+                        alt={ex.alt ?? ex.caption}
                         width={ex.width}
                         height={ex.height}
                         sizes="(max-width: 640px) 78vw, 380px"
@@ -1019,11 +1052,20 @@ export default function VilishLanding() {
                       </span>
                     </span>
                   </button>
-                  <figcaption className="mt-3 flex items-baseline justify-between gap-3 px-1">
-                    <span className="truncate text-[13px] text-white/55">{ex.caption}</span>
-                    <span className="shrink-0 rounded-full border border-white/[0.12] px-2.5 py-0.5 text-[12px] font-semibold tabular-nums text-[#F5F5F3]">
-                      {ex.price}
+                  <figcaption className="mt-3 px-1">
+                    <span className="flex items-baseline justify-between gap-3">
+                      <span className="truncate text-[13px] text-white/55">{ex.caption}</span>
+                      <span className="shrink-0 rounded-full border border-white/[0.12] px-2.5 py-0.5 text-[12px] font-semibold tabular-nums text-[#F5F5F3]">
+                        {ex.price}
+                      </span>
                     </span>
+                    <Link
+                      href={exampleHref(ex)}
+                      aria-label={`Make one like this: ${ex.caption}`}
+                      className="mt-1 inline-flex min-h-[36px] items-center gap-1 text-[12px] font-semibold text-[#D7FF3F] transition-opacity hover:opacity-80"
+                    >
+                      Make one like this <ArrowRight className="h-3.5 w-3.5" strokeWidth={2.2} />
+                    </Link>
                   </figcaption>
                 </figure>
               ))}

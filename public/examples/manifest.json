@@ -1,1 +1,109 @@
-[{"alt":"AI-generated product photo of a premium sneaker floating in a dark studio — ₹29 at Vidish Studio","category":"ad","model":"Studio quality","price":"₹29","prompt":"Cinematic product photograph of a premium sneaker floating in a dark studio, dramatic rim lighting, deep shadows, subtle smoke","src":"/examples/1-sneaker-ad.webp"},{"alt":"AI-generated stylized digital portrait with neon city lights reflected in her eyes — ₹29 at Vidish Studio","category":"image","model":"Studio quality","price":"₹29","prompt":"Stylized digital portrait with neon city lights reflected in her eyes, cinematic color grade, editorial photography style","src":"/examples/2-neon-portrait.webp"},{"alt":"AI-generated travel poster of Himalayan peaks at dawn with a tiny trekker silhouette — ₹29 at Vidish Studio","category":"image","model":"Studio quality","price":"₹29","prompt":"Epic travel poster of Himalayan peaks at dawn, dramatic clouds, tiny trekker silhouette, vintage adventure poster aesthetic","src":"/examples/3-travel-poster.webp"},{"alt":"AI-generated food photography of a gourmet burger with melting cheese on dark slate — ₹49 at Vidish Studio","category":"ad","model":"Product photo","price":"₹49","prompt":"Overhead food photography of a gourmet burger with melting cheese on dark slate, dramatic side lighting, restaurant advertising style","src":"/examples/4-food-photo.webp"},{"alt":"AI-generated product photo of a steel chronograph watch floating in a dark studio — ₹49 at Vidish Studio","category":"ad","model":"Product photo","price":"₹49","prompt":"Studio product shot of a steel chronograph floating in a dark studio, dramatic rim light tracing the case, deep shadows, luxury watch advertising","src":"/examples/5-watch-ad.webp"},{"alt":"AI-generated 1980s movie poster of a lone astronaut before a colossal alien monolith — ₹29 at Vidish Studio","category":"image","model":"Studio quality","price":"₹29","prompt":"Painterly 1980s movie poster of a lone astronaut standing before a colossal alien monolith, dramatic scale, retro sci-fi illustration style","src":"/examples/6-movie-poster.webp"},{"alt":"AI-generated fine-art portrait of a golden retriever in a dark room with Rembrandt lighting — ₹29 at Vidish Studio","category":"image","model":"Studio quality","price":"₹29","prompt":"Fine-art studio portrait of a golden retriever in a dark room, Rembrandt lighting sculpting the fur, soulful eyes, museum-grade pet photography","src":"/examples/7-pet-portrait.webp"},{"alt":"AI-generated cinematic photo of a sports car on a rain-wet neon street at night — ₹29 at Vidish Studio","category":"image","model":"Studio quality","price":"₹29","prompt":"Sports car parked on a rain-wet street at night, neon signs reflected in the wet asphalt, cinematic night photography, moody atmosphere","src":"/examples/8-sportscar.webp"},{"alt":"AI-generated high-fashion editorial portrait with sculptural black spiked hair — ₹29 at Vidish Studio","category":"image","model":"Studio quality","price":"₹29","prompt":"High-fashion editorial portrait, model with sculptural black spiked hair, charcoal studio backdrop, dramatic lighting, magazine cover aesthetic","src":"/examples/9-fashion-editorial.webp"},{"alt":"AI-generated luxury shot of a faceted glass perfume bottle with golden liquid — ₹49 at Vidish Studio","category":"ad","model":"Product photo","price":"₹49","prompt":"Luxury commercial shot of a faceted glass perfume bottle with golden liquid, dark backdrop, sculpted studio lighting, premium fragrance advertising","src":"/examples/10-perfume-ad.webp"},{"alt":"AI-generated video example: stylized neon portrait animating in a 5s loop — 5s clips ₹99 at Vidish Studio","category":"video","model":"5s clip","poster":"/examples/videos/poster-1-portrait.jpg","price":"₹99","prompt":"AI video example — animated neon portrait loop, 5s clip, ₹99, made in minutes","src":"/examples/videos/clip-1-portrait.mp4"},{"alt":"AI-generated video example: premium product shot with slow cinematic motion — 5s clips ₹99 at Vidish Studio","category":"video","model":"5s clip","poster":"/examples/videos/poster-2-product.jpg","price":"₹99","prompt":"AI video example — product shot in motion, 5s clip, ₹99, made in minutes","src":"/examples/videos/clip-2-product.mp4"},{"alt":"AI-generated video example: cinematic night cityscape with slow aerial motion — 5s clips ₹99 at Vidish Studio","category":"video","model":"5s clip","poster":"/examples/videos/poster-3-city.jpg","price":"₹99","prompt":"AI video example — night-city aerial drift, 5s clip, ₹99, made in minutes","src":"/examples/videos/clip-3-city.mp4"}]
+[
+  {
+    "alt": "AI-generated product photo of a premium sneaker floating in a dark studio",
+    "category": "ad",
+    "model": "Studio quality",
+    "prompt": "Cinematic product photograph of a premium sneaker floating in a dark studio, dramatic rim lighting, deep shadows, subtle smoke",
+    "src": "/examples/1-sneaker-ad.webp",
+    "service": "single-image"
+  },
+  {
+    "alt": "AI-generated stylized digital portrait with neon city lights reflected in her eyes",
+    "category": "image",
+    "model": "Studio quality",
+    "prompt": "Stylized digital portrait with neon city lights reflected in her eyes, cinematic color grade, editorial photography style",
+    "src": "/examples/2-neon-portrait.webp",
+    "service": "single-image"
+  },
+  {
+    "alt": "AI-generated travel poster of Himalayan peaks at dawn with a tiny trekker silhouette",
+    "category": "image",
+    "model": "Studio quality",
+    "prompt": "Epic travel poster of Himalayan peaks at dawn, dramatic clouds, tiny trekker silhouette, vintage adventure poster aesthetic",
+    "src": "/examples/3-travel-poster.webp",
+    "service": "single-image"
+  },
+  {
+    "alt": "AI-generated food photography of a gourmet burger with melting cheese on dark slate",
+    "category": "ad",
+    "model": "Product photo",
+    "prompt": "Overhead food photography of a gourmet burger with melting cheese on dark slate, dramatic side lighting, restaurant advertising style",
+    "src": "/examples/4-food-photo.webp",
+    "service": "product-photo"
+  },
+  {
+    "alt": "AI-generated product photo of a steel chronograph watch floating in a dark studio",
+    "category": "ad",
+    "model": "Product photo",
+    "prompt": "Studio product shot of a steel chronograph floating in a dark studio, dramatic rim light tracing the case, deep shadows, luxury watch advertising",
+    "src": "/examples/5-watch-ad.webp",
+    "service": "product-photo"
+  },
+  {
+    "alt": "AI-generated 1980s movie poster of a lone astronaut before a colossal alien monolith",
+    "category": "image",
+    "model": "Studio quality",
+    "prompt": "Painterly 1980s movie poster of a lone astronaut standing before a colossal alien monolith, dramatic scale, retro sci-fi illustration style",
+    "src": "/examples/6-movie-poster.webp",
+    "service": "single-image"
+  },
+  {
+    "alt": "AI-generated fine-art portrait of a golden retriever in a dark room with Rembrandt lighting",
+    "category": "image",
+    "model": "Studio quality",
+    "prompt": "Fine-art studio portrait of a golden retriever in a dark room, Rembrandt lighting sculpting the fur, soulful eyes, museum-grade pet photography",
+    "src": "/examples/7-pet-portrait.webp",
+    "service": "single-image"
+  },
+  {
+    "alt": "AI-generated cinematic photo of a sports car on a rain-wet neon street at night",
+    "category": "image",
+    "model": "Studio quality",
+    "prompt": "Sports car parked on a rain-wet street at night, neon signs reflected in the wet asphalt, cinematic night photography, moody atmosphere",
+    "src": "/examples/8-sportscar.webp",
+    "service": "single-image"
+  },
+  {
+    "alt": "AI-generated high-fashion editorial portrait with sculptural black spiked hair",
+    "category": "image",
+    "model": "Studio quality",
+    "prompt": "High-fashion editorial portrait, model with sculptural black spiked hair, charcoal studio backdrop, dramatic lighting, magazine cover aesthetic",
+    "src": "/examples/9-fashion-editorial.webp",
+    "service": "single-image"
+  },
+  {
+    "alt": "AI-generated luxury shot of a faceted glass perfume bottle with golden liquid",
+    "category": "ad",
+    "model": "Product photo",
+    "prompt": "Luxury commercial shot of a faceted glass perfume bottle with golden liquid, dark backdrop, sculpted studio lighting, premium fragrance advertising",
+    "src": "/examples/10-perfume-ad.webp",
+    "service": "product-photo"
+  },
+  {
+    "alt": "AI-generated video example: stylized neon portrait animating in a 5s loop",
+    "category": "video",
+    "model": "5s clip",
+    "poster": "/examples/videos/poster-1-portrait.jpg",
+    "prompt": "AI video example — animated neon portrait loop, 5s clip, made in minutes",
+    "src": "/examples/videos/clip-1-portrait.mp4",
+    "service": "clip-5s"
+  },
+  {
+    "alt": "AI-generated video example: premium product shot with slow cinematic motion",
+    "category": "video",
+    "model": "5s clip",
+    "poster": "/examples/videos/poster-2-product.jpg",
+    "prompt": "AI video example — product shot in motion, 5s clip, made in minutes",
+    "src": "/examples/videos/clip-2-product.mp4",
+    "service": "clip-5s"
+  },
+  {
+    "alt": "AI-generated video example: cinematic night cityscape with slow aerial motion",
+    "category": "video",
+    "model": "5s clip",
+    "poster": "/examples/videos/poster-3-city.jpg",
+    "prompt": "AI video example — night-city aerial drift, 5s clip, made in minutes",
+    "src": "/examples/videos/clip-3-city.mp4",
+    "service": "clip-5s"
+  }
+]
