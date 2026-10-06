@@ -30,7 +30,7 @@ const post: BlogPost = {
     },
     {
       q: "How long does it take to make an AI product ad?",
-      a: "Most Pixaura orders are delivered within 24 hours. The hands-on part — writing the script and describing the visuals — is under an hour for a short ad.",
+      a: "Every Pixaura order passes a human quality check before download, and you can track live progress while you wait. The hands-on part — writing the script and describing the visuals — is under an hour for a short ad.",
     },
     {
       q: "Will an AI ad look cheap?",

@@ -268,7 +268,7 @@ const FAQS = [
   },
   {
     q: "How long does it take to get my image?",
-    a: "Most orders are delivered within 24 hours. Every creation passes a human quality check before download, so you're never stuck with a bad render.",
+    a: "Every creation passes a human quality check before download — track live progress in your dashboard.",
   },
   {
     q: "Can I use my own photo as a reference?",
@@ -294,8 +294,8 @@ const VIDEO_CATS = [
     id: "portraits",
     label: "Portraits",
     accent: "#FF2D78",
-    blurb: "Character loops and living portraits — stills that breathe.",
-    bullets: ["5s loop · 9:16 vertical", "Animated from a single image", `${formatINR(priceOf("clip-5s"))} per clip`],
+    blurb: "Character loops and portrait clips — 5-second AI motion clips.",
+    bullets: ["5s loop · 9:16 vertical", "Made from a text prompt", `${formatINR(priceOf("clip-5s"))} per clip`],
     clip: {
       src: "/examples/videos/clip-1-portrait.mp4",
       poster: "/examples/videos/poster-1-portrait.jpg",
@@ -844,6 +844,84 @@ const WHY_PILLARS = [
 const CAP_ACCENTS = ["#D7FF3F", "#00F0FF", "#FF2D78"];
 
 /**
+ * "Made for" band: three use-case cards (Sellers / Creators / Marketers)
+ * linking to the use-case landing pages, each with real example imagery.
+ * Imagery is real example output, never stock, never fake customer work.
+ */
+const MADE_FOR = [
+  {
+    href: "/for-sellers",
+    title: "Sellers",
+    copy: "Product shots and ad creatives that look shot in a studio — without booking one.",
+    img: "/examples/10-perfume-ad.webp",
+    imgAlt: "Luxury perfume product shot — AI-generated example",
+    accent: "#D7FF3F",
+  },
+  {
+    href: "/for-creators",
+    title: "Creators",
+    copy: "Portraits, reels and motion clips with a studio finish, priced per piece.",
+    img: "/examples/2-neon-portrait.webp",
+    imgAlt: "Stylized neon portrait — AI-generated example",
+    accent: "#00F0FF",
+  },
+  {
+    href: "/for-marketers",
+    title: "Marketers",
+    copy: "Campaign creatives and ad variants on demand — no retainer, pay per piece.",
+    img: "/examples/1-sneaker-ad.webp",
+    imgAlt: "Cinematic sneaker product photograph — AI-generated example",
+    accent: "#FF2D78",
+  },
+];
+
+/**
+ * Made-for card: real imagery, cinematic gradient, honest link to a
+ * use-case landing page. Same tactile treatment as the capability cards.
+ */
+function MadeForCard({ item }: { item: (typeof MADE_FOR)[number] }) {
+  return (
+    <Link
+      href={item.href}
+      aria-label={`Made for ${item.title}`}
+      className="group relative block h-[380px] overflow-hidden rounded-2xl border border-white/[0.08] outline-none transition-colors duration-300 focus-visible:ring-2 focus-visible:ring-[#D7FF3F] focus-visible:ring-offset-2 focus-visible:ring-offset-[#080808] hover:border-white/[0.22] motion-reduce:transition-none sm:h-[420px]"
+    >
+      <Image
+        src={item.img}
+        alt={item.imgAlt}
+        fill
+        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+        loading="lazy"
+        className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.08] motion-reduce:transition-none"
+      />
+      <span
+        aria-hidden
+        className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/35 to-black/10"
+      />
+      <span className="absolute inset-x-0 bottom-0 p-6">
+        <span
+          className="text-[11px] font-bold uppercase tracking-[0.2em]"
+          style={{ color: item.accent }}
+        >
+          Made for
+        </span>
+        <span className="mt-2 block text-[22px] font-semibold text-white">{item.title}</span>
+        <span className="mt-1.5 block max-w-[30ch] text-[13.5px] leading-6 text-white/60">
+          {item.copy}
+        </span>
+        <span
+          className="mt-4 inline-flex min-h-[36px] items-center gap-1.5 text-[13.5px] font-semibold"
+          style={{ color: item.accent }}
+        >
+          Explore
+          <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" strokeWidth={2.2} />
+        </span>
+      </span>
+    </Link>
+  );
+}
+
+/**
  * Capability card with real example imagery: the photograph fills the card,
  * the copy floats over a cinematic gradient, and hover pushes the image
  * deeper (scale) while the CTA slides forward. Rich, tactile, alive.
@@ -1255,7 +1333,7 @@ export default function VilishLanding() {
                   Made here, <span className="text-[#FF2D78]">priced per piece.</span>
                 </>
               }
-              subtitle="Every piece below was ordered, reviewed by a human, and delivered — each with the brief that made it."
+              subtitle="Every piece below was made with Pixaura and reviewed by a human — each with the brief that made it."
             />
           </div>
           <div className="mx-auto mt-10 max-w-5xl px-4">
@@ -1317,7 +1395,7 @@ export default function VilishLanding() {
               <span className="rounded-full border border-[#D7FF3F]/40 px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#D7FF3F]">
                 Now live
               </span>
-              Video — 5s motion clips at {formatINR(priceOf("clip-5s"))} each, made in minutes. Every
+              Video — 5s motion clips at {formatINR(priceOf("clip-5s"))} each, human-reviewed before delivery. Every
               frame you see here is still a single creation.
             </p>
           </Reveal>
@@ -1328,7 +1406,26 @@ export default function VilishLanding() {
           </Reveal>
         </section>
 
-        
+        {/* ── made for: use-case landing pages ─────────────── */}
+        <section aria-label="Made for you" className="cv-auto mx-auto max-w-5xl px-4 py-20 sm:py-28">
+          <SectionHeader
+            kicker="Use cases"
+            title={
+              <>
+                Made for <span className="text-[#D7FF3F]">what you do.</span>
+              </>
+            }
+            subtitle="Pick your lane — each page bundles the right tools, real examples and honest answers."
+            titleClassName="max-w-[22ch]"
+          />
+          <Stagger className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {MADE_FOR.map((item) => (
+              <StaggerItem key={item.href} className="h-full">
+                <MadeForCard item={item} />
+              </StaggerItem>
+            ))}
+          </Stagger>
+        </section>
 
         {/* ── why pay-per-creation: the honest differentiator ── */}
         <section aria-label="Why pay per creation" className="cv-auto relative overflow-hidden border-b border-white/[0.08]">

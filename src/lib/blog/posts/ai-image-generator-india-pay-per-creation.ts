@@ -41,7 +41,7 @@ const post: BlogPost = {
     },
     {
       q: "How do I pay for a Pixaura image?",
-      a: "Each order shows its exact price before you pay. You pay with UPI, then tap “I've paid”. The order is confirmed and fulfilled — most orders are delivered within 24 hours after a human quality check.",
+      a: "Each order shows its exact price before you pay. You pay with UPI, then tap “I've paid”. The order is confirmed and fulfilled — every creation passes a human quality check before download, and you can track live progress while you wait.",
     },
     {
       q: "Do unused credits expire with pay-per-creation?",
@@ -105,7 +105,7 @@ const post: BlogPost = {
       [t("Describe what you want on the "), link("create page", "/create"), t(" — prompt, quality, aspect ratio.")],
       [t("See the exact price before you commit. A single image shows an estimate of ₹29.")],
       [t("Pay with UPI and tap “I've paid”. No account wallet, no top-ups.")],
-      [t("Your creation passes a human quality check and is delivered — most orders within 24 hours.")],
+      [t("Your creation passes a human quality check and is delivered — track live progress in your dashboard while you wait.")],
     ),
     p(
       t("There's no login wall before you explore either: you can browse "),
