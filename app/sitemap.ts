@@ -9,6 +9,7 @@ const ROUTES = [
   "/about",
   "/about/portfolio",
   "/blog",
+  "/trends",
 ] as const;
 
 export default function sitemap(): MetadataRoute.Sitemap {

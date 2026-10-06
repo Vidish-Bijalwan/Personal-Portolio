@@ -18,6 +18,7 @@ import {
   servicePricePaise,
   type ComposerServiceId,
 } from "@/src/lib/pricing/catalog";
+import type { Template } from "@/src/lib/trends/templates";
 import {
   ATTACH_MAX_FILES,
   ATTACH_MAX_FILE_BYTES,
@@ -82,6 +83,9 @@ interface ComposerProps {
   /** Deep-link support, e.g. /create?service=product-photo — selects the
    *  paid image service. Only applies when initialMedia is "image". */
   initialService?: ComposerServiceId;
+  /** Trend-template deep link, e.g. /create?template=neon-noir-portrait —
+   *  pre-fills the prompt and aspect. The service comes from the template. */
+  initialTemplate?: Template;
 }
 
 const ACCEPT_ATTR = ".png,.jpg,.jpeg,.webp,.gif,.pdf,.doc,.docx,.txt,.md";
@@ -92,12 +96,12 @@ function formatBytes(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-export default function Composer({ variant = "hero", className, initialMedia = "image", initialService }: ComposerProps) {
+export default function Composer({ variant = "hero", className, initialMedia = "image", initialService, initialTemplate }: ComposerProps) {
   const router = useRouter();
-  const [prompt, setPrompt] = useState("");
+  const [prompt, setPrompt] = useState(initialTemplate?.prompt ?? "");
   const [quality, setQuality] = useState<QualityTier>("studio");
   const [aspectRatio, setAspectRatio] = useState<AspectRatio>(
-    initialMedia === "video" ? "9:16" : "1:1"
+    initialTemplate?.aspect ?? (initialMedia === "video" ? "9:16" : "1:1")
   );
   // Paid image service: single-image | 4-pack | product-photo. The estimate
   // and the server quote both derive from the price catalog — never hardcoded.
@@ -625,12 +629,25 @@ export default function Composer({ variant = "hero", className, initialMedia = "
           preview shows until you unlock the clean HD file.
         </p>
       )}
+      {initialTemplate && (
+        <div className="mb-4 flex items-center gap-2.5 rounded-[10px] border border-[#D7FF3F]/25 bg-[#D7FF3F]/[0.06] px-3.5 py-2.5">
+          <Sparkles className="h-4 w-4 shrink-0 text-[#D7FF3F]" />
+          <p className="text-[12.5px] leading-5 text-white/70">
+            Template:{" "}
+            <span className="font-semibold text-[#F5F5F3]">{initialTemplate.name}</span>
+            {initialTemplate.photoSlots.length > 0 ? (
+              <> — attach {initialTemplate.photoSlots.join(" + ")} below</>
+            ) : (
+              <> — your text prompt is ready to go</>
+            )}
+          </p>
+        </div>
+      )}
 
       <div className="flex items-start justify-between gap-3">
         <label htmlFor="vidish-prompt" className="sr-only">
           Describe the image you want to create
-        </label>
-        <p
+        </label>        <p
           className={cn(
             "shrink-0 pt-0.5 text-[12px] tabular-nums",
             overLimit ? "font-medium text-red-300/90" : "text-white/35"
