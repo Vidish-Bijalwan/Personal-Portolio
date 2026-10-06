@@ -1213,7 +1213,7 @@ export default function VilishLanding() {
               subtitle="Every piece below was ordered, reviewed by a human, and delivered — each with the brief that made it."
             />
           </div>
-          <div className="mt-10">
+          <div className="mx-auto mt-10 max-w-5xl px-4">
             <ShowcaseGrid onOpen={(i) => setCaseOpen(i)} />
           </div>
           <Reveal delay={0.15} className="mt-8 text-center">
