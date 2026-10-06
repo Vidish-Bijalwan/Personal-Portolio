@@ -741,8 +741,21 @@ function ShowreelCarousel({
 
   useEffect(() => {
     update();
+    const onLoad = () => update();
     window.addEventListener("resize", update);
-    return () => window.removeEventListener("resize", update);
+    window.addEventListener("load", onLoad);
+    // Images/fonts can change the track's scrollWidth after mount — re-measure
+    // when the track resizes and once more after load settles.
+    const ro =
+      typeof ResizeObserver !== "undefined" ? new ResizeObserver(update) : null;
+    if (ro && trackRef.current) ro.observe(trackRef.current);
+    const t = window.setTimeout(update, 600);
+    return () => {
+      window.removeEventListener("resize", update);
+      window.removeEventListener("load", onLoad);
+      ro?.disconnect();
+      window.clearTimeout(t);
+    };
   }, []);
 
   const nudge = (dir: 1 | -1) => {
