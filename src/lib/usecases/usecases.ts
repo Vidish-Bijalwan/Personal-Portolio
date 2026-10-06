@@ -146,11 +146,11 @@ export const USE_CASES: readonly UseCase[] = [
     faqs: [
       {
         q: "Can I animate my own photo into a reel?",
-        a: "Yes. Attach your photo as the start image on a 5s video clip order and describe the motion — portraits that breathe, product shots that move.",
+        a: "No — the 5s clip is made from your text prompt; animating your own photo isn't supported. Describe the scene instead, or use Product Photo plus a template for product shots.",
       },
       {
         q: "Do the videos come captioned?",
-        a: "Captions are a separate Video Studio tool: upload your clip, paste your script (or try auto), and get styled captions burned in.",
+        a: "Captions are a separate Video Studio tool: upload your clip, paste your script, and get styled captions burned in.",
       },
       {
         q: "What does one reel cost me?",

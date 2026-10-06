@@ -145,7 +145,7 @@ export const TOOL_DETAILS: Record<string, ToolDetail> = {
     cta: "Start creating",
   },
   "clip-5s": {
-    what: "A 5-second AI video clip from your prompt — made for reels, intros, loops and product teasers. Optional start image to anchor the first frame.",
+    what: "A 5-second AI video clip from your prompt — made for reels, intros, loops and product teasers.",
     bestFor: [
       "Reel intros and hooks",
       "Animated product teasers",
@@ -158,7 +158,7 @@ export const TOOL_DETAILS: Record<string, ToolDetail> = {
       "Complex multi-shot narratives don't fit in 5 seconds — keep the motion idea simple.",
     ],
     steps: [
-      { title: "Describe the motion", copy: "Write what should happen in the clip — or attach a start image and describe how it moves." },
+      { title: "Describe the motion", copy: "Write what should happen in the clip — describe the scene, the subject and the motion in plain words." },
       { title: "See the exact price", copy: "The per-clip price is shown before you commit. No subscription." },
       { title: "Pay once, download", copy: "One UPI payment. Human QC, then your 5-second clip is ready to post." },
     ],
@@ -169,7 +169,7 @@ export const TOOL_DETAILS: Record<string, ToolDetail> = {
       },
       {
         q: "Can I animate my own photo?",
-        a: "Yes — attach it as the start image and describe the motion you want.",
+        a: "No — the 5s clip is made from your text prompt; animating your own photo isn't supported. Describe the scene you want instead, or use Product Photo plus a template for product shots.",
       },
       {
         q: "How long does it take?",
@@ -187,7 +187,7 @@ export const TOOL_DETAILS: Record<string, ToolDetail> = {
       "Replacing unclear recorded audio",
     ],
     limitations: [
-      "AI voices, not a human voice actor — great for narration, not for emotional performance.",
+      "AI voices reading your script — not a human voice actor, and it can't imitate or clone any specific person's voice. Great for narration, not for emotional performance.",
       "Scripts up to 2000 characters per job.",
       "Your original audio is ducked (lowered), not removed — use Add audio → Replace if you want it gone.",
     ],
@@ -213,26 +213,25 @@ export const TOOL_DETAILS: Record<string, ToolDetail> = {
     cta: "Open in Video Studio",
   },
   caption: {
-    what: "Styled captions burned into your video — bold, readable, on-brand. Paste your own script for guaranteed results, or try automatic transcription.",
+    what: "Styled captions burned into your video — bold, readable, on-brand. Paste your own script; we build the captions from it.",
     bestFor: [
       "Reels and Shorts (most viewers watch muted)",
       "Talking-head videos",
       "Repurposing long videos into clips",
     ],
     limitations: [
-      "Script mode always works — paste your text and the captions are built from it.",
-      "Auto mode transcribes your audio first, which depends on transcription-engine availability. If the engine is down, the job fails safe and we tell you — use script mode instead.",
+      "Script mode only right now — automatic transcription isn't available, so have your text ready.",
       "Captions are burned in (part of the picture), not separate subtitle files.",
     ],
     steps: [
       { title: "Upload your video", copy: "Drop in the MP4 you want captioned." },
-      { title: "Choose script or auto", copy: "Paste your script for guaranteed captions, or try automatic transcription." },
+      { title: "Paste your script", copy: "Your words, in order — we time and style them for you." },
       { title: "Get the captioned cut", copy: "Styled captions are burned in and the finished video is delivered." },
     ],
     faqs: [
       {
-        q: "Script mode vs auto mode — which should I use?",
-        a: "Script mode if you have the words — it's instant and exact. Auto mode if you don't, but it depends on transcription-engine availability.",
+        q: "Why can't I just upload and get captions automatically?",
+        a: "Automatic transcription isn't available right now — script mode is the reliable path, and it's exact because the words are yours.",
       },
       {
         q: "Can I get an .srt file instead?",

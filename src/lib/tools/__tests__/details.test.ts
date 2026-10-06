@@ -56,6 +56,16 @@ function allCopy(): string {
 describe("tool details", () => {
   it("covers exactly the 12 working tools", () => {
     expect(Object.keys(TOOL_DETAILS)).toHaveLength(12);
+    // Set-equality: every directory id has a detail entry and vice versa,
+    // so a missing tool page can never regress silently (no 404s).
+    const directoryIds = new Set(TOOL_DIRECTORY.map((t) => t.id));
+    const detailIds = new Set(Object.keys(TOOL_DETAILS));
+    for (const id of directoryIds) {
+      expect(detailIds.has(id), `TOOL_DETAILS missing entry for "${id}"`).toBe(true);
+    }
+    for (const id of detailIds) {
+      expect(directoryIds.has(id), `TOOL_DETAILS has orphan entry "${id}"`).toBe(true);
+    }
     for (const t of TOOL_DIRECTORY) {
       expect(toolDetail(t.id)).toBeDefined();
       expect(toolById(t.id)?.name).toBeDefined();
