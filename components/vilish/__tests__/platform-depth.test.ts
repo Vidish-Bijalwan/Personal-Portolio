@@ -79,3 +79,42 @@ describe("sitemap", () => {
     expect(src).toContain("/${u.slug}");
   });
 });
+
+describe("homepage imagery: unique, no bad repeats", () => {
+  const pageSrc = readFileSync(join(root, "app", "page.tsx"), "utf8");
+  // SHOWREEL, SHOWCASE, CAPABILITIES and MADE_FOR all live in app/page.tsx.
+  // Every /examples/*.webp reference there must be unique — the owner
+  // complained about the same images repeating across homepage sections.
+  const IMG_RE = /\/examples\/[\w.-]+\.webp/g;
+  const refs = pageSrc.match(IMG_RE) ?? [];
+
+  it("has zero repeated image srcs across homepage sections", () => {
+    const seen = new Set<string>();
+    const dupes: string[] = [];
+    for (const r of refs) {
+      if (seen.has(r)) dupes.push(r);
+      seen.add(r);
+    }
+    expect(dupes).toEqual([]);
+  });
+
+  it("every referenced /examples/*.webp file exists on disk", () => {
+    const missing: string[] = [];
+    for (const r of new Set(refs)) {
+      const disk = join(root, "public", r.replace(/^\//, ""));
+      try {
+        readFileSync(disk);
+      } catch {
+        missing.push(r);
+      }
+    }
+    expect(missing).toEqual([]);
+  });
+
+  it("showcase neon-portrait banner carries an object-position override", () => {
+    // The 21/8 banner crops a portrait source badly at default center —
+    // the per-card pos must be wired through to the <Image>.
+    expect(pageSrc).toContain('pos: "center 40%"');
+    expect(pageSrc).toContain("objectPosition: ex.pos");
+  });
+});

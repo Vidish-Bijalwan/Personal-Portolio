@@ -70,6 +70,9 @@ interface HomeExample {
   height?: number;
   alt?: string;
   frame?: string;
+  /** Optional object-position override (e.g. "center 40%") for frames whose
+   *  aspect ratio crops the subject badly at the default center. */
+  pos?: string;
 }
 
 /** Showreel: six unique examples, zero overlap with the Showcase section (9, 10, 1, 2).
@@ -188,6 +191,8 @@ const SHOWCASE: HomeExample[] = [
     caption: "Neon portrait, city lights",
     price: formatINR(priceOf("single-image")),
     service: "single-image",
+    // Portrait source in a 21/8 banner: bias the crop window up so the eyes stay in frame.
+    pos: "center 40%",
   },
 ];
 
@@ -222,8 +227,8 @@ const CAPABILITIES: Capability[] = [
     desc: "Anything you can describe — portraits, posters, concepts, scenes. Studio-grade renders, priced per piece.",
     price: `from ${formatINR(priceOf("single-image"))}`,
     href: "/create",
-    img: "/examples/2-neon-portrait.webp",
-    imgAlt: "AI-generated example: stylized neon portrait",
+    img: "/examples/14-concept-islands.webp",
+    imgAlt: "AI-generated example: fantasy floating islands concept art",
   },
   {
     icon: SlidersHorizontal,
@@ -231,8 +236,8 @@ const CAPABILITIES: Capability[] = [
     desc: "Retouch, restyle, recolor, remove backgrounds. Your photo, transformed exactly as you brief it.",
     price: `from ${formatINR(priceOf("single-image"))}`,
     href: "/create",
-    img: "/examples/9-fashion-editorial.webp",
-    imgAlt: "AI-generated example: high-fashion editorial portrait",
+    img: "/examples/15-retouch-light.webp",
+    imgAlt: "AI-generated example: portrait retouch light-sweep",
   },
   {
     icon: Sparkles,
@@ -240,8 +245,8 @@ const CAPABILITIES: Capability[] = [
     desc: "Product shots and campaign creatives that look shot in a studio — without booking a studio.",
     price: `from ${formatINR(priceOf("product-photo"))}`,
     href: "/create",
-    img: "/examples/10-perfume-ad.webp",
-    imgAlt: "AI-generated example: luxury perfume product shot",
+    img: "/examples/16-skincare-splash.webp",
+    imgAlt: "AI-generated example: skincare product shot with water splash",
   },
 ];
 
@@ -853,24 +858,24 @@ const MADE_FOR = [
     href: "/for-sellers",
     title: "Sellers",
     copy: "Product shots and ad creatives that look shot in a studio — without booking one.",
-    img: "/examples/10-perfume-ad.webp",
-    imgAlt: "Luxury perfume product shot — AI-generated example",
+    img: "/examples/11-sellers-headphones.webp",
+    imgAlt: "Matte-black headphones product shot — AI-generated example",
     accent: "#D7FF3F",
   },
   {
     href: "/for-creators",
     title: "Creators",
     copy: "Portraits, reels and motion clips with a studio finish, priced per piece.",
-    img: "/examples/2-neon-portrait.webp",
-    imgAlt: "Stylized neon portrait — AI-generated example",
+    img: "/examples/12-creator-camera.webp",
+    imgAlt: "Creator holding a vintage camera — AI-generated example",
     accent: "#00F0FF",
   },
   {
     href: "/for-marketers",
     title: "Marketers",
     copy: "Campaign creatives and ad variants on demand — no retainer, pay per piece.",
-    img: "/examples/1-sneaker-ad.webp",
-    imgAlt: "Cinematic sneaker product photograph — AI-generated example",
+    img: "/examples/13-marketer-billboard.webp",
+    imgAlt: "Glowing billboard ad at night — AI-generated example",
     accent: "#FF2D78",
   },
 ];
@@ -1136,6 +1141,7 @@ function ShowcaseGrid({ onOpen }: { onOpen: (index: number) => void }) {
                 sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 40vw"
                 loading="lazy"
                 className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.05] motion-reduce:transition-none"
+                style={ex.pos ? { objectPosition: ex.pos } : undefined}
               />
               {/* click layer: opens the lightbox */}
               <button
