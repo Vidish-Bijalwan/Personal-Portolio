@@ -30,6 +30,9 @@ import { promptInsight } from '@/lib/vilish/prompt-insight';
  *   created earlier (1 = next up); null otherwise.
  * - prompt_insight: honest keyword read of the prompt { subject, styles, mood }.
  * - prompt: the owner's own prompt (needed for the remix buttons).
+ * - aspect_ratio: the requested aspect ratio (e.g. "1:1").
+ * - finished_at: last row update (ISO) — the deliver step stamps it, so the
+ *   result page can honestly show when the preview landed.
  */
 export async function GET(
   _req: NextRequest,
@@ -49,6 +52,12 @@ export async function GET(
     gen.createdAt instanceof Date
       ? gen.createdAt.toISOString()
       : new Date(gen.createdAt).toISOString();
+  // Last write wins as "finished" — the deliver step stamps updated_at when
+  // the preview lands. Honest metadata for the result-page details card.
+  const finishedAt =
+    gen.updatedAt instanceof Date
+      ? gen.updatedAt.toISOString()
+      : new Date(gen.updatedAt).toISOString();
 
   let queuePosition: number | null = null;
   if (gen.status === 'queued') {
@@ -74,6 +83,8 @@ export async function GET(
     queue_position: queuePosition,
     prompt_insight: promptInsight(gen.prompt),
     prompt: gen.prompt,
+    aspect_ratio: gen.aspectRatio,
+    finished_at: finishedAt,
     ...(isGenerationErrorCode(gen.errorCode)
       ? { error_code: gen.errorCode }
       : {}),
