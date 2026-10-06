@@ -18,6 +18,8 @@ import VilishFooter from "@/components/vilish/footer";
 import BurgerGrill, { burgerFrameForStage } from "@/components/vilish/burger-grill";
 import PopcornReel, { reelFrameForStage } from "@/components/vilish/popcorn-reel";
 import WaitingPanel from "@/components/vilish/waiting-panel";
+import { REMIX_PRESETS } from "@/components/vilish/waiting-panel";
+import { MoreFromGrill, ResultPanel } from "@/components/vilish/result-panel";
 import type { PromptInsight } from "@/src/lib/vilish/prompt-insight";
 import { progressForStage } from "@/src/lib/vilish/progress";
 import PaymentModal from "@/components/vilish/payment-modal";
@@ -41,6 +43,9 @@ interface GenStatus {
   prompt_insight: PromptInsight | null;
   /** The owner's own prompt — powers the remix buttons. */
   prompt?: string | null;
+  /** Result-page details (from /api/gen/[id]/status). */
+  aspect_ratio: string;
+  finished_at: string;
 }
 
 /** "1m 23s" / "45s" / "2h 4m" — honest elapsed time, never a promise. */
@@ -571,67 +576,139 @@ export default function WatchRoomPage() {
             </section>
           )}
 
-        {/* done + locked: reveal with unlock CTA */}
+        {/* done + locked: reveal with unlock CTA + enriched result page */}
         {data && data.status === "done" && !data.unlocked && (
-          <section className="flex flex-1 flex-col items-center py-8 text-center">
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-[#D7FF3F]/40 bg-[#D7FF3F]/[0.08] px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.1em] text-[#D7FF3F]">
-              <Sparkles className="h-3.5 w-3.5" />
-              {isVideo ? "Your video preview — AI-generated" : "Your free preview — AI-generated"}
-            </span>
+          <section className="w-full py-8">
+            <div className="grid gap-8 lg:grid-cols-[1fr_340px] lg:items-start">
+              {/* left: preview + unlock CTA + actions */}
+              <div className="flex flex-col items-center text-center">
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-[#D7FF3F]/40 bg-[#D7FF3F]/[0.08] px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.1em] text-[#D7FF3F]">
+                  <Sparkles className="h-3.5 w-3.5" />
+                  {isVideo ? "Your video preview — AI-generated" : "Your free preview — AI-generated"}
+                </span>
 
-            <div className="mt-6 w-full max-w-md overflow-hidden rounded-[16px] border border-white/[0.1]">
-              {previewOk ? (
-                isVideo ? (
-                  <video
-                    src={previewUrl}
-                    muted
-                    loop
-                    playsInline
-                    autoPlay
-                    controls
-                    className="block aspect-video w-full bg-black object-cover"
-                    onError={() => setPreviewOk(false)}
-                  />
-                ) : (
-                  <img
-                    src={previewUrl}
-                    alt="Your free AI-generated preview (watermarked)"
-                    className="block w-full"
-                    onError={() => setPreviewOk(false)}
-                  />
-                )
-              ) : (
-                <p className="px-6 py-12 text-[13px] text-white/45">
-                  The preview file isn&apos;t ready to show yet — try refreshing in a moment.
+                <div className="mt-6 w-full max-w-md overflow-hidden rounded-[16px] border border-white/[0.1]">
+                  {previewOk ? (
+                    isVideo ? (
+                      <video
+                        src={previewUrl}
+                        muted
+                        loop
+                        playsInline
+                        autoPlay
+                        controls
+                        className="block aspect-video w-full bg-black object-cover"
+                        onError={() => setPreviewOk(false)}
+                      />
+                    ) : (
+                      <img
+                        src={previewUrl}
+                        alt="Your free AI-generated preview (watermarked)"
+                        className="block w-full"
+                        onError={() => setPreviewOk(false)}
+                      />
+                    )
+                  ) : (
+                    <p className="px-6 py-12 text-[13px] text-white/45">
+                      The preview file isn&apos;t ready to show yet — try refreshing in a moment.
+                    </p>
+                  )}
+                </div>
+
+                <p className="mt-5 max-w-md text-[14px] leading-6 text-white/60">
+                  Watermarked preview. The clean HD {isVideo ? "clip" : "file"} is yours
+                  for {isVideo ? "₹89" : "₹19"}.
                 </p>
-              )}
+
+                <button
+                  type="button"
+                  onClick={handleUnlock}
+                  disabled={unlockBusy}
+                  className={cn(
+                    "mt-5 inline-flex min-h-[48px] items-center gap-2 rounded-[10px] bg-[#D7FF3F] px-6 py-3 text-[15px] font-semibold text-[#080808]",
+                    unlockBusy ? "cursor-wait opacity-70" : "hover:opacity-95",
+                  )}
+                >
+                  {unlockBusy && <Loader2 className="h-4 w-4 animate-spin" />}
+                  Unlock clean HD — {isVideo ? "₹89" : "₹19"}
+                </button>
+                {unlockError && (
+                  <p className="mt-3 max-w-md text-[13px] text-red-300/80" role="alert">
+                    {unlockError}
+                  </p>
+                )}
+                <p className="mt-3 text-[12px] text-white/35">
+                  This is a preview, not a finished order — unlock only if you love it.
+                </p>
+
+                {/* action row: everything here really works */}
+                <div className="mt-6 flex flex-wrap items-center justify-center gap-2.5">
+                  <a
+                    href={previewUrl}
+                    download={isVideo ? "pixaura-preview.mp4" : "pixaura-preview.jpg"}
+                    className="inline-flex min-h-[44px] items-center gap-2 rounded-[10px] border border-white/[0.12] bg-[#18181B] px-4 py-2.5 text-[13px] font-medium text-white/85 hover:border-white/30"
+                  >
+                    <Download className="h-4 w-4" />
+                    Download preview
+                  </a>
+                  <Link
+                    href={isVideo ? "/create?media=video" : "/create"}
+                    className="inline-flex min-h-[44px] items-center gap-2 rounded-[10px] border border-white/[0.12] bg-[#18181B] px-4 py-2.5 text-[13px] font-medium text-white/85 hover:border-white/30"
+                  >
+                    <Sparkles className="h-4 w-4" />
+                    New creation
+                  </Link>
+                </div>
+
+                {/* remix variations — images only (free tier rejects video) */}
+                {!isVideo && (
+                  <div className="mt-7 w-full max-w-md text-left">
+                    <p className="text-[13px] font-semibold text-white/85">
+                      Remix variations
+                    </p>
+                    <p className="mt-1 text-[12px] leading-5 text-white/40">
+                      Same idea, new style — starts a fresh free preview.
+                    </p>
+                    <div className="mt-3 grid grid-cols-2 gap-2">
+                      {REMIX_PRESETS.slice(0, 4).map((p) => {
+                        const busy = remixBusy === p.suffix;
+                        return (
+                          <button
+                            key={p.label}
+                            type="button"
+                            onClick={() => void handleRemix(p.suffix)}
+                            disabled={remixBusy !== null}
+                            className={cn(
+                              "inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-[10px] border border-white/[0.1] bg-white/[0.04] px-3 py-2.5 text-[13px] font-medium text-white/85 transition-colors",
+                              remixBusy === null && "hover:border-[#D7FF3F]/50 hover:text-white",
+                              busy && "cursor-wait opacity-70"
+                            )}
+                          >
+                            {busy && <Loader2 className="h-3.5 w-3.5 animate-spin motion-reduce:animate-none" />}
+                            {p.label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    {remixError && (
+                      <p className="mt-2.5 text-[12.5px] leading-5 text-red-300/80" role="alert">
+                        {remixError}
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* right: creation details */}
+              <ResultPanel
+                prompt={data.prompt}
+                insight={data.prompt_insight}
+                aspectRatio={data.aspect_ratio}
+                finishedAt={data.finished_at}
+              />
             </div>
 
-            <p className="mt-5 max-w-md text-[14px] leading-6 text-white/60">
-              Watermarked preview. The clean HD {isVideo ? "clip" : "file"} is yours
-              for {isVideo ? "₹89" : "₹19"}.
-            </p>
-
-            <button
-              type="button"
-              onClick={handleUnlock}
-              disabled={unlockBusy}
-              className={cn(
-                "mt-5 inline-flex items-center gap-2 rounded-[10px] bg-[#D7FF3F] px-6 py-3 text-[15px] font-semibold text-[#080808]",
-                unlockBusy ? "cursor-wait opacity-70" : "hover:opacity-95",
-              )}
-            >
-              {unlockBusy && <Loader2 className="h-4 w-4 animate-spin" />}
-              Unlock clean HD — {isVideo ? "₹89" : "₹19"}
-            </button>
-            {unlockError && (
-              <p className="mt-3 max-w-md text-[13px] text-red-300/80" role="alert">
-                {unlockError}
-              </p>
-            )}
-            <p className="mt-3 text-[12px] text-white/35">
-              This is a preview, not a finished order — unlock only if you love it.
-            </p>
+            <MoreFromGrill />
           </section>
         )}
 
@@ -668,6 +745,7 @@ export default function WatchRoomPage() {
             >
               Make another one
             </Link>
+            <MoreFromGrill />
           </section>
         )}
       </main>
