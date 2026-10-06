@@ -105,5 +105,105 @@
     "prompt": "AI video example — night-city aerial drift, 5s clip, made in minutes",
     "src": "/examples/videos/clip-3-city.mp4",
     "service": "clip-5s"
+  },
+  {
+    "alt": "AI-generated cyberpunk street food stall at night in the rain with glowing neon signs",
+    "category": "ad",
+    "model": "Studio quality",
+    "prompt": "Cyberpunk street food stall in the rain, glowing neon signs, steam rising from ramen bowls, dark moody premium advertisement",
+    "src": "/examples/17-cyberpunk-ramen.webp",
+    "service": "single-image"
+  },
+  {
+    "alt": "AI-generated astronaut figure as a luxury product shot in a dark studio",
+    "category": "image",
+    "model": "Studio quality",
+    "prompt": "Astronaut figure as a luxury product shot floating in a dark studio, dramatic rim lighting, deep shadows, premium advertising",
+    "src": "/examples/18-astronaut-product.webp",
+    "service": "single-image"
+  },
+  {
+    "alt": "AI-generated dancer frozen mid-motion with flowing silk in a dark studio",
+    "category": "image",
+    "model": "Studio quality",
+    "prompt": "Contemporary dancer frozen mid-motion with flowing silk fabric swirling around, dark studio, dramatic side lighting, fine-art motion",
+    "src": "/examples/19-dancer-silk.webp",
+    "service": "single-image"
+  },
+  {
+    "alt": "AI-generated vintage classic car in a dark studio with dramatic rim light",
+    "category": "ad",
+    "model": "Studio quality",
+    "prompt": "Vintage classic car in a dark studio, dramatic rim light tracing the chrome curves, deep shadows, luxury automotive advertising",
+    "src": "/examples/20-vintage-car.webp",
+    "service": "single-image"
+  },
+  {
+    "alt": "AI-generated macro of a coffee liquid crown splash frozen mid-air",
+    "category": "image",
+    "model": "Studio quality",
+    "prompt": "Macro photograph of a coffee liquid crown splash frozen in mid-air, dark background, dramatic side lighting, high-speed capture",
+    "src": "/examples/21-coffee-splash.webp",
+    "service": "single-image"
+  },
+  {
+    "alt": "AI-generated ethereal portrait surrounded by glowing bioluminescent jellyfish",
+    "category": "image",
+    "model": "Studio quality",
+    "prompt": "Ethereal portrait surrounded by glowing bioluminescent jellyfish, dark underwater atmosphere, cyan and violet glow, fine-art",
+    "src": "/examples/22-jellyfish-portrait.webp",
+    "service": "single-image"
+  },
+  {
+    "alt": "AI-generated extreme macro of a bronze chess knight in dramatic light",
+    "category": "image",
+    "model": "Studio quality",
+    "prompt": "Extreme macro of a bronze chess knight piece, dramatic chiaroscuro lighting, dark background, luxury product photography",
+    "src": "/examples/23-chess-knight.webp",
+    "service": "single-image"
+  },
+  {
+    "alt": "AI-generated hot air balloons over a desert canyon at dawn",
+    "category": "image",
+    "model": "Studio quality",
+    "prompt": "Hot air balloons drifting over a vast desert canyon at dawn, epic scale, warm golden light against deep blue shadows",
+    "src": "/examples/24-balloon-canyon.webp",
+    "service": "single-image"
+  },
+  {
+    "alt": "AI-generated video example: luxury perfume bottle rotating on a dark studio turntable",
+    "category": "video",
+    "model": "5s clip",
+    "poster": "/examples/videos/poster-4-product-spin.jpg",
+    "prompt": "luxury perfume bottle rotating on a dark studio turntable, 5s clip",
+    "src": "/examples/videos/v-01-product-spin.mp4",
+    "service": "clip-5s"
+  },
+  {
+    "alt": "AI-generated video example: slow aerial flythrough of a neon-lit cyberpunk city",
+    "category": "video",
+    "model": "5s clip",
+    "poster": "/examples/videos/poster-5-neon-flythrough.jpg",
+    "prompt": "slow aerial flythrough of a neon-lit cyberpunk city at night, 5s clip",
+    "src": "/examples/videos/v-02-neon-flythrough.mp4",
+    "service": "clip-5s"
+  },
+  {
+    "alt": "AI-generated video example: golden liquid splash in extreme slow motion",
+    "category": "video",
+    "model": "5s clip",
+    "poster": "/examples/videos/poster-6-liquid-splash.jpg",
+    "prompt": "golden liquid splash swirling in extreme slow motion, 5s clip",
+    "src": "/examples/videos/v-03-liquid-splash.mp4",
+    "service": "clip-5s"
+  },
+  {
+    "alt": "AI-generated video example: portrait with hair drifting in the breeze",
+    "category": "video",
+    "model": "5s clip",
+    "poster": "/examples/videos/poster-7-portrait-breeze.jpg",
+    "prompt": "portrait with hair drifting gently in the breeze under neon glow, 5s clip",
+    "src": "/examples/videos/v-04-portrait-breeze.mp4",
+    "service": "clip-5s"
   }
 ]
