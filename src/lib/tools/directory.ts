@@ -120,7 +120,7 @@ export const TOOL_DIRECTORY: readonly ToolEntry[] = [
     href: "/video-studio",
     group: "video-studio",
     icon: Scissors,
-    badge: "AI",
+    badge: "Real processing",
   },
   {
     id: "compress",

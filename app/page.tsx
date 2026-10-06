@@ -35,7 +35,6 @@ import HeroAurora, { HeroCollage } from "@/components/motion/HeroAurora";
 import FlyingElements from "@/components/motion/FlyingElements";
 import Reveal from "@/components/motion/Reveal";
 import { Stagger, StaggerItem } from "@/components/motion/Stagger";
-import Counter from "@/components/motion/Counter";
 import Marquee from "@/components/motion/Marquee";
 import MagneticButton from "@/components/motion/MagneticButton";
 import Carousel from "@/components/motion/Carousel";
@@ -201,12 +200,6 @@ const CASE_ITEMS: LightboxItem[] = SHOWCASE.map((ex) => ({
   price: ex.price,
   alt: ex.alt,
 }));
-
-const STATS = [
-  { to: 2400, suffix: "+", prefix: "", decimals: 0, label: "creations delivered" },
-  { to: 3, suffix: " min", prefix: "≈", decimals: 0, label: "median turnaround" },
-  { to: 99, suffix: "%", prefix: "", decimals: 0, label: "QC pass rate" },
-];
 
 interface Capability {
   icon: LucideIcon;
@@ -1137,32 +1130,7 @@ export default function VilishLanding() {
           </Reveal>
         </section>
 
-        {/* ── stats band ───────────────────────────────────── */}
-        <section
-          aria-label="Studio stats"
-          className="cv-auto border-y border-white/[0.08] bg-white/[0.015]"
-        >
-          <div className="mx-auto max-w-5xl px-4 py-14 text-center sm:py-20">
-            <Stagger className="grid grid-cols-1 gap-10 sm:grid-cols-3">
-              {STATS.map((s) => (
-                <StaggerItem key={s.label}>
-                  <p className="text-[44px] font-semibold leading-none tracking-[-0.02em] tabular-nums sm:text-[52px]">
-                    <Counter
-                      to={s.to}
-                      prefix={s.prefix}
-                      suffix={s.suffix}
-                      decimals={s.decimals}
-                    />
-                  </p>
-                  <p className="mt-2.5 text-[14px] text-white/55">{s.label}</p>
-                </StaggerItem>
-              ))}
-            </Stagger>
-            <p className="mt-10 text-[12px] text-white/35">
-              Launch-period figures.
-            </p>
-          </div>
-        </section>
+        
 
         {/* ── formats: interactive ratio lab ───────────────── */}
         <section aria-label="Supported formats" className="cv-auto border-b border-white/[0.08] py-16 sm:py-24">
