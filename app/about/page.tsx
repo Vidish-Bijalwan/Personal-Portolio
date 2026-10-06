@@ -132,9 +132,9 @@ export default function AboutPage() {
           </Reveal>
           <Stagger className="mt-6 grid gap-3 sm:grid-cols-2">
             {[
-              { icon: Sparkles, text: "Images — portraits, posters, concepts, scenes. From ₹29." },
-              { icon: Brush, text: "Edits — retouch, restyle, recolor, remove backgrounds. From ₹29." },
-              { icon: BadgeCheck, text: "Ads — studio-grade product shots and campaign creatives. From ₹49." },
+              { icon: Sparkles, text: "Images — portraits, posters, concepts, scenes. From ₹19." },
+              { icon: Brush, text: "Edits — retouch, restyle, recolor, remove backgrounds. From ₹19." },
+              { icon: BadgeCheck, text: "Ads — studio-grade product shots and campaign creatives. From ₹39." },
               { icon: Check, text: "Remakes — didn't land? Regenerate any finished piece for ₹19." },
             ].map((r, i) => (
               <StaggerItem key={i}>

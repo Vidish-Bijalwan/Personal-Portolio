@@ -39,7 +39,7 @@ export interface ToolEntry {
   name: string;
   /** Honest one-liner. */
   tagline: string;
-  /** Catalog-derived display price (e.g. "₹29" or "₹49/job"). */
+  /** Catalog-derived display price (e.g. "₹19" or "₹39/job"). */
   price: string;
   /** Where the tool opens. */
   href: string;

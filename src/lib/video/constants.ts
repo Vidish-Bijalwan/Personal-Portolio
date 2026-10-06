@@ -7,7 +7,7 @@
  */
 import { priceOf } from '@/lib/pricing/catalog';
 
-/** ₹49 clean-video unlock, integer paise — the video-studio catalog price. */
+/** ₹39 clean-video unlock, integer paise — the video-studio catalog price. */
 export const VIDEO_JOB_PRICE_PAISE = priceOf('video-studio');
 
 /** Max uploaded source video: 50MB (client + server enforced). */

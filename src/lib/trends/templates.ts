@@ -161,7 +161,7 @@ export const TEMPLATES: readonly Template[] = [
   },
   /* ── Products: video-ad track ────────────────────────────────────
    * Product Video Ad templates: the ad creative starts as a product photo
-   * (₹49); the card's follow-up routes into Video Studio to animate it.
+   * (₹39); the card's follow-up routes into Video Studio to animate it.
    * Honest framing — curated briefs over real services, not separate models. */
   {
     id: "billboard-launch",

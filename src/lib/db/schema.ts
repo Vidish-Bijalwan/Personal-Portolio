@@ -369,7 +369,7 @@ export const videoJobs = pgTable('video_jobs', {
 
 /**
  * Links a manual-UPI order to a video_jobs row. purpose
- * 'video_studio': ₹49 clean-video unlock. The payment-verify hook flips
+ * 'video_studio': ₹39 clean-video unlock. The payment-verify hook flips
  * video_jobs.unlocked from this link (mirrors generation_orders).
  */
 export const videoJobOrders = pgTable('video_job_orders', {

@@ -55,7 +55,7 @@ function toPaymentShape(
 
 /**
  * Create the stub generation_jobs row that orders.job_id requires, then
- * a ₹49 manual-UPI order, then the video_job_orders link.
+ * a ₹39 manual-UPI order, then the video_job_orders link.
  */
 export async function createVideoJobOrder(input: {
   videoJobId: string;
