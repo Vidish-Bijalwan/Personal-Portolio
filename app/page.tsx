@@ -294,7 +294,7 @@ const VIDEO_CATS = [
     id: "portraits",
     label: "Portraits",
     accent: "#FF2D78",
-    blurb: "Character loops and living portraits — 5-second AI motion clips.",
+    blurb: "Character loops and portrait clips — 5-second AI motion clips.",
     bullets: ["5s loop · 9:16 vertical", "Made from a text prompt", `${formatINR(priceOf("clip-5s"))} per clip`],
     clip: {
       src: "/examples/videos/clip-1-portrait.mp4",
