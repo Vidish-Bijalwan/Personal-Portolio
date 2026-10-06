@@ -77,12 +77,20 @@ export function canTransition(from: string, to: string): boolean {
  * - 'content_refused': the provider's safety filter declined the prompt
  *   (a word like "fire" or "blood" tripped it) — the user needs a
  *   rephrase, not a blind retry.
++ * - 'missing_reference': the prompt asks for a specific person/photo
++ *   ("the person in the reference photo") but no reference file was
++ *   attached — the user must attach the photo and try again. Never
++ *   generate a random face in its place.
  * - 'technical': everything else (timeouts, provider errors, stalls,
  *   reap-after-too-many-attempts).
  *
  * status stays 'failed' for both; neither ever consumes the free cap.
  */
-export const GENERATION_ERROR_CODES = ['content_refused', 'technical'] as const;
+export const GENERATION_ERROR_CODES = [
+  'content_refused',
+  'missing_reference',
+  'technical',
+] as const;
 
 export type GenerationErrorCode = (typeof GENERATION_ERROR_CODES)[number];
 
@@ -101,6 +109,8 @@ export function isGenerationErrorCode(v: unknown): v is GenerationErrorCode {
 export const FAILURE_COPY: Record<GenerationErrorCode, string> = {
   content_refused:
     'The image model declined this prompt — usually a word like "fire" or "blood" trips the safety filter. Reword it and try again; your free tries are untouched.',
+  missing_reference:
+    'This prompt asks for a specific person, but no reference photo was attached — attach the photo and try again. Your free tries are untouched.',
   technical: 'The grill flared up — try again. It’s still free.',
 };
 
