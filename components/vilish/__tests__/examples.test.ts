@@ -27,7 +27,8 @@ function loadManifest(): unknown[] {
 describe("examples pricing transparency", () => {
   it("manifest entries all resolve to real catalog services", () => {
     const items = loadManifest();
-    expect(items.length).toBe(13);
+    // 13 originals + 8 new images + 4 new videos (showcase rotation, 2026-10-06).
+    expect(items.length).toBe(25);
     for (const it of items) {
       expect(isExampleItem(it)).toBe(true);
     }

@@ -43,6 +43,8 @@ import { Stagger, StaggerItem } from "@/components/motion/Stagger";
 import MagneticButton from "@/components/motion/MagneticButton";
 import { EASE_OUT, MOTION, usePrefersReducedMotion } from "@/src/lib/motion/theme";
 import SectionHeader from "@/components/vilish/section-header";
+import CategoryMarquee from "@/components/vilish/category-marquee";
+import { useRotatedPool } from "@/src/lib/vilish/showcase-rotation";
 import { toolsByGroup } from "@/src/lib/tools/directory";
 
 const TRUST = [
@@ -73,6 +75,10 @@ interface HomeExample {
   /** Optional object-position override (e.g. "center 40%") for frames whose
    *  aspect ratio crops the subject badly at the default center. */
   pos?: string;
+  /** One-line brief of what was asked for — travels with the item through
+   *  rotation (no invented clients or jobs). Required on showcase-pool
+   *  items; the reel set doesn't use it. */
+  brief?: string;
 }
 
 /** Showreel: six unique examples, zero overlap with the Showcase section (9, 10, 1, 2).
@@ -155,13 +161,19 @@ const SHOWREEL: HomeExample[] = [
 /** Accent rotation across the reel: lime → cyan → magenta. */
 const REEL_ACCENTS = ["#D7FF3F", "#00F0FF", "#FF2D78"];
 
-const SHOWCASE: HomeExample[] = [
+/**
+ * Homepage showcase pool \u2014 12 pieces (4 originals + 8 new). The grid shows
+ * 4 per visit via useRotatedPool, so repeat visits surface different work
+ * instead of the same four every time. Briefs travel with their item.
+ */
+const SHOWCASE_POOL: HomeExample[] = [
   {
     src: "/examples/9-fashion-editorial.webp",
     width: 1280,
     height: 1920,
     alt: "High-fashion model with sculptural black spiked hair in a charcoal studio — AI-generated example",
     caption: "Fashion editorial, sculptural hair",
+    brief: "High-fashion editorial \u2014 sculptural spiked hair, charcoal studio, hard rim light.",
     price: formatINR(priceOf("single-image")),
     service: "single-image",
   },
@@ -171,6 +183,7 @@ const SHOWCASE: HomeExample[] = [
     height: 1600,
     alt: "Faceted glass perfume bottle with golden liquid — AI-generated example",
     caption: "Golden perfume, faceted glass",
+    brief: "Luxury product shot \u2014 faceted glass, golden liquid, macro detail.",
     price: formatINR(priceOf("product-photo")),
     service: "product-photo",
   },
@@ -180,6 +193,7 @@ const SHOWCASE: HomeExample[] = [
     height: 1280,
     alt: "Sneaker floating in a dark studio with dramatic rim lighting — AI-generated example",
     caption: "Floating sneaker, studio shot",
+    brief: "E-commerce hero \u2014 floating sneaker, dark studio, dramatic rim light.",
     price: formatINR(priceOf("single-image")),
     service: "single-image",
   },
@@ -189,10 +203,91 @@ const SHOWCASE: HomeExample[] = [
     height: 1920,
     alt: "Stylized portrait with neon city lights reflected in her eyes — AI-generated example",
     caption: "Neon portrait, city lights",
+    brief: "Stylized portrait \u2014 neon city reflections, cinematic grade.",
     price: formatINR(priceOf("single-image")),
     service: "single-image",
     // Portrait source in a 21/8 banner: bias the crop window up so the eyes stay in frame.
     pos: "center 40%",
+  },
+  {
+    src: "/examples/21-coffee-splash.webp",
+    width: 1920,
+    height: 1280,
+    alt: "Coffee liquid crown splash frozen mid-air with amber-lit droplets \u2014 AI-generated example",
+    caption: "Coffee splash, frozen crown",
+    brief: "High-speed macro \u2014 coffee crown splash, amber droplets on black.",
+    price: formatINR(priceOf("single-image")),
+    service: "single-image",
+  },
+  {
+    src: "/examples/22-jellyfish-portrait.webp",
+    width: 1280,
+    height: 1920,
+    alt: "Ethereal underwater portrait surrounded by glowing jellyfish \u2014 AI-generated example",
+    caption: "Jellyfish portrait, deep glow",
+    brief: "Underwater portrait \u2014 bioluminescent jellyfish, cyan and violet glow.",
+    price: formatINR(priceOf("single-image")),
+    service: "single-image",
+  },
+  {
+    src: "/examples/23-chess-knight.webp",
+    width: 1600,
+    height: 1600,
+    alt: "Extreme macro of a bronze chess knight in dramatic chiaroscuro \u2014 AI-generated example",
+    caption: "Chess knight, macro drama",
+    brief: "Macro still life \u2014 bronze knight, chiaroscuro light, dark ground.",
+    price: formatINR(priceOf("single-image")),
+    service: "single-image",
+  },
+  {
+    src: "/examples/24-balloon-canyon.webp",
+    width: 1920,
+    height: 1280,
+    alt: "Hot air balloons drifting over a desert canyon at dawn \u2014 AI-generated example",
+    caption: "Balloons over the canyon",
+    brief: "Epic landscape \u2014 hot air balloons, desert canyon at dawn.",
+    price: formatINR(priceOf("single-image")),
+    service: "single-image",
+  },
+  {
+    src: "/examples/17-cyberpunk-ramen.webp",
+    width: 1920,
+    height: 1280,
+    alt: "Cyberpunk street food stall in the rain with neon signs and steaming ramen \u2014 AI-generated example",
+    caption: "Cyberpunk ramen stall",
+    brief: "Night market ad \u2014 neon rain, steam, ramen bowls.",
+    price: formatINR(priceOf("single-image")),
+    service: "single-image",
+  },
+  {
+    src: "/examples/18-astronaut-product.webp",
+    width: 1600,
+    height: 1600,
+    alt: "Astronaut figure as a luxury product shot floating in a dark studio \u2014 AI-generated example",
+    caption: "Astronaut, studio product shot",
+    brief: "Product-style portrait \u2014 astronaut figure, rim light, deep shadows.",
+    price: formatINR(priceOf("single-image")),
+    service: "single-image",
+  },
+  {
+    src: "/examples/19-dancer-silk.webp",
+    width: 1920,
+    height: 1280,
+    alt: "Contemporary dancer frozen mid-motion with flowing red silk \u2014 AI-generated example",
+    caption: "Dancer in silk, frozen motion",
+    brief: "Fine-art motion \u2014 dancer mid-leap, swirling silk, dark studio.",
+    price: formatINR(priceOf("single-image")),
+    service: "single-image",
+  },
+  {
+    src: "/examples/20-vintage-car.webp",
+    width: 1920,
+    height: 1280,
+    alt: "Vintage classic car in a dark studio with dramatic rim light \u2014 AI-generated example",
+    caption: "Vintage car, studio light",
+    brief: "Automotive ad \u2014 classic coupe, chrome curves, dark studio.",
+    price: formatINR(priceOf("single-image")),
+    service: "single-image",
   },
 ];
 
@@ -203,12 +298,8 @@ const REEL_ITEMS: LightboxItem[] = SHOWREEL.map((ex) => ({
   price: ex.price,
   alt: ex.alt,
 }));
-const CASE_ITEMS: LightboxItem[] = SHOWCASE.map((ex) => ({
-  src: ex.src,
-  caption: ex.caption,
-  price: ex.price,
-  alt: ex.alt,
-}));
+/** Case lightbox items are derived from the rotated showcase pool inside
+ *  VilishLanding (caseItems) so the lightbox matches the visible grid. */
 
 interface Capability {
   icon: LucideIcon;
@@ -294,7 +385,7 @@ const FAQ_JSON_LD = {
 
 /** Video section: three themed categories, one clip each, each with its own
  *  accent color and motion treatment. Clips are honest AI video examples. */
-const VIDEO_CATS = [
+const VIDEO_POOL = [
   {
     id: "portraits",
     label: "Portraits",
@@ -337,18 +428,66 @@ const VIDEO_CATS = [
       price: formatINR(priceOf("clip-5s")),
     },
   },
+  {
+    id: "turntable",
+    label: "Turntable",
+    accent: "#D7FF3F",
+    blurb: "Slow product rotations for listings \u2014 the bottle does the modeling.",
+    bullets: ["5s loop \u00b7 9:16 vertical", "Studio turntable rotation", `${formatINR(priceOf("clip-5s"))} per clip`],
+    clip: {
+      src: "/examples/videos/v-01-product-spin.mp4",
+      poster: "/examples/videos/poster-4-product-spin.jpg",
+      alt: "AI video example: luxury perfume bottle rotating on a dark studio turntable \u2014 made with Pixaura",
+      caption: "Perfume bottle, turntable spin",
+      price: formatINR(priceOf("clip-5s")),
+    },
+  },
+  {
+    id: "flythrough",
+    label: "Flythrough",
+    accent: "#00F0FF",
+    blurb: "Aerial-style drifts through neon streets \u2014 atmosphere you can feel.",
+    bullets: ["5s loop \u00b7 9:16 vertical", "Cinematic aerial drift", `${formatINR(priceOf("clip-5s"))} per clip`],
+    clip: {
+      src: "/examples/videos/v-02-neon-flythrough.mp4",
+      poster: "/examples/videos/poster-5-neon-flythrough.jpg",
+      alt: "AI video example: slow aerial flythrough of a neon-lit cyberpunk city at night \u2014 made with Pixaura",
+      caption: "Neon city flythrough",
+      price: formatINR(priceOf("clip-5s")),
+    },
+  },
+  {
+    id: "liquid",
+    label: "Liquid macro",
+    accent: "#FF2D78",
+    blurb: "Extreme slow-motion liquid \u2014 texture that sells the product.",
+    bullets: ["5s loop \u00b7 9:16 vertical", "Macro slow motion", `${formatINR(priceOf("clip-5s"))} per clip`],
+    clip: {
+      src: "/examples/videos/v-03-liquid-splash.mp4",
+      poster: "/examples/videos/poster-6-liquid-splash.jpg",
+      alt: "AI video example: golden liquid splash swirling in extreme slow motion \u2014 made with Pixaura",
+      caption: "Liquid gold, slow motion",
+      price: formatINR(priceOf("clip-5s")),
+    },
+  },
+  {
+    id: "breeze",
+    label: "Breeze",
+    accent: "#D7FF3F",
+    blurb: "Portrait clips with natural motion \u2014 hair in the breeze, alive.",
+    bullets: ["5s loop \u00b7 9:16 vertical", "Natural motion loop", `${formatINR(priceOf("clip-5s"))} per clip`],
+    clip: {
+      src: "/examples/videos/v-04-portrait-breeze.mp4",
+      poster: "/examples/videos/poster-7-portrait-breeze.jpg",
+      alt: "AI video example: portrait with hair drifting gently in the breeze under neon glow \u2014 made with Pixaura",
+      caption: "Portrait in the breeze",
+      price: formatINR(priceOf("clip-5s")),
+    },
+  },
 ];
 
-/** Lightbox items for the three video examples (arrows move within the set). */
-const VIDEO_ITEMS: LightboxItem[] = VIDEO_CATS.map((c) => ({
-  src: c.clip.src,
-  poster: c.clip.poster,
-  caption: c.clip.caption,
-  price: c.clip.price,
-  alt: c.clip.alt,
-  badge: "5s clip",
-  kind: "video",
-}));
+/** Video lightbox items are derived from the rotated reel pool inside
+ *  VideoShowcase (videoItems) so the player matches the visible tabs. */
 
 /**
  * One themed video card: poster paints first (preload="metadata"), the clip
@@ -360,7 +499,7 @@ function VideoCard({
   accent,
   onOpen,
 }: {
-  clip: (typeof VIDEO_CATS)[number]["clip"];
+  clip: (typeof VIDEO_POOL)[number]["clip"];
   accent: string;
   onOpen: () => void;
 }) {
@@ -475,10 +614,24 @@ function Perforation({ position }: { position: "top" | "bottom" }) {
  */
 function VideoShowcase() {
   const reduced = usePrefersReducedMotion();
-  const [activeId, setActiveId] = useState(VIDEO_CATS[0].id);
+  // Reel rotation: 3 of the 7-clip pool per visit, reshuffled on mount.
+  const cats = useRotatedPool(VIDEO_POOL, 3);
+  const [activeId, setActiveId] = useState<string | null>(null);
   const [openIdx, setOpenIdx] = useState<number | null>(null);
-  const activeIdx = VIDEO_CATS.findIndex((c) => c.id === activeId);
-  const active = VIDEO_CATS[activeIdx] ?? VIDEO_CATS[0];
+  const active = cats.find((c) => c.id === activeId) ?? cats[0];
+  const activeIdx = Math.max(
+    0,
+    cats.findIndex((c) => c.id === active.id),
+  );
+  const videoItems: LightboxItem[] = cats.map((c) => ({
+    src: c.clip.src,
+    poster: c.clip.poster,
+    caption: c.clip.caption,
+    price: c.clip.price,
+    alt: c.clip.alt,
+    badge: "5s clip",
+    kind: "video",
+  }));
 
   const panel = (
     <div key={active.id} className="grid grid-cols-1 items-center gap-10 lg:grid-cols-[300px_1fr] lg:gap-14">
@@ -562,7 +715,7 @@ function VideoShowcase() {
           aria-label="Video reels"
           className="mt-6 flex gap-2 overflow-x-auto pb-1"
         >
-          {VIDEO_CATS.map((c, ci) => {
+          {cats.map((c, ci) => {
             const selected = c.id === activeId;
             return (
               <button
@@ -606,9 +759,9 @@ function VideoShowcase() {
       </div>
       <Perforation position="bottom" />
 
-      {openIdx !== null && VIDEO_ITEMS[openIdx] && (
+      {openIdx !== null && videoItems[openIdx] && (
         <Lightbox
-          items={VIDEO_ITEMS}
+          items={videoItems}
           index={openIdx}
           onClose={() => setOpenIdx(null)}
           onIndex={setOpenIdx}
@@ -1093,16 +1246,6 @@ function PipelineSteps() {
   );
 }
 
-/** Honest one-line briefs for the four showcase pieces — what was asked
- *  for, not who ordered it. Keeps the editorial framing without inventing
- *  clients or jobs. */
-const SHOWCASE_BRIEFS = [
-  "High-fashion editorial — sculptural spiked hair, charcoal studio, hard rim light.",
-  "Luxury product shot — faceted glass, golden liquid, macro detail.",
-  "E-commerce hero — floating sneaker, dark studio, dramatic rim light.",
-  "Stylized portrait — neon city reflections, cinematic grade.",
-];
-
 /** Editorial spans for the four showcase pieces: one tall feature, two
  *  stacked, one wide banner. Reads like a magazine spread, not a slider. */
 const SHOWCASE_SPANS = [
@@ -1124,10 +1267,16 @@ const SHOWCASE_ASPECTS = [
  * ("what was asked for"), its exact price, and a direct CTA. Click opens the
  * lightbox.
  */
-function ShowcaseGrid({ onOpen }: { onOpen: (index: number) => void }) {
+function ShowcaseGrid({
+  items,
+  onOpen,
+}: {
+  items: HomeExample[];
+  onOpen: (index: number) => void;
+}) {
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-12 sm:gap-5">
-      {SHOWCASE.map((ex, i) => (
+      {items.map((ex, i) => (
         <Reveal key={ex.src} delay={Math.min(i * 0.06, 0.18)} className={SHOWCASE_SPANS[i]}>
           <figure className="h-full">
             <div
@@ -1165,7 +1314,7 @@ function ShowcaseGrid({ onOpen }: { onOpen: (index: number) => void }) {
                   {ex.caption}
                 </span>
                 <span className="pointer-events-none mt-1 block text-[12.5px] leading-5 text-white/60">
-                  {SHOWCASE_BRIEFS[i]}
+                  {ex.brief}
                 </span>
                 <Link
                   href={exampleHref(ex)}
@@ -1232,6 +1381,15 @@ export default function VilishLanding() {
   // Lightbox open indexes — one per image set so arrows navigate within the set.
   const [reelOpen, setReelOpen] = useState<number | null>(null);
   const [caseOpen, setCaseOpen] = useState<number | null>(null);
+
+  // Showcase rotation: 4 of the 12-piece pool per visit, reshuffled on mount.
+  const showcaseItems = useRotatedPool(SHOWCASE_POOL, 4);
+  const caseItems: LightboxItem[] = showcaseItems.map((ex) => ({
+    src: ex.src,
+    caption: ex.caption,
+    price: ex.price,
+    alt: ex.alt,
+  }));
 
   return (
     <div className="min-h-screen bg-[#080808] font-sans text-[#F5F5F3] antialiased">
@@ -1329,7 +1487,10 @@ export default function VilishLanding() {
           </div>
         </section>
 
-        {/* ── showcase ─────────────────────────────────────── */}
+        {/* ── honest lively banner: real creation categories, flowing ── */}
+        <CategoryMarquee />
+
+{/* ── showcase ─────────────────────────────────────── */}
         <section aria-label="Example creations" className="cv-auto border-b border-white/[0.08] py-20 sm:py-28">
           <div className="mx-auto max-w-5xl px-4">
             <SectionHeader
@@ -1343,7 +1504,7 @@ export default function VilishLanding() {
             />
           </div>
           <div className="mx-auto mt-10 max-w-5xl px-4">
-            <ShowcaseGrid onOpen={(i) => setCaseOpen(i)} />
+            <ShowcaseGrid items={showcaseItems} onOpen={(i) => setCaseOpen(i)} />
           </div>
           <Reveal delay={0.15} className="mt-8 text-center">
             <Link
@@ -1641,9 +1802,9 @@ export default function VilishLanding() {
           onIndex={setReelOpen}
         />
       )}
-      {caseOpen !== null && CASE_ITEMS[caseOpen] && (
+      {caseOpen !== null && caseItems[caseOpen] && (
         <Lightbox
-          items={CASE_ITEMS}
+          items={caseItems}
           index={caseOpen}
           onClose={() => setCaseOpen(null)}
           onIndex={setCaseOpen}
