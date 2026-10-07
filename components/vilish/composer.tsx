@@ -42,7 +42,6 @@ import {
 } from "./payment";
 import PaymentModal from "./payment-modal";
 import AuthModal from "./auth-modal";
-import { videoPaymentStorageKey } from "./free-tier";
 
 const QUALITIES: { id: QualityTier; label: string; hint: string }[] = [
   { id: "quick", label: "Quick", hint: "Fast drafts" },
@@ -135,8 +134,7 @@ export default function Composer({ variant = "hero", className, initialMedia = "
   const [freeCap, setFreeCap] = useState(3);
   const [freeSending, setFreeSending] = useState(false);
   const [videoSending, setVideoSending] = useState(false);
-  const [videoModal, setVideoModal] = useState<{ jobId: string; payment: ManualPayment } | null>(null);
-  // Clip length for paid video orders: 5..60s. The order price scales with
+  // Clip length for paid video clips: 5..60s. The unlock price scales with
   // it (engine videoClipPricePaise); the API validates the same range.
   const [videoDuration, setVideoDuration] = useState(VIDEO_DURATION_MIN_S);
 
@@ -417,7 +415,9 @@ export default function Composer({ variant = "hero", className, initialMedia = "
     }
   };
 
-  /** Paid 5s video clip: creates the order, opens the payment modal, then the watch room. */
+  /** Generate-first video: queue the clip immediately — no order, no payment
+      gate. The watch room shows progress, then the watermarked preview;
+      payment unlocks the clean HD file after. */
   const handleVideoGenerate = async () => {
     if (videoSending || !promptOk) return;
     setVideoSending(true);
@@ -435,30 +435,15 @@ export default function Composer({ variant = "hero", className, initialMedia = "
         return;
       }
       const body = await res.json().catch(() => null);
-      if (body?.adminBypass) {
-        // Owner bypass: order auto-verified, no payment needed.
-        router.push(`/watch/${body.id}`);
-        return;
-      }
-      if (!res.ok || !body?.payment) {
+      if (!res.ok || !body?.id) {
         setStatus(
           typeof body?.error === "string" && body.error
             ? body.error
-            : "Could not create your video order. Please try again."
+            : "Could not start your video. Please try again."
         );
         return;
       }
-      const id = body.id ?? body.jobId;
-      const payment = body.payment as ManualPayment;
-      try {
-        sessionStorage.setItem(
-          videoPaymentStorageKey(id),
-          JSON.stringify({ jobId: id, payment })
-        );
-      } catch {
-        /* storage unavailable — payment can still proceed in-session */
-      }
-      setVideoModal({ jobId: id, payment });
+      router.push(`/watch/${body.id}`);
     } finally {
       setVideoSending(false);
     }
@@ -1000,18 +985,6 @@ export default function Composer({ variant = "hero", className, initialMedia = "
           initialPayment={modal.payment}
           onClose={() => setModal(null)}
           navigate={(url) => router.push(url)}
-        />
-      )}
-      {videoModal && (
-        <PaymentModal
-          jobId={videoModal.jobId}
-          initialPayment={videoModal.payment}
-          onClose={() => setVideoModal(null)}
-          navigate={(url) => router.push(url)}
-          onPaymentVerified={(jobId) => {
-            setVideoModal(null);
-            router.push(`/watch/${jobId}`);
-          }}
         />
       )}
     </div>

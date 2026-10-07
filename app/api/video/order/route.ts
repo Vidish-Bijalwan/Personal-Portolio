@@ -3,32 +3,36 @@ export const dynamic = 'force-dynamic';
 import { NextResponse, type NextRequest } from 'next/server';
 import { db } from '@/lib/db/client';
 import { generations } from '@/lib/db/schema';
-import { eq } from 'drizzle-orm';
 import { requireSession } from '@/lib/auth';
-import { isAdminEmail } from '@/lib/admin';
 import { PROMPT_MAX, isValidPrompt } from '@/lib/free/policy';
 import {
   VIDEO_DURATION_MAX_S,
   VIDEO_DURATION_MIN_S,
-  videoClipPricePaise,
 } from '@/lib/pricing/engine';
-import { createGenerationOrder } from '@/lib/free/orders';
-import { verifyOrderAdminBypass } from '@/lib/payments/manual-upi';
 
 /**
  * POST /api/video/order
  * Body: { prompt (1..2000), aspectRatio?, durationSeconds? (5..60, default 5) }
- * Auth required. Creates a paid video generation (tier='paid',
- * media_type='video') + a manual-UPI order linked with purpose='video'.
- * No daily cap. Price scales with the requested duration:
- *   price = ceil(durationSeconds / 5) × ₹45 (the clip-5s catalog price)
- * e.g. 5s → ₹45, 60s → ₹540 — see videoClipPricePaise() in the pricing
- * engine. The requested duration is stored on the generation row so the
- * operator fulfills exactly that length. The watcher generates the clip
- * immediately on order (before payment); the watermarked preview shows
- * while payment is pending and the clean mp4 unlocks on owner verify.
- * Returns { id, durationSeconds, payment } where payment matches the
- * payment modal shape.
+ * Auth required. GENERATE-FIRST: queues a paid video generation
+ * (tier='paid', media_type='video') IMMEDIATELY — no order, no payment gate.
+ * The queue watcher claims every queued row regardless of tier, so the
+ * watermarked preview starts rendering right away and shows on the watch
+ * page (/watch/[id]) while the clean mp4 stays locked behind
+ * generations.unlocked=false.
+ *
+ * Payment happens AFTER the preview lands: on the watch room the user
+ * clicks "Download clean HD — ₹X", which hits POST /api/gen/[id]/unlock.
+ * That endpoint mints the order idempotently at the server-side price
+ * videoClipPricePaise(durationSeconds) and the existing payment modal
+ * (Cashfree primary) takes it from there. PAYMENT_VERIFIED → runUnlockHooks
+ * flips generations.unlocked → the clean download opens.
+ *
+ * No daily cap (paid tier is uncapped; free-tier daily limits are
+ * unaffected). The requested duration is stored on the generation row so
+ * the operator fulfills exactly that length — prompt, duration_seconds and
+ * aspect_ratio are all carried on the row for the watcher.
+ *
+ * Returns 201 { id, durationSeconds }.
  *
  * OPERATOR NOTE (delivery size): longer clips must be re-encoded to keep
  * the total deliverable ≤2MB (e.g. 960x540, H.264 crf 32, veryfast) before
@@ -55,8 +59,9 @@ export async function POST(req: NextRequest) {
       ? body.aspectRatio
       : '16:9';
 
-  // Clip length: integer seconds, 5..60 (default 5). The price scales with
-  // it, so validate BEFORE minting the generation/order rows.
+  // Clip length: integer seconds, 5..60 (default 5). The eventual unlock
+  // price scales with it (videoClipPricePaise at unlock time), so validate
+  // BEFORE queueing the row.
   const durationRaw = body?.durationSeconds;
   const durationSeconds =
     durationRaw === undefined || durationRaw === null
@@ -75,8 +80,9 @@ export async function POST(req: NextRequest) {
       { status: 400 }
     );
   }
-  const amountPaise = videoClipPricePaise(durationSeconds);
 
+  // Queue immediately — no order is minted here. The unlock order comes
+  // later from POST /api/gen/[id]/unlock when the user clicks the CTA.
   const [gen] = await db
     .insert(generations)
     .values({
@@ -93,45 +99,8 @@ export async function POST(req: NextRequest) {
     })
     .returning({ id: generations.id });
 
-  let order;
-  try {
-    order = await createGenerationOrder({
-      generationId: gen.id,
-      userId: user.id,
-      amountPaise,
-      purpose: 'video',
-      stubPrompt: `Paid ${durationSeconds}s video order for generation ${gen.id}`,
-      aspectRatio,
-      quality: 'studio',
-    });
-  } catch {
-    // Order creation failed: remove the queued generation row so the
-    // watcher doesn't produce a video the user can never unlock.
-    await db
-      .delete(generations)
-      .where(eq(generations.id, gen.id))
-      .catch(() => {});
-    return NextResponse.json(
-      { code: 'PAYMENT_ORDER_FAILED', error: 'Failed to create payment order' },
-      { status: 502 }
-    );
-  }
-
-  // Owner/admin testing bypass: no payment needed — verify immediately so
-  // the clean mp4 unlocks. Fully audit-logged as payment.admin_bypass.
-  if (isAdminEmail(user.email)) {
-    await verifyOrderAdminBypass({
-      code: order.payment.code,
-      adminUserId: user.id,
-    });
-    return NextResponse.json(
-      { id: gen.id, durationSeconds, unlocked: true, adminBypass: true },
-      { status: 201 }
-    );
-  }
-
   return NextResponse.json(
-    { id: gen.id, durationSeconds, payment: order.payment },
+    { id: gen.id, durationSeconds },
     { status: 201 }
   );
 }
