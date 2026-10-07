@@ -1,5 +1,5 @@
 /**
- * Pixaura — fulfillment module barrel (Phase 2 contract §5/§7).
+ * Etch — fulfillment module barrel (Phase 2 contract §5/§7).
  */
 export * from './config';
 export * from './guards';

@@ -8,16 +8,16 @@ import { BLOG_CATEGORIES, BLOG_POSTS } from "@/lib/blog";
 const base = process.env.NEXT_PUBLIC_SITE_URL ?? "https://vidish.me";
 
 export const metadata: Metadata = {
-  title: "Blog — AI Creation Guides for India | Pixaura",
+  title: "Blog — AI Creation Guides for India | Etch",
   description:
     "Practical guides to AI images, video, voice-over, and captions — with real Indian pricing, no subscription talk. Pay-per-creation explained honestly.",
   alternates: { canonical: `${base}/blog` },
   openGraph: {
-    title: "Blog — AI Creation Guides for India | Pixaura",
+    title: "Blog — AI Creation Guides for India | Etch",
     description:
       "Practical guides to AI images, video, voice-over, and captions — with real Indian pricing.",
     url: `${base}/blog`,
-    siteName: "Pixaura",
+    siteName: "Etch",
     type: "website",
   },
 };
@@ -28,7 +28,7 @@ export default function BlogIndexPage() {
       <VilishNav />
       <main className="relative mx-auto max-w-6xl px-4 pb-24 pt-28 sm:px-6 sm:pt-32">
         <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#00F0FF]">
-          Pixaura Blog
+          Etch Blog
         </p>
         <h1 className="font-display mt-3 max-w-[20ch] text-[32px] font-semibold leading-tight tracking-[-0.02em] text-[#F5F5F3] sm:text-[44px]">
           Guides to creating with AI,{" "}

@@ -35,11 +35,11 @@ export default function ExamplesPage() {
             Examples
           </p>
           <h1 className="font-display mt-3 text-[34px] font-semibold leading-[1.05] tracking-[-0.02em] sm:text-[52px]">
-            Made with Pixaura,{" "}
+            Made with Etch,{" "}
             <span className="v-iris-text">priced per piece.</span>
           </h1>
           <p className="mt-4 max-w-xl text-[15px] leading-7 text-white/[0.58]">
-            Example creations made with Pixaura — the prompt and price shown for
+            Example creations made with Etch — the prompt and price shown for
             each.
           </p>
         </Reveal>

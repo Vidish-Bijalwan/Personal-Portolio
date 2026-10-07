@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { BlogBlock, BlogPost, RichText } from "@/lib/blog/types";
 
-/* Shared server-rendered blog UI in the Pixaura cyberpunk language.
+/* Shared server-rendered blog UI in the Etch cyberpunk language.
  * No client JS — pure static markup for SEO and speed. */
 
 function formatDate(iso: string): string {

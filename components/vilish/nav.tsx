@@ -166,7 +166,7 @@ export default function VilishNav() {
       <div className="mx-auto flex h-16 min-h-[64px] max-w-6xl items-center justify-between px-4 sm:h-[72px] sm:px-6">
         <Link
           href="/"
-          aria-label="Pixaura — home"
+          aria-label="Etch — home"
           className="group relative shrink-0 outline-none"
         >
           <span

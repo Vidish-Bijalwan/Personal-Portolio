@@ -5,7 +5,7 @@ const post: BlogPost = {
   slug: "ai-image-generator-india-pay-per-creation",
   title: "AI Image Generator India: Pay Per Creation vs Subscription",
   description:
-    "Compare pay-per-creation AI image generators with monthly subscriptions in India. Real prices, who each model suits, and how Pixaura's ₹19 per image works.",
+    "Compare pay-per-creation AI image generators with monthly subscriptions in India. Real prices, who each model suits, and how Etch's ₹19 per image works.",
   date: "2026-10-06",
   category: "Guides",
   tags: ["AI image generator", "India", "pricing", "pay per creation"],
@@ -17,7 +17,7 @@ const post: BlogPost = {
     t("pay per creation"),
     t(" (you pay a fixed price for each finished image, nothing else). "),
     t("Pay-per-creation suits occasional users — for example, "),
-    link("Pixaura", "/"),
+    link("Etch", "/"),
     t(" charges a flat "),
     t("₹19 per image"),
     t(", "),
@@ -27,20 +27,20 @@ const post: BlogPost = {
     t(", paid per order over UPI with no subscription. Subscriptions suit heavy daily users who can predict their volume."),
   ],
   sources: [
-    { label: "Pixaura pricing — real per-creation prices in INR", url: "https://vidish.me/pricing" },
+    { label: "Etch pricing — real per-creation prices in INR", url: "https://vidish.me/pricing" },
     { label: "TalkPix pricing — pay-as-you-go credit packs for AI video", url: "https://www.talkpix.ai/pricing" },
   ],
   faqs: [
     {
       q: "What does pay-per-creation mean for AI images?",
-      a: "You pay a fixed price for each finished image you order — for example ₹19 for a single AI image on Pixaura. There is no monthly fee, no credits that expire, and no commitment. If you order three images in a month, you pay for three images.",
+      a: "You pay a fixed price for each finished image you order — for example ₹19 for a single AI image on Etch. There is no monthly fee, no credits that expire, and no commitment. If you order three images in a month, you pay for three images.",
     },
     {
       q: "Is pay-per-creation cheaper than a subscription?",
       a: "It depends on volume. If you generate a handful of images a month, paying ₹19 per image is far cheaper than any monthly plan. If you generate hundreds of images every single day, a subscription or volume pack may work out cheaper per image. Most individuals and small businesses fall in the first group.",
     },
     {
-      q: "How do I pay for a Pixaura image?",
+      q: "How do I pay for a Etch image?",
       a: "Each order shows its exact price before you pay. You pay with UPI, then tap “I've paid”. The order is confirmed and fulfilled — every creation passes a human quality check before download, and you can track live progress while you wait.",
     },
     {
@@ -75,7 +75,7 @@ const post: BlogPost = {
     h2("What pay-per-creation costs in practice"),
     p(
       t("On "),
-      link("Pixaura", "/"),
+      link("Etch", "/"),
       t(", the prices are printed on the "),
       link("pricing page", "/pricing"),
       t(": a "),

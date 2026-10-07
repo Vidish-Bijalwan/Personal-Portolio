@@ -359,7 +359,7 @@ export default function WatchRoomPage() {
             {refused && data.suggested_prompt && (
               <div className="mt-6 w-full max-w-md rounded-[14px] border border-[#00F0FF]/25 bg-[#00F0FF]/[0.06] px-5 py-4 text-left">
                 <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-[#00F0FF]">
-                  Pixaura&apos;s safer suggestion
+                  Etch&apos;s safer suggestion
                 </p>
                 <p className="mt-2 text-[14px] leading-6 text-white/80">
                   &ldquo;{data.suggested_prompt}&rdquo;
@@ -539,7 +539,7 @@ export default function WatchRoomPage() {
                   {data.stuck && (
                     <div className="mt-5 w-full max-w-[420px] rounded-[14px] border border-amber-200/25 bg-amber-200/[0.06] px-5 py-4">
                       <p className="text-[13px] leading-6 text-amber-100/90">
-                        Pixaura&apos;s kitchen looks backed up — this one&apos;s taking
+                        Etch&apos;s kitchen looks backed up — this one&apos;s taking
                         longer than usual.
                       </p>
                       <button
@@ -645,7 +645,7 @@ export default function WatchRoomPage() {
                 <div className="mt-6 flex flex-wrap items-center justify-center gap-2.5">
                   <a
                     href={previewUrl}
-                    download={isVideo ? "pixaura-preview.mp4" : "pixaura-preview.jpg"}
+                    download={isVideo ? "etch-preview.mp4" : "etch-preview.jpg"}
                     className="inline-flex min-h-[44px] items-center gap-2 rounded-[10px] border border-white/[0.12] bg-[#18181B] px-4 py-2.5 text-[13px] font-medium text-white/85 hover:border-white/30"
                   >
                     <Download className="h-4 w-4" />

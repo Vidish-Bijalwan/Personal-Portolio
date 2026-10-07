@@ -161,7 +161,7 @@ export default function VilishFooter() {
           </p>
           <div className="flex items-center gap-4">
             <CursorSettingsControl />
-            <p className="text-[12px] text-white/30">© 2026 Pixaura</p>
+            <p className="text-[12px] text-white/30">© 2026 Etch</p>
           </div>
         </div>
       </div>

@@ -1,5 +1,5 @@
 /**
- * Pixaura blog — content model + quality gate.
+ * Etch blog — content model + quality gate.
  *
  * Every post is a typed object (not free-form markdown) so the quality gate
  * can enforce the SEO/AEO contract mechanically:
@@ -8,7 +8,7 @@
  *  - answer block + FAQs (chatbot citation)
  *  - real sources (https URLs, no invented citations)
  *  - internal links to /create and /pricing in every post
- *  - honest scope: never claims features Pixaura doesn't have
+ *  - honest scope: never claims features Etch doesn't have
  *  - prices match the canonical catalog when mentioned
  */
 
@@ -64,7 +64,7 @@ export interface BlogPost {
 
 const SLUG_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
-/** Features Pixaura does NOT have — claiming any of these fails the gate.
+/** Features Etch does NOT have — claiming any of these fails the gate.
  * Kept to concrete product features (not business-model words like
  * "subscription", which appear legitimately in comparison copy). */
 const FORBIDDEN_CLAIMS = [

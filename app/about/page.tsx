@@ -68,7 +68,7 @@ export default function AboutPage() {
             An AI studio with <span className="v-iris-text">a human</span> in the loop.
           </h1>
           <p className="mt-5 max-w-2xl text-[15px] leading-7 text-white/[0.62]">
-            Pixaura is a pay-per-creation AI media studio. No subscription, no
+            Etch is a pay-per-creation AI media studio. No subscription, no
             credits, no render roulette: you describe what you want, see the exact
             price, pay once, and a human reviews and delivers every creation. AI
             does the heavy lifting; a person makes sure it&apos;s worth your money.
@@ -101,7 +101,7 @@ export default function AboutPage() {
           </Stagger>
         </section>
 
-        <section aria-label="Why trust Pixaura" className="mt-16">
+        <section aria-label="Why trust Etch" className="mt-16">
           <Reveal>
             <h2 className="font-display text-[22px] font-semibold tracking-[-0.01em] sm:text-[26px]">
               Why people trust it
@@ -176,7 +176,7 @@ export default function AboutPage() {
                 The human behind the studio
               </p>
               <p className="mt-3 max-w-xl text-[14px] leading-7 text-white/[0.62]">
-                Pixaura is run by Vidish Bijalwan — the human who reviews
+                Etch is run by Vidish Bijalwan — the human who reviews
                 your brief, checks every creation, and makes sure it&apos;s worth
                 what you paid.
               </p>

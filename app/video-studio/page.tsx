@@ -149,7 +149,7 @@ interface Clip {
 }
 
 function videoJobPaymentStorageKey(id: string) {
-  return `pixaura:video-job-payment:${id}`;
+  return `etch:video-job-payment:${id}`;
 }
 
 function FilePicker({
@@ -554,14 +554,14 @@ export default function VideoStudioPage() {
       <main className="mx-auto w-full max-w-3xl flex-1 px-4 pb-20 pt-8 sm:pt-12">
         <Reveal>
           <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#00F0FF]">
-            Pixaura · Video Studio · AI + real tools
+            Etch · Video Studio · AI + real tools
           </p>
           <h1 className="font-display mt-2 text-[30px] font-semibold tracking-[-0.02em] sm:text-[40px]">
             Give your video a <span className="v-iris-bg bg-clip-text text-transparent">studio finish</span>
           </h1>
           <p className="mt-3 max-w-xl text-[14px] leading-6 text-white/60">
             Eight real video tools, queue-backed like everything else in
-            Pixaura. <span className="text-white/85">{JOB_PRICE} per finished video</span> —
+            Etch. <span className="text-white/85">{JOB_PRICE} per finished video</span> —
             one UPI payment, no subscription. A watermarked preview plays while
             you wait; the clean file unlocks after payment.
           </p>

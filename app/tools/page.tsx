@@ -17,9 +17,9 @@ import { priceOf } from "@/lib/pricing/catalog";
 import { formatINR } from "@/lib/vilish/types";
 
 export const metadata: Metadata = {
-  title: "Tools — every working tool | Pixaura",
+  title: "Tools — every working tool | Etch",
   description:
-    "The complete Pixaura tool directory: AI image generation, product photos, 5s video clips, and eight Video Studio utilities. Real tools, exact prices, no dead buttons.",
+    "The complete Etch tool directory: AI image generation, product photos, 5s video clips, and eight Video Studio utilities. Real tools, exact prices, no dead buttons.",
   alternates: { canonical: "/tools" },
 };
 

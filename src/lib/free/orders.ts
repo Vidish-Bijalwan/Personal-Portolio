@@ -1,5 +1,5 @@
 /**
- * Pixaura — manual-UPI order plumbing for the generations table.
+ * Etch — manual-UPI order plumbing for the generations table.
  *
  * orders.job_id is NOT NULL with an FK to generation_jobs, so every
  * generations-linked payment first creates a minimal operator stub job

@@ -1,5 +1,5 @@
 /**
- * Pixaura — pricing engine (pure functions, no I/O, no env reads).
+ * Etch — pricing engine (pure functions, no I/O, no env reads).
  *
  * LAW: money is INTEGER PAISE everywhere (₹1 = 100). Never floats in output.
  * All rounding uses integer ceiling arithmetic; totals always round UP to

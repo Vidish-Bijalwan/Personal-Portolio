@@ -46,7 +46,7 @@ describe("marquee categories are honest", () => {
     expect(new Set(MARQUEE_CATEGORIES).size).toBe(MARQUEE_CATEGORIES.length);
   });
 
-  it("every category is a plausible Pixaura creation type", () => {
+  it("every category is a plausible Etch creation type", () => {
     for (const cat of MARQUEE_CATEGORIES) {
       expect(cat.length).toBeLessThanOrEqual(24);
     }

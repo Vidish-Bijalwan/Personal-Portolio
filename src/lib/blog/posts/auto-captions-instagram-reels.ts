@@ -12,13 +12,13 @@ const post: BlogPost = {
   readingMinutes: 5,
   answer: [
     t("Captions are styled subtitles burned into your video — critical because most social video starts muted. Good captioning turns your script into readable, well-timed text. On "),
-    link("Pixaura's Video Studio", "/video-studio"),
+    link("Etch's Video Studio", "/video-studio"),
     t(", captioning costs a flat "),
     t("₹39 per finished video"),
     t(": upload your clip, paste your script, and the captioned video is delivered with styled, readable subtitles."),
   ],
   sources: [
-    { label: "Pixaura Video Studio — captions at ₹39/job", url: "https://vidish.me/pricing" },
+    { label: "Etch Video Studio — captions at ₹39/job", url: "https://vidish.me/pricing" },
     { label: "VEED tools — subtitle and caption generators", url: "https://www.veed.io/tools/ai-video" },
   ],
   faqs: [
@@ -27,7 +27,7 @@ const post: BlogPost = {
       a: "A large share of social video is first watched with sound off — in feeds, offices, and public transport. Captions let muted viewers follow the content instead of scrolling past, which directly affects watch time and completion rate.",
     },
     {
-      q: "How does captioning work on Pixaura?",
+      q: "How does captioning work on Etch?",
       a: "You paste your script; it's turned into timed text, styled, and burned into the video frames. Fully automatic transcription isn't available right now — script mode keeps the wording exact.",
     },
     {
@@ -44,7 +44,7 @@ const post: BlogPost = {
     },
     {
       q: "How long does captioning take?",
-      a: "On Pixaura, captions are built from your script — paste your text and the captioned video is delivered after processing as part of the ₹39 job, with a human quality check before download.",
+      a: "On Etch, captions are built from your script — paste your text and the captioned video is delivered after processing as part of the ₹39 job, with a human quality check before download.",
     },
     {
       q: "Can captions be styled to match my brand?",
@@ -75,7 +75,7 @@ const post: BlogPost = {
     ),
     h2("How captioning works"),
     p(
-      t("Upload your video and paste your script. The text is timed, styled — font, size, position, contrast — and composited onto each frame. Pixaura's "),
+      t("Upload your video and paste your script. The text is timed, styled — font, size, position, contrast — and composited onto each frame. Etch's "),
       link("Video Studio", "/video-studio"),
       t(" does this as a "),
       t("₹39"),
@@ -99,7 +99,7 @@ const post: BlogPost = {
     ),
     h2("Script-based: the honest tradeoff"),
     p(
-      t("Manual subtitling is pixel-perfect and slow. On Pixaura, captioning is script-based: you supply the exact words, we time and style them. That skips transcription slips on names, slang, or heavy accents entirely — the wording is yours from the start.")
+      t("Manual subtitling is pixel-perfect and slow. On Etch, captioning is script-based: you supply the exact words, we time and style them. That skips transcription slips on names, slang, or heavy accents entirely — the wording is yours from the start.")
     ),
     h2("Beyond reels: where else captions pay off"),
     p(

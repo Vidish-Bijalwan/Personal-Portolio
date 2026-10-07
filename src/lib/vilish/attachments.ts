@@ -1,5 +1,5 @@
 /**
- * Pixaura — reference-file attachment policy for the composer.
+ * Etch — reference-file attachment policy for the composer.
  *
  * Customers can attach reference files (images, PDFs, docs, notes) to a
  * generation request. Files are stored in Postgres `bytea` on the

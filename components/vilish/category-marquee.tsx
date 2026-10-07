@@ -13,7 +13,7 @@ export { MARQUEE_CATEGORIES };
 /**
  * CategoryMarquee — the honest lively banner.
  *
- * A flowing strip of REAL creation categories Pixaura makes. Standing rule:
+ * A flowing strip of REAL creation categories Etch makes. Standing rule:
  * no fake stats, reviews, customers, or activity — so there are no person
  * names here, no "X just generated Y", no counts. Every item links to
  * /examples. Reduced motion renders a static strip (handled by Marquee).
@@ -21,7 +21,7 @@ export { MARQUEE_CATEGORIES };
 export default function CategoryMarquee() {
   return (
     <div
-      aria-label="What you can create with Pixaura"
+      aria-label="What you can create with Etch"
       className="border-y border-white/[0.08] bg-white/[0.015] py-4"
     >
       <Marquee speed={42} gap={0} pauseOnHover>

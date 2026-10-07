@@ -1,5 +1,5 @@
 /**
- * Honest marquee categories — real creation types Pixaura makes.
+ * Honest marquee categories — real creation types Etch makes.
  * Pure module so honesty gates can import it without pulling in TSX.
  *
  * Standing rule: no fake stats, reviews, customers, or activity. No person

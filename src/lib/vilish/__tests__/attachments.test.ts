@@ -1,5 +1,5 @@
 /**
- * Pixaura — attachment upload policy tests.
+ * Etch — attachment upload policy tests.
  * The same validateUploads() gates the composer UI and
  * POST /api/generation/start server-side.
  */

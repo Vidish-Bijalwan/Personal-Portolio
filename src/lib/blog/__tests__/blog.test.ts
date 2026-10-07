@@ -1,5 +1,5 @@
 /**
- * Pixaura blog — quality gate, slug validation, sitemap generation.
+ * Etch blog — quality gate, slug validation, sitemap generation.
  *
  * The gate is the contract the daily pipeline must satisfy: every post
  * (seeded or cron-generated) passes validatePost() or it doesn't ship.
@@ -24,7 +24,7 @@ function makePost(overrides: Partial<BlogPost> = {}): BlogPost {
     readingMinutes: 5,
     answer: [{ t: "A concise factual answer block for testing." }],
     sources: [
-      { label: "Pixaura pricing", url: "https://vidish.me/pricing" },
+      { label: "Etch pricing", url: "https://vidish.me/pricing" },
       { label: "Example source", url: "https://example.com/page" },
     ],
     faqs: [
@@ -112,7 +112,7 @@ describe("blog quality gate", () => {
     expect(errs.some((e) => e.includes("/pricing"))).toBe(true);
   });
 
-  it("rejects claims about features Pixaura doesn't have", () => {
+  it("rejects claims about features Etch doesn't have", () => {
     const bad = makePost({
       body: [
         {

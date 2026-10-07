@@ -577,7 +577,7 @@ export default function Composer({ variant = "hero", className, initialMedia = "
       </div>
       {mediaMode === "image" && billingMode === "free" && (
         <p className="mb-4 text-[12px] leading-5 text-white/40">
-          Free previews carry a Pixaura watermark. Unlock the clean HD file
+          Free previews carry a Etch watermark. Unlock the clean HD file
           for {formatINR(priceOf("single-image"))}.
         </p>
       )}

@@ -1,5 +1,5 @@
 /**
- * Pixaura — typewriter placeholder for the composer.
+ * Etch — typewriter placeholder for the composer.
  *
  * Pure state machine: each tick advances one character (typing or
  * deleting). The React hook in this module turns ticks into timers.

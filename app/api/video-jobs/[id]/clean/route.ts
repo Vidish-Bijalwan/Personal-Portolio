@@ -49,7 +49,7 @@ export async function GET(
     headers: {
       'content-type': mime,
       'content-length': String(bytes.byteLength),
-      'content-disposition': `attachment; filename="pixaura-${job.id}.${ext}"`,
+      'content-disposition': `attachment; filename="etch-${job.id}.${ext}"`,
       'x-content-type-options': 'nosniff',
       'cache-control': 'private, max-age=3600',
     },

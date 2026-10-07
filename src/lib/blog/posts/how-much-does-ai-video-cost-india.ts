@@ -5,7 +5,7 @@ const post: BlogPost = {
   slug: "how-much-does-ai-video-cost-india",
   title: "How Much Does AI Video Cost in India? Real Prices Explained",
   description:
-    "AI video pricing in India with real numbers: per-clip costs, credit packs, subscriptions, and Pixaura's flat ₹89 per 5-second clip.",
+    "AI video pricing in India with real numbers: per-clip costs, credit packs, subscriptions, and Etch's flat ₹89 per 5-second clip.",
   date: "2026-10-06",
   category: "Pricing",
   tags: ["AI video", "pricing", "India", "cost"],
@@ -14,7 +14,7 @@ const post: BlogPost = {
     t("AI video in India is priced three ways: subscriptions (monthly fee for a quota), credit packs (pay-as-you-go credits, e.g. "),
     link("TalkPix's credit packs", "https://www.talkpix.ai/pricing"),
     t("), and flat per-clip pricing. "),
-    link("Pixaura", "/"),
+    link("Etch", "/"),
     t(" uses flat pricing: a "),
     t("5-second AI video clip costs ₹89"),
     t(", and a "),
@@ -25,25 +25,25 @@ const post: BlogPost = {
   ],
   sources: [
     { label: "TalkPix pricing — credit packs and per-second billing", url: "https://www.talkpix.ai/pricing" },
-    { label: "Pixaura pricing — ₹89 per 5s clip, ₹39 Video Studio", url: "https://vidish.me/pricing" },
+    { label: "Etch pricing — ₹89 per 5s clip, ₹39 Video Studio", url: "https://vidish.me/pricing" },
     { label: "VEED pricing — subscription tiers for video tools", url: "https://www.veed.io/pricing" },
   ],
   faqs: [
     {
       q: "What is the cheapest way to make one AI video in India?",
-      a: "For a single video, flat per-clip pricing is cheapest — Pixaura charges ₹89 for a 5-second AI clip with no subscription. Subscriptions only beat that if you make videos constantly enough to use the full monthly quota.",
+      a: "For a single video, flat per-clip pricing is cheapest — Etch charges ₹89 for a 5-second AI clip with no subscription. Subscriptions only beat that if you make videos constantly enough to use the full monthly quota.",
     },
     {
       q: "How do AI video credit packs work?",
       a: "You buy a pack of credits (for example $5 or $10 packs) and each render spends credits based on length, resolution, and model. TalkPix publishes exact per-template credit costs on its pricing page. Credits usually don't expire, but you pay upfront for volume you might not use.",
     },
     {
-      q: "What does Pixaura's Video Studio ₹39 include?",
+      q: "What does Etch's Video Studio ₹39 include?",
       a: "One finished video per job: AI voice-over/TTS, auto-captioning, or trim plus text overlay — ₹39 flat, paid per job over UPI. You upload your clip, pick the tool, and the finished video is delivered after processing.",
     },
     {
       q: "Are there hidden costs with pay-per-clip AI video?",
-      a: "On Pixaura, no — the price shown is the price. Watch for the usual traps elsewhere: credits that expire, “HD export” upsells, and watermarked previews that cost extra to remove.",
+      a: "On Etch, no — the price shown is the price. Watch for the usual traps elsewhere: credits that expire, “HD export” upsells, and watermarked previews that cost extra to remove.",
     },
   ],
   related: [
@@ -61,10 +61,10 @@ const post: BlogPost = {
       [
         ["Subscription", "Monthly fee, quota of minutes/renders", "Tiered monthly plans (see VEED's pricing)", "Agencies producing daily"],
         ["Credit packs", "Buy credits upfront, spend per render", "TalkPix credit packs; per-template costs published", "Regular but uneven usage"],
-        ["Flat per-clip", "One fixed price per finished video", "Pixaura: ₹89 per 5s clip", "Occasional creators, one-off projects"],
+        ["Flat per-clip", "One fixed price per finished video", "Etch: ₹89 per 5s clip", "Occasional creators, one-off projects"],
       ]
     ),
-    h2("What a 5-second AI clip actually costs on Pixaura"),
+    h2("What a 5-second AI clip actually costs on Etch"),
     p(
       t("One price: "),
       t("₹89"),
@@ -77,7 +77,7 @@ const post: BlogPost = {
     ),
     h2("Editing an existing video: the ₹39 Video Studio"),
     p(
-      t("Generation isn't the only AI video cost. Polishing a clip — voice-over, captions, trimming — is where subscriptions often hide their real price (export fees, caption minutes). Pixaura's "),
+      t("Generation isn't the only AI video cost. Polishing a clip — voice-over, captions, trimming — is where subscriptions often hide their real price (export fees, caption minutes). Etch's "),
       link("Video Studio", "/video-studio"),
       t(" charges "),
       t("₹39 per finished video"),
@@ -86,7 +86,7 @@ const post: BlogPost = {
     h2("How to estimate your monthly spend"),
     list(
       [t("Count your videos per month honestly — not aspirationally.")],
-      [t("Multiply by the flat per-clip price (₹89 × clips + ₹39 × edits on Pixaura).")],
+      [t("Multiply by the flat per-clip price (₹89 × clips + ₹39 × edits on Etch).")],
       [t("Compare against the subscription tier that covers that volume — including taxes and any export upsells.")],
       [t("If your count swings month to month, flat pricing wins on the quiet months and ties on the busy ones.")],
     ),
@@ -94,7 +94,7 @@ const post: BlogPost = {
     p(
       t("Grab your last three months. For each, write down videos actually published — not planned. Multiply by the flat alternative ("),
       t("₹89"),
-      t(" per clip on Pixaura). Now look at the subscription tier that would cover your busiest month, add taxes, and divide by videos published. If the subscription's per-video number is higher — and for spiky creators it almost always is — flat pricing wins. Repeat quarterly; usage patterns change.")
+      t(" per clip on Etch). Now look at the subscription tier that would cover your busiest month, add taxes, and divide by videos published. If the subscription's per-video number is higher — and for spiky creators it almost always is — flat pricing wins. Repeat quarterly; usage patterns change.")
     ),
     p(
       t("One more consideration: subscriptions charge for the option to create, which subtly pressures you to create to “get your money's worth”. Per-clip pricing has no such tax on your attention. The cheapest video is sometimes the one you wisely didn't make — and with flat pricing, not making it costs nothing.")
@@ -113,7 +113,7 @@ const post: BlogPost = {
       "/create?media=video"
     ),
     callout("tip",
-      t("Screenshot the estimate. On Pixaura the composer shows the exact price before you pay — if a tool only reveals the cost after rendering, treat the first render as the price-discovery fee and budget accordingly.")
+      t("Screenshot the estimate. On Etch the composer shows the exact price before you pay — if a tool only reveals the cost after rendering, treat the first render as the price-discovery fee and budget accordingly.")
     ),
     h2("Bottom line"),
     p(

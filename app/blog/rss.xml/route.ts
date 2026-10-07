@@ -28,7 +28,7 @@ export async function GET() {
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0">
   <channel>
-    <title>Pixaura Blog — AI Creation Guides for India</title>
+    <title>Etch Blog — AI Creation Guides for India</title>
     <link>${base}/blog</link>
     <description>Practical guides to AI images, video, voice-over, and captions — with real Indian pricing.</description>
     <language>en-IN</language>

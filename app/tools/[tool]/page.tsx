@@ -29,9 +29,9 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { tool: toolId } = await params;
   const tool = toolById(toolId);
-  if (!tool) return { title: "Tool not found | Pixaura" };
+  if (!tool) return { title: "Tool not found | Etch" };
   return {
-    title: `${tool.name} — ${tool.price} per ${tool.group === "create" ? "creation" : "job"} | Pixaura`,
+    title: `${tool.name} — ${tool.price} per ${tool.group === "create" ? "creation" : "job"} | Etch`,
     description: `${tool.name}: ${tool.tagline}. ${tool.price}, no subscription. One creation, one price.`,
     alternates: { canonical: `/tools/${tool.id}` },
   };
@@ -64,7 +64,7 @@ export default async function ToolDetailPage({
   const appLd = {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
-    name: `Pixaura ${tool.name}`,
+    name: `Etch ${tool.name}`,
     applicationCategory: "MultimediaApplication",
     operatingSystem: "Web",
     offers: { "@type": "Offer", price: tool.price, priceCurrency: "INR" },

@@ -1,5 +1,5 @@
 /**
- * Pixaura — prompt length policy.
+ * Etch — prompt length policy.
  *
  * A single 2000-character ceiling protects provider token costs. Enforced
  * in two places:

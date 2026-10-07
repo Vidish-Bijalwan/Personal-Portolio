@@ -1,5 +1,5 @@
 /**
- * Pixaura — Drizzle schema (Postgres).
+ * Etch — Drizzle schema (Postgres).
  * LAW: table/column names are fixed; API/payments/auth agents code against these.
  * Money: INTEGER PAISE everywhere.
  */
@@ -325,7 +325,7 @@ export const generationOrders = pgTable('generation_orders', {
 });
 
 /**
- * Pixaura — Video Studio tools.
+ * Etch — Video Studio tools.
  *
  * Queue-backed video processing jobs (voice-over/TTS, captions,
  * trim & text, plus the Phase 4 real tools: compress, convert, gif,

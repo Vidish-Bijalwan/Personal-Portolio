@@ -34,24 +34,24 @@ beforeEach(() => {
   for (const k of ENV_KEYS) delete process.env[k];
   process.env.UPI_PAYMENT_ENABLED = 'true';
   process.env.UPI_VPA = 'vidish@okhdfcbank';
-  process.env.UPI_PAYEE_NAME = 'PixauraStudio';
+  process.env.UPI_PAYEE_NAME = 'EtchStudio';
 });
 
 describe('buildUpiUri', () => {
-  it('contains pa, pn, am (2 decimals), cu=INR, tn=Pixaura-<code>', () => {
+  it('contains pa, pn, am (2 decimals), cu=INR, tn=Etch-<code>', () => {
     const uri = buildUpiUri({
       vpa: 'vidish@okhdfcbank',
-      payeeName: 'PixauraStudio',
+      payeeName: 'EtchStudio',
       amountPaise: 2900,
       orderCode: 'VLSH-8H4K2P',
     });
     expect(uri.startsWith('upi://pay?')).toBe(true);
     const p = new URLSearchParams(uri.slice('upi://pay?'.length));
     expect(p.get('pa')).toBe('vidish@okhdfcbank');
-    expect(p.get('pn')).toBe('PixauraStudio');
+    expect(p.get('pn')).toBe('EtchStudio');
     expect(p.get('am')).toBe('29.00');
     expect(p.get('cu')).toBe('INR');
-    expect(p.get('tn')).toBe('Pixaura-VLSH-8H4K2P');
+    expect(p.get('tn')).toBe('Etch-VLSH-8H4K2P');
   });
 
   it('keeps paise exactness (no float drift)', () => {
@@ -99,7 +99,7 @@ describe('getUpiConfig', () => {
     const cfg = getUpiConfig();
     expect(cfg.enabled).toBe(true);
     expect(cfg.vpa).toBe('vidish@okhdfcbank');
-    expect(cfg.payeeName).toBe('PixauraStudio');
+    expect(cfg.payeeName).toBe('EtchStudio');
     expect(cfg.qrImageUrl).toBeNull();
     expect(cfg.orderTtlMin).toBe(30);
   });
@@ -131,7 +131,7 @@ describe('ManualUpiProvider QR', () => {
     expect(checkout.qrDataUri).toMatch(/^data:image\/png;base64,/);
     expect(checkout.upiUri).toContain('upi://pay?');
     expect(checkout.vpa).toBe('vidish@okhdfcbank');
-    expect(checkout.payeeName).toBe('PixauraStudio');
+    expect(checkout.payeeName).toBe('EtchStudio');
     const ttl = Date.parse(checkout.expiresAt) - Date.now();
     expect(ttl).toBeGreaterThan(29 * 60_000);
     expect(ttl).toBeLessThanOrEqual(30 * 60_000);

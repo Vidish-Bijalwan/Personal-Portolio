@@ -1,5 +1,5 @@
 /**
- * Pixaura — free-tier image + paid video generation policy.
+ * Etch — free-tier image + paid video generation policy.
  *
  * Pure logic: no JSX, no I/O, no imports from server modules.
  * Unit-testable in isolation.

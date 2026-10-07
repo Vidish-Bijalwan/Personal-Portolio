@@ -344,19 +344,19 @@ const CAPABILITIES: Capability[] = [
 const FAQS = [
   {
     q: "How much does it cost to generate one AI image in India?",
-    a: `At Pixaura, a single AI image costs a fixed ${formatINR(priceOf("single-image"))} — no subscription, no credits to manage. You see the exact price before you pay, and you pay once with UPI.`,
+    a: `At Etch, a single AI image costs a fixed ${formatINR(priceOf("single-image"))} — no subscription, no credits to manage. You see the exact price before you pay, and you pay once with UPI.`,
   },
   {
     q: "Is there an AI image generator without a subscription?",
-    a: `Yes. Unlike monthly AI subscriptions, Pixaura is pay-per-creation: you pay only for the images you actually want, starting at ${formatINR(priceOf("single-image"))} each. Nothing renews, nothing auto-charges.`,
+    a: `Yes. Unlike monthly AI subscriptions, Etch is pay-per-creation: you pay only for the images you actually want, starting at ${formatINR(priceOf("single-image"))} each. Nothing renews, nothing auto-charges.`,
   },
   {
     q: "Can I pay with UPI for AI image generation?",
     a: "Yes — every order is paid with a simple UPI payment. After you approve the quoted price, you get a QR code, pay from any UPI app, and submit your transaction ID.",
   },
   {
-    q: "How is Pixaura different from free AI image generators?",
-    a: "Free tools make you do the prompting, editing, and fixing yourself — and often add watermarks or daily limits. At Pixaura you describe what you want, a human reviews the result for quality, and you download a clean, finished image.",
+    q: "How is Etch different from free AI image generators?",
+    a: "Free tools make you do the prompting, editing, and fixing yourself — and often add watermarks or daily limits. At Etch you describe what you want, a human reviews the result for quality, and you download a clean, finished image.",
   },
   {
     q: "Do I own the images I generate? Can I use them commercially?",
@@ -395,7 +395,7 @@ const VIDEO_POOL = [
     clip: {
       src: "/examples/videos/clip-1-portrait.mp4",
       poster: "/examples/videos/poster-1-portrait.jpg",
-      alt: "AI video example: stylized neon portrait animating in a 5s loop — made with Pixaura",
+      alt: "AI video example: stylized neon portrait animating in a 5s loop — made with Etch",
       caption: "Neon portrait, in motion",
       price: formatINR(priceOf("clip-5s")),
     },
@@ -409,7 +409,7 @@ const VIDEO_POOL = [
     clip: {
       src: "/examples/videos/clip-2-product.mp4",
       poster: "/examples/videos/poster-2-product.jpg",
-      alt: "AI video example: premium product shot with slow cinematic motion — made with Pixaura",
+      alt: "AI video example: premium product shot with slow cinematic motion — made with Etch",
       caption: "Product shot, in motion",
       price: formatINR(priceOf("clip-5s")),
     },
@@ -423,7 +423,7 @@ const VIDEO_POOL = [
     clip: {
       src: "/examples/videos/clip-3-city.mp4",
       poster: "/examples/videos/poster-3-city.jpg",
-      alt: "AI video example: cinematic night cityscape with slow aerial motion — made with Pixaura",
+      alt: "AI video example: cinematic night cityscape with slow aerial motion — made with Etch",
       caption: "Night city, in motion",
       price: formatINR(priceOf("clip-5s")),
     },
@@ -437,7 +437,7 @@ const VIDEO_POOL = [
     clip: {
       src: "/examples/videos/v-01-product-spin.mp4",
       poster: "/examples/videos/poster-4-product-spin.jpg",
-      alt: "AI video example: luxury perfume bottle rotating on a dark studio turntable \u2014 made with Pixaura",
+      alt: "AI video example: luxury perfume bottle rotating on a dark studio turntable \u2014 made with Etch",
       caption: "Perfume bottle, turntable spin",
       price: formatINR(priceOf("clip-5s")),
     },
@@ -451,7 +451,7 @@ const VIDEO_POOL = [
     clip: {
       src: "/examples/videos/v-02-neon-flythrough.mp4",
       poster: "/examples/videos/poster-5-neon-flythrough.jpg",
-      alt: "AI video example: slow aerial flythrough of a neon-lit cyberpunk city at night \u2014 made with Pixaura",
+      alt: "AI video example: slow aerial flythrough of a neon-lit cyberpunk city at night \u2014 made with Etch",
       caption: "Neon city flythrough",
       price: formatINR(priceOf("clip-5s")),
     },
@@ -465,7 +465,7 @@ const VIDEO_POOL = [
     clip: {
       src: "/examples/videos/v-03-liquid-splash.mp4",
       poster: "/examples/videos/poster-6-liquid-splash.jpg",
-      alt: "AI video example: golden liquid splash swirling in extreme slow motion \u2014 made with Pixaura",
+      alt: "AI video example: golden liquid splash swirling in extreme slow motion \u2014 made with Etch",
       caption: "Liquid gold, slow motion",
       price: formatINR(priceOf("clip-5s")),
     },
@@ -479,7 +479,7 @@ const VIDEO_POOL = [
     clip: {
       src: "/examples/videos/v-04-portrait-breeze.mp4",
       poster: "/examples/videos/poster-7-portrait-breeze.jpg",
-      alt: "AI video example: portrait with hair drifting gently in the breeze under neon glow \u2014 made with Pixaura",
+      alt: "AI video example: portrait with hair drifting gently in the breeze under neon glow \u2014 made with Etch",
       caption: "Portrait in the breeze",
       price: formatINR(priceOf("clip-5s")),
     },
@@ -1477,7 +1477,7 @@ export default function VilishLanding() {
             <ShowreelCarousel onOpen={(i) => setReelOpen(i)} />
           </Reveal>
           <p className="mt-6 text-center text-[12px] text-white/35">
-            Example creations from Pixaura. Hover any frame for its prompt — tap to inspect it full-screen.
+            Example creations from Etch. Hover any frame for its prompt — tap to inspect it full-screen.
           </p>
         </section>
 
@@ -1518,7 +1518,7 @@ export default function VilishLanding() {
                   Made here, <span className="text-[#FF2D78]">priced per piece.</span>
                 </>
               }
-              subtitle="Every piece below was made with Pixaura and reviewed by a human — each with the brief that made it."
+              subtitle="Every piece below was made with Etch and reviewed by a human — each with the brief that made it."
             />
           </div>
           <div className="mx-auto mt-10 max-w-5xl px-4">
@@ -1624,7 +1624,7 @@ export default function VilishLanding() {
           />
           <div className="relative mx-auto max-w-5xl px-4 py-20 sm:py-28">
             <SectionHeader
-              kicker="Why Pixaura"
+              kicker="Why Etch"
               title={
                 <>
                   Subscriptions sell you access.{" "}

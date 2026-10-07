@@ -42,7 +42,7 @@ describe("watch page done state — every control works", () => {
   it("download preview is a real link to the preview endpoint with a download attr", () => {
     expect(watchSrc).toContain("Download preview");
     expect(watchSrc).toContain("href={previewUrl}");
-    expect(watchSrc).toMatch(/download=\{isVideo \? "pixaura-preview\.mp4" : "pixaura-preview\.jpg"\}/);
+    expect(watchSrc).toMatch(/download=\{isVideo \? "etch-preview\.mp4" : "etch-preview\.jpg"\}/);
   });
 
   it("new creation deep-links to the composer (video-aware)", () => {

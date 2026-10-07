@@ -1,5 +1,5 @@
 /**
- * Pixaura Phase 2 — contract §7: the AI PACKAGE template.
+ * Etch Phase 2 — contract §7: the AI PACKAGE template.
  *
  * buildAiPackage(job, order, references, parent?) must render every §7
  * section; remake/edit jobs must include PREVIOUS RESULT + ORIGINAL PROMPT +
@@ -51,7 +51,7 @@ describe('buildAiPackage — contract §7 template', () => {
     const text = buildAiPackage(jobInput(), orderInput, refInput, null);
 
     const required = [
-      'Pixaura FULFILLMENT JOB',
+      'Etch FULFILLMENT JOB',
       'ORDER:',
       'VLSH-PKG001',
       'TYPE:',
@@ -261,7 +261,7 @@ describe.runIf(existsSync(PACKAGE_ROUTE))(
       const res = await GET(req, { params: Promise.resolve({ id: jobId }) });
       expect(res.status).toBe(200);
       const { text } = (await res.json()) as { text: string };
-      expect(text).toContain('Pixaura FULFILLMENT JOB');
+      expect(text).toContain('Etch FULFILLMENT JOB');
       expect(text).toContain('VLSH-PKG999');
       expect(text).toContain('a brass diya floating on still water at dusk');
       // internal fields must not leak

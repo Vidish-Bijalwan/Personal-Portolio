@@ -1,5 +1,5 @@
 /**
- * Pixaura vertical-slice E2E (no network, no external services).
+ * Etch vertical-slice E2E (no network, no external services).
  * Drives the real lib functions the API routes call, in one PGlite DB:
  * interpret → quote → manual-UPI order → UTR submit → admin verify →
  * job queued → mock provider generation → READY + remake eligibility.
@@ -9,7 +9,7 @@ import { eq } from 'drizzle-orm';
 
 vi.stubEnv('UPI_PAYMENT_ENABLED', 'true');
 vi.stubEnv('UPI_VPA', 'vidish-test@upi');
-vi.stubEnv('UPI_PAYEE_NAME', 'Pixaura TEST');
+vi.stubEnv('UPI_PAYEE_NAME', 'Etch TEST');
 vi.stubEnv('ALLOW_MOCK_PROVIDER', 'true');
 vi.stubEnv('GENERATION_PROVIDER_PRIORITY', 'mock');
 
@@ -36,7 +36,7 @@ async function getJob(id: string) {
   return rows[0];
 }
 
-describe('Pixaura slice E2E', () => {
+describe('Etch slice E2E', () => {
   let jobId: string;
   let orderCode: string;
 

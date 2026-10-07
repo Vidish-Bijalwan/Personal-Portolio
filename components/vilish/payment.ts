@@ -1,5 +1,5 @@
 /**
- * Pixaura — Manual UPI payment flow.
+ * Etch — Manual UPI payment flow.
  * No payment gateway: the user pays to our VPA manually, then taps
  * "I've paid" — the owner gets a phone ping and confirms. No UTR,
  * no screenshot required.

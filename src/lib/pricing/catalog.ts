@@ -1,5 +1,5 @@
 /**
- * Pixaura — canonical price catalog.
+ * Etch — canonical price catalog.
  *
  * ONE source of truth for every price shown anywhere on the site
  * (/pricing, /create composer estimates, /create teaser, /video-studio).
