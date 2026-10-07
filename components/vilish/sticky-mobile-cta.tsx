@@ -44,7 +44,7 @@ export default function StickyMobileCTA() {
             From {formatINR(priceOf("single-image"))} · no subscription
           </span>
         </span>
-        <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[#D7FF3F] text-[#080808]">
+        <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[var(--pro-btn)] text-[var(--pro-btn-ink)]">
           <ArrowRight className="h-4 w-4" strokeWidth={2.4} />
         </span>
       </Link>

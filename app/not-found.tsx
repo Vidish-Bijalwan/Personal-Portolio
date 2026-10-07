@@ -21,7 +21,7 @@ export default function NotFound() {
     <div className="flex min-h-screen flex-col bg-[#080808] font-sans text-[#F5F5F3] antialiased">
       <VilishNav />
       <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col items-center justify-center px-4 py-20 text-center">
-        <p className="font-display v-iris-text text-[72px] font-bold leading-none sm:text-[96px]">
+        <p className="font-display pro-accent-text text-[72px] font-bold leading-none sm:text-[96px]">
           404
         </p>
         <h1 className="font-display mt-4 text-[26px] font-semibold tracking-[-0.01em] sm:text-[32px]">
@@ -33,7 +33,7 @@ export default function NotFound() {
         </p>
         <Link
           href="/"
-          className="mt-8 inline-flex min-h-[44px] items-center gap-2 rounded-[12px] bg-[#D7FF3F] px-7 py-3 text-[15px] font-semibold text-[#080808] hover:opacity-95"
+          className="mt-8 inline-flex min-h-[44px] items-center gap-2 rounded-[12px] bg-[var(--pro-btn)] px-7 py-3 text-[15px] font-semibold text-[var(--pro-btn-ink)] hover:opacity-95"
         >
           <Home className="h-4 w-4" strokeWidth={2.2} /> Back home
         </Link>

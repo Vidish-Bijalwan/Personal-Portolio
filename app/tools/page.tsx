@@ -45,18 +45,18 @@ function ToolCard({ tool }: { tool: ToolEntry }) {
       <Link
         href={tool.href}
         aria-label={`Open ${tool.name} — ${tool.price}`}
-        className="group flex h-full min-h-[44px] flex-col rounded-2xl border border-white/[0.08] bg-white/[0.02] p-5 transition-all hover:border-[#D7FF3F]/35 hover:bg-white/[0.035] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D7FF3F]"
+        className="group flex h-full min-h-[44px] flex-col rounded-2xl border border-white/[0.08] bg-white/[0.02] p-5 transition-all hover:border-[var(--pro-accent)]/35 hover:bg-white/[0.035] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--pro-accent)]"
       >
         <span className="flex items-start justify-between gap-3">
-          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-white/[0.1] bg-white/[0.04] text-[#D7FF3F] transition-colors group-hover:border-[#D7FF3F]/40">
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-white/[0.1] bg-white/[0.04] text-[var(--pro-accent)] transition-colors group-hover:border-[var(--pro-accent)]/40">
             <Icon className="h-5 w-5" strokeWidth={1.8} />
           </span>
           <span
             className={cn(
               "shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.08em]",
               tool.badge === "AI"
-                ? "border-[#00F0FF]/30 text-[#00F0FF]"
-                : "border-[#D7FF3F]/30 text-[#D7FF3F]",
+                ? "border-[var(--pro-accent)]/30 text-[var(--pro-accent)]"
+                : "border-[var(--pro-accent)]/30 text-[var(--pro-accent)]",
             )}
           >
             {tool.badge === "AI" ? "AI" : "Real processing"}
@@ -69,7 +69,7 @@ function ToolCard({ tool }: { tool: ToolEntry }) {
           </span>
         </span>
         <span className="mt-1.5 flex-1 text-[13px] leading-6 text-white/50">{tool.tagline}</span>
-        <span className="mt-4 inline-flex items-center gap-1.5 text-[13px] font-semibold text-[#D7FF3F]">
+        <span className="mt-4 inline-flex items-center gap-1.5 text-[13px] font-semibold text-[var(--pro-accent)]">
           Open tool <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" strokeWidth={2} />
         </span>
       </Link>
@@ -87,7 +87,7 @@ export default function ToolsPage() {
             kicker="Tool directory"
             title={
               <>
-                Every tool that <span className="text-[#D7FF3F]">actually works.</span>
+                Every tool that <span className="text-[var(--pro-accent)]">actually works.</span>
               </>
             }
             subtitle="Twelve live tools. Real prices, no dead buttons, no coming-soon cards. Pick one and start — the price you see is the price you pay."
@@ -114,7 +114,7 @@ export default function ToolsPage() {
 
           <Reveal delay={0.1} className="mt-16">
             <p className="flex items-start gap-3 rounded-2xl border border-dashed border-white/[0.12] bg-white/[0.015] px-5 py-4 text-[13.5px] leading-6 text-white/55">
-              <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-[#D7FF3F]" strokeWidth={1.8} />
+              <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-[var(--pro-accent)]" strokeWidth={1.8} />
               <span>
                 Everything on this page is live right now. If a tool ever breaks,
                 it leaves this page until it&apos;s fixed — a tool you can&apos;t
@@ -126,7 +126,7 @@ export default function ToolsPage() {
           <Reveal delay={0.15} className="mt-12 text-center">
             <Link
               href="/create"
-              className="v-iris-bg inline-flex min-h-[44px] items-center gap-2 rounded-[12px] px-8 py-3.5 text-[15px] font-semibold text-[#080808] transition-opacity hover:opacity-95"
+              className="pro-cta inline-flex min-h-[44px] items-center gap-2 rounded-[12px] px-8 py-3.5 text-[15px] font-semibold text-[var(--pro-btn-ink)] transition-opacity hover:opacity-95"
             >
               Start creating <ArrowRight className="h-4 w-4" strokeWidth={2.2} />
             </Link>

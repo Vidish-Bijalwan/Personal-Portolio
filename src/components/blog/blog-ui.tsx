@@ -24,7 +24,7 @@ export function RichText({ text }: { text: RichText }) {
               href={s.href}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-[#00F0FF] underline decoration-[#00F0FF]/40 underline-offset-2 transition-colors hover:text-[#D7FF3F] hover:decoration-[#D7FF3F]/60"
+              className="text-[var(--pro-accent)] underline decoration-[var(--pro-accent)]/40 underline-offset-2 transition-colors hover:text-[var(--pro-accent)] hover:decoration-[var(--pro-accent)]/60"
             >
               {s.t}
             </a>
@@ -32,7 +32,7 @@ export function RichText({ text }: { text: RichText }) {
             <Link
               key={i}
               href={s.href}
-              className="text-[#00F0FF] underline decoration-[#00F0FF]/40 underline-offset-2 transition-colors hover:text-[#D7FF3F] hover:decoration-[#D7FF3F]/60"
+              className="text-[var(--pro-accent)] underline decoration-[var(--pro-accent)]/40 underline-offset-2 transition-colors hover:text-[var(--pro-accent)] hover:decoration-[var(--pro-accent)]/60"
             >
               {s.t}
             </Link>
@@ -69,7 +69,7 @@ export function BlockRenderer({ block }: { block: BlogBlock }) {
             >
               <span
                 aria-hidden
-                className="mt-[9px] h-1.5 w-1.5 shrink-0 rounded-full bg-[#D7FF3F]"
+                className="mt-[9px] h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--pro-btn)]"
               />
               <span>
                 <RichText text={item} />
@@ -116,9 +116,9 @@ export function BlockRenderer({ block }: { block: BlogBlock }) {
       );
     case "callout": {
       const tones = {
-        tip: "border-[#D7FF3F]/30 bg-[#D7FF3F]/[0.06]",
-        note: "border-[#00F0FF]/30 bg-[#00F0FF]/[0.06]",
-        warn: "border-[#FF2D78]/30 bg-[#FF2D78]/[0.06]",
+        tip: "border-[var(--pro-accent)]/30 bg-[var(--pro-accent)]/[0.06]",
+        note: "border-[var(--pro-accent)]/30 bg-[var(--pro-accent)]/[0.06]",
+        warn: "border-[var(--pro-accent)]/30 bg-[var(--pro-accent)]/[0.06]",
       } as const;
       const labels = { tip: "Tip", note: "Note", warn: "Heads up" } as const;
       return (
@@ -136,7 +136,7 @@ export function BlockRenderer({ block }: { block: BlogBlock }) {
     }
     case "cta":
       return (
-        <div className="v-iris-border relative overflow-hidden rounded-2xl bg-white/[0.02] px-6 py-6">
+        <div className="pro-ring-border relative overflow-hidden rounded-2xl border bg-white/[0.02] px-6 py-6">
           <p className="font-display text-[18px] font-semibold text-[#F5F5F3]">
             {block.title}
           </p>
@@ -145,7 +145,7 @@ export function BlockRenderer({ block }: { block: BlogBlock }) {
           </p>
           <Link
             href={block.href}
-            className="v-iris-bg mt-4 inline-flex min-h-[44px] items-center rounded-[10px] px-5 py-2.5 text-[14px] font-semibold text-[#080808] transition-opacity hover:opacity-90"
+            className="pro-cta mt-4 inline-flex min-h-[44px] items-center rounded-[10px] px-5 py-2.5 text-[14px] font-semibold text-[var(--pro-btn-ink)] transition-opacity hover:opacity-90"
           >
             {block.label}
           </Link>
@@ -159,9 +159,9 @@ export function AnswerBlock({ post }: { post: BlogPost }) {
   return (
     <section
       aria-label="Quick answer"
-      className="rounded-2xl border border-[#00F0FF]/25 bg-[#00F0FF]/[0.05] px-6 py-5"
+      className="rounded-2xl border border-[var(--pro-accent)]/25 bg-[var(--pro-accent)]/[0.05] px-6 py-5"
     >
-      <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#00F0FF]">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--pro-accent)]">
         The short answer
       </p>
       <p className="mt-2 text-[15.5px] leading-7 text-white/85">
@@ -183,7 +183,7 @@ export function FaqSection({ post }: { post: BlogPost }) {
             key={i}
             className="group rounded-xl border border-white/[0.08] bg-white/[0.02] px-5 py-4"
           >
-            <summary className="cursor-pointer list-none text-[15px] font-medium text-[#F5F5F3] transition-colors group-hover:text-[#D7FF3F] [&::-webkit-details-marker]:hidden">
+            <summary className="cursor-pointer list-none text-[15px] font-medium text-[#F5F5F3] transition-colors group-hover:text-[var(--pro-accent)] [&::-webkit-details-marker]:hidden">
               {f.q}
             </summary>
             <p className="mt-2.5 text-[14.5px] leading-6 text-white/65">{f.a}</p>
@@ -208,7 +208,7 @@ export function SourcesSection({ post }: { post: BlogPost }) {
               href={s.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-[#00F0FF]/90 underline decoration-[#00F0FF]/30 underline-offset-2 transition-colors hover:text-[#D7FF3F]"
+              className="text-[var(--pro-accent)]/90 underline decoration-[var(--pro-accent)]/30 underline-offset-2 transition-colors hover:text-[var(--pro-accent)]"
             >
               {s.label}
             </a>
@@ -222,7 +222,7 @@ export function SourcesSection({ post }: { post: BlogPost }) {
 export function PostMeta({ post }: { post: BlogPost }) {
   return (
     <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[12.5px] text-white/45">
-      <span className="rounded-full border border-[#D7FF3F]/30 bg-[#D7FF3F]/[0.07] px-2.5 py-0.5 font-medium text-[#D7FF3F]">
+      <span className="rounded-full border border-[var(--pro-accent)]/30 bg-[var(--pro-accent)]/[0.07] px-2.5 py-0.5 font-medium text-[var(--pro-accent)]">
         {post.category}
       </span>
       <time dateTime={post.date}>{formatDate(post.date)}</time>
@@ -236,16 +236,16 @@ export function PostCard({ post }: { post: BlogPost }) {
   return (
     <Link
       href={`/blog/${post.slug}`}
-      className="group flex flex-col rounded-2xl border border-white/[0.08] bg-white/[0.02] p-6 transition-colors hover:border-[#D7FF3F]/35 hover:bg-white/[0.035]"
+      className="group flex flex-col rounded-2xl border border-white/[0.08] bg-white/[0.02] p-6 transition-colors hover:border-[var(--pro-accent)]/35 hover:bg-white/[0.035]"
     >
       <PostMeta post={post} />
-      <h2 className="font-display mt-3 text-[19px] font-semibold leading-snug tracking-[-0.01em] text-[#F5F5F3] transition-colors group-hover:text-[#D7FF3F]">
+      <h2 className="font-display mt-3 text-[19px] font-semibold leading-snug tracking-[-0.01em] text-[#F5F5F3] transition-colors group-hover:text-[var(--pro-accent)]">
         {post.title}
       </h2>
       <p className="mt-2.5 flex-1 text-[14px] leading-6 text-white/55">
         {post.description}
       </p>
-      <span className="mt-4 text-[13.5px] font-medium text-[#00F0FF] transition-colors group-hover:text-[#D7FF3F]">
+      <span className="mt-4 text-[13.5px] font-medium text-[var(--pro-accent)] transition-colors group-hover:text-[var(--pro-accent)]">
         Read the guide →
       </span>
     </Link>

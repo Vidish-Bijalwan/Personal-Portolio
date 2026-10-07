@@ -41,9 +41,9 @@ function formatUpdated(iso: string): string {
 }
 
 const BADGE_STYLES: Record<string, string> = {
-  New: "border-[#00F0FF]/40 bg-[#00F0FF]/[0.08] text-[#00F0FF]",
-  Popular: "border-[#D7FF3F]/40 bg-[#D7FF3F]/[0.08] text-[#D7FF3F]",
-  "Staff pick": "border-[#FF2D78]/40 bg-[#FF2D78]/[0.08] text-[#FF2D78]",
+  New: "border-[var(--pro-accent)]/40 bg-[var(--pro-accent)]/[0.08] text-[var(--pro-accent)]",
+  Popular: "border-[var(--pro-accent)]/40 bg-[var(--pro-accent)]/[0.08] text-[var(--pro-accent)]",
+  "Staff pick": "border-[var(--pro-accent)]/40 bg-[var(--pro-accent)]/[0.08] text-[var(--pro-accent)]",
 };
 
 export default async function TrendsPage({
@@ -66,12 +66,12 @@ export default async function TrendsPage({
     <>
       <VilishNav />
       <main className="relative mx-auto max-w-6xl px-4 pb-24 pt-28 sm:px-6 sm:pt-32">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#00F0FF]">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--pro-accent)]">
           Etch Trends
         </p>
         <h1 className="font-display mt-3 max-w-[22ch] text-[32px] font-semibold leading-tight tracking-[-0.02em] text-[#F5F5F3] sm:text-[44px]">
           Trend templates,{" "}
-          <span className="text-[#D7FF3F]">priced exactly</span>
+          <span className="text-[var(--pro-accent)]">priced exactly</span>
         </h1>
         <p className="mt-4 max-w-[62ch] text-[15.5px] leading-7 text-white/60">
           Each template is a curated starting brief for Etch&apos;s real
@@ -99,7 +99,7 @@ export default async function TrendsPage({
                 className={cn(
                   "min-h-[44px] shrink-0 whitespace-nowrap rounded-full border px-4 py-2 text-[13px] font-medium transition-colors",
                   isActive
-                    ? "border-[#D7FF3F]/60 bg-[#D7FF3F]/[0.1] text-[#F5F5F3]"
+                    ? "border-[var(--pro-accent)]/60 bg-[var(--pro-accent)]/[0.1] text-[#F5F5F3]"
                     : "border-white/[0.1] bg-white/[0.03] text-white/60 hover:border-white/25 hover:text-white/90"
                 )}
               >
@@ -148,7 +148,7 @@ export default async function TrendsPage({
                 </div>
                 <Link
                   href={templateHref(t)}
-                  className="flex min-h-[44px] shrink-0 items-center gap-1.5 rounded-[10px] bg-[#D7FF3F] px-4 py-2.5 text-[13.5px] font-semibold text-[#080808] transition-opacity hover:opacity-90"
+                  className="flex min-h-[44px] shrink-0 items-center gap-1.5 rounded-[10px] bg-[var(--pro-btn)] px-4 py-2.5 text-[13.5px] font-semibold text-[var(--pro-btn-ink)] transition-opacity hover:opacity-90"
                 >
                   Use this template
                   <ArrowRight className="h-4 w-4" />
@@ -157,7 +157,7 @@ export default async function TrendsPage({
               {t.followUp && (
                 <Link
                   href={t.followUp.href}
-                  className="mt-3 inline-flex min-h-[36px] items-center gap-1 text-[12.5px] font-medium text-[#00F0FF] transition-opacity hover:opacity-80"
+                  className="mt-3 inline-flex min-h-[36px] items-center gap-1 text-[12.5px] font-medium text-[var(--pro-accent)] transition-opacity hover:opacity-80"
                 >
                   {t.followUp.label}
                   <ArrowRight className="h-3.5 w-3.5" />
@@ -176,11 +176,11 @@ export default async function TrendsPage({
         <p className="mx-auto mt-12 max-w-[62ch] text-center text-[13.5px] leading-6 text-white/40">
           Templates are starting briefs, not finished work: every order is
           reviewed by a human and made to order.{" "}
-          <Link href="/pricing" className="text-[#00F0FF] hover:text-[#D7FF3F]">
+          <Link href="/pricing" className="text-[var(--pro-accent)] hover:text-[var(--pro-accent)]">
             See all prices
           </Link>{" "}
           or{" "}
-          <Link href="/create" className="text-[#00F0FF] hover:text-[#D7FF3F]">
+          <Link href="/create" className="text-[var(--pro-accent)] hover:text-[var(--pro-accent)]">
             start from scratch
           </Link>
           .

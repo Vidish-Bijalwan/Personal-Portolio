@@ -60,12 +60,9 @@
     --ease-precision:   cubic-bezier(0.4, 0, 0.2, 1);
     --ease-in:          cubic-bezier(0.4, 0, 1, 1);
 
-    /* Etch — cyberpunk neon identity (replaces the old iris wash).
-       Acid lime #D7FF3F / electric cyan #00F0FF / hot magenta #FF2D78
-       on near-black #080808. Sharp neon, no purple-blue gradient cliché. */
-    --neon-lime:       73 100% 62%;
-    --neon-cyan:       184 100% 50%;
-    --neon-magenta:    339 100% 59%;
+  /* Etch pro identity: classic professional accent (see app/pro-theme.css).
+       Legacy accent tokens removed 2026-10-07 — use var(--pro-accent) /
+       var(--pro-btn) / var(--pro-card-shadow) instead. */
   }
 
   /* Force dark — no light mode */
@@ -112,14 +109,13 @@
   }
 
   :focus-visible {
-    outline: 1px solid hsl(var(--neon-cyan));
+    outline: 1px solid var(--pro-accent);
     outline-offset: 3px;
-    box-shadow: 0 0 12px hsl(var(--neon-cyan) / 0.35);
   }
 
   ::selection {
-    background: hsl(var(--neon-lime));
-    color: #080808;
+    background: var(--pro-accent);
+    color: var(--pro-btn-ink);
   }
 }
 
@@ -174,18 +170,7 @@
     letter-spacing: 0.01em;
   }
 
-  /* ── Neon text glows (pair with .font-display) ── */
-  .v-text-glow-lime {
-    text-shadow: 0 0 18px hsl(var(--neon-lime) / 0.55), 0 0 60px hsl(var(--neon-lime) / 0.25);
-  }
-
-  .v-text-glow-cyan {
-    text-shadow: 0 0 18px hsl(var(--neon-cyan) / 0.55), 0 0 60px hsl(var(--neon-cyan) / 0.25);
-  }
-
-  .v-text-glow-magenta {
-    text-shadow: 0 0 18px hsl(var(--neon-magenta) / 0.55), 0 0 60px hsl(var(--neon-magenta) / 0.25);
-  }
+  /* ── (legacy text-glow utilities removed 2026-10-07 — use .pro-accent-text) ── */
 
   /* Editorial headings */
   .heading-editorial {
@@ -429,49 +414,30 @@
 ::-webkit-scrollbar { display: none; }
 
 /* ─────────────────────────────────────────────
-   Etch — cyberpunk neon identity
-   (v-iris-* class names kept: many usages depend on them.
-    Old blue→purple→pink→orange wash replaced with
-    acid lime → electric cyan → hot magenta on near-black.)
+   Etch — pro identity (legacy glow/gradient system removed 2026-10-07)
+   Classic professional grammar: solid pro tokens, no gradients
+   or glows. The retro white-glove cursor (app/pro-theme.css,
+   pointer:fine only) is the one consistent custom cursor.
    ───────────────────────────────────────────── */
-.v-iris-bg {
-  background: linear-gradient(115deg, #D7FF3F 0%, #00F0FF 48%, #FF2D78 100%);
+
+/* Solid pro CTA fill — replaces the old gradient button. */
+.pro-cta {
+  background: var(--pro-btn);
+  color: var(--pro-btn-ink);
 }
 
-.v-iris-border {
-  border-color: transparent;
-  background:
-    linear-gradient(#0A0A0A, #0A0A0A) padding-box,
-    linear-gradient(115deg, #D7FF3F, #00F0FF 50%, #FF2D78) border-box;
+/* Emphasized-card ring — replaces the old gradient border. */
+.pro-ring-border {
+  border-color: var(--pro-accent);
 }
 
-.v-iris-text {
-  background: linear-gradient(115deg, #E7FF70 0%, #63F6FF 48%, #FF7AA8 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+/* Accent text — replaces the old gradient text. */
+.pro-accent-text {
+  color: var(--pro-accent);
 }
 
-/* Etch aura text — same wash as .v-iris-text, scoped to the wordmark's X. */
-.px-aura-text {
-  background: linear-gradient(115deg, #D7FF3F 0%, #00F0FF 52%, #FF2D78 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
-/* Neon glow utilities — match the new palette */
-.v-glow-lime {
-  box-shadow: 0 0 20px hsl(var(--neon-lime) / 0.35), 0 0 60px hsl(var(--neon-lime) / 0.14);
-}
-
-.v-glow-cyan {
-  box-shadow: 0 0 20px hsl(var(--neon-cyan) / 0.35), 0 0 60px hsl(var(--neon-cyan) / 0.14);
-}
-
-.v-glow-magenta {
-  box-shadow: 0 0 20px hsl(var(--neon-magenta) / 0.35), 0 0 60px hsl(var(--neon-magenta) / 0.14);
-}
+/* (legacy glow utilities removed 2026-10-07 — use var(--pro-card-shadow)
+   for subtle elevation instead.) */
 
 @keyframes v-price-swap {
   from { opacity: 0; transform: translateY(3px); }
@@ -479,25 +445,15 @@
 }
 .v-price-swap { animation: v-price-swap 0.35s ease; }
 
-@keyframes v-gen-glow {
-  0%, 100% {
-    opacity: 0.55;
-    box-shadow: 0 0 0 hsl(var(--neon-cyan) / 0);
-  }
-  50% {
-    opacity: 1;
-    box-shadow: 0 0 28px hsl(var(--neon-cyan) / 0.45), 0 0 80px hsl(var(--neon-cyan) / 0.18);
-  }
-}
-.v-gen-glow { animation: v-gen-glow 2.4s ease-in-out infinite; }
+/* (legacy generation pulse removed 2026-10-07.) */
 
 @media (prefers-reduced-motion: reduce) {
-  .v-price-swap, .v-gen-glow { animation: none; }
+  .v-price-swap { animation: none; }
 }
 /**
  * Etch watch-room animations — burger grill + popcorn projector.
  * All classes are prefixed fg- and scoped to the watch room.
- * Motion theme: acid-lime #D7FF3F, cyan #00F0FF, magenta #FF2D78.
+ * Motion theme: warm grill ambers + projector whites (legacy palette removed 2026-10-07).
  */
 
 /* ── heat glow on the grill ─────────────────────────────────────────── */

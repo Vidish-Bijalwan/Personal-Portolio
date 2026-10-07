@@ -30,7 +30,7 @@ function Reel({ cx, cy, r, duration, delay = "0s" }: { cx: number; cy: number; r
       {holes.map((h, i) => (
         <circle key={i} cx={h.x} cy={h.y} r={r * 0.18} fill="#08080A" stroke="#3B3B42" strokeWidth="1.5" />
       ))}
-      <circle cx={cx} cy={cy} r={r * 0.14} fill="#D7FF3F" />
+      <circle cx={cx} cy={cy} r={r * 0.14} fill="#FFB627" />
     </g>
   );
 }
@@ -61,8 +61,8 @@ export default function PopcornReel({
     >
       {/* spotlight beams (ambient) */}
       <g className="fg-ambient">
-        <polygon points="30,0 110,0 80,230 0,230" fill="#00F0FF" className="fg-beam" />
-        <polygon points="310,0 390,0 420,230 340,230" fill="#FF2D78" className="fg-beam" style={{ animationDelay: "-2.5s" }} />
+        <polygon points="30,0 110,0 80,230 0,230" fill="#FFE9A8" className="fg-beam" />
+        <polygon points="310,0 390,0 420,230 340,230" fill="#FFF3D6" className="fg-beam" style={{ animationDelay: "-2.5s" }} />
       </g>
 
       {/* film strip hanging between the reels */}
@@ -78,7 +78,7 @@ export default function PopcornReel({
 
       {/* projector body */}
       <rect x="140" y="200" width="140" height="20" rx="8" fill="#141416" stroke="#2E2E33" strokeWidth="2" />
-      <circle cx="210" cy="210" r="5" fill="#00F0FF" className="fg-sizzle" />
+      <circle cx="210" cy="210" r="5" fill="#FFE9A8" className="fg-sizzle" />
 
       {/* popping kernels (ambient, frame 1+) */}
       {frame >= 1 && (
@@ -124,16 +124,16 @@ export default function PopcornReel({
               />
             ))}
           </g>
-          <circle cx="44" cy="30" r="9" fill="none" stroke="#D7FF3F" strokeWidth="2.5" className="fg-sizzle" />
-          <polygon points="41,25 41,35 49,30" fill="#D7FF3F" />
+          <circle cx="44" cy="30" r="9" fill="none" stroke="#FFB627" strokeWidth="2.5" className="fg-sizzle" />
+          <polygon points="41,25 41,35 49,30" fill="#FFB627" />
         </g>
       )}
 
       {/* sparkles when the final cut lands */}
       {frame >= 2 && (
         <g className="fg-ambient">
-          <path d="M120,240 l3,8 8,3 -8,3 -3,8 -3,-8 -8,-3 8,-3 z" fill="#D7FF3F" className="fg-twinkle" />
-          <path d="M300,240 l2.5,7 7,2.5 -7,2.5 -2.5,7 -2.5,-7 -7,-2.5 7,-2.5 z" fill="#00F0FF" className="fg-twinkle" style={{ animationDelay: "-0.7s" }} />
+          <path d="M120,240 l3,8 8,3 -8,3 -3,8 -3,-8 -8,-3 8,-3 z" fill="#FFE9A8" className="fg-twinkle" />
+          <path d="M300,240 l2.5,7 7,2.5 -7,2.5 -2.5,7 -2.5,-7 -7,-2.5 7,-2.5 z" fill="#FFC93C" className="fg-twinkle" style={{ animationDelay: "-0.7s" }} />
         </g>
       )}
     </svg>

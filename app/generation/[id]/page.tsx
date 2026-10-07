@@ -136,9 +136,9 @@ function ThankYouBanner() {
   const searchParams = useSearchParams();
   if (searchParams.get("paid") !== "1") return null;
   return (
-    <div className="mt-6 rounded-[16px] border border-[#D7FF3F]/25 bg-[#D7FF3F]/[0.06] p-5">
+    <div className="mt-6 rounded-[16px] border border-[var(--pro-accent)]/25 bg-[var(--pro-accent)]/[0.06] p-5">
       <p className="flex items-center gap-2 text-[15px] font-semibold text-[#F5F5F3]">
-        <Check className="h-5 w-5 text-[#D7FF3F]" strokeWidth={2.2} />
+        <Check className="h-5 w-5 text-[var(--pro-accent)]" strokeWidth={2.2} />
         Payment confirmed — thank you!
       </p>
       <p className="mt-2 text-[13px] leading-6 text-white/[0.6]">
@@ -375,7 +375,7 @@ export default function GenerationPage() {
                     aria-hidden
                   >
                     <div
-                      className="h-full rounded-full bg-[#D7FF3F]"
+                      className="h-full rounded-full bg-[var(--pro-btn)]"
                       style={{ width: `${((idx + 1) / PIPELINE.length) * 100}%` }}
                     />
                   </div>
@@ -393,7 +393,7 @@ export default function GenerationPage() {
                         <div
                           className={cn(
                             "h-1 rounded-full transition-colors",
-                            done || current ? "bg-[#D7FF3F]" : "bg-white/[0.08]",
+                            done || current ? "bg-[var(--pro-btn)]" : "bg-white/[0.08]",
                           )}
                         />
                         <span
@@ -448,7 +448,7 @@ export default function GenerationPage() {
                       type="button"
                       onClick={handleClarify}
                       disabled={clarifyBusy || !clarifyMsg.trim()}
-                      className="mt-3 inline-flex items-center gap-2 rounded-[10px] bg-[#D7FF3F] px-5 py-2.5 text-[14px] font-semibold text-[#080808] hover:opacity-95 disabled:opacity-40"
+                      className="mt-3 inline-flex items-center gap-2 rounded-[10px] bg-[var(--pro-btn)] px-5 py-2.5 text-[14px] font-semibold text-[var(--pro-btn-ink)] hover:opacity-95 disabled:opacity-40"
                     >
                       {clarifyBusy ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
@@ -552,7 +552,7 @@ export default function GenerationPage() {
                         onClick={handleRemake}
                         disabled={remakePaying}
                         className={cn(
-                          "inline-flex items-center gap-2 rounded-[10px] bg-[#D7FF3F] px-5 py-2.5 text-[14px] font-semibold text-[#080808]",
+                          "inline-flex items-center gap-2 rounded-[10px] bg-[var(--pro-btn)] px-5 py-2.5 text-[14px] font-semibold text-[var(--pro-btn-ink)]",
                           remakePaying ? "cursor-wait opacity-70" : "hover:opacity-95",
                         )}
                       >
@@ -609,7 +609,7 @@ export default function GenerationPage() {
                           type="button"
                           onClick={handleEdit}
                           disabled={editBusy}
-                          className="mt-3 inline-flex items-center gap-2 rounded-[10px] bg-[#D7FF3F] px-5 py-2.5 text-[14px] font-semibold text-[#080808] hover:opacity-95 disabled:opacity-40"
+                          className="mt-3 inline-flex items-center gap-2 rounded-[10px] bg-[var(--pro-btn)] px-5 py-2.5 text-[14px] font-semibold text-[var(--pro-btn-ink)] hover:opacity-95 disabled:opacity-40"
                         >
                           {editBusy && <Loader2 className="h-4 w-4 animate-spin" />}
                           Start edit

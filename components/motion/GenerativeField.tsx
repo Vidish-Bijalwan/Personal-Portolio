@@ -6,9 +6,11 @@ import { usePrefersReducedMotion } from "@/src/lib/motion/theme"
 /**
  * "The Generative Field" — Etch's signature ambient hero canvas.
  *
- * A slow-drifting field of ~90 luminous motes in white and iris tints at low
- * alpha, with faint connecting lines when motes are near, and a subtle
- * mouse-reactive glow. Dark and restrained: atmosphere, not fireworks.
+ * A slow-drifting field of ~90 luminous motes in white and cool
+ * pro-accent tints at low alpha, with faint connecting lines when motes
+ * are near, and a subtle mouse-reactive glow. Dark and restrained:
+ * atmosphere, not fireworks. (Legacy tints removed 2026-10-07
+ * for the pro identity.)
  *
  * Performance: devicePixelRatio-aware sizing, rAF paused when the tab is
  * hidden or the element scrolls off-screen (IntersectionObserver), O(n²)
@@ -25,13 +27,14 @@ interface GenerativeFieldProps {
   density?: number
 }
 
-// Cyberpunk tints: acid lime / electric cyan / hot magenta on near-black
+// Pro tints: white / periwinkle accent / cool steel on near-black
+// (legacy tints removed 2026-10-07)
 const TINTS: Array<[number, number, number]> = [
   [245, 245, 243], // white
-  [0, 240, 255], // electric cyan
-  [255, 45, 120], // hot magenta
-  [215, 255, 63], // acid lime
-  [0, 180, 200], // deep cyan
+  [125, 162, 255], // pro accent
+  [170, 180, 220], // pale periwinkle
+  [148, 158, 180], // steel
+  [90, 110, 160], // deep slate blue
 ]
 
 interface Mote {
@@ -59,7 +62,7 @@ export default function GenerativeField({ className, density = 1 }: GenerativeFi
         aria-hidden="true"
         style={{
           background:
-            "radial-gradient(60% 50% at 50% 45%, rgba(0,240,255,0.10), rgba(255,45,120,0.05) 55%, transparent 100%)",
+            "radial-gradient(60% 50% at 50% 45%, rgba(125,162,255,0.10), rgba(255,255,255,0.04) 55%, transparent 100%)",
         }}
       />
     )
@@ -154,8 +157,8 @@ function FieldCanvas({ className, density, wrapRef }: FieldCanvasProps) {
         height * 0.45,
         Math.max(width, height) * 0.6
       )
-      wash.addColorStop(0, "rgba(0,240,255,0.05)")
-      wash.addColorStop(0.55, "rgba(255,45,120,0.025)")
+      wash.addColorStop(0, "rgba(125,162,255,0.05)")
+      wash.addColorStop(0.55, "rgba(255,255,255,0.02)")
       wash.addColorStop(1, "rgba(0,0,0,0)")
       cx.fillStyle = wash
       cx.fillRect(0, 0, width, height)

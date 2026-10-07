@@ -65,22 +65,22 @@ export default function WaitingPanel({
       aria-label="While you wait"
       className="w-full rounded-[18px] border border-white/[0.09] bg-[#101012] p-5 sm:p-6"
     >
-      <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#D7FF3F]">
+      <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--pro-accent)]">
         While you wait
       </p>
 
       {/* 1 — what the grill understood */}
       <section className="mt-4" aria-label="What we understood from your prompt">
         <p className="flex items-center gap-1.5 text-[13px] font-semibold text-white/85">
-          <Sparkles className="h-3.5 w-3.5 text-[#00F0FF]" />
+          <Sparkles className="h-3.5 w-3.5 text-[var(--pro-accent)]" />
           What we understood
         </p>
         <div className="mt-2.5 flex flex-wrap gap-2">
-          <Chip k="Subject" v={subject} accent="#D7FF3F" />
+          <Chip k="Subject" v={subject} accent="var(--pro-accent)" />
           {styles.map((s) => (
-            <Chip key={s} k="Style" v={s} accent="#00F0FF" />
+            <Chip key={s} k="Style" v={s} accent="var(--pro-accent)" />
           ))}
-          {mood && <Chip k="Mood" v={mood} accent="#FF2D78" />}
+          {mood && <Chip k="Mood" v={mood} accent="var(--pro-accent)" />}
         </div>
       </section>
 
@@ -88,7 +88,7 @@ export default function WaitingPanel({
       {showRemix && (
         <section className="mt-6" aria-label="Remix your prompt">
           <p className="flex items-center gap-1.5 text-[13px] font-semibold text-white/85">
-            <Dices className="h-3.5 w-3.5 text-[#D7FF3F]" />
+            <Dices className="h-3.5 w-3.5 text-[var(--pro-accent)]" />
             Remix it — same idea, new style
           </p>
           <p className="mt-1 text-[12px] leading-5 text-white/40">
@@ -105,7 +105,7 @@ export default function WaitingPanel({
                   disabled={busyPreset !== null}
                   className={cn(
                     "inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-[10px] border border-white/[0.1] bg-white/[0.04] px-3 py-2.5 text-[13px] font-medium text-white/85 transition-colors",
-                    busyPreset === null && "hover:border-[#D7FF3F]/50 hover:text-white",
+                    busyPreset === null && "hover:border-[var(--pro-accent)]/50 hover:text-white",
                     busy && "cursor-wait opacity-70"
                   )}
                 >
