@@ -34,7 +34,7 @@ const GROUPS: { id: ToolGroup; kicker: string; title: string; subtitle: string }
     id: "video-studio",
     kicker: "Video Studio",
     title: "Finish your footage.",
-    subtitle: `Upload a video and give it a studio finish — every job is ${formatINR(priceOf("video-studio"))}, one UPI payment.`,
+    subtitle: `Upload a video and give it a studio finish — jobs from ${formatINR(priceOf("tool-basic"))}, one UPI payment.`,
   },
 ];
 

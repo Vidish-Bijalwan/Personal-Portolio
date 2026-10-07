@@ -15,7 +15,7 @@ import {
   ManualUpiProvider,
   createManualPaymentOrder,
 } from '@/lib/payments/manual-upi';
-import { VIDEO_JOB_PRICE_PAISE } from './constants';
+import { toolPricePaise, type VideoTool } from './constants';
 
 /** Matches the ManualPayment shape the payment modal expects. */
 export interface VideoJobPayment {
@@ -55,13 +55,16 @@ function toPaymentShape(
 
 /**
  * Create the stub generation_jobs row that orders.job_id requires, then
- * a ₹39 manual-UPI order, then the video_job_orders link.
+ * a per-tool manual-UPI order, then the video_job_orders link.
+ * The price follows the tool: ₹5 trivial converters, ₹10 heavier
+ * processing jobs, ₹29 AI jobs (voice-over, captions).
  */
 export async function createVideoJobOrder(input: {
   videoJobId: string;
   userId: string;
   tool: string;
 }): Promise<{ orderId: string; payment: VideoJobPayment }> {
+  const pricePaise = toolPricePaise(input.tool as VideoTool);
   const [stub] = await db
     .insert(schema.generationJobs)
     .values({
@@ -69,7 +72,7 @@ export async function createVideoJobOrder(input: {
       prompt: `Video Studio ${input.tool} job ${input.videoJobId}`,
       aspectRatio: '16:9',
       quality: 'studio',
-      customerPrice: VIDEO_JOB_PRICE_PAISE,
+      customerPrice: pricePaise,
       fulfillmentMode: 'operator',
       jobKind: 'generation',
     })
@@ -78,7 +81,7 @@ export async function createVideoJobOrder(input: {
   const payment = await createManualPaymentOrder({
     jobId: stub.id,
     userId: input.userId,
-    amountPaise: VIDEO_JOB_PRICE_PAISE,
+    amountPaise: pricePaise,
   });
 
   const orderRows = await db

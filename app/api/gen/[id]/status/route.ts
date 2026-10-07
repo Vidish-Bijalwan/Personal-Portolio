@@ -12,6 +12,7 @@ import {
   suggestSaferPrompt,
 } from '@/lib/free/policy';
 import { promptInsight } from '@/lib/vilish/prompt-insight';
+import { videoClipPricePaise } from '@/lib/pricing/engine';
 
 /**
  * GET /api/gen/[id]/status
@@ -85,6 +86,15 @@ export async function GET(
     prompt: gen.prompt,
     aspect_ratio: gen.aspectRatio,
     finished_at: finishedAt,
+    // Video rows: the watch room's "Unlock clean HD — ₹X" CTA price and
+    // the clip length, both server-side (the unlock order uses the same
+    // videoClipPricePaise(durationSeconds) number).
+    ...(gen.mediaType === 'video' && gen.durationSeconds != null
+      ? {
+          duration_seconds: gen.durationSeconds,
+          unlock_price_paise: videoClipPricePaise(gen.durationSeconds),
+        }
+      : {}),
     ...(isGenerationErrorCode(gen.errorCode)
       ? { error_code: gen.errorCode }
       : {}),

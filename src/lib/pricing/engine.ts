@@ -22,6 +22,56 @@ export const PRICE_LADDER = {
   remake: priceOf('remake'),
 } as const;
 
+/* ------------------------------------------------------------------ */
+/* Video clip duration pricing                                         */
+/*                                                                     */
+/* Video clips are priced by DURATION, not as catalog entries beyond    */
+/* the 5s base. The formula is deliberately simple and honest:         */
+/*                                                                     */
+/*   price_paise = ceil(duration_seconds / 5) × BLOCK_PRICE_PAISE      */
+/*                                                                     */
+/* where BLOCK_PRICE_PAISE is the "clip-5s" catalog price (₹45). Every  */
+/* 5-second block — or part of one — costs one block. So:              */
+/*   5s  → 1 block → ₹45                                              */
+/*   6s  → 2 blocks → ₹90                                             */
+/*   60s → 12 blocks → ₹540                                           */
+/* The result is rounded UP to whole rupees per engine rules (a no-op  */
+/* today since the block price is already whole rupees, but it keeps   */
+/* the invariant if the catalog price ever changes).                   */
+/* ------------------------------------------------------------------ */
+
+/** One pricing block = 5 seconds of video. */
+export const VIDEO_BLOCK_SECONDS = 5;
+/** Shortest selectable clip duration (the catalog "clip-5s" product). */
+export const VIDEO_DURATION_MIN_S = 5;
+/** Longest selectable clip duration (1 minute). */
+export const VIDEO_DURATION_MAX_S = 60;
+
+/** The 5s block price in paise — always the live catalog clip price. */
+export function videoBlockPricePaise(): number {
+  return priceOf('clip-5s');
+}
+
+/**
+ * Price (integer paise) for a video clip of `durationSeconds`.
+ * Throws on non-integer, <5 or >60 durations — the API validates first.
+ */
+export function videoClipPricePaise(durationSeconds: number): number {
+  if (!Number.isInteger(durationSeconds)) {
+    throw new RangeError(
+      `durationSeconds must be an integer, got ${durationSeconds}`
+    );
+  }
+  if (durationSeconds < VIDEO_DURATION_MIN_S || durationSeconds > VIDEO_DURATION_MAX_S) {
+    throw new RangeError(
+      `durationSeconds must be ${VIDEO_DURATION_MIN_S}..${VIDEO_DURATION_MAX_S}, got ${durationSeconds}`
+    );
+  }
+  const blocks = Math.ceil(durationSeconds / VIDEO_BLOCK_SECONDS);
+  const raw = blocks * videoBlockPricePaise();
+  return roundUpToRupee(raw);
+}
+
 /** Default payment gateway cost basis: 0 bps — manual UPI has no gateway fee.
  * Any bps value is allowed for future providers (e.g. 236 was Razorpay's
  * 2% + GST). Configurable per call via feeBps; never hardcode a provider. */
@@ -36,7 +86,6 @@ export const DEFAULT_REGION_MULTIPLIER = 0.55;
 export const DEFAULT_MIN_MARGIN_PAISE = 100;
 /** Default tax buffer: 0 bps (kept explicit for future GST tiers). */
 export const DEFAULT_TAX_BUFFER_BPS = 0;
-
 /** Integer ceiling division for positive integers: ceil(a / b). */
 function ceilDiv(a: number, b: number): number {
   return Math.floor((a + b - 1) / b);

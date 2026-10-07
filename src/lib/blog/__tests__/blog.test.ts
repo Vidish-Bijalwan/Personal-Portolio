@@ -208,12 +208,13 @@ describe("sitemap generation", () => {
     const mod = (await import("../../../../app/sitemap")) as {
       default: () => { url: string }[];
     };
+    const base = process.env.NEXT_PUBLIC_SITE_URL ?? "https://tryetch.online";
     const urls = mod.default().map((e) => e.url);
     for (const post of BLOG_POSTS) {
-      expect(urls).toContain(`https://vidish.me/blog/${post.slug}`);
+      expect(urls).toContain(`${base}/blog/${post.slug}`);
     }
     for (const route of ["/", "/create", "/pricing", "/blog"]) {
-      expect(urls).toContain(`https://vidish.me${route}`);
+      expect(urls).toContain(`${base}${route}`);
     }
     // no duplicates
     expect(new Set(urls).size).toBe(urls.length);

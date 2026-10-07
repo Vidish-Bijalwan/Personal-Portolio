@@ -50,6 +50,10 @@ export interface ToolEntry {
 }
 
 const VS_JOB = `${formatINR(priceOf("video-studio"))}/job`;
+/** Trivial converters (MP4→MP3, GIF, compressor): ₹5/job. */
+const TOOL_BASIC = `${formatINR(priceOf("tool-basic"))}/job`;
+/** Heavier re-encode jobs (trim & text, add-audio, denoise): ₹10/job. */
+const TOOL_PLUS = `${formatINR(priceOf("tool-plus"))}/job`;
 
 export const TOOL_DIRECTORY: readonly ToolEntry[] = [
   {
@@ -116,7 +120,7 @@ export const TOOL_DIRECTORY: readonly ToolEntry[] = [
     id: "trim",
     name: "Trim & text",
     tagline: "Cut + title card",
-    price: VS_JOB,
+    price: TOOL_PLUS,
     href: "/video-studio",
     group: "video-studio",
     icon: Scissors,
@@ -126,7 +130,7 @@ export const TOOL_DIRECTORY: readonly ToolEntry[] = [
     id: "compress",
     name: "Compressor",
     tagline: "Shrink the file, keep the video",
-    price: VS_JOB,
+    price: TOOL_BASIC,
     href: "/video-studio",
     group: "video-studio",
     icon: Minimize2,
@@ -136,7 +140,7 @@ export const TOOL_DIRECTORY: readonly ToolEntry[] = [
     id: "convert",
     name: "MP4 → MP3",
     tagline: "Pull the audio out as MP3",
-    price: VS_JOB,
+    price: TOOL_BASIC,
     href: "/video-studio",
     group: "video-studio",
     icon: FileAudio,
@@ -146,7 +150,7 @@ export const TOOL_DIRECTORY: readonly ToolEntry[] = [
     id: "gif",
     name: "GIF maker",
     tagline: "Clip → shareable GIF",
-    price: VS_JOB,
+    price: TOOL_BASIC,
     href: "/video-studio",
     group: "video-studio",
     icon: Film,
@@ -156,7 +160,7 @@ export const TOOL_DIRECTORY: readonly ToolEntry[] = [
     id: "add-audio",
     name: "Add audio",
     tagline: "Lay music or VO over video",
-    price: VS_JOB,
+    price: TOOL_PLUS,
     href: "/video-studio",
     group: "video-studio",
     icon: AudioLines,
@@ -166,7 +170,7 @@ export const TOOL_DIRECTORY: readonly ToolEntry[] = [
     id: "denoise",
     name: "Noise reducer",
     tagline: "Tame hum, hiss and rumble",
-    price: VS_JOB,
+    price: TOOL_PLUS,
     href: "/video-studio",
     group: "video-studio",
     icon: Waves,

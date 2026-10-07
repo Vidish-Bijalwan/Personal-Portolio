@@ -7,7 +7,7 @@ import { findPendingVideoJobOrderLink } from '@/lib/video/orders';
 
 /**
  * POST /api/video-jobs/[id]/payment
- * Owner-gated. Resumes the pending ₹39 manual-UPI order for this video
+ * Owner-gated. Resumes the pending per-tool manual-UPI order for this video
  * job (created at job-start time) and returns it in the payment-modal
  * shape. 409 when already unlocked, 404 when no pending order exists
  * (expired or already verified — the watch room then points at status).

@@ -274,12 +274,12 @@ export const freeGenerationAttachments = pgTable(
  * Unified generations table for the free-tier image flow, paid video
  * clips, and generate-first paid images. tier='free' + media_type='image':
  * 3/day cap, watermarked preview, clean download unlocks after verify.
- * tier='paid' + media_type='video': per-clip catalog price, no daily cap;
- * the watcher generates immediately on order and the clean mp4 unlocks on
- * payment verify. tier='paid' + media_type='image': generate-first paid
- * images (POST /api/generation/start) — no order at Generate time; the
- * unlock order is created at "Download clean HD" click time
- * (POST /api/generation/unlock) with the job's server-side price.
+ * tier='paid' + media_type='video': duration-priced clip (5–60s), no daily
+ * cap; the watcher generates immediately on queue and the clean mp4
+ * unlocks on payment verify. tier='paid' + media_type='image':
+ * generate-first paid images (POST /api/generation/start) — no order at
+ * Generate time; the unlock order is created at "Download clean HD" click
+ * time (POST /api/generation/unlock) with the job's server-side price.
  */
 export const generations = pgTable('generations', {
   id: id(),
@@ -308,6 +308,10 @@ export const generations = pgTable('generations', {
   jobId: uuid('job_id').references(() => generationJobs.id, {
     onDelete: 'set null',
   }),
+  /** Requested clip length in seconds (video only). Null for images and
+   *  for clips created before duration selection existed (treated as 5s).
+   *  The operator fulfills exactly this length; pricing scales from it. */
+  durationSeconds: integer('duration_seconds'),
   attempts: integer('attempts').notNull().default(0),
   watermarked: bytea('watermarked'),
   clean: bytea('clean'),
@@ -323,9 +327,10 @@ export const generations = pgTable('generations', {
 });
 
 /**
- * Links a manual-UPI order to a generations row. purpose 'unlock': ₹19
- * clean-image download for a free generation. purpose 'video': ₹89 paid
- * clip. The payment-verify hook flips generations.unlocked from this link.
+ * Links a manual-UPI order to a generations row. purpose 'unlock': clean-image
+ * download for a free generation. purpose 'video': paid clip (5–60s,
+ * duration-priced). The payment-verify hook flips generations.unlocked
+ * from this link.
  */
 export const generationOrders = pgTable('generation_orders', {
   orderId: uuid('order_id')

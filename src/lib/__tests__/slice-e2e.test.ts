@@ -66,7 +66,7 @@ describe('Etch slice E2E', () => {
     expect(breakdown.total % 100).toBe(0);
     // Slice retail mirrors the quote route: ladder price, floor-protected.
     const retailPaise = ladderPrice('singleImage', plan.estimatedCostPaise);
-    expect(retailPaise).toBe(1900);
+    expect(retailPaise).toBe(1500);
 
     const [job] = await db
       .insert(schema.generationJobs)
