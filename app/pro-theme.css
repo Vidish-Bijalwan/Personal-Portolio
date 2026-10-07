@@ -14,8 +14,10 @@
   --pro-faint: rgba(244, 244, 241, 0.42);
   --pro-border: rgba(255, 255, 255, 0.1);
   --pro-border-soft: rgba(255, 255, 255, 0.06);
-  --pro-accent: #7da2ff;
-  --pro-accent-strong: #4f7cff;
+  /* Elegant champagne-gold accent (2026-10-07 — Vidish verdict: replaces
+     periwinkle blue). #C6A15B = 7.6:1 on --pro-bg-elev (AAA). */
+  --pro-accent: #c6a15b;
+  --pro-accent-strong: #7d5f28;
   --pro-btn: #f4f4f1;
   --pro-btn-ink: #0a0a0c;
   --pro-card-shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.28);
@@ -32,8 +34,9 @@
   --pro-faint: #8a94a6;
   --pro-border: #e3e6eb;
   --pro-border-soft: #eef0f3;
-  --pro-accent: #1d4ed8;
-  --pro-accent-strong: #1e40af;
+  /* Light-theme brass — #826622 = 5.0:1 on --pro-bg-elev (AA pass for links). */
+  --pro-accent: #826622;
+  --pro-accent-strong: #6b4f1f;
   --pro-btn: #0e1526;
   --pro-btn-ink: #ffffff;
   --pro-card-shadow: 0 1px 2px rgba(16, 21, 38, 0.06), 0 12px 32px rgba(16, 21, 38, 0.08);

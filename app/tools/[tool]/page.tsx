@@ -49,7 +49,7 @@ export default async function ToolDetailPage({
 
   const Icon = tool.icon;
   const related = toolsByGroup(tool.group).filter((t) => t.id !== tool.id);
-  const accent = "#7da2ff"; // pro accent (legacy palette removed 2026-10-07)
+  const accent = "var(--pro-accent)"; // elegant gold (champagne/brass) 2026-10-07
 
   const faqLd = {
     "@context": "https://schema.org",
