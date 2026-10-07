@@ -1,5 +1,5 @@
 /**
- * Pixaura — Video Studio tool constants.
+ * Etch — Video Studio tool constants.
  *
  * Pure logic: no JSX, no I/O, no imports from server modules.
  * Unit-testable in isolation. Prices come from the canonical catalog

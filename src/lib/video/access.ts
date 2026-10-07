@@ -1,5 +1,5 @@
 /**
- * Pixaura — shared data-access helpers for the video_jobs table.
+ * Etch — shared data-access helpers for the video_jobs table.
  * Owner gating, mirrors src/lib/free/access.ts.
  */
 import { NextResponse } from 'next/server';

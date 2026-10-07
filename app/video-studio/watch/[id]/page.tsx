@@ -148,7 +148,7 @@ const TOOL_META: Record<
 };
 
 function videoJobPaymentStorageKey(id: string) {
-  return `pixaura:video-job-payment:${id}`;
+  return `etch:video-job-payment:${id}`;
 }
 
 export default function VideoStudioWatchPage() {

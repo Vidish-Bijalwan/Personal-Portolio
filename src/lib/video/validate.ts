@@ -1,5 +1,5 @@
 /**
- * Pixaura — Video Studio params validation.
+ * Etch — Video Studio params validation.
  *
  * Pure logic: no JSX, no I/O. Validates the tool-specific `params`
  * jsonb payloads for video_jobs. Unit-testable in isolation.

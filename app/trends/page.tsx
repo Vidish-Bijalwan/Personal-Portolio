@@ -18,16 +18,16 @@ import { cn } from "@/lib/utils";
 const base = process.env.NEXT_PUBLIC_SITE_URL ?? "https://vidish.me";
 
 export const metadata: Metadata = {
-  title: "Trend Templates — Ready-Made AI Creations | Pixaura",
+  title: "Trend Templates — Ready-Made AI Creations | Etch",
   description:
     "Curated AI trend templates with exact Indian pricing: pick a scene, add your photo, pay per creation. No subscription, no credits.",
   alternates: { canonical: `${base}/trends` },
   openGraph: {
-    title: "Trend Templates — Ready-Made AI Creations | Pixaura",
+    title: "Trend Templates — Ready-Made AI Creations | Etch",
     description:
-      "Pick a scene, add your photo, pay the exact price. Curated templates over Pixaura's real services.",
+      "Pick a scene, add your photo, pay the exact price. Curated templates over Etch's real services.",
     url: `${base}/trends`,
-    siteName: "Pixaura",
+    siteName: "Etch",
     type: "website",
   },
 };
@@ -67,14 +67,14 @@ export default async function TrendsPage({
       <VilishNav />
       <main className="relative mx-auto max-w-6xl px-4 pb-24 pt-28 sm:px-6 sm:pt-32">
         <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#00F0FF]">
-          Pixaura Trends
+          Etch Trends
         </p>
         <h1 className="font-display mt-3 max-w-[22ch] text-[32px] font-semibold leading-tight tracking-[-0.02em] text-[#F5F5F3] sm:text-[44px]">
           Trend templates,{" "}
           <span className="text-[#D7FF3F]">priced exactly</span>
         </h1>
         <p className="mt-4 max-w-[62ch] text-[15.5px] leading-7 text-white/60">
-          Each template is a curated starting brief for Pixaura&apos;s real
+          Each template is a curated starting brief for Etch&apos;s real
           image and video services — not a separate AI model. Pick a scene,
           add your photo, and the composer opens with everything filled in.
           The price shown is the exact catalog price you&apos;ll pay: no

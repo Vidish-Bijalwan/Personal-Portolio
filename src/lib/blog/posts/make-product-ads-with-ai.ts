@@ -5,14 +5,14 @@ const post: BlogPost = {
   slug: "make-product-ads-with-ai",
   title: "How to Make Product Ads with AI: Photo to Finished Video",
   description:
-    "Turn a product photo into a finished video ad with AI: script, voice-over, captions, trim. A step-by-step workflow with Pixaura's ₹39 product photos.",
+    "Turn a product photo into a finished video ad with AI: script, voice-over, captions, trim. A step-by-step workflow with Etch's ₹39 product photos.",
   date: "2026-10-06",
   category: "Sellers",
   tags: ["product ads", "video ads", "AI", "Video Studio", "sellers"],
   readingMinutes: 6,
   answer: [
     t("An AI product ad workflow has four steps: (1) generate a studio-grade product photo ("),
-    t("₹39 on Pixaura"),
+    t("₹39 on Etch"),
     t("), (2) generate or shoot a short product clip, (3) add an AI voice-over and auto captions in "),
     link("Video Studio", "/video-studio"),
     t(" ("),
@@ -20,17 +20,17 @@ const post: BlogPost = {
     t("), and (4) trim with a text overlay for the hook. Total: a finished ad for a few hundred rupees — no shoot, no editor, no subscription."),
   ],
   sources: [
-    { label: "Pixaura pricing — product photo and Video Studio prices", url: "https://vidish.me/pricing" },
+    { label: "Etch pricing — product photo and Video Studio prices", url: "https://vidish.me/pricing" },
     { label: "TalkPix product video ads — how AI ad templates are priced", url: "https://www.talkpix.ai/pricing" },
   ],
   faqs: [
     {
       q: "What do I need to start making AI product ads?",
-      a: "A product (or a clear description of it) and a 30–60 second script. Pixaura handles the rest: ₹39 for the product photo, ₹89 if you want a 5-second AI clip generated, and ₹39 per Video Studio job for voice-over, captions, or trim + text.",
+      a: "A product (or a clear description of it) and a 30–60 second script. Etch handles the rest: ₹39 for the product photo, ₹89 if you want a 5-second AI clip generated, and ₹39 per Video Studio job for voice-over, captions, or trim + text.",
     },
     {
       q: "How long does it take to make an AI product ad?",
-      a: "Every Pixaura order passes a human quality check before download, and you can track live progress while you wait. The hands-on part — writing the script and describing the visuals — is under an hour for a short ad.",
+      a: "Every Etch order passes a human quality check before download, and you can track live progress while you wait. The hands-on part — writing the script and describing the visuals — is under an hour for a short ad.",
     },
     {
       q: "Will an AI ad look cheap?",
@@ -57,7 +57,7 @@ const post: BlogPost = {
   body: [
     p(
       t("A product ad used to mean a shoot day, an editor, and a voice artist. The AI version needs one person, one script, and a few hundred rupees. This is the complete workflow — photo to finished video — using "),
-      link("Pixaura", "/"),
+      link("Etch", "/"),
       t("'s actual products and prices.")
     ),
     h2("Step 1 — The product photo (₹39)"),

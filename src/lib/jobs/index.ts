@@ -1,5 +1,5 @@
 /**
- * Pixaura — job lifecycle helpers (pure, no network).
+ * Etch — job lifecycle helpers (pure, no network).
  * The worker cron's hard eligibility rule lives here so it is unit-testable:
  * only PROVIDER-mode jobs in QUEUED / SUBMITTED / GENERATING may be advanced.
  * In operator mode the worker never touches jobs (contract §3: the cron keeps

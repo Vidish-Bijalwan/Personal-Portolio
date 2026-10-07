@@ -10,15 +10,15 @@ type WordmarkProps = {
 };
 
 /**
- * Pixaura wordmark — a custom-built brand mark, not typed text.
+ * Etch wordmark — a custom-built brand mark, not typed text.
  *
  * Glyph: a "pixel core" (rotated square, lime → cyan gradient) ringed by two
  * broken aura arcs (cyan + magenta) — pixels with an aura, in ~32px.
  *
- * Word: "PIXAURA" in tight uppercase tracking with the "X" rendered as a
- * gradient cross-glyph, echoing the brand's lime → cyan → magenta wash.
+ * Word: "ETCH" in tight uppercase tracking, echoing the brand's
+ * lime → cyan → magenta wash.
  *
- * Accessibility/SEO: single accessible name ("Pixaura"), decorative
+ * Accessibility/SEO: single accessible name ("Etch"), decorative
  * per-letter spans hidden from assistive tech. Static by design.
  */
 export default function Wordmark({ size = 22, tone = "light", className }: WordmarkProps) {
@@ -28,7 +28,7 @@ export default function Wordmark({ size = 22, tone = "light", className }: Wordm
   return (
     <span
       role="img"
-      aria-label="Pixaura"
+      aria-label="Etch"
       className={cn(
         "inline-flex select-none items-center",
         tone === "light" ? "text-[#F5F5F3]" : "text-white/70",
@@ -91,14 +91,10 @@ export default function Wordmark({ size = 22, tone = "light", className }: Wordm
         <rect x="3.2" y="22.4" width="3" height="3" rx="0.8" fill="#00F0FF" transform="rotate(-18 4.7 23.9)" />
       </svg>
 
-      {/* ── word: PIXAURA, X as gradient cross ── */}
+      {/* ── word: ETCH ── */}
       <span aria-hidden="true" className="ml-[0.42em] font-display font-bold tracking-[0.18em]">
-        {"PI".split("").map((ch, i) => (
+        {"ETCH".split("").map((ch, i) => (
           <span key={i}>{ch}</span>
-        ))}
-        <span className="px-aura-text">X</span>
-        {"AURA".split("").map((ch, i) => (
-          <span key={`a${i}`}>{ch}</span>
         ))}
       </span>
     </span>

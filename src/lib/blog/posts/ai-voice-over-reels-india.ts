@@ -5,30 +5,30 @@ const post: BlogPost = {
   slug: "ai-voice-over-reels-india",
   title: "AI Voice-Over for Reels: A Creator's Guide for India",
   description:
-    "Add AI voice-over to your reels without a studio or mic. How TTS voice-over works, what it costs (₹39/job on Pixaura), and how to write scripts that sound natural.",
+    "Add AI voice-over to your reels without a studio or mic. How TTS voice-over works, what it costs (₹39/job on Etch), and how to write scripts that sound natural.",
   date: "2026-10-06",
   category: "Creators",
   tags: ["voice-over", "TTS", "reels", "Video Studio", "India"],
   readingMinutes: 6,
   answer: [
     t("AI voice-over (text-to-speech) turns a written script into spoken audio you can lay over your video — no microphone or recording setup needed. On "),
-    link("Pixaura's Video Studio", "/video-studio"),
+    link("Etch's Video Studio", "/video-studio"),
     t(", a voice-over job costs a flat "),
     t("₹39 per finished video"),
     t(": you upload your clip, paste your script (up to 2000 characters), pick a voice vibe — Warm, Energetic, Calm, or Bold — and the finished video is delivered with the voice-over mixed in."),
   ],
   sources: [
-    { label: "Pixaura Video Studio — voice-over & TTS at ₹39/job", url: "https://vidish.me/pricing" },
+    { label: "Etch Video Studio — voice-over & TTS at ₹39/job", url: "https://vidish.me/pricing" },
     { label: "VEED AI tools — voice generation and audio tools", url: "https://www.veed.io/tools/ai-video" },
   ],
   faqs: [
     {
       q: "How does AI voice-over work?",
-      a: "You provide a script as text and choose a voice style. A text-to-speech engine generates the spoken audio, which is then mixed with your video — the original audio is ducked (lowered) under the voice so both are audible. Pixaura's Video Studio does this at ₹39 per finished video.",
+      a: "You provide a script as text and choose a voice style. A text-to-speech engine generates the spoken audio, which is then mixed with your video — the original audio is ducked (lowered) under the voice so both are audible. Etch's Video Studio does this at ₹39 per finished video.",
     },
     {
       q: "How long a script can I use?",
-      a: "Pixaura's voice-over accepts scripts up to 2000 characters — roughly 2–3 minutes of spoken audio depending on pace. For a 30-second reel, 60–75 words is the sweet spot.",
+      a: "Etch's voice-over accepts scripts up to 2000 characters — roughly 2–3 minutes of spoken audio depending on pace. For a 30-second reel, 60–75 words is the sweet spot.",
     },
     {
       q: "Will the AI voice sound robotic?",
@@ -40,7 +40,7 @@ const post: BlogPost = {
     },
     {
       q: "What if I don't like the first voice-over?",
-      a: "Rewrite the weak lines first — most “bad AI voice” problems are script problems. If the delivery itself misses, Pixaura's Video Studio jobs are priced per finished video (₹39), so re-running with a different vibe is a contained cost, not a sunk subscription.",
+      a: "Rewrite the weak lines first — most “bad AI voice” problems are script problems. If the delivery itself misses, Etch's Video Studio jobs are priced per finished video (₹39), so re-running with a different vibe is a contained cost, not a sunk subscription.",
     },
     {
       q: "Which voice vibe should I pick?",
@@ -115,7 +115,7 @@ const post: BlogPost = {
     ),
     h2("Pair it with captions"),
     p(
-      t("Most reel viewers watch muted first. A voice-over plus burned-in captions covers both audiences — sound-on gets the narration, sound-off gets the text. Pixaura's Video Studio also does "),
+      t("Most reel viewers watch muted first. A voice-over plus burned-in captions covers both audiences — sound-on gets the narration, sound-off gets the text. Etch's Video Studio also does "),
       link("auto-captioning", "/blog/auto-captions-instagram-reels"),
       t(" at the same "),
       t("₹39 per finished video"),

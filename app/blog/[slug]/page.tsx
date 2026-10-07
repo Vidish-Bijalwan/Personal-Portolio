@@ -30,14 +30,14 @@ export async function generateMetadata({
   if (!post) return {};
   const url = `${base}/blog/${post.slug}`;
   return {
-    title: `${post.title} | Pixaura Blog`,
+    title: `${post.title} | Etch Blog`,
     description: post.description,
     alternates: { canonical: url },
     openGraph: {
       title: post.title,
       description: post.description,
       url,
-      siteName: "Pixaura",
+      siteName: "Etch",
       type: "article",
       publishedTime: post.date,
       ...(post.updated ? { modifiedTime: post.updated } : {}),
@@ -69,8 +69,8 @@ export default async function BlogPostPage({
     description: post.description,
     datePublished: post.date,
     ...(post.updated ? { dateModified: post.updated } : {}),
-    author: { "@type": "Organization", name: "Pixaura", url: base },
-    publisher: { "@type": "Organization", name: "Pixaura", url: base },
+    author: { "@type": "Organization", name: "Etch", url: base },
+    publisher: { "@type": "Organization", name: "Etch", url: base },
     mainEntityOfPage: { "@type": "WebPage", "@id": url },
     keywords: post.tags.join(", "),
     articleSection: post.category,

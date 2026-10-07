@@ -1,5 +1,5 @@
 /**
- * Pixaura blog registry — the single list of every published post.
+ * Etch blog registry — the single list of every published post.
  *
  * Posts live in ./posts/*.ts (one file per post) so the daily pipeline can
  * append new ones without touching existing files. Add the import + entry

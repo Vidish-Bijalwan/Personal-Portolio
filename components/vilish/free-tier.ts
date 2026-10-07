@@ -1,5 +1,5 @@
 /**
- * Pixaura free-tier helpers shared between the composer and the watch room.
+ * Etch free-tier helpers shared between the composer and the watch room.
  */
 
 import { priceOf } from "@/src/lib/pricing/catalog";

@@ -13,11 +13,11 @@ const post: BlogPost = {
   answer: [
     t("An AI trend template is a pre-built, pre-tested scene — camera, pacing, and style already designed — into which you drop your own photo or photos. You pick the template, add the pictures it asks for, and the studio renders the finished video. "),
     link("TalkPix", "https://www.talkpix.ai/pricing"),
-    t(" publishes 123 such templates with exact per-template credit prices. Pixaura's take on the concept — curated templates that open directly in the composer with the right service preselected — is on the roadmap now."),
+    t(" publishes 123 such templates with exact per-template credit prices. Etch's take on the concept — curated templates that open directly in the composer with the right service preselected — is on the roadmap now."),
   ],
   sources: [
     { label: "TalkPix trends — 123 AI video/image templates with per-template pricing", url: "https://www.talkpix.ai/pricing" },
-    { label: "Pixaura pricing — current per-creation prices", url: "https://vidish.me/pricing" },
+    { label: "Etch pricing — current per-creation prices", url: "https://vidish.me/pricing" },
   ],
   faqs: [
     {
@@ -26,7 +26,7 @@ const post: BlogPost = {
     },
     {
       q: "How much does an AI template video cost?",
-      a: "It depends on the provider and the template's length, resolution, and model. TalkPix lists per-template prices (for example, from 8 credits for short clips to 180+ for long ones). Pixaura's templates, when they launch, will carry the same flat per-creation pricing as everything else — the price shown will be the price charged.",
+      a: "It depends on the provider and the template's length, resolution, and model. TalkPix lists per-template prices (for example, from 8 credits for short clips to 180+ for long ones). Etch's templates, when they launch, will carry the same flat per-creation pricing as everything else — the price shown will be the price charged.",
     },
     {
       q: "Do I need my own photo for templates?",
@@ -46,7 +46,7 @@ const post: BlogPost = {
     p(
       t("Scroll any feed and you'll see them: the same cinematic format, a different face each time — the couple movie poster, the luxury outfit switch, the pet road trip. Those are "),
       t("AI trend templates"),
-      t(": viral formats productized into fill-in-the-blank scenes. Here's what they are, how the economics work, and where Pixaura is taking the idea.")
+      t(": viral formats productized into fill-in-the-blank scenes. Here's what they are, how the economics work, and where Etch is taking the idea.")
     ),
     h2("Anatomy of a template"),
     list(
@@ -89,11 +89,11 @@ const post: BlogPost = {
       t("Before committing photos to any template, check its newest examples — galleries that show recently added templates with dates are actively maintained. Stale galleries mean stale scenes.")
     ),
     p(
-      t("The template economy also rewards speed: trends peak fast and fade faster. A template gallery that ships new scenes weekly — with dates on each addition — is worth more than a large static one. When Pixaura's gallery launches, expect the same cadence: new templates as trends emerge, each with its price printed upfront.")
+      t("The template economy also rewards speed: trends peak fast and fade faster. A template gallery that ships new scenes weekly — with dates on each addition — is worth more than a large static one. When Etch's gallery launches, expect the same cadence: new templates as trends emerge, each with its price printed upfront.")
     ),
-    h2("Pixaura's direction: templates wired to real prices"),
+    h2("Etch's direction: templates wired to real prices"),
     p(
-      t("Pixaura is building its template gallery on the same principle as everything else: the price shown is the price charged. Templates will open directly in the "),
+      t("Etch is building its template gallery on the same principle as everything else: the price shown is the price charged. Templates will open directly in the "),
       link("composer", "/create"),
       t(" with the matching service preselected — so a product template lands on the "),
       t("₹39 product photo"),

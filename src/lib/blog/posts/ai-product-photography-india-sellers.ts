@@ -12,19 +12,19 @@ const post: BlogPost = {
   readingMinutes: 6,
   answer: [
     t("AI product photography creates studio-grade product shots from a description or a reference photo, without a physical photoshoot. On "),
-    link("Pixaura", "/"),
+    link("Etch", "/"),
     t(", a product photo costs a flat "),
     t("₹39"),
     t(" — you describe the product and the look you want, pay over UPI, and receive a human-reviewed image. It suits sellers who need clean catalog shots fast; it doesn't replace a full brand campaign shoot."),
   ],
   sources: [
-    { label: "Pixaura pricing — product photo ₹39", url: "https://vidish.me/pricing" },
+    { label: "Etch pricing — product photo ₹39", url: "https://vidish.me/pricing" },
     { label: "VEED AI tools — product-focused AI video and image tools", url: "https://www.veed.io/tools/ai-video" },
   ],
   faqs: [
     {
       q: "How much does AI product photography cost in India?",
-      a: "On Pixaura, one AI product photo costs a flat ₹39 — the price is shown before you order and you pay per photo over UPI. A traditional product photoshoot in India typically involves photographer fees, studio rental, and editing time, which is why per-photo AI pricing suits sellers with small catalogs.",
+      a: "On Etch, one AI product photo costs a flat ₹39 — the price is shown before you order and you pay per photo over UPI. A traditional product photoshoot in India typically involves photographer fees, studio rental, and editing time, which is why per-photo AI pricing suits sellers with small catalogs.",
     },
     {
       q: "What do I need to provide for an AI product photo?",
@@ -32,7 +32,7 @@ const post: BlogPost = {
     },
     {
       q: "Will the AI get my product's details right?",
-      a: "Attach a reference photo of your actual product whenever accuracy matters — labels, logos, and proportions follow the reference. Every Pixaura creation also passes a human quality check before delivery, and a remake costs ₹9 if the first version misses.",
+      a: "Attach a reference photo of your actual product whenever accuracy matters — labels, logos, and proportions follow the reference. Every Etch creation also passes a human quality check before delivery, and a remake costs ₹9 if the first version misses.",
     },
     {
       q: "Can I use AI product photos on Amazon, Flipkart, or my Shopify store?",
@@ -73,7 +73,7 @@ const post: BlogPost = {
     ),
     h2("AI product photo vs a traditional shoot"),
     table(
-      ["", "AI product photo (Pixaura)", "Traditional photoshoot"],
+      ["", "AI product photo (Etch)", "Traditional photoshoot"],
       [
         ["Cost", "₹39 per finished photo", "Photographer day-rate + studio + editing"],
         ["Turnaround", "Operator-fulfilled, human-reviewed", "Days to weeks"],
@@ -90,7 +90,7 @@ const post: BlogPost = {
     ),
     h2("From photo to product ad"),
     p(
-      t("Once you have the still, the same product can star in a short video ad. Pixaura's "),
+      t("Once you have the still, the same product can star in a short video ad. Etch's "),
       link("Video Studio", "/video-studio"),
       t(" adds voice-over, captions, and trim + text overlay to your clips at "),
       t("₹39 per finished video"),

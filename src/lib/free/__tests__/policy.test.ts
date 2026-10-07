@@ -1,5 +1,5 @@
 /**
- * Pixaura — unit tests for the free-tier / paid-video policy.
+ * Etch — unit tests for the free-tier / paid-video policy.
  * Pure logic: no DB, no network.
  */
 import { describe, it, expect } from 'vitest';

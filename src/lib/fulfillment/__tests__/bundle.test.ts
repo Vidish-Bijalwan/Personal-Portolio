@@ -1,5 +1,5 @@
 /**
- * Pixaura Phase 2 — contract §5 bundle:
+ * Etch Phase 2 — contract §5 bundle:
  * GET /api/admin/fulfillment/[id]/bundle → ZIP `VLSH-XXXXXX.zip` containing
  * `<orderCode>/order.json`, `<orderCode>/prompt.txt`,
  * `<orderCode>/references/<file>` with correct contents.

@@ -2,9 +2,11 @@ export const dynamic = 'force-dynamic';
 
 import { NextResponse, type NextRequest } from 'next/server';
 import { requireSession } from '@/lib/auth';
+import { isAdminEmail } from '@/lib/admin';
 import { UNLOCK_PRICE_PAISE } from '@/lib/free/policy';
 import { getOwnedGeneration } from '@/lib/free/access';
 import { createGenerationOrder, findPendingOrderLink } from '@/lib/free/orders';
+import { verifyOrderAdminBypass } from '@/lib/payments/manual-upi';
 
 /**
  * POST /api/gen/[id]/unlock
@@ -52,6 +54,14 @@ export async function POST(
 
   const resumed = await findPendingOrderLink(gen.id, 'unlock');
   if (resumed) {
+    // Owner/admin testing bypass: verify the pending order immediately.
+    if (isAdminEmail(user.email)) {
+      await verifyOrderAdminBypass({
+        code: resumed.payment.code,
+        adminUserId: user.id,
+      });
+      return NextResponse.json({ id: gen.id, unlocked: true, adminBypass: true });
+    }
     return NextResponse.json({
       id: gen.id,
       resumed: true,
@@ -74,6 +84,19 @@ export async function POST(
     return NextResponse.json(
       { code: 'PAYMENT_ORDER_FAILED', error: 'Failed to create payment order' },
       { status: 502 }
+    );
+  }
+
+  // Owner/admin testing bypass: no payment needed — verify immediately so
+  // the clean download opens. Fully audit-logged as payment.admin_bypass.
+  if (isAdminEmail(user.email)) {
+    await verifyOrderAdminBypass({
+      code: order.payment.code,
+      adminUserId: user.id,
+    });
+    return NextResponse.json(
+      { id: gen.id, unlocked: true, adminBypass: true },
+      { status: 201 }
     );
   }
 

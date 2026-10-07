@@ -1,5 +1,5 @@
 /**
- * Pixaura — tests for the Video Studio tools (W2).
+ * Etch — tests for the Video Studio tools (W2).
  *
  * Pure validation tests run without a DB; route tests run against
  * in-process PGlite (DATABASE_URL unset), with @/lib/auth mocked to a

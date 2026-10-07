@@ -1,5 +1,5 @@
 /**
- * Pixaura — use-case landing pages (/for-sellers, /for-creators, /for-marketers).
+ * Etch — use-case landing pages (/for-sellers, /for-creators, /for-marketers).
  *
  * Each use case bundles real tools (by TOOL_DIRECTORY id), real example
  * images (by /public/examples path + catalog service for price/CTA), and
@@ -108,7 +108,7 @@ export const USE_CASES: readonly UseCase[] = [
     ],
     accent: "#D7FF3F",
     metaDescription:
-      "AI product photography for sellers: studio-grade product shots, ad creatives and 5s product clips. Fixed price per creation, no subscription. Pixaura.",
+      "AI product photography for sellers: studio-grade product shots, ad creatives and 5s product clips. Fixed price per creation, no subscription. Etch.",
   },
   {
     slug: "for-creators",
@@ -167,7 +167,7 @@ export const USE_CASES: readonly UseCase[] = [
     ],
     accent: "#00F0FF",
     metaDescription:
-      "AI content for creators: 5s video clips, portraits, auto captions, GIFs and voice-overs. Fixed price per creation, no subscription. Pixaura.",
+      "AI content for creators: 5s video clips, portraits, auto captions, GIFs and voice-overs. Fixed price per creation, no subscription. Etch.",
   },
   {
     slug: "for-marketers",
@@ -226,7 +226,7 @@ export const USE_CASES: readonly UseCase[] = [
     ],
     accent: "#FF2D78",
     metaDescription:
-      "AI ad creatives for marketers: product shots, ad variant packs, motion teasers. Fixed price per piece, no retainer, no subscription. Pixaura.",
+      "AI ad creatives for marketers: product shots, ad variant packs, motion teasers. Fixed price per piece, no retainer, no subscription. Etch.",
   },
 ];
 

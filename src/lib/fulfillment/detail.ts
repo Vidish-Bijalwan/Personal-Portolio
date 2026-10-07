@@ -1,5 +1,5 @@
 /**
- * Pixaura — fulfillment job detail loader (Phase 2 contract §5).
+ * Etch — fulfillment job detail loader (Phase 2 contract §5).
  * Shared by GET [id], package, and bundle routes.
  */
 import { desc, eq, sql } from 'drizzle-orm';

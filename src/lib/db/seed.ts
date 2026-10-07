@@ -1,5 +1,5 @@
 /**
- * Pixaura — idempotent seed.
+ * Etch — idempotent seed.
  * Safe to run any number of times: rows are inserted only when missing.
  */
 import { eq, and, sql } from 'drizzle-orm';

@@ -1,5 +1,5 @@
 /**
- * Pixaura — route tests for the free-tier image + paid video
+ * Etch — route tests for the free-tier image + paid video
  * generations pipeline. Runs against in-process PGlite (DATABASE_URL
  * unset), with @/lib/auth mocked to a switchable test user.
  */

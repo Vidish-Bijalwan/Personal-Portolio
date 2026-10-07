@@ -152,7 +152,7 @@ export default function AdminPage() {
     <div className="min-h-screen bg-[#080808] font-sans text-[#F5F5F3] antialiased">
       <div className="mx-auto w-full max-w-5xl px-4 pb-20 pt-10 sm:pt-14">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h1 className="text-[22px] font-semibold tracking-[-0.01em]">Pixaura Admin</h1>
+          <h1 className="text-[22px] font-semibold tracking-[-0.01em]">Etch Admin</h1>
           <a
             href="/admin/fulfillment"
             className="rounded-[8px] border border-violet-300/30 bg-violet-300/[0.08] px-3 py-1.5 text-[12px] font-medium text-violet-100 hover:bg-violet-300/[0.14]"

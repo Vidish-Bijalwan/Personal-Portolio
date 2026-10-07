@@ -1,5 +1,5 @@
 /**
- * Pixaura — per-tool detail content for /tools/[tool].
+ * Etch — per-tool detail content for /tools/[tool].
  *
  * Truthful, human-written copy for each of the 12 working tools: what it
  * does, what it's best for, its real limitations, 3 steps, and FAQs.

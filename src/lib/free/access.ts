@@ -1,5 +1,5 @@
 /**
- * Pixaura — shared data-access helpers for the generations table.
+ * Etch — shared data-access helpers for the generations table.
  * Owner gating + free-cap counting, used by the /api/free, /api/video
  * and /api/gen routes.
  */

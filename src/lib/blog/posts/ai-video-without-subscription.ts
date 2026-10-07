@@ -5,14 +5,14 @@ const post: BlogPost = {
   slug: "ai-video-without-subscription",
   title: "AI Video Without a Subscription: What Pay-Per-Clip Costs",
   description:
-    "Can you make AI videos without a monthly plan? Yes — pay-per-clip pricing explained: what ₹89 gets you on Pixaura, when subscriptions win, and traps to avoid.",
+    "Can you make AI videos without a monthly plan? Yes — pay-per-clip pricing explained: what ₹89 gets you on Etch, when subscriptions win, and traps to avoid.",
   date: "2026-10-06",
   category: "Pricing",
   tags: ["AI video", "no subscription", "pay per clip", "India"],
   readingMinutes: 5,
   answer: [
     t("Yes — several AI video tools work without a subscription. "),
-    link("Pixaura", "/"),
+    link("Etch", "/"),
     t(" charges a flat "),
     t("₹89 per 5-second AI video clip"),
     t(" and "),
@@ -22,13 +22,13 @@ const post: BlogPost = {
     t(" are also subscription-free but require buying credits upfront. Subscriptions only win for daily high-volume producers."),
   ],
   sources: [
-    { label: "Pixaura pricing — flat per-clip and per-job prices", url: "https://vidish.me/pricing" },
+    { label: "Etch pricing — flat per-clip and per-job prices", url: "https://vidish.me/pricing" },
     { label: "TalkPix pricing — pay-as-you-go credits, no subscription required", url: "https://www.talkpix.ai/pricing" },
   ],
   faqs: [
     {
       q: "Do I need a subscription to generate AI videos?",
-      a: "No. Pay-per-clip services (Pixaura: ₹89 per 5-second clip) and credit-pack tools (TalkPix) both work without any monthly plan. You pay only for what you render.",
+      a: "No. Pay-per-clip services (Etch: ₹89 per 5-second clip) and credit-pack tools (TalkPix) both work without any monthly plan. You pay only for what you render.",
     },
     {
       q: "What's the catch with no-subscription AI video?",
@@ -36,7 +36,7 @@ const post: BlogPost = {
     },
     {
       q: "Can I edit videos without a subscription too?",
-      a: "Yes. Pixaura's Video Studio does voice-over/TTS, auto-captioning, and trim + text overlay at ₹39 per finished video — one job, one price, no plan.",
+      a: "Yes. Etch's Video Studio does voice-over/TTS, auto-captioning, and trim + text overlay at ₹39 per finished video — one job, one price, no plan.",
     },
     {
       q: "Can I mix subscription and pay-per-clip tools?",
@@ -48,7 +48,7 @@ const post: BlogPost = {
     },
     {
       q: "How do I pay without a subscription account?",
-      a: "On Pixaura you pay per order with UPI and tap “I've paid” — there's no wallet to top up and no card on file. Each order is priced individually before you commit.",
+      a: "On Etch you pay per order with UPI and tap “I've paid” — there's no wallet to top up and no card on file. Each order is priced individually before you commit.",
     },
   ],
   related: [
@@ -64,7 +64,7 @@ const post: BlogPost = {
     ),
     h2("Two ways to skip the subscription"),
     table(
-      ["", "Flat per-clip (Pixaura)", "Credit packs (e.g. TalkPix)"],
+      ["", "Flat per-clip (Etch)", "Credit packs (e.g. TalkPix)"],
       [
         ["You pay", "₹89 per 5s clip, when you order", "Upfront for a pack of credits"],
         ["Price per render", "Fixed and shown before you commit", "Varies by length × resolution × model"],

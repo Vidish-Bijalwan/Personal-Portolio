@@ -5,7 +5,7 @@ import { useCaseBySlug } from "@/src/lib/usecases/usecases";
 const usecase = useCaseBySlug("for-sellers")!;
 
 export const metadata: Metadata = {
-  title: "AI Product Photography for Sellers — Pay Per Creation | Pixaura",
+  title: "AI Product Photography for Sellers — Pay Per Creation | Etch",
   description: usecase.metaDescription,
   alternates: { canonical: "/for-sellers" },
 };

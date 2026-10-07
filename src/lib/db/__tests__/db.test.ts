@@ -1,5 +1,5 @@
 /**
- * Pixaura DB tests — run against in-process PGlite, no external services.
+ * Etch DB tests — run against in-process PGlite, no external services.
  */
 import { describe, it, expect, beforeAll } from 'vitest';
 import { eq } from 'drizzle-orm';

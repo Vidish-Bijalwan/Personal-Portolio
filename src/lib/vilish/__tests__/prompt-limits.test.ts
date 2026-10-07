@@ -1,5 +1,5 @@
 /**
- * Pixaura — prompt length policy tests (client helper).
+ * Etch — prompt length policy tests (client helper).
  * Server-side enforcement is covered by the interpret tests
  * (interpretCreative throws on >2000 chars).
  */

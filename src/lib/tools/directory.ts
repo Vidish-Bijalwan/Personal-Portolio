@@ -1,5 +1,5 @@
 /**
- * Pixaura — canonical tool directory.
+ * Etch — canonical tool directory.
  *
  * The single source of truth for every working tool on the site: the 4
  * composer services + the 8 Video Studio tools. The mega-dropdown, /tools

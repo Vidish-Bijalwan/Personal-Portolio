@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * Pixaura — cursor settings.
+ * Etch — cursor settings.
  *
  * Persisted to localStorage, broadcast on window so the CyberCursor
  * updates live the moment a control changes. Pure load/save/defaults
@@ -36,8 +36,8 @@ export const DEFAULT_CURSOR_SETTINGS: CursorSettings = {
   accent: "cyan",
 };
 
-export const CURSOR_SETTINGS_KEY = "pixaura:cursor-settings";
-export const CURSOR_SETTINGS_EVENT = "pixaura:cursor-settings";
+export const CURSOR_SETTINGS_KEY = "etch:cursor-settings";
+export const CURSOR_SETTINGS_EVENT = "etch:cursor-settings";
 
 function sanitize(raw: unknown): CursorSettings {
   const o = (raw ?? {}) as Partial<CursorSettings>;

@@ -1,5 +1,5 @@
 /**
- * Pixaura — AI PACKAGE builder (Phase 2 contract §7).
+ * Etch — AI PACKAGE builder (Phase 2 contract §7).
  *
  * Renders the exact operator handoff template. No internal mechanics are
  * mentioned in the output (per §6 copy rules); it is the literal text an
@@ -99,7 +99,7 @@ export function buildAiPackage(
   const style = job.style?.trim() || job.genre?.trim() || '—';
 
   const lines: string[] = [
-    'Pixaura FULFILLMENT JOB',
+    'Etch FULFILLMENT JOB',
     '',
     'ORDER:',
     order.code,

@@ -1,5 +1,5 @@
 /**
- * Pixaura — tests for the Video Studio Phase 4 tools
+ * Etch — tests for the Video Studio Phase 4 tools
  * (compress, convert, gif, add-audio, denoise).
  *
  * Pure validation tests run without a DB; route tests run against

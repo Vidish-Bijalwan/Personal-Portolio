@@ -1,5 +1,5 @@
 /**
- * Pixaura — manual-UPI order plumbing for the video_jobs table.
+ * Etch — manual-UPI order plumbing for the video_jobs table.
  *
  * Mirrors src/lib/free/orders.ts: orders.job_id is NOT NULL with an FK
  * to generation_jobs, so every video-job payment first creates a minimal

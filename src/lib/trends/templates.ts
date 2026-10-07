@@ -1,7 +1,7 @@
 /**
- * Pixaura — trend templates (Phase 2 of the TalkPix/VEED roadmap).
+ * Etch — trend templates (Phase 2 of the TalkPix/VEED roadmap).
  *
- * A template is a CURATED PROMPT PRESET over Pixaura's real services — not a
+ * A template is a CURATED PROMPT PRESET over Etch's real services — not a
  * separate AI model. Every template maps 1:1 to a catalog product, so the
  * price shown on /trends is the exact price charged in the composer.
  *
@@ -51,7 +51,7 @@ export interface Template {
   theme: TrendTheme;
   /** One-line scene description shown on the card. */
   description: string;
-  /** Real Pixaura service — price comes from the catalog, never hardcoded. */
+  /** Real Etch service — price comes from the catalog, never hardcoded. */
   service: TemplateServiceId;
   /** Pre-filled composer prompt. */
   prompt: string;

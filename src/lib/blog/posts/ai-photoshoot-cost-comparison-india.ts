@@ -12,7 +12,7 @@ const post: BlogPost = {
   readingMinutes: 6,
   answer: [
     t("A traditional photoshoot in India involves photographer fees, studio/location rental, styling, and editing time — costs that scale per shoot day regardless of how many usable shots you get. AI generation on "),
-    link("Pixaura", "/"),
+    link("Etch", "/"),
     t(" costs "),
     t("₹19 per image"),
     t(" or "),
@@ -20,7 +20,7 @@ const post: BlogPost = {
     t(", with every order human-reviewed before delivery. AI wins on cost and speed for catalog and concept work; traditional shoots still win for campaigns needing real people, real places, and art direction."),
   ],
   sources: [
-    { label: "Pixaura pricing — ₹19 images, ₹39 product photos", url: "https://vidish.me/pricing" },
+    { label: "Etch pricing — ₹19 images, ₹39 product photos", url: "https://vidish.me/pricing" },
     { label: "VEED AI tools — AI production vs traditional workflows", url: "https://www.veed.io/tools/ai-video" },
   ],
   faqs: [
@@ -30,7 +30,7 @@ const post: BlogPost = {
     },
     {
       q: "What does the same work cost with AI?",
-      a: "On Pixaura: ₹19 per AI image, ₹39 per product photo, ₹9 for a remake if the first version misses. Ten product shots cost ten times ₹39 — no day-rates, no rental, no editing queue.",
+      a: "On Etch: ₹19 per AI image, ₹39 per product photo, ₹9 for a remake if the first version misses. Ten product shots cost ten times ₹39 — no day-rates, no rental, no editing queue.",
     },
     {
       q: "Can AI fully replace a photoshoot?",
@@ -38,11 +38,11 @@ const post: BlogPost = {
     },
     {
       q: "How fast is AI vs a photoshoot?",
-      a: "Pixaura orders are fulfilled by an operator after payment confirmation, with every image human-reviewed before delivery. A traditional shoot needs scheduling, the shoot day itself, and editing turnaround — typically days to weeks.",
+      a: "Etch orders are fulfilled by an operator after payment confirmation, with every image human-reviewed before delivery. A traditional shoot needs scheduling, the shoot day itself, and editing turnaround — typically days to weeks.",
     },
     {
       q: "Is AI-generated imagery legal for commercial use in India?",
-      a: "The images Pixaura delivers are yours to use commercially, including in ads and on marketplaces. Standard caveats apply: don't misrepresent products, respect trademarks in your prompts, and follow each platform's AI-content disclosure norms.",
+      a: "The images Etch delivers are yours to use commercially, including in ads and on marketplaces. Standard caveats apply: don't misrepresent products, respect trademarks in your prompts, and follow each platform's AI-content disclosure norms.",
     },
     {
       q: "Should I tell customers an image is AI-generated?",
@@ -71,7 +71,7 @@ const post: BlogPost = {
     ),
     h2("The AI alternative: line items that don't exist"),
     table(
-      ["Cost driver", "Traditional shoot", "Pixaura AI"],
+      ["Cost driver", "Traditional shoot", "Etch AI"],
       [
         ["Per finished photo", "Day-rate ÷ usable shots", "₹19 (image) / ₹39 (product photo)"],
         ["Revisions", "Reshoot fees + scheduling", "₹9 remake"],

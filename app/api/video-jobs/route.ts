@@ -5,6 +5,8 @@ import { eq } from 'drizzle-orm';
 import { db } from '@/lib/db/client';
 import { generations, videoJobs } from '@/lib/db/schema';
 import { requireSession } from '@/lib/auth';
+import { isAdminEmail } from '@/lib/admin';
+import { verifyOrderAdminBypass } from '@/lib/payments/manual-upi';
 import { mimeForMagic } from '@/lib/free/policy';
 import { toBuffer } from '@/lib/free/access';
 import {
@@ -217,6 +219,26 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(
       { code: 'PAYMENT_ORDER_FAILED', error: 'Failed to create payment order' },
       { status: 502 }
+    );
+  }
+
+  // Owner/admin testing bypass: no payment needed — verify immediately so
+  // the clean output unlocks. Fully audit-logged as payment.admin_bypass.
+  if (isAdminEmail(user.email)) {
+    await verifyOrderAdminBypass({
+      code: order.payment.code,
+      adminUserId: user.id,
+    });
+    return NextResponse.json(
+      {
+        id: job.id,
+        tool,
+        status: 'queued',
+        unlocked: true,
+        adminBypass: true,
+        watchUrl: `/video-studio/watch/${job.id}`,
+      },
+      { status: 201 }
     );
   }
 

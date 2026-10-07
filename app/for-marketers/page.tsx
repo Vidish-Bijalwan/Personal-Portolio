@@ -5,7 +5,7 @@ import { useCaseBySlug } from "@/src/lib/usecases/usecases";
 const usecase = useCaseBySlug("for-marketers")!;
 
 export const metadata: Metadata = {
-  title: "AI Ad Creatives for Marketers — Pay Per Piece | Pixaura",
+  title: "AI Ad Creatives for Marketers — Pay Per Piece | Etch",
   description: usecase.metaDescription,
   alternates: { canonical: "/for-marketers" },
 };

@@ -10,7 +10,7 @@ import {
 } from "@/src/lib/motion/cursor-settings"
 
 /**
- * CyberCursor — pointer augmentation for the Pixaura motion system.
+ * CyberCursor — pointer augmentation for the Etch motion system.
  *
  * Glitch fixes (root causes, not patches):
  * 1. Hover flapping: the old `mouseover -> setHovering(bool)` flipped state
