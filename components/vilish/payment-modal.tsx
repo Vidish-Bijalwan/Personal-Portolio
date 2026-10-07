@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, ArrowRight, Check, Copy, Loader2, RefreshCcw, X, Zap } from "lucide-react";
+import { ArrowRight, Check, Copy, Loader2, RefreshCcw, X, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatINR } from "@/src/lib/vilish/types";
 import BurgerGrill from "./burger-grill";
@@ -24,6 +24,8 @@ interface PaymentModalProps {
   navigate: (url: string) => void;
   /** When set, called on payment verification instead of navigating to /generation/[jobId]. */
   onPaymentVerified?: (jobId: string) => void;
+  /** Test/screenshot seam: which pay mode the modal opens on. Defaults to "online" (Cashfree primary). */
+  initialPayMode?: PayMode;
 }
 
 function useCountdown(expiresAt: string, active: boolean) {
@@ -44,10 +46,10 @@ function useCountdown(expiresAt: string, active: boolean) {
 /** Gentle notice threshold while waiting for the owner: 10 minutes. */
 const LONG_WAIT_MS = 10 * 60 * 1000;
 
-export default function PaymentModal({ jobId, initialPayment, onClose, navigate, onPaymentVerified }: PaymentModalProps) {
+export default function PaymentModal({ jobId, initialPayment, onClose, navigate, onPaymentVerified, initialPayMode = "online" }: PaymentModalProps) {
   const [payment, setPayment] = useState<ManualPayment>(initialPayment);
   const [phase, setPhase] = useState<ModalPhase>("pay");
-  const [payMode, setPayMode] = useState<PayMode>("upi");
+  const [payMode, setPayMode] = useState<PayMode>(initialPayMode);
   const [vpaCopied, setVpaCopied] = useState(false);
   const [claiming, setClaiming] = useState(false);
   const [formError, setFormError] = useState("");
@@ -152,7 +154,7 @@ export default function PaymentModal({ jobId, initialPayment, onClose, navigate,
       }
       setPayment(next.payment);
       setPhase("pay");
-      setPayMode("upi");
+      setPayMode("online");
       setNotConfirmed(false);
       setLongWait(false);
       setStatusMsg("");
@@ -206,10 +208,10 @@ export default function PaymentModal({ jobId, initialPayment, onClose, navigate,
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 p-0 sm:items-center sm:p-6"
+      className="fixed inset-0 z-[200] flex items-end justify-center bg-black/70 p-0 pt-[max(0.75rem,env(safe-area-inset-top))] sm:items-center sm:p-6"
       role="dialog"
       aria-modal="true"
-      aria-label="Pay with UPI"
+      aria-label="Payment"
       onClick={onClose}
     >
       <div
@@ -219,7 +221,7 @@ export default function PaymentModal({ jobId, initialPayment, onClose, navigate,
         {/* Fixed header — never scrolls or clips away */}
         <div className="flex shrink-0 items-start justify-between gap-3 border-b border-[var(--pro-border-soft)] px-6 pb-4 pt-5">
           <div className="min-w-0">
-            <h2 className="font-display text-[18px] font-semibold tracking-[0.01em] text-[var(--pro-fg)]">Pay with UPI</h2>
+            <h2 className="font-display text-[18px] font-semibold tracking-[0.01em] text-[var(--pro-fg)]">Complete payment</h2>
             <p className="mt-1 text-[12px] text-[var(--pro-muted)] tabular-nums">Order {payment.code}</p>
           </div>
           <button
@@ -236,7 +238,7 @@ export default function PaymentModal({ jobId, initialPayment, onClose, navigate,
 
         {phase === "pay" && payMode === "upi" && (
           <>
-            {/* Online alternative — kept secondary so manual UPI stays the default */}
+            {/* Online is primary — this card returns to it from the manual-UPI view */}
             <button
               type="button"
               onClick={() => {
@@ -330,16 +332,7 @@ export default function PaymentModal({ jobId, initialPayment, onClose, navigate,
 
         {phase === "pay" && payMode === "online" && (
           <>
-            <button
-              type="button"
-              onClick={() => setPayMode("upi")}
-              className="mt-5 inline-flex items-center gap-1.5 text-[13px] text-[var(--pro-muted)] hover:text-[var(--pro-fg)]"
-            >
-              <ArrowLeft className="h-3.5 w-3.5" />
-              Back to manual UPI (no extra fee)
-            </button>
-
-            <div className="mt-3 rounded-[14px] border border-[var(--pro-border)] bg-[var(--pro-bg-sunken)] p-5">
+            <div className="mt-5 rounded-[14px] border border-[var(--pro-border)] bg-[var(--pro-bg-sunken)] p-5">
               <div className="flex items-center justify-between">
                 <p className="text-[11px] text-[var(--pro-faint)]">Pay securely online</p>
                 <p className="text-[20px] font-semibold tabular-nums">
@@ -399,6 +392,15 @@ export default function PaymentModal({ jobId, initialPayment, onClose, navigate,
                 Order {payment.code} · Secured by Cashfree
               </p>
             </div>
+
+            {/* Manual UPI kept as the quiet secondary option */}
+            <button
+              type="button"
+              onClick={() => setPayMode("upi")}
+              className="mx-auto mt-4 block text-[13px] text-[var(--pro-muted)] underline-offset-4 hover:text-[var(--pro-fg)] hover:underline"
+            >
+              Prefer manual UPI? Pay via QR
+            </button>
           </>
         )}
 
