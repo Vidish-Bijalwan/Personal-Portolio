@@ -71,16 +71,36 @@ export default async function ToolDetailPage({
     description: detail.what,
   };
 
+  const breadcrumbLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: "https://vidish.me/" },
+      { "@type": "ListItem", position: 2, name: "Tools", item: "https://vidish.me/tools" },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: tool.name,
+        item: `https://vidish.me/tools/${tool.id}`,
+      },
+    ],
+  };
+
   return (
     <div className="min-h-screen bg-[#080808] font-sans text-[#F5F5F3] antialiased">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(appLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       <VilishNav />
       <main>
         <div className="mx-auto max-w-5xl px-4 pb-24 pt-10 sm:pt-16">
           {/* breadcrumb */}
           <Reveal>
             <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-[12.5px] text-white/40">
+              <Link href="/" className="transition-colors hover:text-white/80">
+                Home
+              </Link>
+              <span aria-hidden>/</span>
               <Link href="/tools" className="transition-colors hover:text-white/80">
                 Tools
               </Link>

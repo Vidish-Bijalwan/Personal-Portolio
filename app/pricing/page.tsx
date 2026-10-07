@@ -103,6 +103,33 @@ const PROMISES = [
 
 /* Order lifecycle — the operator model: payment verified first, then a
    human reviews, creates, and quality-checks your piece. */
+const PRICING_FAQS = [
+  {
+    q: "How do I pay for my creation?",
+    a: "With UPI. After you approve the quoted price, you get a QR code and a VPA — pay the exact amount from any UPI app, then tap “I've paid”. The studio confirms it directly; no UTR or screenshot needed.",
+  },
+  {
+    q: "What happens after I pay?",
+    a: "Your payment is verified against the order first. Then a human reviews your brief and references, your piece is created to spec, quality-checked against your brief, and delivered to your dashboard ready to download.",
+  },
+  {
+    q: "How long until I get my creation?",
+    a: "Every paid creation passes a human quality check before delivery, so it's not instant — you can track live progress in your dashboard from payment to download.",
+  },
+  {
+    q: "Are there really no subscriptions or hidden fees?",
+    a: "None. You pay once per creation — the price on the card is the price at checkout, taxes and payment fees included. Nothing renews, nothing auto-charges, no credits to manage.",
+  },
+  {
+    q: "What if my creation fails or isn't right?",
+    a: "Failed renders are refunded, and remakes cost just ₹9 — iterate cheaply until it's right.",
+  },
+  {
+    q: "Can I use my creations commercially?",
+    a: "Yes. Once delivered, the image or video is yours — use it for your shop, listings, social media, or client work.",
+  },
+];
+
 const STEPS = [
   {
     icon: ShieldCheck,
@@ -316,6 +343,45 @@ export default function PricingPage() {
           number you pay. Nothing else is added at checkout.
         </p>
 
+        <div className="mt-16">
+          <Reveal>
+            <h2 className="font-display text-[22px] font-semibold tracking-[-0.01em] sm:text-[26px]">
+              Pricing <span className="v-iris-text">questions</span>
+            </h2>
+          </Reveal>
+          <div className="mt-6 grid gap-3">
+            {PRICING_FAQS.map((f, i) => (
+              <Reveal key={f.q} delay={Math.min(i * 0.04, 0.2)}>
+                <details className="group rounded-[16px] border border-white/[0.08] bg-[#121214] px-5 py-4 open:border-white/[0.16]">
+                  <summary className="cursor-pointer list-none text-[15px] font-semibold text-[#F5F5F3] [&::-webkit-details-marker]:hidden">
+                    <span className="flex items-center justify-between gap-4">
+                      {f.q}
+                      <span aria-hidden className="text-white/40 transition-transform group-open:rotate-45">+</span>
+                    </span>
+                  </summary>
+                  <p className="mt-2.5 text-[13.5px] leading-6 text-white/[0.58]">
+                    {f.a}
+                  </p>
+                </details>
+              </Reveal>
+            ))}
+          </div>
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{
+              __html: JSON.stringify({
+                "@context": "https://schema.org",
+                "@type": "FAQPage",
+                mainEntity: PRICING_FAQS.map((f) => ({
+                  "@type": "Question",
+                  name: f.q,
+                  acceptedAnswer: { "@type": "Answer", text: f.a },
+                })),
+              }),
+            }}
+          />
+        </div>
+
         <Reveal className="mt-10">
           <div className="flex flex-col items-center gap-4 rounded-[20px] border border-white/[0.08] bg-[#101012] px-6 py-10 text-center sm:py-12">
             <h2 className="font-display text-[24px] font-semibold tracking-[-0.01em] sm:text-[30px]">
@@ -333,6 +399,12 @@ export default function PricingPage() {
                 </span>
               </MagneticButton>
             </Link>
+            <p className="text-[13px] text-white/40">
+              Not sure yet?{" "}
+              <Link href="/examples" className="underline underline-offset-4 hover:text-white/70">
+                See what ₹19 makes
+              </Link>
+            </p>
           </div>
         </Reveal>
       </main>

@@ -70,7 +70,8 @@ export default function PaymentModal({ jobId, initialPayment, onClose, navigate,
     if (onPaymentVerified) {
       onPaymentVerified(jobId);
     } else {
-      navigate(`/generation/${jobId}`);
+      // ?paid=1 shows the one-time thank-you banner on the order page.
+      navigate(`/generation/${jobId}?paid=1`);
     }
   };
 

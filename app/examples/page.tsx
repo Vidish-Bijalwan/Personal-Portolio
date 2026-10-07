@@ -10,6 +10,13 @@ import ExamplesGrid, {
 import { isExampleItem } from "@/components/vilish/examples";
 import Reveal from "@/components/motion/Reveal";
 
+export const metadata = {
+  title: "Made with Etch — real AI creations, priced per piece | Etch",
+  description:
+    "Browse real creations made with Etch: portraits, product photos, posters and videos — every piece shown with its prompt and exact price.",
+  alternates: { canonical: "/examples" },
+};
+
 function loadManifest(): ExampleItem[] {
   try {
     const p = path.join(process.cwd(), "public", "examples", "manifest.json");
@@ -62,6 +69,12 @@ export default function ExamplesPage() {
             >
               Make yours <ArrowRight className="h-4 w-4" strokeWidth={2} />
             </Link>
+            <p className="mt-4 text-[13px] text-white/40">
+              Prefer to edit video?{" "}
+              <Link href="/tools" className="underline underline-offset-4 hover:text-white/70">
+                Browse every tool
+              </Link>
+            </p>
           </div>
         </Reveal>
       </main>
