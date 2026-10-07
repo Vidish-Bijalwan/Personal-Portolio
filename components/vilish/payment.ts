@@ -20,6 +20,8 @@ export interface ManualPayment {
 export interface StartResult {
   jobId: string;
   payment: ManualPayment;
+  /** Owner bypass: order auto-verified, no payment needed. */
+  adminBypass?: boolean;
 }
 
 export type StartError =
