@@ -14,12 +14,16 @@ import {
 } from '@/lib/payments/cashfree';
 
 /**
- * GET /api/cashfree/return?code=<internal order code>&order_id=<cashfree order id>
+ * GET /api/cashfree/return?order_id=<cashfree order id>[&code=<internal order code>]
  *
- * Where Cashfree sends the customer after checkout (Cashfree auto-appends
- * order_id). NEVER trusts the redirect alone: the order status is re-fetched
- * from Cashfree's API, and only order_status === 'PAID' marks the internal
- * order verified (idempotent — safe if the webhook already fired).
+ * Where Cashfree sends the customer after checkout (Cashfree appends
+ * order_id to the return_url — the URL is kept a static path because
+ * appending to a URL that already carries a query string is unreliable).
+ * Order lookup prefers Cashfree's order_id via our stored cashfreeOrderId
+ * (unique); the legacy code param is a fallback. NEVER trusts the redirect
+ * alone: the order status is re-fetched from Cashfree's API, and only
+ * order_status === 'PAID' marks the internal order verified (idempotent —
+ * safe if the webhook already fired).
  */
 export async function GET(req: NextRequest) {
   const params = req.nextUrl.searchParams;
@@ -29,14 +33,21 @@ export async function GET(req: NextRequest) {
   const fail = (dest: string) =>
     NextResponse.redirect(new URL(`${dest}?payment=failed`, req.url));
 
-  if (!code) {
-    return NextResponse.redirect(new URL('/?payment=error', req.url));
+  let order: typeof orders.$inferSelect | undefined;
+  if (cfOrderIdParam) {
+    [order] = await db
+      .select()
+      .from(orders)
+      .where(eq(orders.cashfreeOrderId, cfOrderIdParam))
+      .limit(1);
   }
-  const [order] = await db
-    .select()
-    .from(orders)
-    .where(eq(orders.code, code))
-    .limit(1);
+  if (!order && code) {
+    [order] = await db
+      .select()
+      .from(orders)
+      .where(eq(orders.code, code))
+      .limit(1);
+  }
   if (!order) {
     return NextResponse.redirect(new URL('/?payment=error', req.url));
   }

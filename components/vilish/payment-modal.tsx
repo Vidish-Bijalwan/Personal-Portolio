@@ -213,23 +213,26 @@ export default function PaymentModal({ jobId, initialPayment, onClose, navigate,
       onClick={onClose}
     >
       <div
-        className="max-h-[92dvh] w-full max-w-md overflow-y-auto rounded-t-[20px] border border-white/[0.1] bg-[#121214] p-6 sm:rounded-[20px]"
+        className="flex max-h-[92dvh] w-full max-w-md flex-col overflow-hidden rounded-t-[20px] border border-[var(--pro-border)] bg-[var(--pro-bg-elev)] text-[var(--pro-fg)] shadow-2xl sm:rounded-[20px] pb-[env(safe-area-inset-bottom)] sm:pb-0"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-start justify-between">
-          <div>
-            <h2 className="font-display text-[18px] font-semibold tracking-[0.01em]">Pay with UPI</h2>
-            <p className="mt-1 text-[12px] text-white/45 tabular-nums">Order {payment.code}</p>
+        {/* Fixed header — never scrolls or clips away */}
+        <div className="flex shrink-0 items-start justify-between gap-3 border-b border-[var(--pro-border-soft)] px-6 pb-4 pt-5">
+          <div className="min-w-0">
+            <h2 className="font-display text-[18px] font-semibold tracking-[0.01em] text-[var(--pro-fg)]">Pay with UPI</h2>
+            <p className="mt-1 text-[12px] text-[var(--pro-muted)] tabular-nums">Order {payment.code}</p>
           </div>
           <button
             type="button"
             onClick={onClose}
             aria-label="Close payment dialog"
-            className="rounded-[8px] p-2.5 text-white/50 hover:bg-white/[0.06] hover:text-white/85"
+            className="rounded-[8px] p-2.5 text-[var(--pro-muted)] hover:bg-[var(--pro-bg-sunken)] hover:text-[var(--pro-fg)]"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
+        {/* Scrollable body — long content scrolls under the fixed header */}
+        <div className="overflow-y-auto px-6 pb-6">
 
         {phase === "pay" && payMode === "upi" && (
           <>
@@ -248,23 +251,23 @@ export default function PaymentModal({ jobId, initialPayment, onClose, navigate,
                   <Zap className="h-4 w-4 text-[var(--pro-accent)]" />
                 </span>
                 <span>
-                  <span className="block text-[14px] font-semibold text-[#F5F5F3]">
+                  <span className="block text-[14px] font-semibold text-[var(--pro-fg)]">
                     Pay online instantly
                   </span>
-                  <span className="mt-0.5 block text-[12px] text-white/50">
+                  <span className="mt-0.5 block text-[12px] text-[var(--pro-muted)]">
                     UPI, cards, netbanking — confirmed automatically
                   </span>
                 </span>
               </span>
-              <ArrowRight className="h-4 w-4 shrink-0 text-white/50" />
+              <ArrowRight className="h-4 w-4 shrink-0 text-[var(--pro-muted)]" />
             </button>
 
             {qrSrc ? (
-              <div className="mx-auto mt-5 w-52 overflow-hidden rounded-[14px] border border-white/[0.1] bg-white p-3">
+              <div className="mx-auto mt-5 w-52 overflow-hidden rounded-[14px] border border-[var(--pro-border)] bg-white p-3">
                 <img src={qrSrc} alt="UPI payment QR code" className="h-auto w-full" />
               </div>
             ) : (
-              <div className="mx-auto mt-5 flex w-52 items-center justify-center rounded-[14px] border border-white/[0.1] bg-[#0D0D0F] p-8 text-center text-[13px] text-white/50">
+              <div className="mx-auto mt-5 flex w-52 items-center justify-center rounded-[14px] border border-[var(--pro-border)] bg-[var(--pro-bg-sunken)] p-8 text-center text-[13px] text-[var(--pro-muted)]">
                 Scan not available — pay to the VPA below
               </div>
             )}
@@ -272,7 +275,7 @@ export default function PaymentModal({ jobId, initialPayment, onClose, navigate,
             {/* mobile: open UPI app */}
             <a
               href={payment.upiUri}
-              className="mt-4 block rounded-[10px] bg-[#18181B] px-4 py-3 text-center text-[14px] font-semibold text-[#F5F5F3] ring-1 ring-white/[0.12] hover:ring-white/25 sm:hidden"
+              className="mt-4 block rounded-[10px] bg-[var(--pro-bg-sunken)] px-4 py-3 text-center text-[14px] font-semibold text-[var(--pro-fg)] ring-1 ring-[var(--pro-border)] hover:ring-[var(--pro-accent)]/50 sm:hidden"
             >
               Open UPI App
             </a>
@@ -280,26 +283,26 @@ export default function PaymentModal({ jobId, initialPayment, onClose, navigate,
             <button
               type="button"
               onClick={copyVpa}
-              className="mt-3 flex w-full items-center justify-between rounded-[10px] border border-white/[0.1] bg-[#0D0D0F] px-4 py-3 hover:border-white/25"
+              className="mt-3 flex w-full items-center justify-between rounded-[10px] border border-[var(--pro-border)] bg-[var(--pro-bg-sunken)] px-4 py-3 hover:border-[var(--pro-accent)]/50"
             >
               <span className="text-left">
-                <span className="block text-[11px] text-white/40">Pay to VPA ({payment.payeeName})</span>
-                <span className="text-[15px] font-medium tabular-nums">{payment.vpa}</span>
+                <span className="block text-[11px] text-[var(--pro-faint)]">Pay to VPA{payment.payeeName ? ` (${payment.payeeName})` : ""}</span>
+                <span className="text-[15px] font-medium tabular-nums text-[var(--pro-fg)]">{payment.vpa}</span>
               </span>
-              {vpaCopied ? <Check className="h-4 w-4 text-emerald-300" /> : <Copy className="h-4 w-4 text-white/50" />}
+              {vpaCopied ? <Check className="h-4 w-4 text-emerald-500" /> : <Copy className="h-4 w-4 text-[var(--pro-muted)]" />}
             </button>
 
-            <div className="mt-4 flex items-center justify-between border-t border-white/[0.06] pt-4">
+            <div className="mt-4 flex items-center justify-between border-t border-[var(--pro-border-soft)] pt-4">
               <div>
-                <p className="text-[11px] text-white/40">Pay exactly</p>
+                <p className="text-[11px] text-[var(--pro-faint)]">Pay exactly</p>
                 <p className="text-[22px] font-semibold tabular-nums">{formatINR(payment.amountPaise)}</p>
               </div>
-              <p className="text-[13px] text-white/50 tabular-nums">
-                Expires in <span className="font-semibold text-[#F5F5F3]">{countdown.label}</span>
+              <p className="text-[13px] text-[var(--pro-muted)] tabular-nums">
+                Expires in <span className="font-semibold text-[var(--pro-fg)]">{countdown.label}</span>
               </p>
             </div>
 
-            {formError && <p className="mt-3 text-[13px] text-red-300/80">{formError}</p>}
+            {formError && <p className="mt-3 text-[13px] text-[#e5484d]">{formError}</p>}
 
             <button
               type="button"
@@ -313,12 +316,12 @@ export default function PaymentModal({ jobId, initialPayment, onClose, navigate,
               {claiming && <Loader2 className="h-4 w-4 animate-spin" />}
               I&apos;ve paid {formatINR(payment.amountPaise)}
             </button>
-            <p className="mt-3 text-center text-[12px] text-white/35">
+            <p className="mt-3 text-center text-[12px] text-[var(--pro-faint)]">
               Pay the exact amount in your UPI app, then tap &ldquo;I&apos;ve
               paid&rdquo; — no UTR, no screenshot needed. The studio confirms it
               directly.
             </p>
-            <p className="mt-2 text-center text-[12px] leading-5 text-white/35">
+            <p className="mt-2 text-center text-[12px] leading-5 text-[var(--pro-faint)]">
               AI generation with human quality review — every paid generation is
               reviewed before delivery.
             </p>
@@ -330,20 +333,20 @@ export default function PaymentModal({ jobId, initialPayment, onClose, navigate,
             <button
               type="button"
               onClick={() => setPayMode("upi")}
-              className="mt-5 inline-flex items-center gap-1.5 text-[13px] text-white/55 hover:text-white/85"
+              className="mt-5 inline-flex items-center gap-1.5 text-[13px] text-[var(--pro-muted)] hover:text-[var(--pro-fg)]"
             >
               <ArrowLeft className="h-3.5 w-3.5" />
               Back to manual UPI (no extra fee)
             </button>
 
-            <div className="mt-3 rounded-[14px] border border-white/[0.1] bg-[#0D0D0F] p-5">
+            <div className="mt-3 rounded-[14px] border border-[var(--pro-border)] bg-[var(--pro-bg-sunken)] p-5">
               <div className="flex items-center justify-between">
-                <p className="text-[11px] text-white/40">Pay securely online</p>
+                <p className="text-[11px] text-[var(--pro-faint)]">Pay securely online</p>
                 <p className="text-[20px] font-semibold tabular-nums">
                   {formatINR(payment.amountPaise)}
                 </p>
               </div>
-              <p className="mt-1 text-[12px] leading-5 text-white/45">
+              <p className="mt-1 text-[12px] leading-5 text-[var(--pro-muted)]">
                 UPI, cards and netbanking via Cashfree. You&apos;ll be redirected
                 to a secure checkout and your payment is confirmed automatically
                 — no waiting.
@@ -351,12 +354,12 @@ export default function PaymentModal({ jobId, initialPayment, onClose, navigate,
 
               <label
                 htmlFor="cf-phone"
-                className="mt-4 block text-[12px] font-medium text-white/60"
+                className="mt-4 block text-[12px] font-medium text-[var(--pro-muted)]"
               >
                 Mobile number
               </label>
-              <div className="mt-1.5 flex overflow-hidden rounded-[10px] border border-white/[0.12] bg-[#121214] focus-within:border-[var(--pro-accent)]/60">
-                <span className="flex items-center border-r border-white/[0.08] px-3 text-[14px] text-white/50">
+              <div className="mt-1.5 flex overflow-hidden rounded-[10px] border border-[var(--pro-border)] bg-[var(--pro-bg-elev)] focus-within:border-[var(--pro-accent)]/60">
+                <span className="flex items-center border-r border-[var(--pro-border-soft)] px-3 text-[14px] text-[var(--pro-muted)]">
                   +91
                 </span>
                 <input
@@ -370,14 +373,14 @@ export default function PaymentModal({ jobId, initialPayment, onClose, navigate,
                     setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))
                   }
                   placeholder="98765 43210"
-                  className="w-full bg-transparent px-3 py-3 text-[15px] tabular-nums text-[#F5F5F3] outline-none placeholder:text-white/25"
+                  className="w-full bg-transparent px-3 py-3 text-[15px] tabular-nums text-[var(--pro-fg)] outline-none placeholder:text-[var(--pro-faint)]"
                 />
               </div>
               {phoneError && (
-                <p className="mt-2 text-[13px] text-red-300/80">{phoneError}</p>
+                <p className="mt-2 text-[13px] text-[#e5484d]">{phoneError}</p>
               )}
               {onlineError && (
-                <p className="mt-2 text-[13px] text-red-300/80">{onlineError}</p>
+                <p className="mt-2 text-[13px] text-[#e5484d]">{onlineError}</p>
               )}
 
               <button
@@ -392,7 +395,7 @@ export default function PaymentModal({ jobId, initialPayment, onClose, navigate,
                 {onlineLoading && <Loader2 className="h-4 w-4 animate-spin" />}
                 Pay {formatINR(payment.amountPaise)} online
               </button>
-              <p className="mt-3 text-center text-[11px] leading-5 text-white/35">
+              <p className="mt-3 text-center text-[11px] leading-5 text-[var(--pro-faint)]">
                 Order {payment.code} · Secured by Cashfree
               </p>
             </div>
@@ -406,28 +409,28 @@ export default function PaymentModal({ jobId, initialPayment, onClose, navigate,
             </div>
             {/* indeterminate progress */}
             <div
-              className="mx-auto mt-2 h-[3px] w-48 overflow-hidden rounded-full bg-white/[0.08]"
+              className="mx-auto mt-2 h-[3px] w-48 overflow-hidden rounded-full bg-[var(--pro-border-soft)]"
               aria-hidden="true"
             >
               <div className="fg-bar h-full w-1/3 rounded-full bg-[var(--pro-btn)]" />
             </div>
-            <p className="mt-4 text-[15px] font-medium text-[#F5F5F3]">
+            <p className="mt-4 text-[15px] font-medium text-[var(--pro-fg)]">
               Confirming your payment with the studio…
             </p>
-            <p className="mt-2 text-[13px] leading-6 text-white/55">
+            <p className="mt-2 text-[13px] leading-6 text-[var(--pro-muted)]">
               The owner has been pinged and usually confirms within a couple of
               minutes. Your order is saved — you can keep this open.
             </p>
-            <p className="mt-2 text-[12px] text-white/40 tabular-nums">Order {payment.code}</p>
+            <p className="mt-2 text-[12px] text-[var(--pro-faint)] tabular-nums">Order {payment.code}</p>
             {longWait && (
-              <p className="mt-3 rounded-[10px] border border-white/[0.08] bg-white/[0.03] px-4 py-3 text-[13px] leading-6 text-white/60">
+              <p className="mt-3 rounded-[10px] border border-[var(--pro-border-soft)] bg-[var(--pro-bg-sunken)] px-4 py-3 text-[13px] leading-6 text-[var(--pro-muted)]">
                 Still waiting — the owner has been notified. This usually takes
                 a couple of minutes; your order is saved and nothing is lost.
               </p>
             )}
             {notConfirmed && (
-              <div className="mt-4 rounded-[10px] border border-amber-200/[0.14] bg-amber-200/[0.05] px-4 py-3">
-                <p className="text-[13px] leading-6 text-amber-200/90">
+              <div className="mt-4 rounded-[10px] border border-amber-500/30 bg-amber-500/10 px-4 py-3">
+                <p className="text-[13px] leading-6 text-amber-600">
                   Payment not confirmed — please check your UPI app that the
                   exact amount went through, then try again.
                 </p>
@@ -445,17 +448,17 @@ export default function PaymentModal({ jobId, initialPayment, onClose, navigate,
                 </button>
               </div>
             )}
-            {statusMsg && <p className="mt-3 text-[13px] text-amber-200/80">{statusMsg}</p>}
+            {statusMsg && <p className="mt-3 text-[13px] text-amber-600">{statusMsg}</p>}
           </div>
         )}
 
         {phase === "expired" && (
           <div className="mt-6 text-center">
-            <p className="text-[15px] font-medium">This payment order expired</p>
-            <p className="mt-2 text-[13px] leading-6 text-white/55">
+            <p className="text-[15px] font-medium text-[var(--pro-fg)]">This payment order expired</p>
+            <p className="mt-2 text-[13px] leading-6 text-[var(--pro-muted)]">
               Nothing was charged. Create a new payment order to try again.
             </p>
-            {statusMsg && <p className="mt-3 text-[13px] text-red-300/80">{statusMsg}</p>}
+            {statusMsg && <p className="mt-3 text-[13px] text-[#e5484d]">{statusMsg}</p>}
             <button
               type="button"
               onClick={handleReorder}
@@ -470,6 +473,7 @@ export default function PaymentModal({ jobId, initialPayment, onClose, navigate,
             </button>
           </div>
         )}
+        </div>
       </div>
     </div>
   );
