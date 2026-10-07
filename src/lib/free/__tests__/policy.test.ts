@@ -33,8 +33,8 @@ describe('constants', () => {
     expect(FREE_DAILY_CAP).toBe(3);
     expect(PROMPT_MAX).toBe(2000);
     expect(PROMPT_MIN).toBe(1);
-    expect(UNLOCK_PRICE_PAISE).toBe(1900); // ₹19
-    expect(VIDEO_PRICE_PAISE).toBe(8900); // ₹89
+    expect(UNLOCK_PRICE_PAISE).toBe(1500); // ₹15
+    expect(VIDEO_PRICE_PAISE).toBe(4500); // ₹45 (5s base; longer clips are duration-priced)
     expect(IMAGE_MAX_BYTES).toBe(8 * 1024 * 1024);
     expect(VIDEO_MAX_BYTES).toBe(32 * 1024 * 1024);
   });

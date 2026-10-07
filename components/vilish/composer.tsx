@@ -20,6 +20,11 @@ import {
 } from "@/src/lib/pricing/catalog";
 import type { Template } from "@/src/lib/trends/templates";
 import {
+  VIDEO_DURATION_MAX_S,
+  VIDEO_DURATION_MIN_S,
+  videoClipPricePaise,
+} from "@/src/lib/pricing/engine";
+import {
   ATTACH_MAX_FILES,
   ATTACH_MAX_FILE_BYTES,
   ATTACH_MAX_TOTAL_BYTES,
@@ -31,13 +36,11 @@ import {
   formatPromptCount,
 } from "@/src/lib/vilish/prompt-limits";
 import {
-  startManualPayment,
   UPLOAD_EDGE_LIMIT_BYTES,
   type ManualPayment,
 } from "./payment";
 import PaymentModal from "./payment-modal";
 import AuthModal from "./auth-modal";
-import { videoPaymentStorageKey } from "./free-tier";
 
 const QUALITIES: { id: QualityTier; label: string; hint: string }[] = [
   { id: "quick", label: "Quick", hint: "Fast drafts" },
@@ -117,7 +120,6 @@ export default function Composer({ variant = "hero", className, initialMedia = "
   const [status, setStatus] = useState("");
   const [authNeeded, setAuthNeeded] = useState(false);
   const [pendingAuth, setPendingAuth] = useState<"paid" | "free" | "video" | null>(null);
-  const [modal, setModal] = useState<{ jobId: string; payment: ManualPayment } | null>(null);
   const [ordersAccepting, setOrdersAccepting] = useState<boolean | null>(null);
   const [turnaround, setTurnaround] = useState("");
   const abortRef = useRef<AbortController | null>(null);
@@ -130,7 +132,9 @@ export default function Composer({ variant = "hero", className, initialMedia = "
   const [freeCap, setFreeCap] = useState(3);
   const [freeSending, setFreeSending] = useState(false);
   const [videoSending, setVideoSending] = useState(false);
-  const [videoModal, setVideoModal] = useState<{ jobId: string; payment: ManualPayment } | null>(null);
+  // Clip length for paid video clips: 5..60s. The unlock price scales with
+  // it (engine videoClipPricePaise); the API validates the same range.
+  const [videoDuration, setVideoDuration] = useState(VIDEO_DURATION_MIN_S);
 
   // reference attachments (stored with the order, shown to the operator)
   const [files, setFiles] = useState<File[]>([]);
@@ -266,6 +270,14 @@ export default function Composer({ variant = "hero", className, initialMedia = "
     });
   }, []);
 
+  /**
+   * Paid image generation — generate-first: the generation starts
+   * immediately with NO payment order. POST /api/generation/start queues
+   * a paid generations row and returns its id; the watch room shows the
+   * watermarked preview on completion, and the unlock order (with the
+   * server-side quoted price) is created only when the user clicks
+   * "Download clean HD".
+   */
   const handleGenerate = async () => {
     if (!quote || starting) return;
     if (overLimit) {
@@ -294,34 +306,79 @@ export default function Composer({ variant = "hero", className, initialMedia = "
         );
         return;
       }
-      const res = await startManualPayment(quote.quoteId, "IN", {
-        files,
-        onProgress: (f) => setUploadProgress(f),
-      });
-      setUploadProgress(null);
-      if (!res.ok) {
-        if (res.error.kind === "unauthorized") {
-          setPendingAuth("paid");
-          setAuthNeeded(true);
-        } else if (res.error.kind === "paused") {
-          setStatus("New generation orders are temporarily paused.");
-        } else if (res.error.kind === "intl") {
-          setStatus("International payments coming soon — India (UPI) only for now.");
-        } else if (res.error.kind === "too_large") {
-          setStatus(
-            "Those files are too large to upload in one go — try fewer or smaller files (keep the total under 4 MB)."
-          );
+      let res: Response;
+      try {
+        if (files.length > 0) {
+          // XHR for real upload progress (fetch has no upload-progress
+          // events). Response shape is identical to the JSON path.
+          const form = new FormData();
+          form.append("quoteId", quote.quoteId);
+          form.append("country", "IN");
+          for (const f of files) form.append("files", f);
+          res = await new Promise<Response>((resolvePromise, reject) => {
+            const xhr = new XMLHttpRequest();
+            xhr.open("POST", "/api/generation/start");
+            xhr.upload.onprogress = (e) => {
+              if (e.lengthComputable && e.total > 0) {
+                setUploadProgress(Math.min(1, e.loaded / e.total));
+              }
+            };
+            xhr.onload = () =>
+              resolvePromise(
+                new Response(xhr.responseText, {
+                  status: xhr.status,
+                  headers: {
+                    "content-type":
+                      xhr.getResponseHeader("content-type") ?? "",
+                  },
+                })
+              );
+            xhr.onerror = () => reject(new Error("network"));
+            xhr.send(form);
+          });
         } else {
-          setStatus(res.error.message);
+          res = await fetch("/api/generation/start", {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ quoteId: quote.quoteId, country: "IN" }),
+          });
         }
+      } catch {
+        setStatus("Network error. Please try again.");
         return;
       }
-      if (res.result.adminBypass) {
-        // Owner bypass: order auto-verified, no payment needed.
-        router.push(`/generation/${res.result.jobId}`);
+      setUploadProgress(null);
+      if (res.status === 401) {
+        setPendingAuth("paid");
+        setAuthNeeded(true);
         return;
       }
-      setModal({ jobId: res.result.jobId, payment: res.result.payment });
+      if (res.status === 413) {
+        setStatus(
+          "Those files are too large to upload in one go — try fewer or smaller files (keep the total under 4 MB)."
+        );
+        return;
+      }
+      const body = await res.json().catch(() => null);
+      if (res.status === 403 && (body?.error === "ORDERS_PAUSED" || body?.code === "ORDERS_PAUSED")) {
+        setStatus("New generation orders are temporarily paused.");
+        return;
+      }
+      if (res.status === 400 && body?.code === "INTL_PAYMENTS_COMING_SOON") {
+        setStatus("International payments coming soon — India (UPI) only for now.");
+        return;
+      }
+      if (!res.ok || !body?.generationId) {
+        setStatus(
+          typeof body?.error === "string" && body.error
+            ? body.error
+            : "Could not start your generation. Please try again."
+        );
+        return;
+      }
+      // Generation started — straight to the watch room. Payment happens
+      // later, only if the user wants the clean HD file.
+      router.push(`/watch/${body.generationId}`);
     } finally {
       setStarting(false);
       setUploadProgress(null);
@@ -409,7 +466,9 @@ export default function Composer({ variant = "hero", className, initialMedia = "
     }
   };
 
-  /** Paid 5s video clip: creates the order, opens the payment modal, then the watch room. */
+  /** Generate-first video: queue the clip immediately — no order, no payment
+      gate. The watch room shows progress, then the watermarked preview;
+      payment unlocks the clean HD file after. */
   const handleVideoGenerate = async () => {
     if (videoSending || !promptOk) return;
     setVideoSending(true);
@@ -419,7 +478,7 @@ export default function Composer({ variant = "hero", className, initialMedia = "
       const res = await fetch("/api/video/order", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ prompt: prompt.trim(), aspectRatio }),
+        body: JSON.stringify({ prompt: prompt.trim(), aspectRatio, durationSeconds: videoDuration }),
       });
       if (res.status === 401) {
         setPendingAuth("video");
@@ -427,30 +486,15 @@ export default function Composer({ variant = "hero", className, initialMedia = "
         return;
       }
       const body = await res.json().catch(() => null);
-      if (body?.adminBypass) {
-        // Owner bypass: order auto-verified, no payment needed.
-        router.push(`/watch/${body.id}`);
-        return;
-      }
-      if (!res.ok || !body?.payment) {
+      if (!res.ok || !body?.id) {
         setStatus(
           typeof body?.error === "string" && body.error
             ? body.error
-            : "Could not create your video order. Please try again."
+            : "Could not start your video. Please try again."
         );
         return;
       }
-      const id = body.id ?? body.jobId;
-      const payment = body.payment as ManualPayment;
-      try {
-        sessionStorage.setItem(
-          videoPaymentStorageKey(id),
-          JSON.stringify({ jobId: id, payment })
-        );
-      } catch {
-        /* storage unavailable — payment can still proceed in-session */
-      }
-      setVideoModal({ jobId: id, payment });
+      router.push(`/watch/${body.id}`);
     } finally {
       setVideoSending(false);
     }
@@ -518,7 +562,7 @@ export default function Composer({ variant = "hero", className, initialMedia = "
           {(
             [
               { id: "image", label: "Image" },
-              { id: "video", label: "5s video clip" },
+              { id: "video", label: "Video clip" },
             ] as const
           ).map((m) => (
             <button
@@ -637,10 +681,41 @@ export default function Composer({ variant = "hero", className, initialMedia = "
         </div>
       )}
       {mediaMode === "video" && (
-        <p className="mb-4 text-[12px] leading-5 text-[var(--pro-faint)]">
-          {formatINR(priceOf("clip-5s"))} per 5s clip — fulfilled by an operator with human QC. AI-generated; a watermarked
-          preview shows until you unlock the clean HD file.
-        </p>
+        <div className="mb-4">
+          <div className="flex items-center justify-between gap-3">
+            <label
+              htmlFor="video-duration"
+              className="text-[13px] font-semibold text-[var(--pro-fg)]"
+            >
+              Clip length
+            </label>
+            <p className="text-[13px] tabular-nums text-[var(--pro-muted)]">
+              <span className="font-semibold text-[var(--pro-fg)]">{videoDuration}s</span>
+              {" · "}
+              {formatINR(videoClipPricePaise(videoDuration))}
+            </p>
+          </div>
+          <input
+            id="video-duration"
+            type="range"
+            min={VIDEO_DURATION_MIN_S}
+            max={VIDEO_DURATION_MAX_S}
+            step={1}
+            value={videoDuration}
+            onChange={(e) => setVideoDuration(Number(e.target.value))}
+            className="mt-2 w-full accent-[var(--pro-accent)]"
+            aria-valuetext={`${videoDuration} seconds, ${formatINR(videoClipPricePaise(videoDuration))}`}
+          />
+          <div className="mt-1 flex justify-between text-[11px] tabular-nums text-[var(--pro-faint)]">
+            <span>5s · {formatINR(priceOf("clip-5s"))}</span>
+            <span>60s · {formatINR(videoClipPricePaise(VIDEO_DURATION_MAX_S))}</span>
+          </div>
+          <p className="mt-2 text-[12px] leading-5 text-[var(--pro-faint)]">
+            {formatINR(priceOf("clip-5s"))} per 5-second block (or part of one) —
+            fulfilled by an operator with human QC. A watermarked preview shows
+            until you unlock the clean HD file.
+          </p>
+        </div>
       )}
       {initialTemplate && (
         <div className="mb-4 flex items-center gap-2.5 rounded-[10px] border border-[var(--pro-accent)]/25 bg-[var(--pro-accent)]/[0.06] px-3.5 py-2.5">
@@ -934,7 +1009,7 @@ export default function Composer({ variant = "hero", className, initialMedia = "
       {mediaMode === "image" && billingMode === "paid" && phase === "quoted" && quote && (
         <>
           <p className="mt-3 text-[12px] text-[var(--pro-faint)]">
-            No subscription · Pay once for this render · Failed renders refunded
+            No subscription · Pay only if you love the preview · Failed renders are never charged
           </p>
           <p className="mt-1.5 text-[12px] leading-5 text-[var(--pro-faint)]">
             AI generation with human quality review — every paid generation is
@@ -953,27 +1028,6 @@ export default function Composer({ variant = "hero", className, initialMedia = "
         <p className="mt-3 text-[13px] font-medium text-amber-200/90" role="status">
           New generation orders are temporarily paused.
         </p>
-      )}
-
-      {modal && (
-        <PaymentModal
-          jobId={modal.jobId}
-          initialPayment={modal.payment}
-          onClose={() => setModal(null)}
-          navigate={(url) => router.push(url)}
-        />
-      )}
-      {videoModal && (
-        <PaymentModal
-          jobId={videoModal.jobId}
-          initialPayment={videoModal.payment}
-          onClose={() => setVideoModal(null)}
-          navigate={(url) => router.push(url)}
-          onPaymentVerified={(jobId) => {
-            setVideoModal(null);
-            router.push(`/watch/${jobId}`);
-          }}
-        />
       )}
     </div>
   );

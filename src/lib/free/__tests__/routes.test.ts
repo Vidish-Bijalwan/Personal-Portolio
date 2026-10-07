@@ -476,7 +476,7 @@ describe('free image end-to-end: deliver → preview → unlock → clean', () =
     expect(locked.status).toBe(402);
     expect(locked.body.code).toBe('LOCKED');
 
-    // unlock creates the ₹19 order
+    // unlock creates the ₹15 order
     const unlock = await json(
       await h('POST', 'app/api/gen/[id]/unlock/route.ts')(
         req('POST', `/api/gen/${id}/unlock`),
@@ -484,7 +484,7 @@ describe('free image end-to-end: deliver → preview → unlock → clean', () =
       )
     );
     expect(unlock.status).toBe(201);
-    expect(unlock.body.payment.amountPaise).toBe(1900);
+    expect(unlock.body.payment.amountPaise).toBe(1500);
     expect(unlock.body.payment.code).toBeTruthy();
     expect(unlock.body.payment.upiUri).toContain('upi://pay');
     const orderCode = unlock.body.payment.code as string;
@@ -538,7 +538,7 @@ describe('free image end-to-end: deliver → preview → unlock → clean', () =
     expect(again.body.code).toBe('ALREADY_UNLOCKED');
   });
 
-  it('rejects unlock before delivery and for non-free rows', async () => {
+  it('rejects unlock before delivery and for non-unlockable rows', async () => {
     mockAuth.userId = 'user-1';
     const pending = await insertGeneration('user-1');
     const unlock = h('POST', 'app/api/gen/[id]/unlock/route.ts');
@@ -549,23 +549,36 @@ describe('free image end-to-end: deliver → preview → unlock → clean', () =
     expect(notDelivered.status).toBe(409);
     expect(notDelivered.body.code).toBe('NOT_DELIVERED');
 
-    const video = await insertGeneration('user-1', {
+    // paid video that is NOT done yet → 409 (still not deliverable)
+    const pendingVideo = await insertGeneration('user-1', {
       mediaType: 'video',
+      tier: 'paid',
+      status: 'queued',
+      durationSeconds: 10,
+    });
+    const notDone = await json(await call(pendingVideo.id));
+    expect(notDone.status).toBe(409);
+    expect(notDone.body.code).toBe('NOT_DELIVERED');
+
+    // paid image rows are neither free images nor paid videos → 400
+    const paidImage = await insertGeneration('user-1', {
+      mediaType: 'image',
       tier: 'paid',
       status: 'done',
     });
-    const notFree = await json(await call(video.id));
-    expect(notFree.status).toBe(400);
-    expect(notFree.body.code).toBe('NOT_FREE_IMAGE');
+    const notUnlockable = await json(await call(paidImage.id));
+    expect(notUnlockable.status).toBe(400);
+    expect(notUnlockable.body.code).toBe('NOT_UNLOCKABLE');
   });
 });
 
 describe('POST /api/video/order', () => {
   const FILE = 'app/api/video/order/route.ts';
 
-  it('creates a paid video row + ₹89 order link, uncapped', async () => {
+  it('queues a paid video row with NO order and NO payment gate (generate-first), uncapped', async () => {
     mockAuth.userId = 'user-1';
     const db = client.getDb();
+    const before = await db.select().from(schema.orders);
     let lastId = '';
     for (let i = 0; i < 3; i++) {
       const { status, body } = await json(
@@ -575,8 +588,10 @@ describe('POST /api/video/order', () => {
         )
       );
       expect(status).toBe(201);
-      expect(body.payment.amountPaise).toBe(8900);
-      expect(body.payment.code).toBeTruthy();
+      // generate-first: no payment object, no order minted at queue time
+      expect(body.id).toBeTruthy();
+      expect(body).not.toHaveProperty('payment');
+      expect(body.durationSeconds).toBe(5);
       lastId = body.id;
     }
     const [row] = await db
@@ -589,20 +604,59 @@ describe('POST /api/video/order', () => {
       status: 'queued',
       mime: 'video/mp4',
       unlocked: false,
+      durationSeconds: 5,
     });
 
+    // no order linked to the generation, and no new order rows at all
     const links = await db
       .select()
       .from(schema.generationOrders)
       .where(eq(schema.generationOrders.generationId, lastId));
-    expect(links).toHaveLength(1);
-    expect(links[0].purpose).toBe('video');
-    const [order] = await db
-      .select()
-      .from(schema.orders)
-      .where(eq(schema.orders.id, links[0].orderId));
-    expect(order.amountPaise).toBe(8900);
-    expect(order.provider).toBe('manual_upi');
+    expect(links).toHaveLength(0);
+    const after = await db.select().from(schema.orders);
+    expect(after.length).toBe(before.length);
+  });
+
+  it('stores custom durations on the row (unlock prices them later)', async () => {
+    mockAuth.userId = 'user-1';
+    const db = client.getDb();
+    for (const durationSeconds of [10, 11, 60]) {
+      const { status, body } = await json(
+        await h('POST', FILE)(
+          req('POST', '/api/video/order', {
+            prompt: `clip ${durationSeconds}s`,
+            durationSeconds,
+          }),
+          { params: Promise.resolve({}) }
+        )
+      );
+      expect(status).toBe(201);
+      expect(body).not.toHaveProperty('payment');
+      expect(body.durationSeconds).toBe(durationSeconds);
+      const [row] = await db
+        .select()
+        .from(schema.generations)
+        .where(eq(schema.generations.id, body.id));
+      expect(row.durationSeconds).toBe(durationSeconds);
+    }
+  });
+
+  it('400s on out-of-range or non-integer durations', async () => {
+    mockAuth.userId = 'user-1';
+    const post = h('POST', FILE);
+    for (const durationSeconds of [4, 61, 0, -5, 5.5, 'ten', true]) {
+      const { status, body } = await json(
+        await post(
+          req('POST', '/api/video/order', {
+            prompt: 'bad duration clip',
+            durationSeconds,
+          }),
+          { params: Promise.resolve({}) }
+        )
+      );
+      expect(status).toBe(400);
+      expect(body.code).toBe('INVALID_DURATION');
+    }
   });
 
   it('400s on bad prompts, 401s unauthenticated', async () => {
@@ -624,26 +678,29 @@ describe('POST /api/video/order', () => {
   });
 });
 
-describe('paid video clean 402 → 200 after the verify hook', () => {
+describe('paid video generate-first: queue → preview → unlock → clean', () => {
   const ORDER = 'app/api/video/order/route.ts';
+  const UNLOCK = 'app/api/gen/[id]/unlock/route.ts';
   const DELIVER = 'app/api/admin/fulfillment/deliver-generation/route.ts';
   const admin = { 'x-admin-token': 'test-admin-token' };
 
-  it('gates the clean mp4 on payment verification', async () => {
+  it('queues with no order; unlock mints videoClipPricePaise(duration) idempotently', async () => {
     mockAuth.userId = 'user-2';
     const db = client.getDb();
+    const { videoClipPricePaise } = await import('@/lib/pricing/engine');
 
-    const ordered = await json(
+    // 1. generate-first queue: 201, no payment, no order
+    const queued = await json(
       await h('POST', ORDER)(
-        req('POST', '/api/video/order', { prompt: 'a wave', aspectRatio: '9:16' }),
+        req('POST', '/api/video/order', { prompt: 'a slow wave', durationSeconds: 20 }),
         { params: Promise.resolve({}) }
       )
     );
-    expect(ordered.status).toBe(201);
-    const id = ordered.body.id as string;
-    const orderCode = ordered.body.payment.code as string;
+    expect(queued.status).toBe(201);
+    expect(queued.body).not.toHaveProperty('payment');
+    const id = queued.body.id as string;
 
-    // deliver the mp4 pair (watcher generates immediately on order)
+    // 2. deliver the mp4 pair (the watcher renders it while payment pends)
     const delivered = await json(
       await h('POST', DELIVER)(
         req(
@@ -662,6 +719,7 @@ describe('paid video clean 402 → 200 after the verify hook', () => {
     );
     expect(delivered.status).toBe(200);
 
+    // 3. clean download is LOCKED until payment is verified
     const cleanRoute = h('GET', 'app/api/gen/[id]/clean/route.ts');
     const locked = await json(
       await cleanRoute(req('GET', `/api/gen/${id}/clean`), {
@@ -670,22 +728,51 @@ describe('paid video clean 402 → 200 after the verify hook', () => {
     );
     expect(locked.status).toBe(402);
 
-    // unlock via unlock route is rejected for paid video…
-    const noUnlock = await json(
-      await h('POST', 'app/api/gen/[id]/unlock/route.ts')(
-        req('POST', `/api/gen/${id}/unlock`),
-        { params: Promise.resolve({ id }) }
-      )
-    );
-    expect(noUnlock.status).toBe(400);
+    // 4. unlock mints the order at the server-side duration price —
+    //    20s = ceil(20/5)=4 blocks × ₹45 = ₹180
+    const unlockCall = () =>
+      h('POST', UNLOCK)(req('POST', `/api/gen/${id}/unlock`), {
+        params: Promise.resolve({ id }),
+      });
+    const unlocked = await json(await unlockCall());
+    expect(unlocked.status).toBe(201);
+    expect(unlocked.body.payment.amountPaise).toBe(videoClipPricePaise(20));
+    expect(unlocked.body.payment.amountPaise).toBe(18000);
+    expect(unlocked.body.payment.code).toBeTruthy();
+    const orderCode = unlocked.body.payment.code as string;
 
-    // …the ₹89 payment verify flips unlocked instead
+    // the order is linked with purpose='video' (the verify hook's key)
+    const links = await db
+      .select()
+      .from(schema.generationOrders)
+      .where(eq(schema.generationOrders.generationId, id));
+    expect(links).toHaveLength(1);
+    expect(links[0].purpose).toBe('video');
+
+    // 5. idempotent: a second unlock resumes the pending order
+    const again = await json(await unlockCall());
+    expect(again.status).toBe(200);
+    expect(again.body.resumed).toBe(true);
+    expect(again.body.payment.code).toBe(orderCode);
+    const links2 = await db
+      .select()
+      .from(schema.generationOrders)
+      .where(eq(schema.generationOrders.generationId, id));
+    expect(links2).toHaveLength(1);
+
+    // 6. customer submits UTR, owner verifies → unlock hook flips the flag
     await manualUpi.submitPaymentUtr({
       code: orderCode,
-      utrReference: 'VIDEOUTR999001',
+      utrReference: 'VIDEOUTR999002',
       userId: 'user-2',
     });
     await manualUpi.verifyPaymentOrder({ code: orderCode, adminUserId: 'admin' });
+
+    const [after] = await db
+      .select()
+      .from(schema.generations)
+      .where(eq(schema.generations.id, id));
+    expect(after.unlocked).toBe(true);
 
     const clean = await cleanRoute(req('GET', `/api/gen/${id}/clean`), {
       params: Promise.resolve({ id }),
@@ -694,6 +781,60 @@ describe('paid video clean 402 → 200 after the verify hook', () => {
     expect(clean.headers.get('content-type')).toBe('video/mp4');
     expect(clean.headers.get('content-disposition')).toContain('attachment');
     expect(clean.headers.get('content-disposition')).toContain('.mp4');
+
+    // unlock again → already unlocked
+    const done = await json(await unlockCall());
+    expect(done.status).toBe(409);
+    expect(done.body.code).toBe('ALREADY_UNLOCKED');
+  });
+
+  it('prices the longest clip: 60s → ₹540 at unlock', async () => {
+    mockAuth.userId = 'user-1';
+    const { videoClipPricePaise } = await import('@/lib/pricing/engine');
+    const queued = await json(
+      await h('POST', ORDER)(
+        req('POST', '/api/video/order', { prompt: 'an epic', durationSeconds: 60 }),
+        { params: Promise.resolve({}) }
+      )
+    );
+    expect(queued.status).toBe(201);
+    const id = queued.body.id as string;
+
+    // flip to done with bytes without the admin deliver dance
+    const db = client.getDb();
+    await db.execute(
+      sql`UPDATE generations SET status = 'done', watermarked = ${MP4}, clean = ${MP4} WHERE id = ${id}::uuid`
+    );
+
+    const unlocked = await json(
+      await h('POST', UNLOCK)(req('POST', `/api/gen/${id}/unlock`), {
+        params: Promise.resolve({ id }),
+      })
+    );
+    expect(unlocked.status).toBe(201);
+    expect(unlocked.body.payment.amountPaise).toBe(videoClipPricePaise(60));
+    expect(unlocked.body.payment.amountPaise).toBe(54000);
+  });
+
+  it('status exposes the server-side unlock price and duration', async () => {
+    mockAuth.userId = 'user-1';
+    const queued = await json(
+      await h('POST', ORDER)(
+        req('POST', '/api/video/order', { prompt: 'a tide', durationSeconds: 15 }),
+        { params: Promise.resolve({}) }
+      )
+    );
+    const id = queued.body.id as string;
+    const status = await json(
+      await h('GET', 'app/api/gen/[id]/status/route.ts')(
+        req('GET', `/api/gen/${id}/status`),
+        { params: Promise.resolve({ id }) }
+      )
+    );
+    expect(status.status).toBe(200);
+    expect(status.body.duration_seconds).toBe(15);
+    // 15s = 3 blocks × ₹45 = ₹135
+    expect(status.body.unlock_price_paise).toBe(13500);
   });
 });
 
@@ -724,7 +865,7 @@ describe('GET /api/gen/[id]/payment', () => {
     expect(withOrder.body.order).toMatchObject({
       code: unlocked.body.payment.code,
       status: 'PAYMENT_PENDING',
-      amountPaise: 1900,
+      amountPaise: 1500,
       purpose: 'unlock',
     });
     expect(withOrder.body.order.expiresAt).toBeTruthy();

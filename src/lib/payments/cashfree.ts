@@ -391,8 +391,9 @@ export async function markCashfreeOrderPaid(
 
 /**
  * Where the customer lands after paying: unlock orders go back to the
- * generation page, paid-video orders to the watch room — mirroring the
- * manual-UPI post-payment destinations.
+ * watch room (both free-tier and generate-first paid image unlocks live
+ * on generations rows at /watch/[id]), paid-video orders to the video
+ * watch room — mirroring the manual-UPI post-payment destinations.
  */
 export async function resolvePostPaymentDestination(
   orderId: string
@@ -405,5 +406,6 @@ export async function resolvePostPaymentDestination(
   const link = links[0];
   if (!link) return '/?payment=error';
   if (link.purpose === 'video') return `/watch/${link.generationId}?paid=1`;
+  if (link.purpose === 'unlock') return `/watch/${link.generationId}?paid=1`;
   return `/generation/${link.generationId}?paid=1`;
 }

@@ -16,19 +16,26 @@ export interface PriceEntry {
     | "product-photo"
     | "clip-5s"
     | "video-studio"
-    | "remake";
+    | "remake"
+    | "tool-basic"
+    | "tool-plus";
   label: string;
   /** Integer paise. */
   paise: number;
 }
 
 export const PRICE_CATALOG: readonly PriceEntry[] = [
-  { id: "single-image", label: "Single image", paise: 1900 },
-  { id: "pack-4", label: "4-pack", paise: 6900 },
-  { id: "product-photo", label: "Product photo", paise: 3900 },
-  { id: "clip-5s", label: "5s clip", paise: 8900 },
-  { id: "video-studio", label: "Video Studio", paise: 3900 },
-  { id: "remake", label: "Remake", paise: 900 },
+  { id: "single-image", label: "Single image", paise: 1500 },
+  { id: "pack-4", label: "4-pack", paise: 4900 },
+  { id: "product-photo", label: "Product photo", paise: 2900 },
+  { id: "clip-5s", label: "5s clip", paise: 4500 },
+  { id: "video-studio", label: "Video Studio", paise: 2900 },
+  { id: "remake", label: "Remake", paise: 500 },
+  // Utility tool tiers (Video Studio "Real processing" tools, Oct 2026
+  // price drop): trivial converters at ₹5, heavier jobs at ₹10. The AI
+  // tools (voice-over, captions) stay on the "video-studio" product.
+  { id: "tool-basic", label: "Basic tool job", paise: 500 },
+  { id: "tool-plus", label: "Plus tool job", paise: 1000 },
 ] as const;
 
 export function priceOf(id: PriceEntry["id"]): number {

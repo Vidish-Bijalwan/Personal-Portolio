@@ -7,7 +7,39 @@
  */
 import { priceOf } from '@/lib/pricing/catalog';
 
-/** ₹39 clean-video unlock, integer paise — the video-studio catalog price. */
+/**
+ * Per-tool price (integer paise) for a Video Studio job — always
+ * catalog-derived, never hardcoded.
+ *
+ * Oct 2026 price drop: the trivial ffmpeg converters (MP4→MP3, GIF,
+ * compressor) cost ₹5 ("tool-basic"); the heavier re-encode jobs
+ * (trim & text, add-audio, denoise) cost ₹10 ("tool-plus"); the two AI
+ * jobs (voice-over TTS, auto-captions) keep the ₹29 "video-studio" rate
+ * because they run inference, not just transcoding.
+ */
+export const TOOL_PRICE_PAISE: Record<VideoTool, number> = {
+  tts: priceOf('video-studio'),
+  caption: priceOf('video-studio'),
+  trim: priceOf('tool-plus'),
+  compress: priceOf('tool-basic'),
+  convert: priceOf('tool-basic'),
+  gif: priceOf('tool-basic'),
+  'add-audio': priceOf('tool-plus'),
+  denoise: priceOf('tool-plus'),
+};
+
+/** Price (integer paise) for one job of the given Video Studio tool. */
+export function toolPricePaise(tool: VideoTool): number {
+  const p = TOOL_PRICE_PAISE[tool];
+  if (p === undefined) throw new RangeError(`Unknown video tool: ${tool}`);
+  return p;
+}
+
+/**
+ * Legacy flat rate — the AI-job ("video-studio") catalog price.
+ * Kept for tests and any caller that prices a job without a tool id.
+ * New code should use toolPricePaise().
+ */
 export const VIDEO_JOB_PRICE_PAISE = priceOf('video-studio');
 
 /** Max uploaded source video: 50MB (client + server enforced). */

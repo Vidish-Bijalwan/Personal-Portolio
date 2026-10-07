@@ -17,7 +17,7 @@ import { Stagger, StaggerItem } from "@/components/motion/Stagger";
 import Counter from "@/components/motion/Counter";
 import MagneticButton from "@/components/motion/MagneticButton";
 import { MOTION, usePrefersReducedMotion } from "@/src/lib/motion/theme";
-import { PRICE_CATALOG, type PriceEntry } from "@/src/lib/pricing/catalog";
+import { PRICE_CATALOG, priceOf, type PriceEntry } from "@/src/lib/pricing/catalog";
 import { formatINR } from "@/src/lib/vilish/types";
 
 interface TierMeta {
@@ -45,18 +45,24 @@ const TIER_META: Record<PriceEntry["id"], TierMeta> = {
     action: { label: "Create", href: "/create?service=product-photo" },
   },
   "clip-5s": {
-    blurb:
-      "A 5-second AI video clip from your description. Fulfilled by an operator and human-reviewed before delivery.",
+    blurb: `A 5-second AI video clip from your description — or up to a full minute; the price scales with length (${formatINR(priceOf("clip-5s"))} per 5-second block). Fulfilled by an operator and human-reviewed before delivery.`,
     action: { label: "Create a clip", href: "/create?media=video" },
   },
   "video-studio": {
-    blurb:
-      "Voice-over & TTS, auto-captioning, or trim + text overlay on your video. One finished video per job.",
+    blurb: `Voice-over & TTS, auto-captioning, or trim + text overlay on your video. One finished video per job — ${formatINR(priceOf("video-studio"))} for the AI jobs, ${formatINR(priceOf("tool-plus"))} or ${formatINR(priceOf("tool-basic"))} for simple processing.`,
     action: { label: "Open Video Studio", href: "/video-studio" },
   },
   remake: {
     blurb:
       "Didn't land? Regenerate any finished image with the same settings for less.",
+  },
+  "tool-basic": {
+    blurb: `Trivial converters — MP4→MP3, GIF maker, video compressor. Real ffmpeg processing, ${formatINR(priceOf("tool-basic"))} a job.`,
+    action: { label: "Open Video Studio", href: "/video-studio" },
+  },
+  "tool-plus": {
+    blurb: `Heavier processing — trim & text, add audio, noise reduction. ${formatINR(priceOf("tool-plus"))} a job.`,
+    action: { label: "Open Video Studio", href: "/video-studio" },
   },
 };
 
@@ -122,7 +128,7 @@ const PRICING_FAQS = [
   },
   {
     q: "What if my creation fails or isn't right?",
-    a: "Failed renders are refunded, and remakes cost just ₹9 — iterate cheaply until it's right.",
+    a: `Failed renders are refunded, and remakes cost just ${formatINR(priceOf("remake"))} — iterate cheaply until it's right.`,
   },
   {
     q: "Can I use my creations commercially?",
@@ -380,7 +386,7 @@ export default function PricingPage() {
           <div className="flex flex-col items-center gap-4 rounded-[20px] border border-white/[0.08] bg-[#101012] px-6 py-10 text-center sm:py-12">
             <h2 className="font-display text-[24px] font-semibold tracking-[-0.01em] sm:text-[30px]">
               Your idea, <span className="pro-accent-text">made real</span> —
-              from ₹19
+              from {formatINR(priceOf("single-image"))}
             </h2>
             <p className="max-w-md text-[14px] leading-6 text-white/[0.55]">
               Describe it once. See the exact price. Pay with UPI. We handle
@@ -396,7 +402,7 @@ export default function PricingPage() {
             <p className="text-[13px] text-white/40">
               Not sure yet?{" "}
               <Link href="/examples" className="underline underline-offset-4 hover:text-white/70">
-                See what ₹19 makes
+                See what {formatINR(priceOf("single-image"))} makes
               </Link>
             </p>
           </div>

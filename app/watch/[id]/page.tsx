@@ -25,7 +25,9 @@ import type { PromptInsight } from "@/src/lib/vilish/prompt-insight";
 import { progressForStage } from "@/src/lib/vilish/progress";
 import PaymentModal from "@/components/vilish/payment-modal";
 import AuthModal from "@/components/vilish/auth-modal";
-import { videoPaymentStorageKey } from "@/components/vilish/free-tier";
+import { formatINR } from "@/src/lib/vilish/types";
+import { priceOf } from "@/src/lib/pricing/catalog";
+import { UNLOCK_PRICE_PAISE } from "@/src/lib/free/policy";
 import type { ManualPayment } from "@/components/vilish/payment";
 
 interface GenStatus {
@@ -47,6 +49,9 @@ interface GenStatus {
   /** Result-page details (from /api/gen/[id]/status). */
   aspect_ratio: string;
   finished_at: string;
+  /** Video rows: server-side unlock price (paise) + clip length. */
+  unlock_price_paise?: number | null;
+  duration_seconds?: number | null;
 }
 
 /** "1m 23s" / "45s" / "2h 4m" — honest elapsed time, never a promise. */
@@ -89,7 +94,6 @@ export default function WatchRoomPage() {
   const [payModal, setPayModal] = useState<{ jobId: string; payment: ManualPayment } | null>(null);
   const [authNeeded, setAuthNeeded] = useState(false);
   const [pendingUnlock, setPendingUnlock] = useState(false);
-  const [noStoredPayment, setNoStoredPayment] = useState(false);
 
   // retry flow: mint a fresh attempt (same prompt, or the safer rephrase)
   const [retrying, setRetrying] = useState<null | "same" | "safe">(null);
@@ -241,9 +245,19 @@ export default function WatchRoomPage() {
   const handleUnlock = async () => {
     setUnlockBusy(true);
     setUnlockError("");
-    setNoStoredPayment(false);
     try {
-      const res = await fetch(`/api/gen/${encodeURIComponent(id)}/unlock`, { method: "POST" });
+      // Generate-first paid images create the unlock order here (at
+      // "Download clean HD" click time) via the paid-image unlock route;
+      // free-tier images and paid videos use /api/gen/[id]/unlock.
+      const res = isPaidImage
+        ? await fetch("/api/generation/unlock", {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ generationId: id }),
+          })
+        : await fetch(`/api/gen/${encodeURIComponent(id)}/unlock`, {
+            method: "POST",
+          });
       if (res.status === 401) {
         setPendingUnlock(true);
         setAuthNeeded(true);
@@ -263,34 +277,66 @@ export default function WatchRoomPage() {
         );
         return;
       }
-      setPayModal({ jobId: body.id ?? id, payment: body.payment as ManualPayment });
+      setPayModal({ jobId: body.generationId ?? body.id ?? id, payment: body.payment as ManualPayment });
     } finally {
       setUnlockBusy(false);
     }
   };
 
-  /** Reopen the stored video payment order (same-session; sessionStorage). */
-  const openStoredPayment = () => {
-    setNoStoredPayment(false);
+  /**
+   * Reopen/reorder the paid-image unlock payment. Unlock orders are
+   * idempotent per generation (POST /api/generation/unlock resumes a
+   * still-pending order), so this doubles as the expired-order recovery.
+   */
+  const reorderPaidImagePayment = async (): Promise<ManualPayment | null> => {
     try {
-      const raw = sessionStorage.getItem(videoPaymentStorageKey(id));
-      if (raw) {
-        const parsed = JSON.parse(raw) as { jobId?: string; payment?: ManualPayment };
-        if (parsed?.payment) {
-          setPayModal({ jobId: parsed.jobId ?? id, payment: parsed.payment });
-          return;
-        }
+      const res = await fetch("/api/generation/unlock", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ generationId: id }),
+      });
+      const body = await res.json().catch(() => null);
+      if (body?.adminBypass) {
+        window.location.reload();
+        return null;
       }
+      return (body?.payment as ManualPayment) ?? null;
     } catch {
-      /* fall through to fallback copy */
+      return null;
     }
-    setNoStoredPayment(true);
   };
 
   const previewUrl = `/api/gen/${encodeURIComponent(id)}/preview`;
   const cleanUrl = `/api/gen/${encodeURIComponent(id)}/clean`;
 
   const isVideo = data?.media_type === "video";
+  const isPaidImage = data?.tier === "paid" && data?.media_type === "image";
+  // generate-first paid images: server-side unlock price for the CTA
+  const [unlockPricePaise, setUnlockPricePaise] = useState<number | null>(null);
+
+  // Fetch the server-side unlock price once a paid image is done & locked,
+  // so the CTA shows the true quoted price ("Download clean HD — ₹X").
+  useEffect(() => {
+    if (!isPaidImage || data?.status !== "done" || data?.unlocked) {
+      setUnlockPricePaise(null);
+      return;
+    }
+    let alive = true;
+    fetch(`/api/generation/unlock?generationId=${encodeURIComponent(id)}`, {
+      cache: "no-store",
+    })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((b) => {
+        if (alive && typeof b?.pricePaise === "number") {
+          setUnlockPricePaise(b.pricePaise);
+        }
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isPaidImage, data?.status, data?.unlocked, id]);
   const refused = data?.error_code === "content_refused";
   const captions = isVideo ? VIDEO_CAPTIONS : IMAGE_CAPTIONS;
   const caption = captions[captionIdx % captions.length];
@@ -299,6 +345,12 @@ export default function WatchRoomPage() {
     (isVideo ? "Setting up the projector…" : "Warming up the grill…");
   // Real progress from the pipeline stage + status.
   const progress = data ? progressForStage(data.stage, data.status) : 8;
+  // Paid videos are generate-first: the unlock price comes from the
+  // server (videoClipPricePaise(durationSeconds)); images stay flat.
+  const unlockPrice =
+    isVideo && data?.unlock_price_paise != null
+      ? formatINR(data.unlock_price_paise)
+      : "₹19";
 
   return (
     <div className="flex min-h-screen flex-col bg-[#080808] font-sans text-[#F5F5F3] antialiased">
@@ -350,7 +402,9 @@ export default function WatchRoomPage() {
                 ? "The image model refused this one — usually a word like “fire” or “blood” trips the safety filter. Try a gentler rephrase instead."
                 : isVideo
                   ? "Your clip didn't make it this time — nothing was charged."
-                  : "Try again — it's still free."}
+                  : isPaidImage
+                    ? "Your image didn't make it this time — nothing was charged, since payment only happens when you unlock."
+                    : "Try again — it's still free."}
             </p>
             {data.tier === "free" && (
               <p className="mt-2 max-w-md text-[13px] leading-6 text-white/40">
@@ -429,70 +483,36 @@ export default function WatchRoomPage() {
           </section>
         )}
 
-        {/* paid + not unlocked: payment pending / under review */}
-        {data && data.status !== "failed" && data.tier === "paid" && !data.unlocked && (
-          <section className="flex flex-1 flex-col items-center py-10 text-center">
-            <h1 className="font-display text-[26px] font-semibold tracking-[-0.02em] sm:text-[32px]">
-              Your {isVideo ? "clip" : "creation"} is waiting on payment
-            </h1>
-            <p className="mt-3 max-w-md text-[14px] leading-6 text-white/60">
-              Complete your {isVideo ? "₹89" : "₹19"} payment to unlock the clean HD{" "}
-              {isVideo ? "clip" : "file"}. If you already paid, it unlocks here as
-              soon as the payment is confirmed.
-            </p>
-            {previewOk && data.media_type === "video" && (
-              <div className="mt-6 w-full max-w-md overflow-hidden rounded-[16px] border border-white/[0.1]">
-                <video
-                  src={previewUrl}
-                  muted
-                  loop
-                  playsInline
-                  autoPlay
-                  className="block w-full bg-black object-contain"
-                  style={{ aspectRatio: cssAspectRatio(data?.aspect_ratio) }}
-                  onError={() => setPreviewOk(false)}
-                />
-                <p className="border-t border-white/[0.08] bg-[#121214] px-4 py-2 text-[11px] uppercase tracking-[0.08em] text-white/40">
-                  Watermarked preview · AI-generated
-                </p>
-              </div>
-            )}
-            <button
-              type="button"
-              onClick={openStoredPayment}
-              className="mt-6 inline-flex items-center gap-2 min-h-[44px] rounded-[10px] bg-[var(--pro-btn)] px-5 py-2.5 text-[14px] font-semibold text-[var(--pro-btn-ink)] hover:opacity-95"
-            >
-              <Sparkles className="h-4 w-4" />
-              Open payment
-            </button>
-            {noStoredPayment && (
-              <p className="mt-3 max-w-md text-[13px] leading-6 text-white/45">
-                We couldn&apos;t find your payment details on this device — head back
-                to the{" "}
-                <Link href="/create?media=video" className="text-[var(--pro-accent)] underline underline-offset-2">
-                  composer
-                </Link>{" "}
-                to start the order again.
-              </p>
-            )}
-          </section>
-        )}
-
-        {/* cooking / generating — the waiting room */}
-        {data &&
-          data.status !== "failed" &&
-          data.status !== "done" &&
-          !(data.tier === "paid" && !data.unlocked) && (
+        {/* cooking / generating — the waiting room.
+            Generate-first: no payment gate here for any tier; the
+            watermarked preview unlocks clean HD after it lands. */}
+        {data && data.status !== "failed" && data.status !== "done" && (
             <section aria-live="polite" className="w-full py-8">
               <div className="grid gap-8 lg:grid-cols-[1fr_340px] lg:items-start">
                 {/* left: the showpiece + live status */}
                 <div className="flex flex-col items-center text-center">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--pro-accent)]">
-                    {data.tier === "free" ? "Free preview" : "Paid order"} · AI-generated
+                    {data.tier === "free" ? "Free preview" : isVideo ? "Paid clip" : "Paid order"} · AI-generated
                   </p>
                   <h1 className="font-display mt-2 text-[26px] font-semibold tracking-[-0.02em] sm:text-[32px]">
                     {isVideo ? "Your clip is in the projector" : "Your creation is on the grill"}
                   </h1>
+                  {isVideo && data.tier === "paid" && !data.unlocked && data.unlock_price_paise != null && (
+                    <p className="mt-2 max-w-md text-[13px] leading-5 text-white/45">
+                      Preview first — unlock the clean HD clip for{" "}
+                      <span className="font-semibold text-white/80">{formatINR(data.unlock_price_paise)}</span>{" "}
+                      when it lands.
+                    </p>
+                  )}
+                  {isPaidImage && !data.unlocked && (
+                    <p className="mt-2 max-w-md text-[13px] leading-5 text-white/45">
+                      Preview first — unlock the clean HD file for{" "}
+                      <span className="font-semibold text-white/80">
+                        {unlockPricePaise !== null ? formatINR(unlockPricePaise) : "the quoted price"}
+                      </span>{" "}
+                      when it lands.
+                    </p>
+                  )}
 
                   <div className="mt-6 w-full max-w-[520px]">
                     {isVideo ? (
@@ -624,8 +644,19 @@ export default function WatchRoomPage() {
                 </div>
 
                 <p className="mt-5 max-w-md text-[14px] leading-6 text-white/60">
-                  Watermarked preview. The clean HD {isVideo ? "clip" : "file"} is yours
-                  for {isVideo ? "₹89" : "₹19"}.
+                  Watermarked preview.{" "}
+                  {isPaidImage
+                    ? `The clean HD file is yours for ${
+                        unlockPricePaise !== null
+                          ? formatINR(unlockPricePaise)
+                          : "the quoted price"
+                      }.`
+                    : `The clean HD ${isVideo ? "clip" : "file"} is yours
+                  for ${formatINR(
+                    isVideo && data?.unlock_price_paise != null
+                      ? data.unlock_price_paise
+                      : UNLOCK_PRICE_PAISE,
+                  )}.`}
                 </p>
 
                 <button
@@ -638,7 +669,17 @@ export default function WatchRoomPage() {
                   )}
                 >
                   {unlockBusy && <Loader2 className="h-4 w-4 animate-spin" />}
-                  Unlock clean HD — {isVideo ? "₹89" : "₹19"}
+                  {isPaidImage
+                    ? `Download clean HD — ${
+                        unlockPricePaise !== null
+                          ? formatINR(unlockPricePaise)
+                          : "…"
+                      }`
+                    : `Unlock clean HD — ${formatINR(
+                        isVideo && data?.unlock_price_paise != null
+                          ? data.unlock_price_paise
+                          : UNLOCK_PRICE_PAISE,
+                      )}`}
                 </button>
                 {unlockError && (
                   <p className="mt-3 max-w-md text-[13px] text-red-300/80" role="alert">
@@ -769,6 +810,7 @@ export default function WatchRoomPage() {
             setPayModal(null);
             void fetchStatus();
           }}
+          onReorder={isPaidImage ? reorderPaidImagePayment : undefined}
         />
       )}
       <AuthModal

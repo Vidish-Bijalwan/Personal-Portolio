@@ -7,17 +7,28 @@ import { UNLOCK_PRICE_PAISE } from '@/lib/free/policy';
 import { getOwnedGeneration } from '@/lib/free/access';
 import { createGenerationOrder, findPendingOrderLink } from '@/lib/free/orders';
 import { verifyOrderAdminBypass } from '@/lib/payments/manual-upi';
+import {
+  VIDEO_DURATION_MIN_S,
+  videoClipPricePaise,
+} from '@/lib/pricing/engine';
 
 /**
  * POST /api/gen/[id]/unlock
- * Owner-gated. FREE-TIER IMAGES ONLY (tier='free'): paid video rows are
- * rejected — their payment was already taken at /api/video/order time.
- * Requires status=done and unlocked=false. Creates a ₹19 (1900 paise)
- * manual-UPI order via the existing payment flow and links it with
- * purpose='unlock'. Idempotent: a still-pending unlock order is resumed
- * instead of duplicated. Returns { id, payment } in the payment-modal
- * shape so the existing UPI → UTR-submit → owner-verify flow works
- * unchanged; the verify hook flips generations.unlocked.
+ * Owner-gated. Generate-first unlock for TWO generation kinds:
+ *
+ * - FREE-TIER IMAGES (tier='free', mediaType='image'): the image previewed
+ *   first; unlock mints a manual-UPI order for UNLOCK_PRICE_PAISE
+ *   (single-image catalog price, never hardcoded) with purpose='unlock'.
+ * - PAID VIDEOS (tier='paid', mediaType='video'): the clip previewed first;
+ *   unlock mints the order with purpose='video' at the server-side price
+ *   videoClipPricePaise(durationSeconds) taken from the row's stored
+ *   duration_seconds — the client never sets the price.
+ *
+ * Requires status=done and unlocked=false. Idempotent: a still-pending
+ * unlock/video order is resumed instead of duplicated. Returns { id,
+ * payment } in the payment-modal shape so the existing UPI/Cashfree flow
+ * works unchanged; the verify hook (runUnlockHooks) flips
+ * generations.unlocked.
  */
 export async function POST(
   _req: NextRequest,
@@ -30,18 +41,20 @@ export async function POST(
   const { gen, error } = await getOwnedGeneration(id, user.id);
   if (error) return error;
 
-  if (gen.tier !== 'free' || gen.mediaType !== 'image') {
+  const isFreeImage = gen.tier === 'free' && gen.mediaType === 'image';
+  const isPaidVideo = gen.tier === 'paid' && gen.mediaType === 'video';
+  if (!isFreeImage && !isPaidVideo) {
     return NextResponse.json(
       {
-        code: 'NOT_FREE_IMAGE',
-        error: 'Unlock orders are for free-tier images only',
+        code: 'NOT_UNLOCKABLE',
+        error: 'Unlock orders are for free-tier images and paid videos only',
       },
       { status: 400 }
     );
   }
   if (gen.status !== 'done') {
     return NextResponse.json(
-      { code: 'NOT_DELIVERED', error: 'Image is not delivered yet' },
+      { code: 'NOT_DELIVERED', error: 'It is not delivered yet' },
       { status: 409 }
     );
   }
@@ -52,7 +65,25 @@ export async function POST(
     );
   }
 
-  const resumed = await findPendingOrderLink(gen.id, 'unlock');
+  // Paid video: price from the row's stored duration — server-side, never
+  // the client's word. purpose='video' is what runUnlockHooks flips on
+  // PAYMENT_VERIFIED, and resuming a still-pending order keeps the flow
+  // idempotent (also covers rows queued before the generate-first change).
+  let amountPaise: number;
+  let purpose: 'unlock' | 'video';
+  let stubPrompt: string;
+  if (isPaidVideo) {
+    const durationSeconds = gen.durationSeconds ?? VIDEO_DURATION_MIN_S;
+    amountPaise = videoClipPricePaise(durationSeconds);
+    purpose = 'video';
+    stubPrompt = `Paid ${durationSeconds}s video unlock for generation ${gen.id}`;
+  } else {
+    amountPaise = UNLOCK_PRICE_PAISE;
+    purpose = 'unlock';
+    stubPrompt = `Free-tier unlock for generation ${gen.id}`;
+  }
+
+  const resumed = await findPendingOrderLink(gen.id, purpose);
   if (resumed) {
     // Owner/admin testing bypass: verify the pending order immediately.
     if (isAdminEmail(user.email)) {
@@ -74,9 +105,9 @@ export async function POST(
     order = await createGenerationOrder({
       generationId: gen.id,
       userId: user.id,
-      amountPaise: UNLOCK_PRICE_PAISE,
-      purpose: 'unlock',
-      stubPrompt: `Free-tier unlock for generation ${gen.id}`,
+      amountPaise,
+      purpose,
+      stubPrompt,
       aspectRatio: gen.aspectRatio,
       quality: gen.quality,
     });

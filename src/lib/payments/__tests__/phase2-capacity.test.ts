@@ -158,26 +158,33 @@ describe.runIf(HAS_START)('POST /api/generation/start — capacity gates', () =>
     expect(body.error).toBe('DAILY_CAP_REACHED');
   });
 
-  it('below the daily cap → order is created normally', async () => {
+  it('below the daily cap → generation starts with NO payment order', async () => {
     await setConfig('MAX_OPERATOR_ORDERS_PER_DAY', 50);
-    const { quote } = await makeStartableJob();
+    const { quote, job } = await makeStartableJob();
     const res = await POST(startRequest(quote.id));
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(201);
     const body = (await res.json()) as {
       jobId?: string;
+      generationId?: string;
       payment?: { code?: string };
     };
-    expect(body.jobId).toBeTruthy();
-    expect(body.payment?.code).toMatch(/^VLSH-/);
+    expect(body.jobId).toBe(job.id);
+    expect(body.generationId).toBeTruthy();
+    // Generate-first: the order is created at unlock-click time, not here.
+    expect(body.payment).toBeUndefined();
+    const orderRows = await db
+      .select({ id: schema.orders.id })
+      .from(schema.orders);
+    expect(orderRows).toHaveLength(0);
   });
 
   it('valid x-admin-token bypasses the paused gate', async () => {
     await setConfig('ORDERS_ACCEPTING', 'false');
     const { quote } = await makeStartableJob();
     const res = await POST(startRequest(quote.id, ADMIN_TOKEN));
-    expect(res.status).toBe(200);
-    const body = (await res.json()) as { payment?: { code?: string } };
-    expect(body.payment?.code).toMatch(/^VLSH-/);
+    expect(res.status).toBe(201);
+    const body = (await res.json()) as { generationId?: string };
+    expect(body.generationId).toBeTruthy();
   });
 
   it('valid x-admin-token bypasses the daily-cap gate', async () => {
@@ -185,6 +192,6 @@ describe.runIf(HAS_START)('POST /api/generation/start — capacity gates', () =>
     await makeStartableJob(); // fill the cap
     const { quote } = await makeStartableJob();
     const res = await POST(startRequest(quote.id, ADMIN_TOKEN));
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(201);
   });
 });

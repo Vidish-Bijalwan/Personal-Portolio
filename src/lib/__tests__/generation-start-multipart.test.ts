@@ -1,8 +1,10 @@
 /**
- * W1-BUGFIX empirical probe: drive the REAL POST /api/generation/start
+ * Generate-first probe: drive the REAL POST /api/generation/start
  * handler with a multipart body (the paid reference-upload path) against
  * in-process PGlite. Verifies end-to-end: multipart parse -> validation ->
- * bytea insert -> payment order.
+ * generations row queued (tier='paid') -> bytea insert -> NO payment order
+ * created at Generate time (the unlock order comes later, at
+ * POST /api/generation/unlock).
  */
 import { describe, it, expect, beforeAll, vi } from 'vitest';
 import { resolve } from 'node:path';
@@ -84,21 +86,37 @@ function multipartReq(quoteId: string, files: File[]): NextRequest {
 }
 
 describe('POST /api/generation/start multipart (paid reference upload)', () => {
-  it('stores attached reference files as bytea and returns a payment order', async () => {
+  it('queues a paid generations row, stores attachments, creates NO payment order', async () => {
     const { quoteId, jobId } = await seedJobAndQuote('uploader-1');
     const bytes = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0xde, 0xad, 0xbe, 0xef]);
     const file = new File([bytes], 'ref.png', { type: 'image/png' });
     const res = await POST(multipartReq(quoteId, [file]));
     const body = (await res.json().catch(() => null)) as any;
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(201);
     expect(body?.jobId).toBe(jobId);
-    expect(body?.payment?.code).toBeTruthy();
+    expect(body?.generationId).toBeTruthy();
+    // Generate-first: no payment order at Generate time.
+    expect(body?.payment).toBeUndefined();
 
     const db = client.getDb();
+    const orderRows = await db.select({ id: schema.orders.id }).from(schema.orders);
+    expect(orderRows).toHaveLength(0);
+
+    const genRows = await db
+      .select()
+      .from(schema.generations)
+      .where(eq(schema.generations.id, body.generationId));
+    expect(genRows).toHaveLength(1);
+    expect(genRows[0].tier).toBe('paid');
+    expect(genRows[0].mediaType).toBe('image');
+    expect(genRows[0].status).toBe('queued');
+    expect(genRows[0].jobId).toBe(jobId);
+    expect(genRows[0].unlocked).toBe(false);
+
     const rows = await db
       .select()
-      .from(schema.generationAttachments)
-      .where(eq(schema.generationAttachments.generationId, jobId));
+      .from(schema.freeGenerationAttachments)
+      .where(eq(schema.freeGenerationAttachments.generationId, body.generationId));
     expect(rows).toHaveLength(1);
     expect(rows[0].filename).toBe('ref.png');
     expect(rows[0].mimeType).toBe('image/png');

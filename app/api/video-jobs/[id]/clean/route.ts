@@ -7,7 +7,7 @@ import { OUTPUT_MIME_EXT } from '@/lib/video/constants';
 
 /**
  * GET /api/video-jobs/[id]/clean
- * Owner-gated. 402 {code:'LOCKED'} unless unlocked=true (₹39 payment
+ * Owner-gated. 402 {code:'LOCKED'} unless unlocked=true (tool payment
  * verified). 404 unless status=done with clean bytes stored.
  * Serves the clean file as an attachment download (mp4, mp3 or gif
  * depending on the tool).

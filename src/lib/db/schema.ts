@@ -226,9 +226,11 @@ const bytea = customType<{ data: Buffer; driverData: Buffer }>({
 });
 
 /**
- * Customer-uploaded reference files attached to a generation job at
- * order-start time (multipart on /api/generation/start). The operator sees
- * them in the fulfillment queue/detail views.
+ * Customer-uploaded reference files attached to a generation job.
+ * Legacy: the pre-generate-first flow stored these at order-start time
+ * (multipart on /api/generation/start). The generate-first flow stores
+ * reference files on free_generation_attachments linked to the
+ * generations row (the table the watcher reads).
  */
 export const generationAttachments = pgTable('generation_attachments', {
   id: id(),
@@ -266,16 +268,18 @@ export const freeGenerationAttachments = pgTable(
   }
 );
 
-/* ---------------- free-tier images + paid video clips ---------------- */
-/* ---------------- free-tier images + paid video clips ---------------- */
+/* ---------------- free-tier images + paid video clips + paid images ---- */
 
 /**
- * Unified generations table for the free-tier image flow and paid video
- * clips. tier='free' + media_type='image': 3/day cap, watermarked preview,
- * clean download unlocks for ₹19 after manual-UPI verify. tier='paid' +
- * media_type='video': ₹89 per 5s clip, no daily cap; the watcher generates
- * immediately on order and the clean mp4 unlocks on payment verify.
- * (Paid operator images keep using generation_jobs — NOT this table.)
+ * Unified generations table for the free-tier image flow, paid video
+ * clips, and generate-first paid images. tier='free' + media_type='image':
+ * 3/day cap, watermarked preview, clean download unlocks after verify.
+ * tier='paid' + media_type='video': duration-priced clip (5–60s), no daily
+ * cap; the watcher generates immediately on queue and the clean mp4
+ * unlocks on payment verify. tier='paid' + media_type='image':
+ * generate-first paid images (POST /api/generation/start) — no order at
+ * Generate time; the unlock order is created at "Download clean HD" click
+ * time (POST /api/generation/unlock) with the job's server-side price.
  */
 export const generations = pgTable('generations', {
   id: id(),
@@ -293,6 +297,21 @@ export const generations = pgTable('generations', {
   mediaType: text('media_type').notNull().default('image'),
   /** free | paid */
   tier: text('tier').notNull().default('free'),
+  /**
+   * Generate-first flow: the pricing job this paid image generation was
+   * started from (POST /api/generation/start). The job is the system of
+   * record for the quoted server-side price — the unlock order created at
+   * "Download clean HD" click time reads amountPaise from the job, never
+   * from the client. Null for free-tier rows and paid video rows (those
+   * carry their own fixed catalog prices).
+   */
+  jobId: uuid('job_id').references(() => generationJobs.id, {
+    onDelete: 'set null',
+  }),
+  /** Requested clip length in seconds (video only). Null for images and
+   *  for clips created before duration selection existed (treated as 5s).
+   *  The operator fulfills exactly this length; pricing scales from it. */
+  durationSeconds: integer('duration_seconds'),
   attempts: integer('attempts').notNull().default(0),
   watermarked: bytea('watermarked'),
   clean: bytea('clean'),
@@ -308,9 +327,10 @@ export const generations = pgTable('generations', {
 });
 
 /**
- * Links a manual-UPI order to a generations row. purpose 'unlock': ₹19
- * clean-image download for a free generation. purpose 'video': ₹89 paid
- * clip. The payment-verify hook flips generations.unlocked from this link.
+ * Links a manual-UPI order to a generations row. purpose 'unlock': clean-image
+ * download for a free generation. purpose 'video': paid clip (5–60s,
+ * duration-priced). The payment-verify hook flips generations.unlocked
+ * from this link.
  */
 export const generationOrders = pgTable('generation_orders', {
   orderId: uuid('order_id')
