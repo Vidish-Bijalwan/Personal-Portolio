@@ -439,9 +439,11 @@ export const orders = pgTable('orders', {
     .notNull()
     .references(() => generationJobs.id, { onDelete: 'cascade' }),
   userId: text('user_id').references(() => users.id, { onDelete: 'set null' }),
-  /** manual_upi | razorpay | stripe */
+  /** manual_upi | cashfree */
   provider: text('provider').notNull().default('manual_upi'),
   razorpayOrderId: text('razorpay_order_id').unique(),
+  /** Cashfree PG order id (etch_<code>_<ts>) for online payments. */
+  cashfreeOrderId: text('cashfree_order_id').unique(),
   amountPaise: integer('amount_paise').notNull(),
   currency: text('currency').notNull().default('INR'),
   status: text('status')
@@ -472,6 +474,8 @@ export const payments = pgTable('payments', {
     .notNull()
     .references(() => orders.id, { onDelete: 'cascade' }),
   razorpayPaymentId: text('razorpay_payment_id').unique(),
+  /** Cashfree gateway cf_payment_id for online payments. */
+  cashfreePaymentId: text('cashfree_payment_id').unique(),
   utrReference: text('utr_reference'),
   amountPaise: integer('amount_paise').notNull(),
   method: text('method'), // upi_manual | upi | card | ...

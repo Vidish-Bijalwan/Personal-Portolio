@@ -211,3 +211,97 @@ export async function checkManualPayment(code: string): Promise<PaymentCheckStat
   const body = await res.json().catch(() => null);
   return (body?.status as PaymentCheckStatus) ?? null;
 }
+
+/* ---------------- Cashfree online payments ---------------- */
+
+export interface CashfreeSession {
+  paymentSessionId: string;
+  cashfreeOrderId: string;
+  mode: 'sandbox' | 'production';
+}
+
+export type CashfreeSessionError =
+  | { kind: 'invalid_phone' }
+  | { kind: 'failed'; message: string };
+
+/**
+ * Create a Cashfree payment session for an existing internal order.
+ * The server owns the amount; the client only names the order + phone.
+ */
+export async function createCashfreeSession(
+  orderCode: string,
+  customerPhone: string
+): Promise<{ ok: true; session: CashfreeSession } | { ok: false; error: CashfreeSessionError }> {
+  let res: Response;
+  try {
+    res = await fetch('/api/cashfree/create-order', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ orderCode, customerPhone }),
+    });
+  } catch {
+    return { ok: false, error: { kind: 'failed', message: 'Network error — please try again.' } };
+  }
+  const body = await res.json().catch(() => null);
+  if (res.ok && body?.paymentSessionId) {
+    return {
+      ok: true,
+      session: {
+        paymentSessionId: body.paymentSessionId,
+        cashfreeOrderId: body.cashfreeOrderId,
+        mode: body.mode === 'production' ? 'production' : 'sandbox',
+      },
+    };
+  }
+  if (body?.code === 'INVALID_PHONE') {
+    return { ok: false, error: { kind: 'invalid_phone' } };
+  }
+  return {
+    ok: false,
+    error: {
+      kind: 'failed',
+      message:
+        typeof body?.error === 'string' && body.error
+          ? body.error
+          : 'Could not start online payment. Please try again.',
+    },
+  };
+}
+
+interface CashfreeSdk {
+  (opts: { mode: 'sandbox' | 'production' }): {
+    checkout(opts: {
+      paymentSessionId: string;
+      redirectTarget?: '_self' | '_blank' | '_top' | '_modal';
+    }): Promise<{ error?: { message?: string }; redirect?: boolean; paymentDetails?: unknown }>;
+  };
+}
+
+declare global {
+  interface Window {
+    Cashfree?: CashfreeSdk;
+  }
+}
+
+let sdkLoadPromise: Promise<CashfreeSdk> | null = null;
+
+/** Load Cashfree's hosted-checkout JS SDK once. */
+export function loadCashfreeSdk(): Promise<CashfreeSdk> {
+  if (typeof window !== 'undefined' && window.Cashfree) {
+    return Promise.resolve(window.Cashfree);
+  }
+  if (!sdkLoadPromise) {
+    sdkLoadPromise = new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = 'https://sdk.cashfree.com/js/v3/cashfree.js';
+      script.async = true;
+      script.onload = () => {
+        if (window.Cashfree) resolve(window.Cashfree);
+        else reject(new Error('Cashfree SDK failed to initialise'));
+      };
+      script.onerror = () => reject(new Error('Could not load the payment page'));
+      document.head.appendChild(script);
+    });
+  }
+  return sdkLoadPromise;
+}

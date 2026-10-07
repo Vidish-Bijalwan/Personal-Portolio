@@ -1,18 +1,21 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Check, Copy, Loader2, RefreshCcw, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Copy, Loader2, RefreshCcw, X, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatINR } from "@/src/lib/vilish/types";
 import BurgerGrill from "./burger-grill";
 import {
   checkManualPayment,
   claimPaymentPaid,
+  createCashfreeSession,
+  loadCashfreeSdk,
   reorderManualPayment,
   type ManualPayment,
 } from "./payment";
 
 type ModalPhase = "pay" | "processing" | "expired";
+type PayMode = "upi" | "online";
 
 interface PaymentModalProps {
   jobId: string;
@@ -44,6 +47,7 @@ const LONG_WAIT_MS = 10 * 60 * 1000;
 export default function PaymentModal({ jobId, initialPayment, onClose, navigate, onPaymentVerified }: PaymentModalProps) {
   const [payment, setPayment] = useState<ManualPayment>(initialPayment);
   const [phase, setPhase] = useState<ModalPhase>("pay");
+  const [payMode, setPayMode] = useState<PayMode>("upi");
   const [vpaCopied, setVpaCopied] = useState(false);
   const [claiming, setClaiming] = useState(false);
   const [formError, setFormError] = useState("");
@@ -51,6 +55,10 @@ export default function PaymentModal({ jobId, initialPayment, onClose, navigate,
   const [notConfirmed, setNotConfirmed] = useState(false);
   const [longWait, setLongWait] = useState(false);
   const [reordering, setReordering] = useState(false);
+  const [phone, setPhone] = useState("");
+  const [phoneError, setPhoneError] = useState("");
+  const [onlineLoading, setOnlineLoading] = useState(false);
+  const [onlineError, setOnlineError] = useState("");
   const claimStartRef = useRef(0);
   const countdown = useCountdown(payment.expiresAt, phase === "pay");
 
@@ -144,11 +152,53 @@ export default function PaymentModal({ jobId, initialPayment, onClose, navigate,
       }
       setPayment(next.payment);
       setPhase("pay");
+      setPayMode("upi");
       setNotConfirmed(false);
       setLongWait(false);
       setStatusMsg("");
     } finally {
       setReordering(false);
+    }
+  };
+
+  const handlePayOnline = async () => {
+    setPhoneError("");
+    setOnlineError("");
+    const digits = phone.replace(/\D/g, "");
+    if (!/^[6-9]\d{9}$/.test(digits)) {
+      setPhoneError("Enter a valid 10-digit Indian mobile number");
+      return;
+    }
+    setOnlineLoading(true);
+    try {
+      const res = await createCashfreeSession(payment.code, digits);
+      if (!res.ok) {
+        if (res.error.kind === "invalid_phone") {
+          setPhoneError("Enter a valid 10-digit Indian mobile number");
+        } else {
+          setOnlineError(res.error.message);
+        }
+        return;
+      }
+      const cf = await loadCashfreeSdk();
+      const cashfree = cf({ mode: res.session.mode });
+      const result = await cashfree.checkout({
+        paymentSessionId: res.session.paymentSessionId,
+        redirectTarget: "_self",
+      });
+      if (result?.error) {
+        setOnlineError(
+          result.error.message || "Payment could not be started. Please try again."
+        );
+      }
+      // result.redirect → the browser navigates to our return URL, which
+      // verifies the payment server-side. Nothing more to do here.
+    } catch (e) {
+      setOnlineError(
+        e instanceof Error ? e.message : "Could not start online payment. Please try again."
+      );
+    } finally {
+      setOnlineLoading(false);
     }
   };
 
@@ -181,8 +231,34 @@ export default function PaymentModal({ jobId, initialPayment, onClose, navigate,
           </button>
         </div>
 
-        {phase === "pay" && (
+        {phase === "pay" && payMode === "upi" && (
           <>
+            {/* Online alternative — kept secondary so manual UPI stays the default */}
+            <button
+              type="button"
+              onClick={() => {
+                setPayMode("online");
+                setOnlineError("");
+                setPhoneError("");
+              }}
+              className="mt-5 flex w-full items-center justify-between gap-3 rounded-[12px] border border-[var(--pro-accent)]/35 bg-[var(--pro-accent)]/[0.07] px-4 py-3.5 text-left transition hover:bg-[var(--pro-accent)]/[0.12]"
+            >
+              <span className="flex items-center gap-3">
+                <span className="flex h-9 w-9 items-center justify-center rounded-[10px] bg-[var(--pro-accent)]/15">
+                  <Zap className="h-4 w-4 text-[var(--pro-accent)]" />
+                </span>
+                <span>
+                  <span className="block text-[14px] font-semibold text-[#F5F5F3]">
+                    Pay online instantly
+                  </span>
+                  <span className="mt-0.5 block text-[12px] text-white/50">
+                    UPI, cards, netbanking — confirmed automatically
+                  </span>
+                </span>
+              </span>
+              <ArrowRight className="h-4 w-4 shrink-0 text-white/50" />
+            </button>
+
             {qrSrc ? (
               <div className="mx-auto mt-5 w-52 overflow-hidden rounded-[14px] border border-white/[0.1] bg-white p-3">
                 <img src={qrSrc} alt="UPI payment QR code" className="h-auto w-full" />
@@ -246,6 +322,80 @@ export default function PaymentModal({ jobId, initialPayment, onClose, navigate,
               AI generation with human quality review — every paid generation is
               reviewed before delivery.
             </p>
+          </>
+        )}
+
+        {phase === "pay" && payMode === "online" && (
+          <>
+            <button
+              type="button"
+              onClick={() => setPayMode("upi")}
+              className="mt-5 inline-flex items-center gap-1.5 text-[13px] text-white/55 hover:text-white/85"
+            >
+              <ArrowLeft className="h-3.5 w-3.5" />
+              Back to manual UPI (no extra fee)
+            </button>
+
+            <div className="mt-3 rounded-[14px] border border-white/[0.1] bg-[#0D0D0F] p-5">
+              <div className="flex items-center justify-between">
+                <p className="text-[11px] text-white/40">Pay securely online</p>
+                <p className="text-[20px] font-semibold tabular-nums">
+                  {formatINR(payment.amountPaise)}
+                </p>
+              </div>
+              <p className="mt-1 text-[12px] leading-5 text-white/45">
+                UPI, cards and netbanking via Cashfree. You&apos;ll be redirected
+                to a secure checkout and your payment is confirmed automatically
+                — no waiting.
+              </p>
+
+              <label
+                htmlFor="cf-phone"
+                className="mt-4 block text-[12px] font-medium text-white/60"
+              >
+                Mobile number
+              </label>
+              <div className="mt-1.5 flex overflow-hidden rounded-[10px] border border-white/[0.12] bg-[#121214] focus-within:border-[var(--pro-accent)]/60">
+                <span className="flex items-center border-r border-white/[0.08] px-3 text-[14px] text-white/50">
+                  +91
+                </span>
+                <input
+                  id="cf-phone"
+                  type="tel"
+                  inputMode="numeric"
+                  autoComplete="tel"
+                  maxLength={10}
+                  value={phone}
+                  onChange={(e) =>
+                    setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))
+                  }
+                  placeholder="98765 43210"
+                  className="w-full bg-transparent px-3 py-3 text-[15px] tabular-nums text-[#F5F5F3] outline-none placeholder:text-white/25"
+                />
+              </div>
+              {phoneError && (
+                <p className="mt-2 text-[13px] text-red-300/80">{phoneError}</p>
+              )}
+              {onlineError && (
+                <p className="mt-2 text-[13px] text-red-300/80">{onlineError}</p>
+              )}
+
+              <button
+                type="button"
+                onClick={handlePayOnline}
+                disabled={onlineLoading}
+                className={cn(
+                  "mt-4 flex w-full items-center justify-center gap-2 rounded-[10px] bg-[var(--pro-btn)] px-4 py-3 text-[14px] font-semibold text-[var(--pro-btn-ink)]",
+                  onlineLoading ? "cursor-wait opacity-70" : "hover:opacity-95"
+                )}
+              >
+                {onlineLoading && <Loader2 className="h-4 w-4 animate-spin" />}
+                Pay {formatINR(payment.amountPaise)} online
+              </button>
+              <p className="mt-3 text-center text-[11px] leading-5 text-white/35">
+                Order {payment.code} · Secured by Cashfree
+              </p>
+            </div>
           </>
         )}
 
