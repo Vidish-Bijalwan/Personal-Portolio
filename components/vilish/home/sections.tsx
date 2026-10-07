@@ -352,6 +352,7 @@ export function ToolsDirectory({
 }) {
   return (
     <Section
+      id="tools"
       eyebrow="Tools"
       title="Every tool. One honest price."
       lede="Twelve tools, all live right now — AI generation and real media processing. Each card opens the real thing at its exact price."

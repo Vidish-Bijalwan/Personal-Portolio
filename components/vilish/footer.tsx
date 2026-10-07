@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { ArrowUpRight, Github, Linkedin, Mail } from "lucide-react";
 import { EtchMark } from "./nav";
-import CursorSettingsControl from "@/components/motion/CursorSettingsControl";
 
 const COLUMNS = [
   {
@@ -197,7 +196,6 @@ export default function VilishFooter() {
             Prices include GST. All images shown are examples.
           </p>
           <div className="flex items-center gap-4">
-            <CursorSettingsControl />
             <p className="text-[12px]" style={{ color: "var(--pro-faint)" }}>© 2026 Etch</p>
           </div>
         </div>
