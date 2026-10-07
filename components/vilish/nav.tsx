@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { ArrowRight, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Wordmark from "./wordmark";
+import AuthButton from "./auth-button";
 import {
   TOOL_DIRECTORY,
   toolsByGroup,
@@ -192,12 +193,15 @@ export default function VilishNav() {
             </Link>
           ))}
         </nav>
-        <Link
-          href="/create"
-          className="v-iris-bg inline-flex min-h-[44px] items-center rounded-[12px] px-5 py-2.5 text-[14px] font-semibold text-[#080808] shadow-[0_10px_32px_-12px_rgba(215,255,63,0.6)] transition-all hover:shadow-[0_10px_40px_-8px_rgba(215,255,63,0.75)]"
-        >
-          Create
-        </Link>
+        <div className="flex shrink-0 items-center gap-2 sm:gap-2.5">
+          <AuthButton />
+          <Link
+            href="/create"
+            className="v-iris-bg inline-flex min-h-[44px] items-center rounded-[12px] px-5 py-2.5 text-[14px] font-semibold text-[#080808] shadow-[0_10px_32px_-12px_rgba(215,255,63,0.6)] transition-all hover:shadow-[0_10px_40px_-8px_rgba(215,255,63,0.75)]"
+          >
+            Create
+          </Link>
+        </div>
       </div>
       {/* mobile links */}
       <div className="sm:hidden">
