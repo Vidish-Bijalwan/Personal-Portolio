@@ -249,6 +249,11 @@ export default function WatchRoomPage() {
         return;
       }
       const body = await res.json().catch(() => null);
+      if (body?.adminBypass) {
+        // Owner bypass: already unlocked — reload to show the clean download.
+        window.location.reload();
+        return;
+      }
       if (!res.ok || !body?.payment) {
         setUnlockError(
           typeof body?.error === "string" && body.error

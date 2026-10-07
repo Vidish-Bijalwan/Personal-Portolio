@@ -526,6 +526,11 @@ export default function VideoStudioPage() {
         return;
       }
       const body = await res.json().catch(() => null);
+      if (body?.adminBypass) {
+        // Owner bypass: order auto-verified, no payment needed.
+        router.push(body.watchUrl ?? `/video-studio/watch/${body.id}`);
+        return;
+      }
       if (!res.ok || !body?.id || !body?.payment) {
         setSubmitError(
           typeof body?.error === "string" && body.error

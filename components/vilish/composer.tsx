@@ -316,6 +316,11 @@ export default function Composer({ variant = "hero", className, initialMedia = "
         }
         return;
       }
+      if (res.result.adminBypass) {
+        // Owner bypass: order auto-verified, no payment needed.
+        router.push(`/generation/${res.result.jobId}`);
+        return;
+      }
       setModal({ jobId: res.result.jobId, payment: res.result.payment });
     } finally {
       setStarting(false);
@@ -422,6 +427,11 @@ export default function Composer({ variant = "hero", className, initialMedia = "
         return;
       }
       const body = await res.json().catch(() => null);
+      if (body?.adminBypass) {
+        // Owner bypass: order auto-verified, no payment needed.
+        router.push(`/watch/${body.id}`);
+        return;
+      }
       if (!res.ok || !body?.payment) {
         setStatus(
           typeof body?.error === "string" && body.error
