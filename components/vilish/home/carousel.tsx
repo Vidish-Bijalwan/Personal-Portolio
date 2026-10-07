@@ -41,7 +41,6 @@ export function HeroCarousel({ slides }: { slides: CarouselSlide[] }) {
   const [dragX, setDragX] = useState(0);
   const dragging = useRef(false);
   const dragStartX = useRef(0);
-  const trackRef = useRef<HTMLDivElement>(null);
   const reduceMotion = useRef(false);
 
   useEffect(() => {
@@ -152,7 +151,6 @@ export function HeroCarousel({ slides }: { slides: CarouselSlide[] }) {
           style={{ touchAction: "pan-y" }}
         >
           <div
-            ref={trackRef}
             className="flex items-center"
             onTransitionEnd={onTransitionEnd}
             style={{
