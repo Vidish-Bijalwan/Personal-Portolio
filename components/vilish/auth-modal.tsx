@@ -10,6 +10,7 @@
  * set by Auth.js; protected routes re-validate server-side regardless.
  */
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { signIn } from "next-auth/react";
 import { Loader2, X } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -111,7 +112,10 @@ export default function AuthModal({ open, onClose, onAuthenticated }: AuthModalP
   const inputCls =
     "w-full rounded-[10px] border border-white/[0.12] bg-[#0D0D0F] px-4 py-3 text-[14px] text-white placeholder:text-white/30 outline-none focus:border-white/35";
 
-  return (
+  // Rendered in a portal on document.body: `position: fixed` breaks when
+  // any ancestor has a CSS transform (the hero/composer trees animate),
+  // which pushed the dialog partly off-screen on some viewports.
+  const dialog = (
     <div
       className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 p-0 sm:items-center sm:p-6"
       role="dialog"
@@ -215,4 +219,7 @@ export default function AuthModal({ open, onClose, onAuthenticated }: AuthModalP
       </div>
     </div>
   );
+
+  if (typeof document === "undefined") return dialog;
+  return createPortal(dialog, document.body);
 }
