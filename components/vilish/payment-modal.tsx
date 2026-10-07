@@ -26,6 +26,14 @@ interface PaymentModalProps {
   onPaymentVerified?: (jobId: string) => void;
   /** Test/screenshot seam: which pay mode the modal opens on. Defaults to "online" (Cashfree primary). */
   initialPayMode?: PayMode;
+  /**
+   * Expired-order recovery override. When set, the "Create a new payment
+   * order" screen calls this instead of the default manual-UPI reorder
+   * endpoint (which only knows generation_jobs). Used by the
+   * generate-first unlock flow, whose orders are idempotent per
+   * generation.
+   */
+  onReorder?: () => Promise<ManualPayment | null>;
 }
 
 function useCountdown(expiresAt: string, active: boolean) {
@@ -46,7 +54,7 @@ function useCountdown(expiresAt: string, active: boolean) {
 /** Gentle notice threshold while waiting for the owner: 10 minutes. */
 const LONG_WAIT_MS = 10 * 60 * 1000;
 
-export default function PaymentModal({ jobId, initialPayment, onClose, navigate, onPaymentVerified, initialPayMode = "online" }: PaymentModalProps) {
+export default function PaymentModal({ jobId, initialPayment, onClose, navigate, onPaymentVerified, initialPayMode = "online", onReorder }: PaymentModalProps) {
   const [payment, setPayment] = useState<ManualPayment>(initialPayment);
   const [phase, setPhase] = useState<ModalPhase>("pay");
   const [payMode, setPayMode] = useState<PayMode>(initialPayMode);
@@ -147,12 +155,18 @@ export default function PaymentModal({ jobId, initialPayment, onClose, navigate,
   const handleReorder = async () => {
     setReordering(true);
     try {
-      const next = await reorderManualPayment(jobId);
-      if (!next) {
+      let payment: ManualPayment | null = null;
+      if (onReorder) {
+        payment = await onReorder();
+      } else {
+        const next = await reorderManualPayment(jobId);
+        payment = next ? next.payment : null;
+      }
+      if (!payment) {
         setStatusMsg("Could not create a new payment order. Please try again.");
         return;
       }
-      setPayment(next.payment);
+      setPayment(payment);
       setPhase("pay");
       setPayMode("online");
       setNotConfirmed(false);

@@ -14,8 +14,9 @@ import type { PriceBreakdown } from '@/lib/vilish/types';
  * Body: { prompt?: string }
  * Auth required. Consumes the lowest-level unused remakeEligibility credit on
  * a READY job, prices it via remakePrice(), and creates a child QUOTED job +
- * quote. Payment for the remake goes through /api/generation/start with the
- * returned quoteId — same flow as a fresh generation.
+ * quote. The remake starts generate-first via /api/generation/start with the
+ * returned quoteId — same flow as a fresh generation (no pre-payment; the
+ * clean file unlocks post-generation).
  */
 export async function POST(
   req: NextRequest,

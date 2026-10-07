@@ -31,7 +31,6 @@ import {
   formatPromptCount,
 } from "@/src/lib/vilish/prompt-limits";
 import {
-  startManualPayment,
   UPLOAD_EDGE_LIMIT_BYTES,
   type ManualPayment,
 } from "./payment";
@@ -117,7 +116,6 @@ export default function Composer({ variant = "hero", className, initialMedia = "
   const [status, setStatus] = useState("");
   const [authNeeded, setAuthNeeded] = useState(false);
   const [pendingAuth, setPendingAuth] = useState<"paid" | "free" | "video" | null>(null);
-  const [modal, setModal] = useState<{ jobId: string; payment: ManualPayment } | null>(null);
   const [ordersAccepting, setOrdersAccepting] = useState<boolean | null>(null);
   const [turnaround, setTurnaround] = useState("");
   const abortRef = useRef<AbortController | null>(null);
@@ -266,6 +264,14 @@ export default function Composer({ variant = "hero", className, initialMedia = "
     });
   }, []);
 
+  /**
+   * Paid image generation — generate-first: the generation starts
+   * immediately with NO payment order. POST /api/generation/start queues
+   * a paid generations row and returns its id; the watch room shows the
+   * watermarked preview on completion, and the unlock order (with the
+   * server-side quoted price) is created only when the user clicks
+   * "Download clean HD".
+   */
   const handleGenerate = async () => {
     if (!quote || starting) return;
     if (overLimit) {
@@ -294,34 +300,79 @@ export default function Composer({ variant = "hero", className, initialMedia = "
         );
         return;
       }
-      const res = await startManualPayment(quote.quoteId, "IN", {
-        files,
-        onProgress: (f) => setUploadProgress(f),
-      });
-      setUploadProgress(null);
-      if (!res.ok) {
-        if (res.error.kind === "unauthorized") {
-          setPendingAuth("paid");
-          setAuthNeeded(true);
-        } else if (res.error.kind === "paused") {
-          setStatus("New generation orders are temporarily paused.");
-        } else if (res.error.kind === "intl") {
-          setStatus("International payments coming soon — India (UPI) only for now.");
-        } else if (res.error.kind === "too_large") {
-          setStatus(
-            "Those files are too large to upload in one go — try fewer or smaller files (keep the total under 4 MB)."
-          );
+      let res: Response;
+      try {
+        if (files.length > 0) {
+          // XHR for real upload progress (fetch has no upload-progress
+          // events). Response shape is identical to the JSON path.
+          const form = new FormData();
+          form.append("quoteId", quote.quoteId);
+          form.append("country", "IN");
+          for (const f of files) form.append("files", f);
+          res = await new Promise<Response>((resolvePromise, reject) => {
+            const xhr = new XMLHttpRequest();
+            xhr.open("POST", "/api/generation/start");
+            xhr.upload.onprogress = (e) => {
+              if (e.lengthComputable && e.total > 0) {
+                setUploadProgress(Math.min(1, e.loaded / e.total));
+              }
+            };
+            xhr.onload = () =>
+              resolvePromise(
+                new Response(xhr.responseText, {
+                  status: xhr.status,
+                  headers: {
+                    "content-type":
+                      xhr.getResponseHeader("content-type") ?? "",
+                  },
+                })
+              );
+            xhr.onerror = () => reject(new Error("network"));
+            xhr.send(form);
+          });
         } else {
-          setStatus(res.error.message);
+          res = await fetch("/api/generation/start", {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ quoteId: quote.quoteId, country: "IN" }),
+          });
         }
+      } catch {
+        setStatus("Network error. Please try again.");
         return;
       }
-      if (res.result.adminBypass) {
-        // Owner bypass: order auto-verified, no payment needed.
-        router.push(`/generation/${res.result.jobId}`);
+      setUploadProgress(null);
+      if (res.status === 401) {
+        setPendingAuth("paid");
+        setAuthNeeded(true);
         return;
       }
-      setModal({ jobId: res.result.jobId, payment: res.result.payment });
+      if (res.status === 413) {
+        setStatus(
+          "Those files are too large to upload in one go — try fewer or smaller files (keep the total under 4 MB)."
+        );
+        return;
+      }
+      const body = await res.json().catch(() => null);
+      if (res.status === 403 && (body?.error === "ORDERS_PAUSED" || body?.code === "ORDERS_PAUSED")) {
+        setStatus("New generation orders are temporarily paused.");
+        return;
+      }
+      if (res.status === 400 && body?.code === "INTL_PAYMENTS_COMING_SOON") {
+        setStatus("International payments coming soon — India (UPI) only for now.");
+        return;
+      }
+      if (!res.ok || !body?.generationId) {
+        setStatus(
+          typeof body?.error === "string" && body.error
+            ? body.error
+            : "Could not start your generation. Please try again."
+        );
+        return;
+      }
+      // Generation started — straight to the watch room. Payment happens
+      // later, only if the user wants the clean HD file.
+      router.push(`/watch/${body.generationId}`);
     } finally {
       setStarting(false);
       setUploadProgress(null);
@@ -934,7 +985,7 @@ export default function Composer({ variant = "hero", className, initialMedia = "
       {mediaMode === "image" && billingMode === "paid" && phase === "quoted" && quote && (
         <>
           <p className="mt-3 text-[12px] text-[var(--pro-faint)]">
-            No subscription · Pay once for this render · Failed renders refunded
+            No subscription · Pay only if you love the preview · Failed renders are never charged
           </p>
           <p className="mt-1.5 text-[12px] leading-5 text-[var(--pro-faint)]">
             AI generation with human quality review — every paid generation is
@@ -955,14 +1006,6 @@ export default function Composer({ variant = "hero", className, initialMedia = "
         </p>
       )}
 
-      {modal && (
-        <PaymentModal
-          jobId={modal.jobId}
-          initialPayment={modal.payment}
-          onClose={() => setModal(null)}
-          navigate={(url) => router.push(url)}
-        />
-      )}
       {videoModal && (
         <PaymentModal
           jobId={videoModal.jobId}

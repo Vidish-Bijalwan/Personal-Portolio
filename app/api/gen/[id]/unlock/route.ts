@@ -12,9 +12,10 @@ import { verifyOrderAdminBypass } from '@/lib/payments/manual-upi';
  * POST /api/gen/[id]/unlock
  * Owner-gated. FREE-TIER IMAGES ONLY (tier='free'): paid video rows are
  * rejected — their payment was already taken at /api/video/order time.
- * Requires status=done and unlocked=false. Creates a ₹19 (1900 paise)
- * manual-UPI order via the existing payment flow and links it with
- * purpose='unlock'. Idempotent: a still-pending unlock order is resumed
+ * Requires status=done and unlocked=false. Creates a manual-UPI order
+ * for UNLOCK_PRICE_PAISE (the single-image catalog price — read from
+ * src/lib/free/policy, never hardcoded) via the existing payment flow
+ * and links it with purpose='unlock'. Idempotent: a still-pending unlock
  * instead of duplicated. Returns { id, payment } in the payment-modal
  * shape so the existing UPI → UTR-submit → owner-verify flow works
  * unchanged; the verify hook flips generations.unlocked.
