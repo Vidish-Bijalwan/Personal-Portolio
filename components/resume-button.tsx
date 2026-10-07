@@ -39,7 +39,7 @@ export default function ResumeButton() {
       <span className="flex items-center">
         {isDownloaded ? (
           <>
-            <Check className="mr-2 h-4 w-4 text-blue-500" />
+            <Check className="mr-2 h-4 w-4 text-[var(--pro-accent)]" />
             Resume Downloaded
           </>
         ) : isDownloading ? (

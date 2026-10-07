@@ -38,6 +38,16 @@ import {
 import { composerServiceById, priceOf } from "@/src/lib/pricing/catalog";
 import { formatINR } from "@/src/lib/vilish/types";
 import { cn } from "@/lib/utils";
+import conceptArtRaw from "@/data/ad-concepts/concept-art.json";
+
+/* Per-concept card art: unique thumbnails generated for every concept
+   (public/pro/ads-concepts/<id>.jpg). Falls back to the category art
+   when a concept has no dedicated thumbnail yet. */
+const CONCEPT_ART: Record<string, string> = Object.fromEntries(
+  Object.entries(conceptArtRaw as Record<string, unknown>)
+    .filter(([, v]) => typeof v === "string" && (v as string).length > 0)
+    .map(([k, v]) => [k, `/pro/${v as string}`])
+);
 
 /* Card art: reuse the shipped pro hero images as decorative style
    references, mapped by concept category family. */
@@ -61,6 +71,10 @@ const CATEGORY_ART: Record<string, string> = {
   transformation: "/pro/ad-skincare.jpg",
   video: "/pro/hero-headphones.jpg",
 };
+
+function artForConcept(c: { id: string; category: string }): string {
+  return CONCEPT_ART[c.id] ?? CATEGORY_ART[c.category] ?? "/pro/hero-headphones.jpg";
+}
 
 function artFor(category: string): string {
   return CATEGORY_ART[category] ?? "/pro/hero-headphones.jpg";
@@ -156,7 +170,11 @@ export default function AdsFlow() {
     [concept, product, paletteName, typographyName, layoutName]
   );
 
-  const service = concept ? conceptService(concept) : null;
+  const service = concept
+    ? conceptService(concept)
+    : media === "image" && composerServiceById("product-photo")
+      ? "product-photo"
+      : null;
   const serviceInfo = service ? composerServiceById(service) : null;
   const priceLine = service
     ? `${serviceInfo?.label ?? service} — ${formatINR(priceOf(service))}`
@@ -261,7 +279,7 @@ export default function AdsFlow() {
                 color: "var(--pro-fg)",
               }}
             />
-            <div className="mt-6 flex items-center justify-between">
+            <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-3">
               <button
                 type="button"
                 onClick={() => setStep(2)}
@@ -269,6 +287,16 @@ export default function AdsFlow() {
                 className="pro-btn-primary inline-flex disabled:cursor-not-allowed disabled:opacity-40"
               >
                 Pick a concept <ArrowRight className="ml-2 h-4 w-4" />
+              </button>
+              {/* Freeform path: description + reference photo, no concept needed. */}
+              <button
+                type="button"
+                onClick={() => { setConceptId(null); setStep(3); }}
+                disabled={product.trim().length === 0}
+                className="pro-body inline-flex items-center gap-1.5 text-[14px] font-medium underline underline-offset-4 disabled:cursor-not-allowed disabled:opacity-40"
+                style={{ color: "var(--pro-muted)", textDecorationColor: "var(--pro-border)" }}
+              >
+                Skip — use my own description <ArrowRight className="h-4 w-4" />
               </button>
             </div>
           </div>
@@ -413,7 +441,7 @@ export default function AdsFlow() {
                   >
                     <div className="relative aspect-[16/9]">
                       <Image
-                        src={artFor(c.category)}
+                        src={artForConcept(c)}
                         alt=""
                         fill
                         sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
@@ -451,24 +479,31 @@ export default function AdsFlow() {
             </div>
           )}
 
-          <div className="mt-8 flex items-center gap-3">
+          <div className="mt-8 flex flex-wrap items-center gap-3">
             <button type="button" onClick={() => setStep(1)} className="pro-btn-secondary inline-flex">
               <ArrowLeft className="mr-2 h-4 w-4" /> Back
             </button>
             <button
               type="button"
               onClick={() => setStep(3)}
-              disabled={!concept}
+              disabled={product.trim().length === 0}
+              title={concept ? "Style the selected concept" : "Skip the concept library — style your own description"}
               className="pro-btn-primary inline-flex disabled:cursor-not-allowed disabled:opacity-40"
             >
-              Style it <ArrowRight className="ml-2 h-4 w-4" />
+              {concept ? "Style it" : "Skip — style my own description"} <ArrowRight className="ml-2 h-4 w-4" />
             </button>
+            {!concept && (
+              <p className="w-full text-[13px]" style={{ color: "var(--pro-faint)" }}>
+                No concept selected — your description goes straight to styling. You can
+                still pick a concept above for a proven starting point.
+              </p>
+            )}
           </div>
         </section>
       )}
 
       {/* ------------------------------ Step 3 ------------------------------ */}
-      {step === 3 && concept && (
+      {step === 3 && (
         <section className="mt-8 grid gap-6 lg:grid-cols-2">
           <div className="space-y-6">
             <div className="pro-card p-7" style={{ boxShadow: "var(--pro-card-shadow)" }}>
@@ -613,16 +648,18 @@ export default function AdsFlow() {
       )}
 
       {/* ------------------------------ Step 4 ------------------------------ */}
-      {step === 4 && concept && (
+      {step === 4 && (
         <section className="mt-8 grid gap-6 lg:grid-cols-5">
           <div className="pro-card p-7 lg:col-span-3" style={{ boxShadow: "var(--pro-card-shadow)" }}>
             <h2 className="pro-display text-xl font-bold" style={{ color: "var(--pro-fg)" }}>
               Your ad prompt
             </h2>
             <div className="mt-4 flex flex-wrap gap-2 text-[12.5px]" style={{ color: "var(--pro-muted)" }}>
-              <span className="rounded-full border px-2.5 py-1" style={{ borderColor: "var(--pro-border-soft)" }}>
-                {concept.name}
-              </span>
+              {concept && (
+                <span className="rounded-full border px-2.5 py-1" style={{ borderColor: "var(--pro-border-soft)" }}>
+                  {concept.name}
+                </span>
+              )}
               {paletteName && (
                 <span className="rounded-full border px-2.5 py-1" style={{ borderColor: "var(--pro-border-soft)" }}>
                   {paletteName}

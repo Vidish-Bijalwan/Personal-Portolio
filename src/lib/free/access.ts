@@ -66,7 +66,17 @@ export async function countFreeImagesToday(userId: string): Promise<number> {
   return rows[0]?.n ?? 0;
 }
 
-export async function freeRemaining(userId: string): Promise<{ left: number; cap: number }> {
+/**
+ * Free-trial quota for the composer. The owner/admin bypasses the daily cap
+ * (the /api/free/generate route also skips enforcement server-side) — the
+ * client gates on this value, so it must be bypass-aware too, otherwise the
+ * admin gets blocked with a "pay" nudge after heavy testing.
+ */
+export async function freeRemaining(
+  userId: string,
+  opts?: { adminBypass?: boolean }
+): Promise<{ left: number; cap: number }> {
+  if (opts?.adminBypass) return { left: FREE_DAILY_CAP, cap: FREE_DAILY_CAP };
   const used = await countFreeImagesToday(userId);
   return { left: Math.max(0, FREE_DAILY_CAP - used), cap: FREE_DAILY_CAP };
 }

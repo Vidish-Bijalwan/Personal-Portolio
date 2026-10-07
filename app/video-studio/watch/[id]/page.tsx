@@ -424,7 +424,8 @@ export default function VideoStudioWatchPage() {
                     playsInline
                     autoPlay
                     controls
-                    className="block aspect-video w-full bg-black object-cover"
+                    className="block w-full bg-black object-contain"
+                    style={{ maxHeight: "72vh" }}
                     onError={() => setPreviewOk(false)}
                   />
                 )
@@ -484,7 +485,7 @@ export default function VideoStudioWatchPage() {
               {meta.fileNoun === "audio" ? (
                 <audio src={cleanUrl} controls className="block w-full bg-[#121214] px-4 py-6" />
               ) : (
-                <video src={cleanUrl} controls playsInline className="block aspect-video w-full bg-black object-cover" />
+                <video src={cleanUrl} controls playsInline className="block w-full bg-black object-contain" style={{ maxHeight: "72vh" }} />
               )}
               <p className="border-t border-white/[0.08] bg-[#121214] px-4 py-2 text-[11px] uppercase tracking-[0.08em] text-white/40">
                 {meta.badge}

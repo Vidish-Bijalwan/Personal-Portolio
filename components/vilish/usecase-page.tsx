@@ -70,7 +70,7 @@ export default function UseCasePage({ usecase }: { usecase: UseCase }) {
           <div
             aria-hidden
             className="pointer-events-none absolute -top-32 left-1/2 h-96 w-[720px] -translate-x-1/2 rounded-full blur-3xl"
-            style={{ background: `${usecase.accent}14` }}
+            style={{ background: "color-mix(in srgb, var(--pro-accent) 8%, transparent)" }}
           />
           <div className="relative mx-auto max-w-5xl px-4 pb-16 pt-12 sm:pt-20">
             <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-[12.5px] text-white/40">
@@ -97,7 +97,7 @@ export default function UseCasePage({ usecase }: { usecase: UseCase }) {
                 <Reveal delay={0.1} className="mt-8 flex flex-wrap gap-3">
                   <Link
                     href="/create"
-                    className="inline-flex min-h-[44px] items-center gap-2 rounded-[12px] px-7 py-3 text-[15px] font-semibold text-[#080808] transition-opacity hover:opacity-95"
+                    className="inline-flex min-h-[44px] items-center gap-2 rounded-[12px] px-7 py-3 text-[15px] font-semibold text-[var(--pro-btn-ink)] transition-opacity hover:opacity-95"
                     style={{ background: usecase.accent }}
                   >
                     Start creating <ArrowRight className="h-4 w-4" strokeWidth={2.2} />
@@ -312,7 +312,7 @@ export default function UseCasePage({ usecase }: { usecase: UseCase }) {
             <Reveal delay={0.1} className="mt-12 text-center">
               <Link
                 href="/create"
-                className="inline-flex min-h-[44px] items-center gap-2 rounded-[12px] px-8 py-3.5 text-[15px] font-semibold text-[#080808] transition-opacity hover:opacity-95"
+                className="inline-flex min-h-[44px] items-center gap-2 rounded-[12px] px-8 py-3.5 text-[15px] font-semibold text-[var(--pro-btn-ink)] transition-opacity hover:opacity-95"
                 style={{ background: usecase.accent }}
               >
                 Start creating <ArrowRight className="h-4 w-4" strokeWidth={2.2} />

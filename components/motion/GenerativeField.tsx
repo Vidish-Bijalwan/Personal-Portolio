@@ -27,14 +27,14 @@ interface GenerativeFieldProps {
   density?: number
 }
 
-// Pro tints: white / periwinkle accent / cool steel on near-black
+// Pro tints: white / champagne-gold accent / pale champagne / cool steel / deep bronze on near-black
 // (legacy tints removed 2026-10-07)
 const TINTS: Array<[number, number, number]> = [
   [245, 245, 243], // white
-  [125, 162, 255], // pro accent
-  [170, 180, 220], // pale periwinkle
+  [198, 161, 91], // pro accent (champagne gold)
+  [222, 203, 168], // pale champagne
   [148, 158, 180], // steel
-  [90, 110, 160], // deep slate blue
+  [110, 86, 44], // deep bronze
 ]
 
 interface Mote {
@@ -62,7 +62,7 @@ export default function GenerativeField({ className, density = 1 }: GenerativeFi
         aria-hidden="true"
         style={{
           background:
-            "radial-gradient(60% 50% at 50% 45%, rgba(125,162,255,0.10), rgba(255,255,255,0.04) 55%, transparent 100%)",
+            "radial-gradient(60% 50% at 50% 45%, rgba(198,161,91,0.10), rgba(255,255,255,0.04) 55%, transparent 100%)",
         }}
       />
     )
@@ -157,7 +157,7 @@ function FieldCanvas({ className, density, wrapRef }: FieldCanvasProps) {
         height * 0.45,
         Math.max(width, height) * 0.6
       )
-      wash.addColorStop(0, "rgba(125,162,255,0.05)")
+      wash.addColorStop(0, "rgba(198,161,91,0.05)")
       wash.addColorStop(0.55, "rgba(255,255,255,0.02)")
       wash.addColorStop(1, "rgba(0,0,0,0)")
       cx.fillStyle = wash
@@ -174,7 +174,7 @@ function FieldCanvas({ className, density, wrapRef }: FieldCanvasProps) {
           const d2 = dx * dx + dy * dy
           if (d2 < LINK_DIST * LINK_DIST) {
             const closeness = 1 - Math.sqrt(d2) / LINK_DIST
-            cx.strokeStyle = `rgba(139,140,250,${(0.07 * closeness).toFixed(3)})`
+            cx.strokeStyle = `rgba(198,161,91,${(0.07 * closeness).toFixed(3)})`
             cx.beginPath()
             cx.moveTo(a.x, a.y)
             cx.lineTo(b.x, b.y)

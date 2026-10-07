@@ -32,7 +32,7 @@ export default function SiteBackdrop({ className }: SiteBackdropProps) {
         className="absolute inset-x-0 top-0 h-[46vh]"
         style={{
           background:
-            "radial-gradient(ellipse 70% 100% at 50% -20%, rgba(125,162,255,0.06) 0%, rgba(255,255,255,0.02) 45%, transparent 100%)",
+            "radial-gradient(ellipse 70% 100% at 50% -20%, rgba(198,161,91,0.06) 0%, rgba(255,255,255,0.02) 45%, transparent 100%)",
         }}
       />
       {/* bottom ambient glow */}
@@ -40,7 +40,7 @@ export default function SiteBackdrop({ className }: SiteBackdropProps) {
         className="absolute inset-x-0 bottom-0 h-[40vh]"
         style={{
           background:
-            "radial-gradient(ellipse 70% 100% at 50% 120%, rgba(125,162,255,0.04) 0%, rgba(255,255,255,0.015) 50%, transparent 100%)",
+            "radial-gradient(ellipse 70% 100% at 50% 120%, rgba(198,161,91,0.04) 0%, rgba(255,255,255,0.015) 50%, transparent 100%)",
         }}
       />
       {/* ultra-slow drifting sheen — omitted for reduced motion */}
@@ -49,7 +49,7 @@ export default function SiteBackdrop({ className }: SiteBackdropProps) {
           className="v-site-backdrop-drift absolute inset-x-[-20%] top-[10%] h-[60vh]"
           style={{
             background:
-              "radial-gradient(ellipse 40% 60% at 60% 40%, rgba(125,162,255,0.045) 0%, transparent 70%)",
+              "radial-gradient(ellipse 40% 60% at 60% 40%, rgba(198,161,91,0.045) 0%, transparent 70%)",
           }}
         />
       )}

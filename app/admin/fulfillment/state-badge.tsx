@@ -5,7 +5,7 @@ export function StateBadge({ state }: { state: string }) {
       : state === "AWAITING_OPERATOR_REVIEW"
         ? "border-violet-300/30 bg-violet-300/10 text-violet-200"
         : state === "APPROVED_FOR_GENERATION" || state === "GENERATING"
-          ? "border-sky-300/30 bg-sky-300/10 text-sky-200"
+          ? "border-[#c6a15b]/30 bg-[#c6a15b]/10 text-[#c6a15b]"
           : state === "RESULT_UPLOADED" || state === "OPERATOR_QC"
             ? "border-amber-300/30 bg-amber-300/10 text-amber-200"
             : state === "NEEDS_CLARIFICATION" ||
