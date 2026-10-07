@@ -215,7 +215,7 @@ export default function VideoStudioWatchPage() {
     return () => clearInterval(t);
   }, []);
 
-  /** Open the job payment (catalog ₹39): stored payment first, then server resume. */
+  /** Open the job payment (per-tool catalog price): stored payment first, then server resume. */
   const openPayment = async () => {
     setPayBusy(true);
     setPayError("");

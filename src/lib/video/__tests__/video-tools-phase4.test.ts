@@ -29,6 +29,8 @@ import {
   TOOL_OUTPUT_MIME,
   VIDEO_JOB_PRICE_PAISE,
   VIDEO_TOOLS,
+  toolPricePaise,
+  type VideoTool,
 } from '@/lib/video/constants';
 import { priceOf } from '@/lib/pricing/catalog';
 import { formatINR } from '@/lib/vilish/types';
@@ -59,8 +61,20 @@ describe('phase 4 tool registry', () => {
 
   it('prices every tool from the real catalog — no hardcoded paise', () => {
     expect(VIDEO_JOB_PRICE_PAISE).toBe(priceOf('video-studio'));
-    expect(VIDEO_JOB_PRICE_PAISE).toBe(3900);
-    expect(formatINR(priceOf('video-studio'))).toBe('₹39');
+    expect(VIDEO_JOB_PRICE_PAISE).toBe(2900);
+    expect(formatINR(priceOf('video-studio'))).toBe('₹29');
+  });
+
+  it('tiers per-tool prices: ₹5 trivial converters, ₹10 heavier jobs, ₹29 AI jobs', () => {
+    expect(toolPricePaise('convert')).toBe(priceOf('tool-basic'));
+    expect(toolPricePaise('gif')).toBe(priceOf('tool-basic'));
+    expect(toolPricePaise('compress')).toBe(priceOf('tool-basic'));
+    expect(toolPricePaise('trim')).toBe(priceOf('tool-plus'));
+    expect(toolPricePaise('add-audio')).toBe(priceOf('tool-plus'));
+    expect(toolPricePaise('denoise')).toBe(priceOf('tool-plus'));
+    expect(toolPricePaise('tts')).toBe(priceOf('video-studio'));
+    expect(toolPricePaise('caption')).toBe(priceOf('video-studio'));
+    expect(() => toolPricePaise('nonsense' as never)).toThrow(RangeError);
   });
 
   it('maps each tool to its real output mime', () => {
@@ -319,7 +333,7 @@ describe('POST /api/video-jobs — phase 4 tools', () => {
 
   it('creates compress/convert/gif/denoise jobs with real output mimes', async () => {
     mockAuth.userId = 'vuser-1';
-    const cases: Array<[string, Record<string, string>, string]> = [
+    const cases: Array<[string, Record<string, string | number>, string]> = [
       ['compress', { quality: 'balanced' }, 'video/mp4'],
       ['convert', {}, 'audio/mpeg'],
       ['gif', { start: 1, end: 5, fps: 12, width: 480 }, 'image/gif'],
@@ -333,10 +347,11 @@ describe('POST /api/video-jobs — phase 4 tools', () => {
       const { status, body } = await json(res);
       expect(status).toBe(201);
       expect(body.tool).toBe(tool);
-      expect(body.pricePaise).toBe(3900);
+      const expectedPaise = toolPricePaise(tool as VideoTool);
+      expect(body.pricePaise).toBe(expectedPaise);
       const db = client.getDb();
       const rows = await db.select().from(schema.videoJobs).where(eq(schema.videoJobs.id, body.id));
-      expect(rows[0]).toMatchObject({ tool, mime, status: 'queued', priceCents: 3900 });
+      expect(rows[0]).toMatchObject({ tool, mime, status: 'queued', priceCents: expectedPaise });
     }
   });
 

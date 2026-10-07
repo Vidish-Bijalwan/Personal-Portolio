@@ -20,7 +20,7 @@ import {
 import { createVideoJobOrder } from '@/lib/video/orders';
 import {
   TOOL_OUTPUT_MIME,
-  VIDEO_JOB_PRICE_PAISE,
+  toolPricePaise,
   type VideoTool,
 } from '@/lib/video/constants';
 
@@ -34,9 +34,10 @@ const UUID_RE =
  * video (File, video/mp4 ≤50MB, required unless tts uses a generated
  * clip), audio (File, .mp3/.wav/.m4a ≤20MB, required for add-audio),
  * generationId (optional — tts clip source).
- * Auth required. Creates a queued video_jobs row + a ₹39 (3900 paise)
- * manual-UPI order via the existing order flow (pay-ping: "I've paid" →
- * owner ping → verify → clean unlock). The watcher processes the job
+ * Auth required. Creates a queued video_jobs row + a per-tool manual-UPI
+ * order via the existing order flow (pay-ping: "I've paid" → owner ping →
+ * verify → clean unlock): ₹5 trivial converters, ₹10 heavier processing,
+ * ₹29 AI jobs (voice-over, captions). The watcher processes the job
  * immediately (watermarked preview while payment pends); the verify hook
  * flips video_jobs.unlocked so the clean file opens.
  * Returns 201 { id, tool, status, pricePaise, watchUrl, payment }.
@@ -202,7 +203,7 @@ export async function POST(req: NextRequest) {
       input2: input2Bytes,
       input2Mime,
       mime: TOOL_OUTPUT_MIME[tool],
-      priceCents: VIDEO_JOB_PRICE_PAISE,
+      priceCents: toolPricePaise(tool),
       status: 'queued',
       unlocked: false,
     })
@@ -247,7 +248,7 @@ export async function POST(req: NextRequest) {
       id: job.id,
       tool,
       status: 'queued',
-      pricePaise: VIDEO_JOB_PRICE_PAISE,
+      pricePaise: toolPricePaise(tool),
       watchUrl: `/video-studio/watch/${job.id}`,
       payment: order.payment,
     },

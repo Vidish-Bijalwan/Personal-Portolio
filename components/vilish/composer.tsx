@@ -18,6 +18,11 @@ import {
   servicePricePaise,
   type ComposerServiceId,
 } from "@/src/lib/pricing/catalog";
+import {
+  VIDEO_DURATION_MAX_S,
+  VIDEO_DURATION_MIN_S,
+  videoClipPricePaise,
+} from "@/src/lib/pricing/engine";
 import type { Template } from "@/src/lib/trends/templates";
 import {
   ATTACH_MAX_FILES,
@@ -131,6 +136,9 @@ export default function Composer({ variant = "hero", className, initialMedia = "
   const [freeSending, setFreeSending] = useState(false);
   const [videoSending, setVideoSending] = useState(false);
   const [videoModal, setVideoModal] = useState<{ jobId: string; payment: ManualPayment } | null>(null);
+  // Clip length for paid video orders: 5..60s. The order price scales with
+  // it (engine videoClipPricePaise); the API validates the same range.
+  const [videoDuration, setVideoDuration] = useState(VIDEO_DURATION_MIN_S);
 
   // reference attachments (stored with the order, shown to the operator)
   const [files, setFiles] = useState<File[]>([]);
@@ -419,7 +427,7 @@ export default function Composer({ variant = "hero", className, initialMedia = "
       const res = await fetch("/api/video/order", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ prompt: prompt.trim(), aspectRatio }),
+        body: JSON.stringify({ prompt: prompt.trim(), aspectRatio, durationSeconds: videoDuration }),
       });
       if (res.status === 401) {
         setPendingAuth("video");
@@ -518,7 +526,7 @@ export default function Composer({ variant = "hero", className, initialMedia = "
           {(
             [
               { id: "image", label: "Image" },
-              { id: "video", label: "5s video clip" },
+              { id: "video", label: "Video clip" },
             ] as const
           ).map((m) => (
             <button
@@ -637,10 +645,41 @@ export default function Composer({ variant = "hero", className, initialMedia = "
         </div>
       )}
       {mediaMode === "video" && (
-        <p className="mb-4 text-[12px] leading-5 text-[var(--pro-faint)]">
-          {formatINR(priceOf("clip-5s"))} per 5s clip — fulfilled by an operator with human QC. AI-generated; a watermarked
-          preview shows until you unlock the clean HD file.
-        </p>
+        <div className="mb-4">
+          <div className="flex items-center justify-between gap-3">
+            <label
+              htmlFor="video-duration"
+              className="text-[13px] font-semibold text-[var(--pro-fg)]"
+            >
+              Clip length
+            </label>
+            <p className="text-[13px] tabular-nums text-[var(--pro-muted)]">
+              <span className="font-semibold text-[var(--pro-fg)]">{videoDuration}s</span>
+              {" · "}
+              {formatINR(videoClipPricePaise(videoDuration))}
+            </p>
+          </div>
+          <input
+            id="video-duration"
+            type="range"
+            min={VIDEO_DURATION_MIN_S}
+            max={VIDEO_DURATION_MAX_S}
+            step={1}
+            value={videoDuration}
+            onChange={(e) => setVideoDuration(Number(e.target.value))}
+            className="mt-2 w-full accent-[var(--pro-accent)]"
+            aria-valuetext={`${videoDuration} seconds, ${formatINR(videoClipPricePaise(videoDuration))}`}
+          />
+          <div className="mt-1 flex justify-between text-[11px] tabular-nums text-[var(--pro-faint)]">
+            <span>5s · {formatINR(priceOf("clip-5s"))}</span>
+            <span>60s · {formatINR(videoClipPricePaise(VIDEO_DURATION_MAX_S))}</span>
+          </div>
+          <p className="mt-2 text-[12px] leading-5 text-[var(--pro-faint)]">
+            {formatINR(priceOf("clip-5s"))} per 5-second block (or part of one) —
+            fulfilled by an operator with human QC. A watermarked preview shows
+            until you unlock the clean HD file.
+          </p>
+        </div>
       )}
       {initialTemplate && (
         <div className="mb-4 flex items-center gap-2.5 rounded-[10px] border border-[var(--pro-accent)]/25 bg-[var(--pro-accent)]/[0.06] px-3.5 py-2.5">
@@ -676,7 +715,7 @@ export default function Composer({ variant = "hero", className, initialMedia = "
         onChange={(e) => setPrompt(e.target.value)}
         onFocus={() => setPromptFocused(true)}
         onBlur={() => setPromptFocused(false)}
-        placeholder={mediaMode === "video" ? "Describe the 5-second clip…" : (animatedPlaceholder ?? "What do you want to make?")}
+        placeholder={mediaMode === "video" ? "Describe your clip…" : (animatedPlaceholder ?? "What do you want to make?")}
         rows={variant === "hero" ? 3 : 4}
         maxLength={PROMPT_MAX_LENGTH}
         aria-invalid={overLimit}
@@ -812,8 +851,8 @@ export default function Composer({ variant = "hero", className, initialMedia = "
         <div className="min-w-0">
           {mediaMode === "video" && (
             <p className="text-[13px] text-[var(--pro-faint)] tabular-nums">
-              <span className="text-[18px] font-semibold text-[var(--pro-fg)]">{formatINR(priceOf("clip-5s"))}</span>{" "}
-              per 5s clip
+              <span className="text-[18px] font-semibold text-[var(--pro-fg)]">{formatINR(videoClipPricePaise(videoDuration))}</span>{" "}
+              for a {videoDuration}s clip
             </p>
           )}
           {mediaMode === "image" && billingMode === "free" && (

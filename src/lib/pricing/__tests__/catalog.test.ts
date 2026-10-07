@@ -6,7 +6,14 @@ import {
   composerServiceById,
   servicePricePaise,
 } from "@/lib/pricing/catalog";
-import { PRICE_LADDER } from "@/lib/pricing/engine";
+import {
+  PRICE_LADDER,
+  VIDEO_BLOCK_SECONDS,
+  VIDEO_DURATION_MAX_S,
+  VIDEO_DURATION_MIN_S,
+  videoBlockPricePaise,
+  videoClipPricePaise,
+} from "@/lib/pricing/engine";
 import { formatINR } from "@/lib/vilish/types";
 
 /**
@@ -25,33 +32,85 @@ describe("price catalog", () => {
       "clip-5s",
       "video-studio",
       "remake",
+      "tool-basic",
+      "tool-plus",
     ]);
     expect(new Set(ids).size).toBe(ids.length);
   });
 
   it("matches the canonical prices", () => {
-    expect(priceOf("single-image")).toBe(1900);
-    expect(priceOf("pack-4")).toBe(6900);
-    expect(priceOf("product-photo")).toBe(3900);
-    expect(priceOf("clip-5s")).toBe(8900);
-    expect(priceOf("video-studio")).toBe(3900);
-    expect(priceOf("remake")).toBe(900);
+    expect(priceOf("single-image")).toBe(1500);
+    expect(priceOf("pack-4")).toBe(4900);
+    expect(priceOf("product-photo")).toBe(2900);
+    expect(priceOf("clip-5s")).toBe(4500);
+    expect(priceOf("video-studio")).toBe(2900);
+    expect(priceOf("remake")).toBe(500);
+    expect(priceOf("tool-basic")).toBe(500);
+    expect(priceOf("tool-plus")).toBe(1000);
   });
 
   it("equals exactly the October 2026 price-drop catalog", () => {
     expect(PRICE_CATALOG.map((p) => [p.id, p.paise])).toEqual([
-      ["single-image", 1900],
-      ["pack-4", 6900],
-      ["product-photo", 3900],
-      ["clip-5s", 8900],
-      ["video-studio", 3900],
-      ["remake", 900],
+      ["single-image", 1500],
+      ["pack-4", 4900],
+      ["product-photo", 2900],
+      ["clip-5s", 4500],
+      ["video-studio", 2900],
+      ["remake", 500],
+      ["tool-basic", 500],
+      ["tool-plus", 1000],
     ]);
   });
 
   it("throws on unknown ids instead of returning a wrong price", () => {
     // @ts-expect-error — intentionally invalid id
     expect(() => priceOf("nonsense")).toThrow();
+  });
+});
+
+describe("video clip duration pricing", () => {
+  it("exposes the duration bounds and block size", () => {
+    expect(VIDEO_DURATION_MIN_S).toBe(5);
+    expect(VIDEO_DURATION_MAX_S).toBe(60);
+    expect(VIDEO_BLOCK_SECONDS).toBe(5);
+  });
+
+  it("derives the block price from the live clip-5s catalog price", () => {
+    expect(videoBlockPricePaise()).toBe(priceOf("clip-5s"));
+    expect(videoBlockPricePaise()).toBe(4500);
+  });
+
+  it("prices exact 5s blocks at one block price each", () => {
+    expect(videoClipPricePaise(5)).toBe(4500); // ₹45
+    expect(videoClipPricePaise(10)).toBe(9000); // ₹90
+    expect(videoClipPricePaise(30)).toBe(27000); // ₹270
+    expect(videoClipPricePaise(60)).toBe(54000); // ₹540
+  });
+
+  it("rounds partial blocks UP to the next whole block", () => {
+    expect(videoClipPricePaise(6)).toBe(9000); // 2 blocks
+    expect(videoClipPricePaise(7)).toBe(9000);
+    expect(videoClipPricePaise(59)).toBe(54000); // 12 blocks
+  });
+
+  it("returns whole-rupee integer paise", () => {
+    for (let s = 5; s <= 60; s++) {
+      const p = videoClipPricePaise(s);
+      expect(Number.isInteger(p)).toBe(true);
+      expect(p % 100).toBe(0);
+    }
+  });
+
+  it("keeps the 5s default equal to the catalog clip price", () => {
+    expect(videoClipPricePaise(5)).toBe(priceOf("clip-5s"));
+  });
+
+  it("rejects out-of-range and non-integer durations", () => {
+    expect(() => videoClipPricePaise(4)).toThrow(RangeError);
+    expect(() => videoClipPricePaise(61)).toThrow(RangeError);
+    expect(() => videoClipPricePaise(5.5)).toThrow(RangeError);
+    expect(() => videoClipPricePaise(0)).toThrow(RangeError);
+    expect(() => videoClipPricePaise(NaN)).toThrow(RangeError);
   });
 });
 

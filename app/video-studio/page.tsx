@@ -38,6 +38,7 @@ import {
   GIF_WIDTHS,
   SCRIPT_MAX,
   TEXT_POSITIONS,
+  TOOL_PRICE_PAISE,
   TTS_VOICES,
   type VideoTool,
 } from "@/lib/video/constants";
@@ -45,8 +46,11 @@ import {
 const MAX_FILE_BYTES = 50 * 1024 * 1024;
 const MAX_AUDIO_BYTES = 20 * 1024 * 1024;
 
-/** Live catalog price for every Video Studio job — never hardcoded. */
-const JOB_PRICE = formatINR(priceOf("video-studio"));
+/** Live per-tool catalog price — trivial converters ₹5, heavier processing
+ *  ₹10, AI jobs (voice-over, captions) ₹29. Never hardcoded. */
+function toolPrice(t: VideoTool): string {
+  return formatINR(TOOL_PRICE_PAISE[t]);
+}
 
 interface ToolMeta {
   id: VideoTool;
@@ -566,7 +570,7 @@ export default function VideoStudioPage() {
           </h1>
           <p className="mt-3 max-w-xl text-[14px] leading-6 text-white/60">
             Eight real video tools, queue-backed like everything else in
-            Etch. <span className="text-white/85">{JOB_PRICE} per finished video</span> —
+            Etch. <span className="text-white/85">from {formatINR(priceOf("tool-basic"))} per job</span> —
             one UPI payment, no subscription. A watermarked preview plays while
             you wait; the clean file unlocks after payment.
           </p>
@@ -606,6 +610,9 @@ export default function VideoStudioPage() {
                     </span>
                     <span className="mt-0.5 block text-[12px] leading-5 text-white/50">
                       {t.tagline}
+                    </span>
+                    <span className="mt-1 inline-block rounded-full border border-white/[0.12] px-2 py-0.5 text-[11px] font-semibold tabular-nums text-white/80">
+                      {toolPrice(t.id)}/job
                     </span>
                   </span>
                 </button>
@@ -1160,7 +1167,7 @@ export default function VideoStudioPage() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-[13px] text-white/60">
                   <ShieldCheck className="h-4 w-4 text-[var(--pro-accent)]" />
-                  {JOB_PRICE} flat · one UPI payment · no subscription
+                  {toolPrice(tool)} flat · one UPI payment · no subscription
                 </div>
               </div>
               <p className="mt-1.5 text-[12px] leading-5 text-white/40">
@@ -1184,7 +1191,7 @@ export default function VideoStudioPage() {
                   </>
                 ) : (
                   <>
-                    Start {activeMeta.label} — {JOB_PRICE}
+                    Start {activeMeta.label} — {toolPrice(tool)}
                     <ChevronRight className="h-4 w-4" />
                   </>
                 )}

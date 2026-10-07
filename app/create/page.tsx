@@ -14,12 +14,13 @@ import FulfillmentNotices from "@/components/vilish/fulfillment-notices";
 import Reveal from "@/components/motion/Reveal";
 import { Stagger, StaggerItem } from "@/components/motion/Stagger";
 import { PRICE_CATALOG, composerServiceById, priceOf, type ComposerServiceId } from "@/src/lib/pricing/catalog";
+import { VIDEO_DURATION_MAX_S, videoClipPricePaise } from "@/src/lib/pricing/engine";
 import { templateById } from "@/src/lib/trends/templates";
 import { formatINR } from "@/src/lib/vilish/types";
 
 export const metadata = {
   title: "Make an ad for your product — pay per creation | Etch",
-  description: `Describe your ad in plain words, see the exact price before you pay. Images from ${formatINR(priceOf("single-image"))}, 5-second clips from ${formatINR(priceOf("clip-5s"))}. One UPI payment, no subscription.`,
+  description: `Describe your ad in plain words, see the exact price before you pay. Images from ${formatINR(priceOf("single-image"))}, video clips from ${formatINR(priceOf("clip-5s"))} for 5s up to ${formatINR(videoClipPricePaise(VIDEO_DURATION_MAX_S))} for a full minute. One UPI payment, no subscription.`,
   alternates: { canonical: "/create" },
 };
 
@@ -116,7 +117,7 @@ export default async function CreatePage({
                   style={{ color: "var(--pro-muted)" }}
                 >
                   {isVideo
-                    ? `Describe the 5-second clip. ${formatINR(priceOf("clip-5s"))} — exact price shown before you pay, fulfilled by an operator with human QC.`
+                    ? `Describe your clip. ${formatINR(priceOf("clip-5s"))} for 5 seconds, up to ${formatINR(videoClipPricePaise(VIDEO_DURATION_MAX_S))} for a full minute — exact price shown before you pay, fulfilled by an operator with human QC.`
                     : "Type what you want in plain words — you see the exact price before anything is charged. One UPI payment, human quality review, your finished ad to download."}
                 </p>
               </StaggerItem>

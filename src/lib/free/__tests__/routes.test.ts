@@ -476,7 +476,7 @@ describe('free image end-to-end: deliver → preview → unlock → clean', () =
     expect(locked.status).toBe(402);
     expect(locked.body.code).toBe('LOCKED');
 
-    // unlock creates the ₹19 order
+    // unlock creates the ₹15 order
     const unlock = await json(
       await h('POST', 'app/api/gen/[id]/unlock/route.ts')(
         req('POST', `/api/gen/${id}/unlock`),
@@ -484,7 +484,7 @@ describe('free image end-to-end: deliver → preview → unlock → clean', () =
       )
     );
     expect(unlock.status).toBe(201);
-    expect(unlock.body.payment.amountPaise).toBe(1900);
+    expect(unlock.body.payment.amountPaise).toBe(1500);
     expect(unlock.body.payment.code).toBeTruthy();
     expect(unlock.body.payment.upiUri).toContain('upi://pay');
     const orderCode = unlock.body.payment.code as string;
@@ -563,7 +563,7 @@ describe('free image end-to-end: deliver → preview → unlock → clean', () =
 describe('POST /api/video/order', () => {
   const FILE = 'app/api/video/order/route.ts';
 
-  it('creates a paid video row + ₹89 order link, uncapped', async () => {
+  it('creates a paid video row + ₹45 (5s default) order link, uncapped', async () => {
     mockAuth.userId = 'user-1';
     const db = client.getDb();
     let lastId = '';
@@ -575,7 +575,8 @@ describe('POST /api/video/order', () => {
         )
       );
       expect(status).toBe(201);
-      expect(body.payment.amountPaise).toBe(8900);
+      expect(body.payment.amountPaise).toBe(4500);
+      expect(body.durationSeconds).toBe(5);
       expect(body.payment.code).toBeTruthy();
       lastId = body.id;
     }
@@ -589,6 +590,7 @@ describe('POST /api/video/order', () => {
       status: 'queued',
       mime: 'video/mp4',
       unlocked: false,
+      durationSeconds: 5,
     });
 
     const links = await db
@@ -601,8 +603,55 @@ describe('POST /api/video/order', () => {
       .select()
       .from(schema.orders)
       .where(eq(schema.orders.id, links[0].orderId));
-    expect(order.amountPaise).toBe(8900);
+    expect(order.amountPaise).toBe(4500);
     expect(order.provider).toBe('manual_upi');
+  });
+
+  it('prices custom durations: 60s → ₹540, partial blocks round up', async () => {
+    mockAuth.userId = 'user-1';
+    const db = client.getDb();
+    const cases: Array<[number, number]> = [
+      [10, 9000],
+      [11, 13500], // ceil(11/5)=3 blocks
+      [60, 54000],
+    ];
+    for (const [durationSeconds, expectedPaise] of cases) {
+      const { status, body } = await json(
+        await h('POST', FILE)(
+          req('POST', '/api/video/order', {
+            prompt: `clip ${durationSeconds}s`,
+            durationSeconds,
+          }),
+          { params: Promise.resolve({}) }
+        )
+      );
+      expect(status).toBe(201);
+      expect(body.payment.amountPaise).toBe(expectedPaise);
+      expect(body.durationSeconds).toBe(durationSeconds);
+      const [row] = await db
+        .select()
+        .from(schema.generations)
+        .where(eq(schema.generations.id, body.id));
+      expect(row.durationSeconds).toBe(durationSeconds);
+    }
+  });
+
+  it('400s on out-of-range or non-integer durations', async () => {
+    mockAuth.userId = 'user-1';
+    const post = h('POST', FILE);
+    for (const durationSeconds of [4, 61, 0, -5, 5.5, 'ten', true]) {
+      const { status, body } = await json(
+        await post(
+          req('POST', '/api/video/order', {
+            prompt: 'bad duration clip',
+            durationSeconds,
+          }),
+          { params: Promise.resolve({}) }
+        )
+      );
+      expect(status).toBe(400);
+      expect(body.code).toBe('INVALID_DURATION');
+    }
   });
 
   it('400s on bad prompts, 401s unauthenticated', async () => {
@@ -679,7 +728,7 @@ describe('paid video clean 402 → 200 after the verify hook', () => {
     );
     expect(noUnlock.status).toBe(400);
 
-    // …the ₹89 payment verify flips unlocked instead
+    // …the ₹45 (5s default) payment verify flips unlocked instead
     await manualUpi.submitPaymentUtr({
       code: orderCode,
       utrReference: 'VIDEOUTR999001',
@@ -724,7 +773,7 @@ describe('GET /api/gen/[id]/payment', () => {
     expect(withOrder.body.order).toMatchObject({
       code: unlocked.body.payment.code,
       status: 'PAYMENT_PENDING',
-      amountPaise: 1900,
+      amountPaise: 1500,
       purpose: 'unlock',
     });
     expect(withOrder.body.order.expiresAt).toBeTruthy();

@@ -302,15 +302,20 @@ export const generations = pgTable('generations', {
    *  vs 'technical'. status stays 'failed'; never consumes quota. */
   errorCode: text('error_code'),
   unlocked: boolean('unlocked').notNull().default(false),
+  /** Requested clip length in seconds (video only). Null for images and
+   *  for clips created before duration selection existed (treated as 5s).
+   *  The operator fulfills exactly this length; pricing scales from it. */
+  durationSeconds: integer('duration_seconds'),
   createdAt: createdAt(),
   updatedAt: updatedAt(),
   deliveredAt: timestamp('delivered_at', { withTimezone: true }),
 });
 
 /**
- * Links a manual-UPI order to a generations row. purpose 'unlock': ₹19
- * clean-image download for a free generation. purpose 'video': ₹89 paid
- * clip. The payment-verify hook flips generations.unlocked from this link.
+ * Links a manual-UPI order to a generations row. purpose 'unlock': clean-image
+ * download for a free generation. purpose 'video': paid clip (5–60s,
+ * duration-priced). The payment-verify hook flips generations.unlocked
+ * from this link.
  */
 export const generationOrders = pgTable('generation_orders', {
   orderId: uuid('order_id')
