@@ -102,7 +102,7 @@ export async function POST(req: NextRequest) {
       customerId: user.id,
       customerEmail: user.email ?? undefined,
       customerPhone,
-      returnUrl: `${siteUrl}/api/cashfree/return?code=${encodeURIComponent(order.code)}`,
+      returnUrl: `${siteUrl}/api/cashfree/return`,
       notifyUrl: `${siteUrl}/api/cashfree/webhook`,
     });
   } catch (e) {

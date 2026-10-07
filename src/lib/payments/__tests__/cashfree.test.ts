@@ -111,7 +111,7 @@ describe('buildCashfreeOrderPayload', () => {
     amountPaise: 1900,
     customerId: 'user_123',
     customerPhone: '9876543210',
-    returnUrl: 'https://tryetch.online/api/cashfree/return?code=VLSH8H4K2P',
+    returnUrl: 'https://tryetch.online/api/cashfree/return',
     notifyUrl: 'https://tryetch.online/api/cashfree/webhook',
   };
 
@@ -149,6 +149,32 @@ describe('buildCashfreeOrderPayload', () => {
     expect(() =>
       buildCashfreeOrderPayload({ ...base, amountPaise: 0 })
     ).toThrow();
+  });
+
+  it('matches Cashfree\'s documented required-fields contract', () => {
+    // Per Cashfree PG docs, POST /pg/orders requires: order_amount,
+    // order_currency, customer_details.customer_id,
+    // customer_details.customer_phone. A missing field surfaces as a
+    // checkout-side "technical glitch", so lock the contract here.
+    const p = buildCashfreeOrderPayload(base);
+    expect(typeof p.order_amount).toBe('number');
+    expect(p.order_amount).toBeGreaterThan(0);
+    expect(p.order_currency).toBe('INR');
+    expect(p.customer_details.customer_id).toBeTruthy();
+    expect(p.customer_details.customer_phone).toMatch(/^[6-9]\d{9}$/);
+    expect(p.order_meta.return_url).toBeTruthy();
+    expect(p.order_meta.notify_url).toBeTruthy();
+  });
+
+  it('keeps return_url a static path (Cashfree appends ?order_id itself)', () => {
+    // Cashfree appends "?order_id=<id>" to the return_url. If the URL
+    // already carried a query string (?code=...), the append would mangle
+    // it and the return handler could not find the order.
+    const p = buildCashfreeOrderPayload(base);
+    expect(p.order_meta.return_url).not.toContain('?');
+    expect(new URL(p.order_meta.return_url).pathname).toBe(
+      '/api/cashfree/return'
+    );
   });
 });
 
