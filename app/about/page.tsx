@@ -14,6 +14,13 @@ import VilishFooter from "@/components/vilish/footer";
 import Reveal from "@/components/motion/Reveal";
 import { Stagger, StaggerItem } from "@/components/motion/Stagger";
 
+export const metadata = {
+  title: "How Etch works — human-reviewed AI creations | Etch",
+  description:
+    "How Etch works: describe your idea, see the exact price, pay once with UPI. A human reviews every creation before delivery. No subscription.",
+  alternates: { canonical: "/about" },
+};
+
 const HOW = [
   {
     step: "01",

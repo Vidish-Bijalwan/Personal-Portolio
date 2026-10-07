@@ -39,11 +39,29 @@ export default function UseCasePage({ usecase }: { usecase: UseCase }) {
     })),
   };
 
+  const breadcrumbLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: "https://vidish.me/" },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: usecase.navLabel,
+        item: `https://vidish.me/${usecase.slug}`,
+      },
+    ],
+  };
+
   return (
     <div className="min-h-screen bg-[#080808] font-sans text-[#F5F5F3] antialiased">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
       />
       <VilishNav />
       <main>
@@ -55,7 +73,14 @@ export default function UseCasePage({ usecase }: { usecase: UseCase }) {
             style={{ background: `${usecase.accent}14` }}
           />
           <div className="relative mx-auto max-w-5xl px-4 pb-16 pt-12 sm:pt-20">
-            <div className="grid items-center gap-10 lg:grid-cols-2">
+            <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-[12.5px] text-white/40">
+              <Link href="/" className="transition-colors hover:text-white/80">
+                Home
+              </Link>
+              <span aria-hidden>/</span>
+              <span className="text-white/70">{usecase.navLabel}</span>
+            </nav>
+            <div className="mt-8 grid items-center gap-10 lg:grid-cols-2">
               <div>
                 <Reveal>
                   <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-white/45">

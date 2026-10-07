@@ -4,6 +4,7 @@ import { Chakra_Petch, IBM_Plex_Sans, IBM_Plex_Mono } from "next/font/google"
 import { AuthSessionProvider } from "@/components/vilish/session-provider"
 import SiteBackdrop from "@/components/motion/SiteBackdrop"
 import CyberCursor from "@/components/motion/CyberCursor"
+import StickyMobileCTA from "@/components/vilish/sticky-mobile-cta"
 
 const chakraPetch = Chakra_Petch({
   subsets: ["latin"],
@@ -31,6 +32,9 @@ export const viewport = {
 };
 
 export const metadata = {
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_SITE_URL ?? "https://vidish.me",
+  ),
   title: "AI Image Generator India — ₹19 per Creation | Etch",
   description:
     "Generate custom AI images for a fixed ₹19 each. No subscription, pay with UPI, human-reviewed quality. Portraits, product photos, posters & more.",
@@ -43,12 +47,21 @@ export const metadata = {
       "Generate custom AI images for a fixed ₹19 each. No subscription, pay with UPI, human-reviewed quality. Portraits, product photos, posters & more.",
     siteName: "Etch",
     type: "website",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Etch — one creation, one price. AI images and video tools with no subscription.",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "AI Image Generator India — ₹19 per Creation | Etch",
     description:
       "Generate custom AI images for a fixed ₹19 each. No subscription, pay with UPI, human-reviewed quality. Portraits, product photos, posters & more.",
+    images: ["/og-image.png"],
   },
 }
 
@@ -64,6 +77,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <SiteBackdrop />
         <CyberCursor />
         <AuthSessionProvider>{children}</AuthSessionProvider>
+        <StickyMobileCTA />
       </body>
     </html>
   )

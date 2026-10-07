@@ -1,8 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import {
   ArrowLeft,
   Check,
@@ -129,6 +129,25 @@ function isTerminal(state: string): boolean {
 
 function isVideoUrl(url?: string) {
   return !!url && /\.(mp4|mov|webm)(\?|$)/i.test(url);
+}
+
+/** Shown once, right after a verified payment lands on this page. */
+function ThankYouBanner() {
+  const searchParams = useSearchParams();
+  if (searchParams.get("paid") !== "1") return null;
+  return (
+    <div className="mt-6 rounded-[16px] border border-[#D7FF3F]/25 bg-[#D7FF3F]/[0.06] p-5">
+      <p className="flex items-center gap-2 text-[15px] font-semibold text-[#F5F5F3]">
+        <Check className="h-5 w-5 text-[#D7FF3F]" strokeWidth={2.2} />
+        Payment confirmed — thank you!
+      </p>
+      <p className="mt-2 text-[13px] leading-6 text-white/[0.6]">
+        Your order is in. A human reviews your brief, your piece is created
+        and quality-checked, then it&apos;s delivered here ready to download.
+        Track live progress below.
+      </p>
+    </div>
+  );
 }
 
 export default function GenerationPage() {
@@ -320,6 +339,10 @@ export default function GenerationPage() {
         >
           <ArrowLeft className="h-4 w-4" strokeWidth={1.8} /> Back to create
         </Link>
+
+        <Suspense fallback={null}>
+          <ThankYouBanner />
+        </Suspense>
 
         {notFound && (
           <p className="mt-10 text-[15px] text-white/60">

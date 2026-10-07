@@ -383,6 +383,28 @@ const FAQ_JSON_LD = {
   })),
 };
 
+/** Organization + WebSite structured data. */
+const ORG_JSON_LD = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: "Etch",
+  url: "https://vidish.me",
+  logo: "https://vidish.me/icon.svg",
+  sameAs: [
+    "https://github.com/Vidish-Bijalwan",
+    "https://www.linkedin.com/in/vidish-bijalwan",
+  ],
+};
+
+const SITE_JSON_LD = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: "Etch",
+  url: "https://vidish.me",
+  description:
+    "Pay-per-creation AI studio: custom AI images and video tools, one fixed price each, no subscription.",
+};
+
 /** Video section: three themed categories, one clip each, each with its own
  *  accent color and motion treatment. Clips are honest AI video examples. */
 const VIDEO_POOL = [
@@ -1721,6 +1743,14 @@ export default function VilishLanding() {
           <script
             type="application/ld+json"
             dangerouslySetInnerHTML={{ __html: JSON.stringify(FAQ_JSON_LD) }}
+          />
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(ORG_JSON_LD) }}
+          />
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(SITE_JSON_LD) }}
           />
         </section>
 

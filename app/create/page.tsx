@@ -6,6 +6,13 @@ import Composer from "@/components/vilish/composer";
 import FulfillmentNotices from "@/components/vilish/fulfillment-notices";
 import Reveal from "@/components/motion/Reveal";
 import { Stagger, StaggerItem } from "@/components/motion/Stagger";
+
+export const metadata = {
+  title: "Create AI images & videos — pay per piece | Etch",
+  description:
+    "Start your creation: describe it, see the exact price, pay once with UPI. Images from ₹19, video tools from ₹39. No subscription.",
+  alternates: { canonical: "/create" },
+};
 import { PRICE_CATALOG, composerServiceById, priceOf, type ComposerServiceId } from "@/src/lib/pricing/catalog";
 import { templateById } from "@/src/lib/trends/templates";
 import { formatINR } from "@/src/lib/vilish/types";
