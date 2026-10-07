@@ -1377,10 +1377,28 @@ function ToolPillDirectory() {
   );
 }
 
+/**
+ * Perf: the ambient hero video (~2.9MB) is desktop-only by design, but a CSS
+ * `hidden sm:block` still lets mobile browsers download the file. Mount the
+ * <video> element only when the viewport actually reaches the sm breakpoint,
+ * so phones never pay for bytes they can't see. No visual change.
+ */
+function HeroVideoDesktop() {
+  const [show, setShow] = useState(false);
+  useEffect(() => {
+    const mql = window.matchMedia("(min-width: 640px)");
+    setShow(mql.matches);
+    const onChange = (e: MediaQueryListEvent) => setShow(e.matches);
+    mql.addEventListener("change", onChange);
+    return () => mql.removeEventListener("change", onChange);
+  }, []);
+  if (!show) return null;
+  return <HeroVideo className="absolute inset-0" />;
+}
+
 export default function VilishLanding() {
   // Lightbox open indexes — one per image set so arrows navigate within the set.
-  const [reelOpen, setReelOpen] = useState<number | null>(null);
-  const [caseOpen, setCaseOpen] = useState<number | null>(null);
+  const [reelOpen, setReelOpen] = useState<number | null>(null);  const [caseOpen, setCaseOpen] = useState<number | null>(null);
 
   // Showcase rotation: 4 of the 12-piece pool per visit, reshuffled on mount.
   const showcaseItems = useRotatedPool(SHOWCASE_POOL, 4);
@@ -1400,7 +1418,7 @@ export default function VilishLanding() {
         <section className="relative flex min-h-[100svh] flex-col overflow-hidden">
           {/* Desktop keeps the ambient video loop; mobile gets the aurora +
               example collage — the video never worked on phone GPUs. */}
-          <HeroVideo className="absolute inset-0 hidden sm:block" />
+          <HeroVideoDesktop />
           <HeroAurora className="absolute inset-0 sm:hidden" />
           <FlyingElements className="absolute inset-0 z-[1]" density={0.7} />
 
