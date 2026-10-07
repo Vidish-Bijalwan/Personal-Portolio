@@ -5,7 +5,6 @@ import { Chakra_Petch, IBM_Plex_Sans, IBM_Plex_Mono, Inter, Space_Grotesk } from
 import { AuthSessionProvider } from "@/components/vilish/session-provider"
 import { ThemeProvider } from "@/components/theme-provider"
 import SiteBackdrop from "@/components/motion/SiteBackdrop"
-import CyberCursor from "@/components/motion/CyberCursor"
 import StickyMobileCTA from "@/components/vilish/sticky-mobile-cta"
 
 const chakraPetch = Chakra_Petch({
@@ -96,10 +95,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           enableSystem
           disableTransitionOnChange
         >
-          {/* Fixed animated backdrop behind all content; never intercepts clicks.
-              Cursor is a pointer-events-none augmentation — native cursor untouched. */}
+          {/* Fixed animated backdrop behind all content; never intercepts clicks. */}
           <SiteBackdrop />
-          <CyberCursor />
           <AuthSessionProvider>{children}</AuthSessionProvider>
           <StickyMobileCTA />
         </ThemeProvider>

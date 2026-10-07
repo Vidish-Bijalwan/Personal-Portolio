@@ -106,3 +106,40 @@ describe("homepage tweak round: hi-def carousel + restored sections", () => {
     expect(pageSrc).toContain("BLOG_POSTS");
   });
 });
+
+describe("neon-final fix: no neon cursor, tools in nav", () => {
+  it("CyberCursor neon system is fully removed", () => {
+    const layoutSrc = readFileSync(join(root, "app", "layout.tsx"), "utf8");
+    expect(layoutSrc).not.toContain("CyberCursor");
+    expect(footerSrc).not.toContain("CursorSettingsControl");
+    for (const f of [
+      join(root, "components", "motion", "CyberCursor.tsx"),
+      join(root, "components", "motion", "CursorSettingsControl.tsx"),
+      join(root, "src", "lib", "motion", "cursor-settings.ts"),
+    ]) {
+      expect(() => readFileSync(f, "utf8")).toThrow();
+    }
+  });
+
+  it("no neon color/glow tokens remain in pro CSS or carousel", () => {
+    const css = readFileSync(join(root, "app", "pro-theme.css"), "utf8");
+    const carousel = readFileSync(
+      join(root, "components", "vilish", "home", "carousel.tsx"),
+      "utf8",
+    );
+    for (const sig of ["#00F0FF", "#00f0ff", "#7da2ff", "0 0 8px", "0 0 12px", "drop-shadow"]) {
+      expect(css).not.toContain(sig);
+      expect(carousel).not.toContain(sig);
+    }
+  });
+
+  it("nav has a Tools link to /#tools and the tools section has the anchor", () => {
+    expect(navSrc).toContain('href: "/#tools"');
+    expect(navSrc).toContain('label: "Tools"');
+    const sectionsSrc = readFileSync(
+      join(root, "components", "vilish", "home", "sections.tsx"),
+      "utf8",
+    );
+    expect(sectionsSrc).toContain('id="tools"');
+  });
+});
