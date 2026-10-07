@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ArrowUpRight, Github, Linkedin, Mail } from "lucide-react";
-import Wordmark from "./wordmark";
+import { EtchMark } from "./nav";
 import CursorSettingsControl from "@/components/motion/CursorSettingsControl";
 
 const COLUMNS = [
@@ -60,43 +60,61 @@ const CHANNELS = [
 
 export default function VilishFooter() {
   return (
-    <footer className="relative overflow-hidden border-t border-white/[0.08] bg-[#070708]">
-      {/* brand wash along the top edge */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#D7FF3F]/60 via-[#00F0FF]/30 to-transparent"
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -top-32 left-1/2 h-64 w-[720px] -translate-x-1/2 rounded-full bg-[#D7FF3F]/[0.04] blur-3xl"
-      />
-      <div className="relative mx-auto max-w-6xl px-4 pb-10 pt-14 sm:px-6 sm:pt-20">
+    <footer
+      className="pro-body relative overflow-hidden border-t"
+      style={{
+        borderColor: "var(--pro-border-soft)",
+        background: "var(--pro-bg-sunken)",
+        color: "var(--pro-fg)",
+      }}
+    >
+      <div className="relative mx-auto max-w-6xl px-4 pb-10 pt-14 sm:px-6 sm:pt-16">
         {/* brand row */}
         <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <Wordmark size={30} />
-            <p className="mt-4 max-w-[38ch] text-[14px] leading-6 text-white/55">
+            <div className="flex items-center gap-2.5">
+              <EtchMark size={32} />
+              <span
+                className="pro-display text-[22px] font-bold"
+                style={{ color: "var(--pro-fg)" }}
+              >
+                Etch
+              </span>
+            </div>
+            <p
+              className="mt-4 max-w-[38ch] text-[14px] leading-6"
+              style={{ color: "var(--pro-muted)" }}
+            >
               A pay-per-creation AI studio. One creation. One price. No
               subscription.
             </p>
           </div>
-          <p className="text-[12.5px] leading-6 text-white/40 sm:text-right">
+          <p
+            className="text-[12.5px] leading-6 sm:text-right"
+            style={{ color: "var(--pro-faint)" }}
+          >
             UPI payments · Human QC · Exact price first
             <br />
-            <span className="text-white/55">by Vidish Bijalwan</span>
+            <span style={{ color: "var(--pro-muted)" }}>by Vidish Bijalwan</span>
           </p>
         </div>
 
-        <div
+        <hr
+          className="pro-hr my-10"
           aria-hidden
-          className="my-10 h-px bg-gradient-to-r from-transparent via-white/[0.1] to-transparent"
         />
 
         {/* link grid */}
         <div className="grid grid-cols-2 gap-x-6 gap-y-10 sm:grid-cols-4 lg:grid-cols-4">
           {COLUMNS.map((col) => (
             <nav key={col.title} aria-label={`Footer — ${col.title}`}>
-              <h3 className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/40">
+              <h3
+                className="text-[11px] font-semibold uppercase"
+                style={{
+                  letterSpacing: "0.22em",
+                  color: "var(--pro-faint)",
+                }}
+              >
                 {col.title}
               </h3>
               <ul className="mt-5 space-y-3">
@@ -105,7 +123,8 @@ export default function VilishFooter() {
                     <li key={l.label}>
                       <a
                         href={l.href}
-                        className="group inline-flex min-h-[32px] items-center gap-1 text-[13.5px] text-white/60 transition-colors hover:text-[#D7FF3F]"
+                        className="group inline-flex min-h-[32px] items-center gap-1 text-[13.5px] transition-colors"
+                        style={{ color: "var(--pro-muted)" }}
                       >
                         {l.label}
                         <ArrowUpRight
@@ -119,7 +138,8 @@ export default function VilishFooter() {
                     <li key={l.label}>
                       <Link
                         href={l.href}
-                        className="inline-flex min-h-[32px] items-center text-[13.5px] text-white/60 transition-colors hover:text-[#D7FF3F]"
+                        className="inline-flex min-h-[32px] items-center text-[13.5px] transition-colors"
+                        style={{ color: "var(--pro-muted)" }}
                       >
                         {l.label}
                       </Link>
@@ -132,7 +152,13 @@ export default function VilishFooter() {
 
           {/* contact column */}
           <div>
-            <h3 className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/40">
+            <h3
+              className="text-[11px] font-semibold uppercase"
+              style={{
+                letterSpacing: "0.22em",
+                color: "var(--pro-faint)",
+              }}
+            >
               Contact
             </h3>
             <ul className="mt-5 space-y-3">
@@ -142,9 +168,16 @@ export default function VilishFooter() {
                     href={c.href}
                     target={c.href.startsWith("mailto:") ? undefined : "_blank"}
                     rel="noopener noreferrer"
-                    className="group inline-flex min-h-[32px] items-center gap-2.5 text-[13.5px] text-white/60 transition-colors hover:text-white/95"
+                    className="group inline-flex min-h-[32px] items-center gap-2.5 text-[13.5px] transition-colors"
+                    style={{ color: "var(--pro-muted)" }}
                   >
-                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-white/[0.1] bg-white/[0.03] transition-colors group-hover:border-[#D7FF3F]/40">
+                    <span
+                      className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border transition-colors"
+                      style={{
+                        borderColor: "var(--pro-border)",
+                        background: "var(--pro-bg-elev)",
+                      }}
+                    >
                       <c.icon className="h-3.5 w-3.5" strokeWidth={1.8} aria-hidden />
                     </span>
                     <span className="truncate">{c.display}</span>
@@ -156,13 +189,16 @@ export default function VilishFooter() {
         </div>
 
         {/* bottom bar */}
-        <div className="mt-12 flex flex-col gap-4 border-t border-white/[0.06] pt-6 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-[12px] leading-5 text-white/35">
+        <div
+          className="mt-12 flex flex-col gap-4 border-t pt-6 sm:flex-row sm:items-center sm:justify-between"
+          style={{ borderColor: "var(--pro-border-soft)" }}
+        >
+          <p className="text-[12px] leading-5" style={{ color: "var(--pro-faint)" }}>
             Prices include GST. All images shown are examples.
           </p>
           <div className="flex items-center gap-4">
             <CursorSettingsControl />
-            <p className="text-[12px] text-white/30">© 2026 Etch</p>
+            <p className="text-[12px]" style={{ color: "var(--pro-faint)" }}>© 2026 Etch</p>
           </div>
         </div>
       </div>
