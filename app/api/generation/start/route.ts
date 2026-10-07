@@ -5,7 +5,11 @@ import { db } from '@/lib/db/client';
 import * as schema from '@/lib/db/schema';
 import { eq, sql } from 'drizzle-orm';
 import { requireSession } from '@/lib/auth';
-import { createManualPaymentOrder } from '@/lib/payments/manual-upi';
+import { isAdminEmail } from '@/lib/admin';
+import {
+  createManualPaymentOrder,
+  verifyOrderAdminBypass,
+} from '@/lib/payments/manual-upi';
 import { canTransition } from '@/lib/vilish/types';
 import {
   canonicalMimeFor,
@@ -192,6 +196,17 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  // Owner/admin testing bypass: no payment needed — verify immediately.
+  // Fully audit-logged as payment.admin_bypass.
+  let adminBypass = false;
+  if (isAdminEmail(user.email)) {
+    await verifyOrderAdminBypass({
+      code: payment.code,
+      adminUserId: user.id,
+    });
+    adminBypass = true;
+  }
+
   if (!canTransition(job.state, 'PAYMENT_PENDING')) {
     return NextResponse.json(
       { code: 'INVALID_STATE', error: 'Job cannot move to PAYMENT_PENDING' },
@@ -231,6 +246,7 @@ export async function POST(req: NextRequest) {
 
   return NextResponse.json({
     jobId: job.id,
+    ...(adminBypass ? { adminBypass: true } : {}),
     payment: {
       code: payment.code,
       upiUri: payment.upiUri,

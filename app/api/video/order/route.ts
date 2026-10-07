@@ -5,8 +5,10 @@ import { db } from '@/lib/db/client';
 import { generations } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 import { requireSession } from '@/lib/auth';
+import { isAdminEmail } from '@/lib/admin';
 import { PROMPT_MAX, VIDEO_PRICE_PAISE, isValidPrompt } from '@/lib/free/policy';
 import { createGenerationOrder } from '@/lib/free/orders';
+import { verifyOrderAdminBypass } from '@/lib/payments/manual-upi';
 
 /**
  * POST /api/video/order
@@ -74,6 +76,19 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(
       { code: 'PAYMENT_ORDER_FAILED', error: 'Failed to create payment order' },
       { status: 502 }
+    );
+  }
+
+  // Owner/admin testing bypass: no payment needed — verify immediately so
+  // the clean mp4 unlocks. Fully audit-logged as payment.admin_bypass.
+  if (isAdminEmail(user.email)) {
+    await verifyOrderAdminBypass({
+      code: order.payment.code,
+      adminUserId: user.id,
+    });
+    return NextResponse.json(
+      { id: gen.id, unlocked: true, adminBypass: true },
+      { status: 201 }
     );
   }
 

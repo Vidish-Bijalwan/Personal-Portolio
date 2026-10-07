@@ -5,6 +5,7 @@ import { eq } from 'drizzle-orm';
 import { db } from '@/lib/db/client';
 import { freeGenerationAttachments, generations } from '@/lib/db/schema';
 import { requireSession } from '@/lib/auth';
+import { isAdminEmail } from '@/lib/admin';
 import {
   FREE_DAILY_CAP,
   PROMPT_MAX,
@@ -115,7 +116,11 @@ export async function POST(req: NextRequest) {
   }
 
   const used = await countFreeImagesToday(user.id);
-  if (used >= FREE_DAILY_CAP) {
+  // Owner/admin testing bypass: no daily cap (audit-logged server-side).
+  // Safety/moderation filters below still apply to everyone.
+  const admin = isAdminEmail(user.email);
+  if (admin) console.info(`[admin] cap bypass: free generate for ${user.id}`);
+  if (!admin && used >= FREE_DAILY_CAP) {
     return NextResponse.json(
       {
         code: 'FREE_CAP_REACHED',

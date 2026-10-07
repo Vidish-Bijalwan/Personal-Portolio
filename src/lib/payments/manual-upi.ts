@@ -385,16 +385,26 @@ export async function verifyPaymentOrder(input: {
     // address, shown to the paying customer only, never to third parties.
     target: { code: order.code, amountPaise: order.amountPaise },
   });
+  await runUnlockHooks(order.id);
+  return { status: 'PAYMENT_VERIFIED' as PaymentOrderState, jobId: order.jobId };
+}
+
+/**
+ * Shared unlock side-effects: flip generations.unlocked / videoJobs.unlocked
+ * for orders linked via generationOrders / videoJobOrders. Never throws —
+ * a missing table must NEVER break payment verification.
+ */
+async function runUnlockHooks(orderId: string): Promise<void> {
   // Free-tier / paid-video unlock side-effect: if this order is linked to a
-  // generations row (purpose 'unlock' = ₹19 clean-image unlock,
-  // purpose 'video' = ₹89 clip), flip its unlocked flag so the clean
+  // generations row (purpose 'unlock' = clean-image unlock,
+  // purpose 'video' = paid clip), flip its unlocked flag so the clean
   // download opens. Guarded: a missing generations table (legacy DB where
   // the 0004 migration hasn't applied) must NEVER break payment verify.
   try {
     const links = await db
       .select()
       .from(generationOrders)
-      .where(eq(generationOrders.orderId, order.id))
+      .where(eq(generationOrders.orderId, orderId))
       .limit(1);
     const link = links[0];
     if (link && (link.purpose === 'unlock' || link.purpose === 'video')) {
@@ -407,14 +417,14 @@ export async function verifyPaymentOrder(input: {
     console.error('[payments] generation unlock hook failed:', hookErr);
   }
   // Video Studio unlock side-effect (W2): if this order is linked to a
-  // video_jobs row (purpose 'video_studio' = ₹39 clean-video unlock),
+  // video_jobs row (purpose 'video_studio' = clean-video unlock),
   // flip its unlocked flag so the clean mp4 opens. Same guard as above:
   // a missing video_jobs table must NEVER break payment verify.
   try {
     const vlinks = await db
       .select()
       .from(videoJobOrders)
-      .where(eq(videoJobOrders.orderId, order.id))
+      .where(eq(videoJobOrders.orderId, orderId))
       .limit(1);
     const vlink = vlinks[0];
     if (vlink && vlink.purpose === 'video_studio') {
@@ -426,6 +436,58 @@ export async function verifyPaymentOrder(input: {
   } catch (hookErr) {
     console.error('[payments] video-job unlock hook failed:', hookErr);
   }
+}
+
+/**
+ * Owner/admin testing bypass: mark a fresh order verified with NO payment.
+ *
+ * Call sites MUST gate on isAdminEmail() first — this function performs no
+ * allowlist check itself. Accepts PAYMENT_PENDING (fresh), PAYMENT_AWAITING_OWNER
+ * and PAYMENT_SUBMITTED orders. Writes a distinct audit action
+ * ('payment.admin_bypass', amount recorded as 0) and runs the same unlock
+ * side-effects as verifyPaymentOrder. Safety/moderation is unaffected.
+ */
+export async function verifyOrderAdminBypass(input: {
+  code: string;
+  adminUserId: string;
+}) {
+  const order = await getOrderByCodeOrShort(input.code);
+  if (
+    order.status !== 'PAYMENT_PENDING' &&
+    order.status !== 'PAYMENT_AWAITING_OWNER' &&
+    order.status !== 'PAYMENT_SUBMITTED'
+  ) {
+    throw new PaymentHttpError(
+      409,
+      'ORDER_NOT_BYPASSABLE',
+      `Order is ${order.status}; cannot bypass.`
+    );
+  }
+  console.info(
+    `[admin] bypass-verify order ${order.code} (₹${(order.amountPaise / 100).toFixed(2)}) for ${input.adminUserId}`
+  );
+  await db
+    .update(orders)
+    .set({
+      status: 'PAYMENT_VERIFIED',
+      verifiedAt: new Date(),
+      verifiedByUserId: input.adminUserId,
+      verifiedAmountPaise: 0,
+    })
+    .where(eq(orders.id, order.id));
+  await db.insert(payments).values({
+    orderId: order.id,
+    utrReference: order.utrReference,
+    amountPaise: 0,
+    method: 'admin_bypass',
+    status: 'verified',
+  });
+  await db.insert(auditLogs).values({
+    actorUserId: input.adminUserId,
+    action: 'payment.admin_bypass',
+    target: { code: order.code, amountPaise: order.amountPaise },
+  });
+  await runUnlockHooks(order.id);
   return { status: 'PAYMENT_VERIFIED' as PaymentOrderState, jobId: order.jobId };
 }
 
