@@ -89,26 +89,22 @@ describe("manifest covers the rotation pool", () => {
   });
 });
 
-describe("homepage pools have no repeats", () => {
+describe("homepage gallery integrity (pro redesign)", () => {
   const pageSrc = readFileSync(join(root, "app", "page.tsx"), "utf8");
 
-  it("SHOWCASE_POOL srcs are all unique", () => {
-    const pool = pageSrc.split("const SHOWCASE_POOL")[1].split("];")[0];
-    const srcs = [...pool.matchAll(/src:\s*"([^"]+)"/g)].map((m) => m[1]);
-    expect(srcs.length).toBeGreaterThanOrEqual(12);
-    expect(new Set(srcs).size).toBe(srcs.length);
+  it("gallery is manifest-driven, not a hardcoded pool", () => {
+    expect(pageSrc).toContain("manifest.json");
+    expect(pageSrc).not.toContain("SHOWCASE_POOL");
+    expect(pageSrc).not.toContain("VIDEO_POOL");
+    expect(pageSrc).not.toContain("useRotatedPool");
   });
 
-  it("VIDEO_POOL ids are all unique", () => {
-    const pool = pageSrc.split("const VIDEO_POOL")[1].split(/^];/m)[0];
-    const ids = [...pool.matchAll(/id:\s*"([^"]+)"/g)].map((m) => m[1]);
-    expect(ids.length).toBeGreaterThanOrEqual(7);
-    expect(new Set(ids).size).toBe(ids.length);
+  it("gallery prices derive from the catalog (honest prices only)", () => {
+    expect(pageSrc).toContain("examplePrice");
   });
 
-  it("both pools use the rotation hook", () => {
-    expect(pageSrc).toContain("useRotatedPool(SHOWCASE_POOL, 4)");
-    expect(pageSrc).toContain("useRotatedPool(VIDEO_POOL, 3)");
+  it("gallery prefers lightweight thumbs", () => {
+    expect(pageSrc).toContain("-thumb.webp");
   });
 });
 
@@ -152,14 +148,14 @@ describe("perf: mobile image weight", () => {
   });
 });
 
-describe("perf: hero video never downloads on mobile", () => {
+describe("perf: homepage ships zero video weight", () => {
   const pageSrc = readFileSync(join(root, "app", "page.tsx"), "utf8");
 
-  it("the hero <video> mounts only at/above the sm breakpoint", () => {
-    // A CSS `hidden sm:block` still downloads the file — the element must
-    // not be mounted on small viewports at all.
-    expect(pageSrc).toContain("HeroVideoDesktop");
-    expect(pageSrc).toContain("(min-width: 640px)");
-    expect(pageSrc).not.toContain('<HeroVideo className="absolute inset-0 hidden sm:block"');
+  it("no <video> element mounts on the homepage at all", () => {
+    // The pro redesign dropped the hero video entirely: a static,
+    // thumbnail-backed gallery beats even a breakpoint-gated video.
+    expect(pageSrc).not.toContain("<video");
+    expect(pageSrc).not.toContain("HeroVideo");
+    expect(pageSrc).not.toContain("hero-loop.mp4");
   });
 });

@@ -111,10 +111,15 @@ describe("homepage imagery: unique, no bad repeats", () => {
     expect(missing).toEqual([]);
   });
 
-  it("showcase neon-portrait banner carries an object-position override", () => {
-    // The 21/8 banner crops a portrait source badly at default center —
-    // the per-card pos must be wired through to the <Image>.
-    expect(pageSrc).toContain('pos: "center 40%"');
-    expect(pageSrc).toContain("objectPosition: ex.pos");
+  it("gallery cards crop cleanly with object-cover", () => {
+    // The pro redesign's gallery (components/vilish/home/gallery.tsx)
+    // renders every example with object-cover inside a fixed aspect box,
+    // so portrait/landscape sources crop predictably.
+    const gallerySrc = readFileSync(
+      join(root, "components", "vilish", "home", "gallery.tsx"),
+      "utf8",
+    );
+    expect(gallerySrc).toContain("object-cover");
+    expect(gallerySrc).toContain("aspectRatio");
   });
 });
