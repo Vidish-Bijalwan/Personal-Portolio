@@ -13,19 +13,49 @@
  * Styled with pro tokens so it reads in both themes.
  */
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { signOut, useSession } from "next-auth/react";
-import { ChevronDown, LogIn, LogOut } from "lucide-react";
+import { ChevronDown, Image as ImageIcon, LogIn, LogOut, User as UserIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import AuthModal from "./auth-modal";
+
+interface MiniProfile {
+  displayName: string | null;
+  avatarUrl: string | null;
+}
 
 export default function AuthButton() {
   const { data: session, status } = useSession();
   const [modalOpen, setModalOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const [miniProfile, setMiniProfile] = useState<MiniProfile | null>(null);
 
   const email = session?.user?.email ?? "";
   const initial = (email.trim()[0] ?? "?").toUpperCase();
+
+  // Load the user's display name + avatar once signed in (best-effort).
+  useEffect(() => {
+    if (status !== "authenticated") {
+      setMiniProfile(null);
+      return;
+    }
+    let cancelled = false;
+    fetch("/api/me/profile", { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((p) => {
+        if (!cancelled && p) {
+          setMiniProfile({
+            displayName: p.displayName ?? null,
+            avatarUrl: p.avatarUrl ?? null,
+          });
+        }
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [status]);
 
   // Close the dropdown on outside click / Escape.
   useEffect(() => {
@@ -102,13 +132,22 @@ export default function AuthButton() {
       >
         <span
           aria-hidden
-          className="flex h-8 w-8 items-center justify-center rounded-full text-[14px] font-bold"
+          className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full text-[14px] font-bold"
           style={{
             background: "var(--pro-accent-strong)",
             color: "#fff",
           }}
         >
-          {initial}
+          {miniProfile?.avatarUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={miniProfile.avatarUrl}
+              alt=""
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            initial
+          )}
         </span>
         <ChevronDown
           className={cn("h-3.5 w-3.5 transition-transform", menuOpen && "rotate-180")}
@@ -138,9 +177,37 @@ export default function AuthButton() {
               className="block truncate text-[13px] font-semibold"
               style={{ color: "var(--pro-fg)" }}
             >
-              {email}
+              {miniProfile?.displayName?.trim() || email}
             </span>
           </p>
+          <Link
+            href="/profile"
+            role="menuitem"
+            onClick={() => setMenuOpen(false)}
+            className="flex min-h-[44px] w-full items-center gap-2.5 px-4 py-2.5 text-left text-[13.5px] font-medium transition-colors"
+            style={{ color: "var(--pro-fg)" }}
+          >
+            <UserIcon
+              className="h-4 w-4"
+              strokeWidth={2}
+              style={{ color: "var(--pro-muted)" }}
+            />
+            Profile
+          </Link>
+          <Link
+            href="/profile?tab=creations"
+            role="menuitem"
+            onClick={() => setMenuOpen(false)}
+            className="flex min-h-[44px] w-full items-center gap-2.5 px-4 py-2.5 text-left text-[13.5px] font-medium transition-colors"
+            style={{ color: "var(--pro-fg)" }}
+          >
+            <ImageIcon
+              className="h-4 w-4"
+              strokeWidth={2}
+              style={{ color: "var(--pro-muted)" }}
+            />
+            My creations
+          </Link>
           <button
             type="button"
             role="menuitem"
