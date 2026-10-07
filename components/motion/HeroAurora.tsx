@@ -72,7 +72,9 @@ export function HeroCollage() {
             className="relative block h-[112px] w-[100px] shrink-0 overflow-hidden rounded-xl border border-white/[0.12] bg-white/[0.03]"
           >
             <Image
-              src={it.src}
+              // Perf: 240px thumbnail variant — the full file is 6-8x heavier
+              // and these render at 100px wide. Same image, fraction of bytes.
+              src={it.src.replace(/\.webp$/, "-thumb.webp")}
               alt=""
               width={200}
               height={224}

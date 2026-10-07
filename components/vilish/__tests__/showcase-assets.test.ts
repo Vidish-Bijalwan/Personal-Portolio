@@ -111,3 +111,55 @@ describe("homepage pools have no repeats", () => {
     expect(pageSrc).toContain("useRotatedPool(VIDEO_POOL, 3)");
   });
 });
+
+describe("perf: mobile image weight", () => {
+  const COLLAGE_SRCS = [
+    "/examples/1-sneaker-ad.webp",
+    "/examples/2-neon-portrait.webp",
+    "/examples/3-travel-poster.webp",
+    "/examples/4-food-photo.webp",
+    "/examples/5-watch-ad.webp",
+    "/examples/6-movie-poster.webp",
+    "/examples/7-pet-portrait.webp",
+    "/examples/8-sportscar.webp",
+  ];
+
+  it("every collage image has a lightweight -thumb.webp variant on disk", () => {
+    for (const src of COLLAGE_SRCS) {
+      const thumb = src.replace(/\.webp$/, "-thumb.webp");
+      const disk = join(examplesDir, thumb.replace("/examples/", ""));
+      expect(existsSync(disk), thumb).toBe(true);
+    }
+  });
+
+  it("thumbs are a fraction of the full file weight", () => {
+    const { statSync } = require("node:fs");
+    for (const src of COLLAGE_SRCS) {
+      const full = statSync(join(examplesDir, src.replace("/examples/", ""))).size;
+      const thumb = statSync(
+        join(examplesDir, src.replace("/examples/", "").replace(/\.webp$/, "-thumb.webp")),
+      ).size;
+      expect(thumb, src).toBeLessThan(full / 4);
+    }
+  });
+
+  it("HeroCollage renders the thumb variant, not the full file", () => {
+    const auroraSrc = readFileSync(
+      join(root, "components", "motion", "HeroAurora.tsx"),
+      "utf8",
+    );
+    expect(auroraSrc).toContain('"-thumb.webp"');
+  });
+});
+
+describe("perf: hero video never downloads on mobile", () => {
+  const pageSrc = readFileSync(join(root, "app", "page.tsx"), "utf8");
+
+  it("the hero <video> mounts only at/above the sm breakpoint", () => {
+    // A CSS `hidden sm:block` still downloads the file — the element must
+    // not be mounted on small viewports at all.
+    expect(pageSrc).toContain("HeroVideoDesktop");
+    expect(pageSrc).toContain("(min-width: 640px)");
+    expect(pageSrc).not.toContain('<HeroVideo className="absolute inset-0 hidden sm:block"');
+  });
+});
