@@ -13,6 +13,7 @@ import {
   TriangleAlert,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { cssAspectRatio } from "@/src/lib/media/aspect";
 import VilishNav from "@/components/vilish/nav";
 import VilishFooter from "@/components/vilish/footer";
 import BurgerGrill, { burgerFrameForStage } from "@/components/vilish/burger-grill";
@@ -447,7 +448,8 @@ export default function WatchRoomPage() {
                   loop
                   playsInline
                   autoPlay
-                  className="block aspect-video w-full bg-black object-cover"
+                  className="block w-full bg-black object-contain"
+                  style={{ aspectRatio: cssAspectRatio(data?.aspect_ratio) }}
                   onError={() => setPreviewOk(false)}
                 />
                 <p className="border-t border-white/[0.08] bg-[#121214] px-4 py-2 text-[11px] uppercase tracking-[0.08em] text-white/40">
@@ -602,7 +604,8 @@ export default function WatchRoomPage() {
                         playsInline
                         autoPlay
                         controls
-                        className="block aspect-video w-full bg-black object-cover"
+                        className="block w-full bg-black object-contain"
+                        style={{ aspectRatio: cssAspectRatio(data?.aspect_ratio) }}
                         onError={() => setPreviewOk(false)}
                       />
                     ) : (
@@ -730,7 +733,7 @@ export default function WatchRoomPage() {
 
             <div className="mt-6 w-full max-w-md overflow-hidden rounded-[16px] border border-white/[0.1]">
               {isVideo ? (
-                <video src={cleanUrl} controls playsInline className="block aspect-video w-full bg-black object-cover" />
+                <video src={cleanUrl} controls playsInline className="block w-full bg-black object-contain" style={{ aspectRatio: cssAspectRatio(data?.aspect_ratio) }} />
               ) : (
                 <img src={cleanUrl} alt="Your unlocked AI-generated creation" className="block w-full" />
               )}

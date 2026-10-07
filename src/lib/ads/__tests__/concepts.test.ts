@@ -187,8 +187,17 @@ describe("buildFinalPrompt", () => {
     expect(out).toBe("Studio shot of mug, soft light");
   });
 
-  it("returns '' for a null concept", () => {
-    expect(buildFinalPrompt(null, "mug")).toBe("");
+  it("freeform path: builds a prompt from the product when concept is null", () => {
+    const palettes = getPalettes();
+    const out = buildFinalPrompt(null, "handmade ceramic mug", palettes[0].name);
+    expect(out).toContain("handmade ceramic mug");
+    expect(out).toContain("advertising photograph");
+    expect(out).toContain(palettes[0].mood || palettes[0].name);
+  });
+
+  it("returns '' for null concept AND empty product", () => {
+    expect(buildFinalPrompt(null, "   ")).toBe("");
+    expect(buildFinalPrompt(undefined, "")).toBe("");
   });
 
   it("lookups return null for unknown names", () => {
@@ -207,5 +216,36 @@ describe("conceptService", () => {
   it("returns null for video concepts (they deep-link via media=video)", () => {
     const v = getConcepts().find((x) => x.media === "video")!;
     expect(conceptService(v)).toBeNull();
+  });
+});
+
+describe("concept card art (QA round: unique thumbnails)", () => {
+  it("every concept id maps to a unique thumbnail file present on disk", async () => {
+    const fs = await import("node:fs");
+    const path = await import("node:path");
+    const art = (
+      await import("@/data/ad-concepts/concept-art.json")
+    ).default as Record<string, string>;
+    const concepts = getConcepts();
+    expect(concepts.length).toBeGreaterThan(0);
+    const seen = new Set<string>();
+    for (const c of concepts) {
+      const rel = art[c.id];
+      expect(rel, `concept ${c.id} has card art`).toBeTruthy();
+      expect(seen.has(rel), `duplicate art file ${rel}`).toBe(false);
+      seen.add(rel);
+      const abs = path.join(
+        __dirname,
+        "..",
+        "..",
+        "..",
+        "..",
+        "public",
+        "pro",
+        rel
+      );
+      expect(fs.existsSync(abs), `art file exists: ${rel}`).toBe(true);
+      expect(fs.statSync(abs).size, `${rel} non-trivial`).toBeGreaterThan(10_000);
+    }
   });
 });

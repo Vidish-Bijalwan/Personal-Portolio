@@ -251,6 +251,47 @@ describe('GET /api/free/remaining', () => {
     expect(res.status).toBe(401);
     mockAuth.userId = 'user-1';
   });
+
+  it('admin bypass: exhausted cap still reports full quota (never nudged to pay)', async () => {
+    // Regression: the composer gates free generation on this endpoint, so it
+    // must be bypass-aware — otherwise the admin is told "the paid route is
+    // open" after heavy testing. Mirrors /api/free/generate's server bypass.
+    const prev = process.env.ADMIN_EMAILS;
+    process.env.ADMIN_EMAILS = 'admin-9@vidish.dev';
+    try {
+      mockAuth.userId = 'admin-9';
+      await seedUser('admin-9');
+      // Exhaust the cap: 3 free images today.
+      await insertGeneration('admin-9');
+      await insertGeneration('admin-9');
+      await insertGeneration('admin-9');
+      const res = await json(
+        await h('GET', FILE)(req('GET', '/api/free/remaining'), {
+          params: Promise.resolve({}),
+        })
+      );
+      expect(res.body).toEqual({ left: 3, cap: 3 });
+    } finally {
+      if (prev === undefined) delete process.env.ADMIN_EMAILS;
+      else process.env.ADMIN_EMAILS = prev;
+      mockAuth.userId = 'user-1';
+    }
+  });
+
+  it('non-admin with exhausted cap reports zero left', async () => {
+    mockAuth.userId = 'user-3';
+    await seedUser('user-3');
+    await insertGeneration('user-3');
+    await insertGeneration('user-3');
+    await insertGeneration('user-3');
+    const res = await json(
+      await h('GET', FILE)(req('GET', '/api/free/remaining'), {
+        params: Promise.resolve({}),
+      })
+    );
+    expect(res.body).toEqual({ left: 0, cap: 3 });
+    mockAuth.userId = 'user-1';
+  });
 });
 
 describe('GET /api/gen/[id]/status', () => {

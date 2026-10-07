@@ -22,4 +22,4 @@ export const MARQUEE_CATEGORIES = [
   "Cinematic stills",
 ] as const;
 
-export const MARQUEE_ACCENTS = ["#7da2ff", "#f4f4f1", "#8a94a6"] as const; // pro tones (legacy palette removed 2026-10-07)
+export const MARQUEE_ACCENTS = ["var(--pro-accent)", "#f4f4f1", "#8a94a6"] as const; // pro tones (legacy palette removed 2026-10-07)

@@ -296,11 +296,13 @@ export function layoutByName(name: string, layouts: LayoutPattern[] = getLayouts
 
 /**
  * Compose the final generation prompt:
- *  1. concept.prompt_template with {product} replaced by the product text
+ *  1. concept.prompt_template with {product} replaced by the product text,
+ *     or — when no concept is selected (freeform path) — a neutral premium
+ *     base template built from the product description alone.
  *  2. appended style tokens for the chosen palette (mood + hex colors),
  *     typography pairing (headline/body style + mood) and layout (eye path)
- * Unknown option names are skipped silently; a missing/invalid concept
- * yields "" (the UI treats that as "no prompt yet").
+ * Unknown option names are skipped silently; an empty product with no
+ * concept yields "" (the UI treats that as "no prompt yet").
  */
 export function buildFinalPrompt(
   concept: Concept | null | undefined,
@@ -309,9 +311,19 @@ export function buildFinalPrompt(
   typographyName?: string,
   layoutName?: string
 ): string {
-  if (!concept || typeof concept.prompt_template !== "string") return "";
-  const productText = product.trim() || "{product}";
-  let prompt = concept.prompt_template.split("{product}").join(productText);
+  const productText = product.trim();
+  let prompt: string;
+  if (concept && typeof concept.prompt_template === "string") {
+    prompt = concept.prompt_template
+      .split("{product}")
+      .join(productText || "{product}");
+  } else {
+    // Freeform path: no predefined concept — describe the product directly.
+    if (!productText) return "";
+    prompt =
+      `Premium advertising photograph of ${productText}, professional commercial ` +
+      `product photography, studio quality, photorealistic, ultra detailed`;
+  }
 
   const tokens: string[] = [];
   if (paletteName) {
