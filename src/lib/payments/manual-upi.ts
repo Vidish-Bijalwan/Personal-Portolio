@@ -394,8 +394,7 @@ export async function verifyPaymentOrder(input: {
  * for orders linked via generationOrders / videoJobOrders. Never throws —
  * a missing table must NEVER break payment verification.
  */
-async function runUnlockHooks(orderId: string): Promise<void> {
-  // Free-tier / paid-video unlock side-effect: if this order is linked to a
+export async function runUnlockHooks(orderId: string): Promise<void> {  // Free-tier / paid-video unlock side-effect: if this order is linked to a
   // generations row (purpose 'unlock' = clean-image unlock,
   // purpose 'video' = paid clip), flip its unlocked flag so the clean
   // download opens. Guarded: a missing generations table (legacy DB where
