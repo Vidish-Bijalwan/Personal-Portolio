@@ -5,12 +5,6 @@ import { db } from '@/lib/db/client';
 import * as schema from '@/lib/db/schema';
 import { eq, sql } from 'drizzle-orm';
 import { requireSession } from '@/lib/auth';
-import { isAdminEmail } from '@/lib/admin';
-import {
-  createManualPaymentOrder,
-  verifyOrderAdminBypass,
-} from '@/lib/payments/manual-upi';
-import { canTransition } from '@/lib/vilish/types';
 import {
   canonicalMimeFor,
   validateUploads,
@@ -45,14 +39,20 @@ async function countOperatorJobsToday(): Promise<number> {
  * Body (JSON): { quoteId: string, country?: string }
  * Body (multipart/form-data): quoteId, country?, files (0-5 reference files)
  * Auth required. India (UPI) only: any other country -> 400
- * INTL_PAYMENTS_COMING_SOON. Creates a manual-UPI payment order, persists
- * it, and moves the job QUOTED -> PAYMENT_PENDING. The customer pays in
- * their UPI app, submits the UTR, and an admin verifies it before the job
- * queues. No Razorpay anywhere in this flow.
+ * INTL_PAYMENTS_COMING_SOON.
+ *
+ * GENERATE-FIRST: no payment order is created here. The quoted job starts
+ * generating immediately — a `generations` row (tier='paid',
+ * media_type='image') is queued for the generation queue, which produces
+ * the watermarked preview. The job stays QUOTED as the pricing record;
+ * the unlock order is created later, when the user clicks "Download clean
+ * HD" (POST /api/generation/unlock), with the amount read server-side
+ * from the job — never from the client.
  *
  * Reference files (optional): validated against the shared attachment
  * policy (8MB/file, 20MB total, max 5, allowlisted types only) and stored
- * as bytea on generation_attachments for the operator to download.
+ * as bytea on free_generation_attachments (the generations-row attachment
+ * table the watcher reads) linked to the new generations row.
  */
 export async function POST(req: NextRequest) {
   const { user, response: authResponse } = await requireSession();
@@ -149,14 +149,29 @@ export async function POST(req: NextRequest) {
       { status: 404 }
     );
   }
+  if (job.userId && job.userId !== user.id) {
+    return NextResponse.json(
+      { code: 'FORBIDDEN', error: 'Not your quote' },
+      { status: 403 }
+    );
+  }
   if (job.state !== 'QUOTED') {
     return NextResponse.json(
       { code: 'INVALID_STATE', error: `Job is ${job.state}, expected QUOTED` },
       { status: 409 }
     );
   }
+  // Quotes are anonymous until Generate-time auth (lazy login): claim an
+  // unowned job for the signed-in user so the pricing record, the
+  // generations row, and the later unlock order all share one owner.
+  if (!job.userId) {
+    await db
+      .update(schema.generationJobs)
+      .set({ userId: user.id, updatedAt: new Date() })
+      .where(eq(schema.generationJobs.id, job.id));
+  }
 
-  // Phase 2 contract §5: capacity gates BEFORE order creation.
+  // Phase 2 contract §5: capacity gates BEFORE generation starts.
   // Valid x-admin-token bypasses both.
   const fulfillmentCfg = await getFulfillmentConfig();
   const fulfillmentMode = fulfillmentCfg.FULFILLMENT_MODE;
@@ -173,89 +188,65 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  let payment: {
-    code: string;
-    upiUri: string;
-    qrDataUri?: string;
-    qrImageUrl?: string;
-    vpa: string;
-    payeeName: string;
-    amountPaise: number;
-    expiresAt: string;
-  };
-  try {
-    payment = await createManualPaymentOrder({
-      jobId: job.id,
+  // Generate-first: queue a paid generations row for the generation queue.
+  // The queue produces the watermarked preview; the clean file unlocks
+  // later via POST /api/generation/unlock. No payment order is created.
+  // The job stays QUOTED as the pricing record (customerPrice/product were
+  // set server-side at quote time).
+  const [genRow] = await db
+    .insert(schema.generations)
+    .values({
       userId: user.id,
-      amountPaise: quote.totalPaise,
-    });
-  } catch {
-    return NextResponse.json(
-      { code: 'PAYMENT_ORDER_FAILED', error: 'Failed to create payment order' },
-      { status: 502 }
-    );
-  }
+      prompt: job.enhancedPrompt ?? job.prompt,
+      quality: job.quality,
+      aspectRatio: job.aspectRatio,
+      mediaType: 'image',
+      tier: 'paid',
+      status: 'queued',
+      mime: 'image/jpeg',
+      jobId: job.id,
+      unlocked: false,
+    })
+    .returning({ id: schema.generations.id });
 
-  // Owner/admin testing bypass: no payment needed — verify immediately.
-  // Fully audit-logged as payment.admin_bypass.
-  let adminBypass = false;
-  if (isAdminEmail(user.email)) {
-    await verifyOrderAdminBypass({
-      code: payment.code,
-      adminUserId: user.id,
-    });
-    adminBypass = true;
-  }
-
-  if (!canTransition(job.state, 'PAYMENT_PENDING')) {
-    return NextResponse.json(
-      { code: 'INVALID_STATE', error: 'Job cannot move to PAYMENT_PENDING' },
-      { status: 409 }
-    );
-  }
-
-  // Persist validated reference files on the job (bytea — works on both
-  // PGlite and Postgres). Stored only now that the payment order exists,
-  // so no orphan attachments survive a failed start.
+  // Persist validated reference files on the generations row (bytea) for
+  // the watcher. If the insert fails, remove the just-created row so no
+  // attachment-less orphan is queued.
   if (files.length > 0) {
-    const rows = [];
-    for (const f of files) {
-      const data = Buffer.from(await f.arrayBuffer());
-      rows.push({
-        generationId: job.id,
-        filename: f.name,
-        // Never trust the browser-reported MIME; the extension is the gate.
-        mimeType: canonicalMimeFor(f.name) ?? 'application/octet-stream',
-        byteSize: data.byteLength,
-        data,
-      });
+    try {
+      const rows = [];
+      for (const f of files) {
+        const data = Buffer.from(await f.arrayBuffer());
+        rows.push({
+          generationId: genRow.id,
+          filename: f.name,
+          // Never trust the browser-reported MIME; the extension is the gate.
+          mimeType: canonicalMimeFor(f.name) ?? 'application/octet-stream',
+          byteSize: data.byteLength,
+          data,
+        });
+      }
+      await db.insert(schema.freeGenerationAttachments).values(rows);
+    } catch {
+      await db
+        .delete(schema.generations)
+        .where(eq(schema.generations.id, genRow.id))
+        .catch(() => {});
+      return NextResponse.json(
+        {
+          code: 'ATTACHMENT_SAVE_FAILED',
+          error: 'Could not save your reference files. Please try again.',
+        },
+        { status: 500 }
+      );
     }
-    await db.insert(schema.generationAttachments).values(rows);
   }
 
-  await db
-    .update(schema.generationJobs)
-    // fulfillmentMode is stamped at job start (contract §5). Cast: the
-    // Phase-2 column types land with the parallel schema migration.
-    .set({
-      state: 'PAYMENT_PENDING',
-      updatedAt: new Date(),
-      fulfillmentMode,
-    } as never)
-    .where(eq(schema.generationJobs.id, job.id));
-
-  return NextResponse.json({
-    jobId: job.id,
-    ...(adminBypass ? { adminBypass: true } : {}),
-    payment: {
-      code: payment.code,
-      upiUri: payment.upiUri,
-      ...(payment.qrDataUri ? { qrDataUri: payment.qrDataUri } : {}),
-      ...(payment.qrImageUrl ? { qrImageUrl: payment.qrImageUrl } : {}),
-      vpa: payment.vpa,
-      payeeName: payment.payeeName,
-      amountPaise: payment.amountPaise,
-      expiresAt: payment.expiresAt,
+  return NextResponse.json(
+    {
+      jobId: job.id,
+      generationId: genRow.id,
     },
-  });
+    { status: 201 }
+  );
 }

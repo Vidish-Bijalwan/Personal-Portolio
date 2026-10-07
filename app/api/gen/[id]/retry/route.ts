@@ -99,6 +99,9 @@ export async function POST(
       mediaType: gen.mediaType,
       tier: gen.tier,
       status: 'queued',
+      // Preserve the pricing-job link so generate-first paid images stay
+      // unlockable after a retry (the unlock order prices from the job).
+      jobId: gen.jobId,
     })
     .returning({ id: generations.id });
 

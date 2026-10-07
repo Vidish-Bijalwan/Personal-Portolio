@@ -32,18 +32,18 @@ const TRUST = [
 const NEXT = [
   {
     num: "01",
-    title: "Pay",
-    text: "One UPI payment for the exact quoted price. No account needed until checkout.",
+    title: "Generate",
+    text: "Describe your ad and hit Generate — creation starts immediately. No payment upfront, no account needed.",
   },
   {
     num: "02",
-    title: "Human review + creation",
-    text: "A human reviews your brief and creates your ad — checked before anything ships.",
+    title: "Preview first",
+    text: "See your watermarked preview as soon as it's ready. A human reviews every paid generation before delivery.",
   },
   {
     num: "03",
-    title: "QC + delivery",
-    text: "Your ad passes quality control, then lands in your hands to download and post.",
+    title: "Unlock the clean file",
+    text: "Love it? One payment for the exact quoted price unlocks the clean HD file to download and post.",
   },
 ];
 

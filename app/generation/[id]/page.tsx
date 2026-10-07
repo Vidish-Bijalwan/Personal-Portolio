@@ -18,11 +18,6 @@ import { cn } from "@/lib/utils";
 import VilishNav from "@/components/vilish/nav";
 import VilishFooter from "@/components/vilish/footer";
 import { formatINR } from "@/src/lib/vilish/types";
-import {
-  startManualPayment,
-  type ManualPayment,
-} from "@/components/vilish/payment";
-import PaymentModal from "@/components/vilish/payment-modal";
 import AuthModal from "@/components/vilish/auth-modal";
 
 interface JobPayload {
@@ -163,7 +158,7 @@ export default function GenerationPage() {
   const [remakePaying, setRemakePaying] = useState(false);
   const [remakeStatus, setRemakeStatus] = useState("");
   const [remakeAuth, setRemakeAuth] = useState(false);
-  const [modal, setModal] = useState<{ jobId: string; payment: ManualPayment } | null>(null);
+  const [remakePrice, setRemakePrice] = useState<number | null>(null);
 
   // edit
   const [editOpen, setEditOpen] = useState(false);
@@ -215,6 +210,12 @@ export default function GenerationPage() {
       .catch(() => {});
   }, []);
 
+  /**
+   * Remake — generate-first: the remake quote starts generating
+   * immediately with no pre-payment. The user lands in the watch room;
+   * the clean HD file unlocks via the post-generation "Download clean HD"
+   * payment (priced from the remake quote server-side).
+   */
   const handleRemake = async () => {
     if (remakePaying) return;
     setRemakePaying(true);
@@ -236,22 +237,33 @@ export default function GenerationPage() {
         return;
       }
       const body: { quoteId: string; jobId: string; totalPaise: number } = await res.json();
-      const startRes = await startManualPayment(body.quoteId);
-      if (!startRes.ok) {
-        if (startRes.error.kind === "unauthorized") {
-          setRemakeAuth(true);
-        } else if (startRes.error.kind === "paused") {
-          setRemakeStatus("New generation orders are temporarily paused.");
-        } else if (startRes.error.kind === "intl") {
-          setRemakeStatus("International payments coming soon — India (UPI) only for now.");
-        } else if (startRes.error.kind === "too_large") {
-          setRemakeStatus("The request was too large. Please try again.");
-        } else {
-          setRemakeStatus(startRes.error.message);
-        }
+      if (typeof body.totalPaise === "number") setRemakePrice(body.totalPaise);
+      // Generate-first: start the remake quote directly — no payment order.
+      let startRes: Response;
+      try {
+        startRes = await fetch("/api/generation/start", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ quoteId: body.quoteId, country: "IN" }),
+        });
+      } catch {
+        setRemakeStatus("Network error. Please try again.");
         return;
       }
-      setModal({ jobId: startRes.result.jobId, payment: startRes.result.payment });
+      if (startRes.status === 401) {
+        setRemakeAuth(true);
+        return;
+      }
+      const started = await startRes.json().catch(() => null);
+      if (!startRes.ok || !started?.generationId) {
+        setRemakeStatus(
+          typeof started?.error === "string" && started.error
+            ? started.error
+            : "Could not start the remake. Please try again."
+        );
+        return;
+      }
+      router.push(`/watch/${started.generationId}`);
     } finally {
       setRemakePaying(false);
     }
@@ -561,7 +573,7 @@ export default function GenerationPage() {
                         ) : (
                           <RefreshCcw className="h-4 w-4" />
                         )}
-                        Remake · ₹19
+                        Remake · {remakePrice !== null ? formatINR(remakePrice) : "₹…"}
                       </button>
                       <button
                         type="button"
@@ -637,14 +649,6 @@ export default function GenerationPage() {
           </div>
         )}
 
-        {modal && (
-          <PaymentModal
-            jobId={modal.jobId}
-            initialPayment={modal.payment}
-            onClose={() => setModal(null)}
-            navigate={(url) => router.push(url)}
-          />
-        )}
       </div>
       <VilishFooter />
     </div>
