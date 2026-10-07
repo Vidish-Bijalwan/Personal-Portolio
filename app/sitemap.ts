@@ -6,6 +6,7 @@ import { USE_CASES } from "../src/lib/usecases/usecases";
 const ROUTES = [
   "/",
   "/create",
+  "/ads",
   "/pricing",
   "/examples",
   "/tools",

@@ -171,13 +171,13 @@ export default function ExamplesGrid({ items }: { items: ExampleItem[] }) {
                 setOpenIndex(null);
               }}
               className={`relative rounded-full px-4 py-2 text-[13px] font-medium transition-colors ${
-                selected ? "text-[#080808]" : "text-white/[0.55] hover:text-white/[0.85]"
+                selected ? "text-[var(--pro-btn-ink)]" : "text-white/[0.55] hover:text-white/[0.85]"
               }`}
             >
               {selected && (
                 <motion.span
                   layoutId="examples-category-pill"
-                  className="absolute inset-0 rounded-full border border-[#D7FF3F]/40 bg-[#D7FF3F]"
+                  className="absolute inset-0 rounded-full border border-[var(--pro-accent)]/40 bg-[var(--pro-btn)]"
                   transition={{ type: "spring", stiffness: 500, damping: 38 }}
                 />
               )}
@@ -244,7 +244,7 @@ export default function ExamplesGrid({ items }: { items: ExampleItem[] }) {
                   <Link
                     href={exampleHref(item)}
                     aria-label={`Make one like this: ${item.prompt.slice(0, 60)}`}
-                    className="inline-flex min-h-[44px] items-center gap-1 text-[13px] font-semibold text-[#D7FF3F] transition-opacity hover:opacity-80"
+                    className="inline-flex min-h-[44px] items-center gap-1 text-[13px] font-semibold text-[var(--pro-accent)] transition-opacity hover:opacity-80"
                   >
                     Make one like this
                     <ArrowRight className="h-3.5 w-3.5" strokeWidth={2.2} />

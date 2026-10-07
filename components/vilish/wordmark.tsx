@@ -12,11 +12,12 @@ type WordmarkProps = {
 /**
  * Etch wordmark — a custom-built brand mark, not typed text.
  *
- * Glyph: a "pixel core" (rotated square, lime → cyan gradient) ringed by two
- * broken aura arcs (cyan + magenta) — pixels with an aura, in ~32px.
+ * Glyph: a "pixel core" (rotated square, ivory → pro-accent gradient)
+ * ringed by two broken aura arcs (pro accent / accent-strong) — pixels
+ * with an aura, in ~32px. Legacy wash removed 2026-10-07 for the pro
+ * identity; classic professional grammar.
  *
- * Word: "ETCH" in tight uppercase tracking, echoing the brand's
- * lime → cyan → magenta wash.
+ * Word: "ETCH" in tight uppercase tracking.
  *
  * Accessibility/SEO: single accessible name ("Etch"), decorative
  * per-letter spans hidden from assistive tech. Static by design.
@@ -48,9 +49,9 @@ export default function Wordmark({ size = 22, tone = "light", className }: Wordm
       >
         <defs>
           <linearGradient id={gradId} x1="8" y1="24" x2="24" y2="8" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor="#D7FF3F" />
-            <stop offset="55%" stopColor="#00F0FF" />
-            <stop offset="100%" stopColor="#FF2D78" />
+            <stop offset="0%" stopColor="#F4F4F1" />
+            <stop offset="55%" stopColor="#7DA2FF" />
+            <stop offset="100%" stopColor="#4F7CFF" />
           </linearGradient>
         </defs>
         {/* aura rings (broken) */}
@@ -58,7 +59,7 @@ export default function Wordmark({ size = 22, tone = "light", className }: Wordm
           cx="16"
           cy="16"
           r="12.5"
-          stroke="#00F0FF"
+          stroke="#7DA2FF"
           strokeOpacity="0.75"
           strokeWidth="2"
           strokeLinecap="round"
@@ -69,7 +70,7 @@ export default function Wordmark({ size = 22, tone = "light", className }: Wordm
           cx="16"
           cy="16"
           r="15"
-          stroke="#FF2D78"
+          stroke="#4F7CFF"
           strokeOpacity="0.45"
           strokeWidth="1.6"
           strokeLinecap="round"
@@ -87,8 +88,8 @@ export default function Wordmark({ size = 22, tone = "light", className }: Wordm
           fill={`url(#${gradId})`}
         />
         {/* pixel sparks on the rings */}
-        <rect x="25.4" y="6.2" width="3.4" height="3.4" rx="0.8" fill="#D7FF3F" transform="rotate(24 27.1 7.9)" />
-        <rect x="3.2" y="22.4" width="3" height="3" rx="0.8" fill="#00F0FF" transform="rotate(-18 4.7 23.9)" />
+        <rect x="25.4" y="6.2" width="3.4" height="3.4" rx="0.8" fill="#F4F4F1" transform="rotate(24 27.1 7.9)" />
+        <rect x="3.2" y="22.4" width="3" height="3" rx="0.8" fill="#7DA2FF" transform="rotate(-18 4.7 23.9)" />
       </svg>
 
       {/* ── word: ETCH ── */}

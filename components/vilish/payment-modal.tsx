@@ -230,7 +230,7 @@ export default function PaymentModal({ jobId, initialPayment, onClose, navigate,
               onClick={handleClaimPaid}
               disabled={claiming}
               className={cn(
-                "mt-4 flex w-full items-center justify-center gap-2 rounded-[10px] bg-[#D7FF3F] px-4 py-3 text-[14px] font-semibold text-[#080808]",
+                "mt-4 flex w-full items-center justify-center gap-2 rounded-[10px] bg-[var(--pro-btn)] px-4 py-3 text-[14px] font-semibold text-[var(--pro-btn-ink)]",
                 claiming ? "cursor-wait opacity-70" : "hover:opacity-95",
               )}
             >
@@ -259,7 +259,7 @@ export default function PaymentModal({ jobId, initialPayment, onClose, navigate,
               className="mx-auto mt-2 h-[3px] w-48 overflow-hidden rounded-full bg-white/[0.08]"
               aria-hidden="true"
             >
-              <div className="fg-bar h-full w-1/3 rounded-full bg-[#D7FF3F]" />
+              <div className="fg-bar h-full w-1/3 rounded-full bg-[var(--pro-btn)]" />
             </div>
             <p className="mt-4 text-[15px] font-medium text-[#F5F5F3]">
               Confirming your payment with the studio…
@@ -286,7 +286,7 @@ export default function PaymentModal({ jobId, initialPayment, onClose, navigate,
                   onClick={handleClaimPaid}
                   disabled={claiming}
                   className={cn(
-                    "mt-3 flex min-h-[44px] w-full items-center justify-center gap-2 rounded-[10px] bg-[#D7FF3F] px-4 py-2.5 text-[14px] font-semibold text-[#080808]",
+                    "mt-3 flex min-h-[44px] w-full items-center justify-center gap-2 rounded-[10px] bg-[var(--pro-btn)] px-4 py-2.5 text-[14px] font-semibold text-[var(--pro-btn-ink)]",
                     claiming ? "cursor-wait opacity-70" : "hover:opacity-95",
                   )}
                 >
@@ -311,7 +311,7 @@ export default function PaymentModal({ jobId, initialPayment, onClose, navigate,
               onClick={handleReorder}
               disabled={reordering}
               className={cn(
-                "mt-5 inline-flex w-full items-center justify-center gap-2 rounded-[10px] bg-[#D7FF3F] px-4 py-3 text-[14px] font-semibold text-[#080808]",
+                "mt-5 inline-flex w-full items-center justify-center gap-2 rounded-[10px] bg-[var(--pro-btn)] px-4 py-3 text-[14px] font-semibold text-[var(--pro-btn-ink)]",
                 reordering ? "cursor-wait opacity-70" : "hover:opacity-95",
                 )}
               >

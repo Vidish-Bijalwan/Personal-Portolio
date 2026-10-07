@@ -314,7 +314,7 @@ export default function WatchRoomPage() {
         {/* initial load */}
         {!data && !fetchError && (
           <div className="flex flex-1 flex-col items-center justify-center py-24 text-center">
-            <Loader2 className="h-8 w-8 animate-spin text-[#D7FF3F]" />
+            <Loader2 className="h-8 w-8 animate-spin text-[var(--pro-accent)]" />
             <p className="mt-4 text-[14px] text-white/50">Finding your order…</p>
           </div>
         )}
@@ -362,8 +362,8 @@ export default function WatchRoomPage() {
             )}
 
             {refused && data.suggested_prompt && (
-              <div className="mt-6 w-full max-w-md rounded-[14px] border border-[#00F0FF]/25 bg-[#00F0FF]/[0.06] px-5 py-4 text-left">
-                <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-[#00F0FF]">
+              <div className="mt-6 w-full max-w-md rounded-[14px] border border-[var(--pro-accent)]/25 bg-[var(--pro-accent)]/[0.06] px-5 py-4 text-left">
+                <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-[var(--pro-accent)]">
                   Etch&apos;s safer suggestion
                 </p>
                 <p className="mt-2 text-[14px] leading-6 text-white/80">
@@ -377,7 +377,7 @@ export default function WatchRoomPage() {
                 type="button"
                 onClick={() => void handleRetry(true)}
                 disabled={retrying !== null}
-                className="mt-6 inline-flex items-center gap-2 min-h-[44px] rounded-[10px] bg-[#D7FF3F] px-5 py-2.5 text-[14px] font-semibold text-[#080808] hover:opacity-95 disabled:cursor-wait disabled:opacity-60"
+                className="mt-6 inline-flex items-center gap-2 min-h-[44px] rounded-[10px] bg-[var(--pro-btn)] px-5 py-2.5 text-[14px] font-semibold text-[var(--pro-btn-ink)] hover:opacity-95 disabled:cursor-wait disabled:opacity-60"
               >
                 {retrying === "safe" ? (
                   <Loader2 className="h-4 w-4 animate-spin motion-reduce:animate-none" />
@@ -391,7 +391,7 @@ export default function WatchRoomPage() {
                 type="button"
                 onClick={() => void handleRetry(false)}
                 disabled={retrying !== null}
-                className="mt-7 inline-flex items-center gap-2 min-h-[44px] rounded-[10px] bg-[#D7FF3F] px-5 py-2.5 text-[14px] font-semibold text-[#080808] hover:opacity-95 disabled:cursor-wait disabled:opacity-60"
+                className="mt-7 inline-flex items-center gap-2 min-h-[44px] rounded-[10px] bg-[var(--pro-btn)] px-5 py-2.5 text-[14px] font-semibold text-[var(--pro-btn-ink)] hover:opacity-95 disabled:cursor-wait disabled:opacity-60"
               >
                 {retrying === "same" ? (
                   <Loader2 className="h-4 w-4 animate-spin motion-reduce:animate-none" />
@@ -458,7 +458,7 @@ export default function WatchRoomPage() {
             <button
               type="button"
               onClick={openStoredPayment}
-              className="mt-6 inline-flex items-center gap-2 min-h-[44px] rounded-[10px] bg-[#D7FF3F] px-5 py-2.5 text-[14px] font-semibold text-[#080808] hover:opacity-95"
+              className="mt-6 inline-flex items-center gap-2 min-h-[44px] rounded-[10px] bg-[var(--pro-btn)] px-5 py-2.5 text-[14px] font-semibold text-[var(--pro-btn-ink)] hover:opacity-95"
             >
               <Sparkles className="h-4 w-4" />
               Open payment
@@ -467,7 +467,7 @@ export default function WatchRoomPage() {
               <p className="mt-3 max-w-md text-[13px] leading-6 text-white/45">
                 We couldn&apos;t find your payment details on this device — head back
                 to the{" "}
-                <Link href="/create?media=video" className="text-[#D7FF3F] underline underline-offset-2">
+                <Link href="/create?media=video" className="text-[var(--pro-accent)] underline underline-offset-2">
                   composer
                 </Link>{" "}
                 to start the order again.
@@ -485,7 +485,7 @@ export default function WatchRoomPage() {
               <div className="grid gap-8 lg:grid-cols-[1fr_340px] lg:items-start">
                 {/* left: the showpiece + live status */}
                 <div className="flex flex-col items-center text-center">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#D7FF3F]">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--pro-accent)]">
                     {data.tier === "free" ? "Free preview" : "Paid order"} · AI-generated
                   </p>
                   <h1 className="font-display mt-2 text-[26px] font-semibold tracking-[-0.02em] sm:text-[32px]">
@@ -518,7 +518,7 @@ export default function WatchRoomPage() {
                   >
                     <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/[0.08]">
                       <div
-                        className="h-full rounded-full bg-gradient-to-r from-[#D7FF3F] via-[#00F0FF] to-[#FF2D78] transition-[width] duration-700 ease-out motion-reduce:transition-none"
+                        className="h-full rounded-full bg-[var(--pro-accent)] transition-[width] duration-700 ease-out motion-reduce:transition-none"
                         style={{ width: `${progress}%` }}
                       />
                     </div>
@@ -587,7 +587,7 @@ export default function WatchRoomPage() {
             <div className="grid gap-8 lg:grid-cols-[1fr_340px] lg:items-start">
               {/* left: preview + unlock CTA + actions */}
               <div className="flex flex-col items-center text-center">
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-[#D7FF3F]/40 bg-[#D7FF3F]/[0.08] px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.1em] text-[#D7FF3F]">
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--pro-accent)]/40 bg-[var(--pro-accent)]/[0.08] px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.1em] text-[var(--pro-accent)]">
                   <Sparkles className="h-3.5 w-3.5" />
                   {isVideo ? "Your video preview — AI-generated" : "Your free preview — AI-generated"}
                 </span>
@@ -630,7 +630,7 @@ export default function WatchRoomPage() {
                   onClick={handleUnlock}
                   disabled={unlockBusy}
                   className={cn(
-                    "mt-5 inline-flex min-h-[48px] items-center gap-2 rounded-[10px] bg-[#D7FF3F] px-6 py-3 text-[15px] font-semibold text-[#080808]",
+                    "mt-5 inline-flex min-h-[48px] items-center gap-2 rounded-[10px] bg-[var(--pro-btn)] px-6 py-3 text-[15px] font-semibold text-[var(--pro-btn-ink)]",
                     unlockBusy ? "cursor-wait opacity-70" : "hover:opacity-95",
                   )}
                 >
@@ -685,7 +685,7 @@ export default function WatchRoomPage() {
                             disabled={remixBusy !== null}
                             className={cn(
                               "inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-[10px] border border-white/[0.1] bg-white/[0.04] px-3 py-2.5 text-[13px] font-medium text-white/85 transition-colors",
-                              remixBusy === null && "hover:border-[#D7FF3F]/50 hover:text-white",
+                              remixBusy === null && "hover:border-[var(--pro-accent)]/50 hover:text-white",
                               busy && "cursor-wait opacity-70"
                             )}
                           >
@@ -739,7 +739,7 @@ export default function WatchRoomPage() {
             <a
               href={cleanUrl}
               download
-              className="mt-6 inline-flex items-center gap-2 rounded-[10px] bg-[#D7FF3F] px-6 py-3 text-[15px] font-semibold text-[#080808] hover:opacity-95"
+              className="mt-6 inline-flex items-center gap-2 rounded-[10px] bg-[var(--pro-btn)] px-6 py-3 text-[15px] font-semibold text-[var(--pro-btn-ink)] hover:opacity-95"
             >
               <Download className="h-4 w-4" />
               Download clean HD

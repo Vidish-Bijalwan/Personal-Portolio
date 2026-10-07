@@ -75,7 +75,7 @@ const TIERS: Tier[] = PRICE_CATALOG.map((p) => ({
   ...TIER_META[p.id],
 }));
 
-/* Emphasized tier — rendered with .v-iris-border. */
+/* Emphasized tier — rendered with .pro-ring-border. */
 const POPULAR_TIER = "4-pack";
 
 /** Numeric amount derived from the exact price string (no data change). */
@@ -161,7 +161,7 @@ const STEPS = [
 function PopularBadge() {
   const reduced = usePrefersReducedMotion();
   const inner = (
-    <span className="rounded-full bg-[#D7FF3F] px-3 py-1 text-[11px] font-bold uppercase tracking-[0.08em] text-[#080808]">
+    <span className="rounded-full bg-[var(--pro-btn)] px-3 py-1 text-[11px] font-bold uppercase tracking-[0.08em] text-[var(--pro-btn-ink)]">
       Most popular
     </span>
   );
@@ -190,17 +190,11 @@ function TierCard({ tier }: { tier: Tier }) {
       className={
         "relative flex h-full flex-col rounded-[18px] border bg-[#121214] p-6 " +
         (popular
-          ? "v-iris-border shadow-[0_0_44px_-12px_rgba(255,45,120,0.5)] "
+          ? "pro-ring-border shadow-[var(--pro-card-shadow)] "
           : "border-white/[0.08] hover:shadow-[0_24px_60px_-24px_rgba(0,0,0,0.9)] ") +
         (tier.comingSoon ? "opacity-60 " : "")
       }
     >
-      {popular && (
-        <span
-          aria-hidden="true"
-          className="v-iris-bg pointer-events-none absolute -inset-px -z-10 rounded-[18px] opacity-40 blur-xl"
-        />
-      )}
 
       <div className="flex items-center justify-between gap-2">
         <h2 className="font-display text-[17px] font-semibold tracking-[0.01em]">
@@ -228,7 +222,7 @@ function TierCard({ tier }: { tier: Tier }) {
           className={
             "mt-5 inline-flex items-center justify-center gap-1.5 rounded-[10px] border px-4 py-2.5 text-[13px] font-medium text-[#F5F5F3] transition-all " +
             (popular
-              ? "v-iris-bg border-transparent text-[#080808] hover:brightness-110"
+              ? "pro-cta border-transparent text-[var(--pro-btn-ink)] hover:brightness-110"
               : "border-white/[0.12] bg-[#18181B] hover:border-white/30 hover:bg-[#1E1E22]")
           }
         >
@@ -250,7 +244,7 @@ export default function PricingPage() {
           </p>
           <h1 className="font-display mt-3 text-[34px] font-bold leading-[1.05] tracking-[-0.02em] sm:text-[52px]">
             One creation.{" "}
-            <span className="v-iris-text">One price.</span>
+            <span className="pro-accent-text">One price.</span>
             <br />
             No subscription.
           </h1>
@@ -274,7 +268,7 @@ export default function PricingPage() {
             >
               <span
                 aria-hidden="true"
-                className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-[#00F0FF] opacity-15 blur-3xl"
+                className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-[var(--pro-accent)] opacity-15 blur-3xl"
               />
               <h2 className="font-display text-[17px] font-semibold">
                 Not sure yet?
@@ -296,7 +290,7 @@ export default function PricingPage() {
         <div className="mt-16">
           <Reveal>
             <h2 className="font-display text-[22px] font-semibold tracking-[-0.01em] sm:text-[26px]">
-              What you&apos;re <span className="v-iris-text">not</span> paying for
+              What you&apos;re <span className="pro-accent-text">not</span> paying for
             </h2>
           </Reveal>
           <Stagger className="mt-6 grid gap-4 sm:grid-cols-3">
@@ -324,7 +318,7 @@ export default function PricingPage() {
             {STEPS.map((s, i) => (
               <StaggerItem key={s.title}>
                 <div className="relative h-full rounded-[16px] border border-white/[0.08] bg-[#121214] p-5">
-                  <span className="font-display v-iris-text text-[28px] font-bold leading-none">
+                  <span className="font-display pro-accent-text text-[28px] font-bold leading-none">
                     {i + 1}
                   </span>
                   <s.icon className="mt-3 h-5 w-5 text-white/70" strokeWidth={1.8} />
@@ -346,7 +340,7 @@ export default function PricingPage() {
         <div className="mt-16">
           <Reveal>
             <h2 className="font-display text-[22px] font-semibold tracking-[-0.01em] sm:text-[26px]">
-              Pricing <span className="v-iris-text">questions</span>
+              Pricing <span className="pro-accent-text">questions</span>
             </h2>
           </Reveal>
           <div className="mt-6 grid gap-3">
@@ -385,7 +379,7 @@ export default function PricingPage() {
         <Reveal className="mt-10">
           <div className="flex flex-col items-center gap-4 rounded-[20px] border border-white/[0.08] bg-[#101012] px-6 py-10 text-center sm:py-12">
             <h2 className="font-display text-[24px] font-semibold tracking-[-0.01em] sm:text-[30px]">
-              Your idea, <span className="v-iris-text">made real</span> —
+              Your idea, <span className="pro-accent-text">made real</span> —
               from ₹19
             </h2>
             <p className="max-w-md text-[14px] leading-6 text-white/[0.55]">
@@ -394,7 +388,7 @@ export default function PricingPage() {
             </p>
             <Link href="/create" aria-label="Start creating">
               <MagneticButton>
-                <span className="v-iris-bg inline-flex items-center gap-2 rounded-[12px] px-7 py-3.5 text-[15px] font-semibold text-[#080808]">
+                <span className="pro-cta inline-flex items-center gap-2 rounded-[12px] px-7 py-3.5 text-[15px] font-semibold text-[var(--pro-btn-ink)]">
                   Start creating <ArrowRight className="h-4 w-4" />
                 </span>
               </MagneticButton>

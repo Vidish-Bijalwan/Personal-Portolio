@@ -87,7 +87,7 @@ export default function CursorSettingsControl() {
               onClick={() => update({ enabled: !settings.enabled })}
               className={cn(
                 "relative h-6 w-11 rounded-full transition-colors",
-                settings.enabled ? "bg-[#D7FF3F]" : "bg-white/[0.12]",
+                settings.enabled ? "bg-[var(--pro-accent)]" : "bg-white/[0.12]",
               )}
             >
               <span
@@ -115,7 +115,7 @@ export default function CursorSettingsControl() {
                 className={cn(
                   "rounded-[8px] border px-2 py-2 text-[11.5px] font-medium transition-colors",
                   settings.style === id
-                    ? "border-[#D7FF3F]/60 bg-[#D7FF3F]/[0.1] text-[#F5F5F3]"
+                    ? "border-[var(--pro-accent)]/60 bg-[var(--pro-accent)]/[0.1] text-[#F5F5F3]"
                     : "border-white/[0.08] text-white/50 hover:border-white/20 hover:text-white/80",
                 )}
               >
@@ -144,7 +144,7 @@ export default function CursorSettingsControl() {
                 style={{ background: CURSOR_ACCENTS[id].hex }}
               >
                 {settings.accent === id && (
-                  <Check className="h-4 w-4 text-[#080808]" strokeWidth={3} aria-hidden />
+                  <Check className="h-4 w-4 text-[var(--pro-btn-ink)]" strokeWidth={3} aria-hidden />
                 )}
               </button>
             ))}

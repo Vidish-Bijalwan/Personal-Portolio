@@ -49,7 +49,7 @@ export default async function ToolDetailPage({
 
   const Icon = tool.icon;
   const related = toolsByGroup(tool.group).filter((t) => t.id !== tool.id);
-  const accent = tool.group === "create" ? "#D7FF3F" : "#00F0FF";
+  const accent = "var(--pro-accent)"; // elegant gold (champagne/brass) 2026-10-07
 
   const faqLd = {
     "@context": "https://schema.org",
@@ -118,8 +118,8 @@ export default async function ToolDetailPage({
                     className={cn(
                       "rounded-full border px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.08em]",
                       tool.badge === "AI"
-                        ? "border-[#00F0FF]/30 text-[#00F0FF]"
-                        : "border-[#D7FF3F]/30 text-[#D7FF3F]",
+                        ? "border-[var(--pro-accent)]/30 text-[var(--pro-accent)]"
+                        : "border-[var(--pro-accent)]/30 text-[var(--pro-accent)]",
                     )}
                   >
                     {tool.badge === "AI" ? "AI" : "Real processing"}
@@ -142,7 +142,7 @@ export default async function ToolDetailPage({
               <Reveal delay={0.1} className="mt-8 flex flex-wrap gap-3">
                 <Link
                   href={tool.href}
-                  className="inline-flex min-h-[44px] items-center gap-2 rounded-[12px] px-7 py-3 text-[15px] font-semibold text-[#080808] transition-opacity hover:opacity-95"
+                  className="inline-flex min-h-[44px] items-center gap-2 rounded-[12px] px-7 py-3 text-[15px] font-semibold text-[var(--pro-btn-ink)] transition-opacity hover:opacity-95"
                   style={{ background: accent }}
                 >
                   {detail.cta} <ArrowRight className="h-4 w-4" strokeWidth={2.2} />
@@ -277,7 +277,7 @@ export default async function ToolDetailPage({
           <Reveal delay={0.1} className="mt-20 text-center">
             <Link
               href={tool.href}
-              className="inline-flex min-h-[44px] items-center gap-2 rounded-[12px] px-8 py-3.5 text-[15px] font-semibold text-[#080808] transition-opacity hover:opacity-95"
+              className="inline-flex min-h-[44px] items-center gap-2 rounded-[12px] px-8 py-3.5 text-[15px] font-semibold text-[var(--pro-btn-ink)] transition-opacity hover:opacity-95"
               style={{ background: accent }}
             >
               {detail.cta} — {tool.price} <ArrowRight className="h-4 w-4" strokeWidth={2.2} />

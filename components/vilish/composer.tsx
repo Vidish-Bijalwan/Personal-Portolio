@@ -503,8 +503,8 @@ export default function Composer({ variant = "hero", className, initialMedia = "
       className={cn(
         "w-full rounded-[20px] border p-5 sm:p-6 transition-shadow duration-300 motion-reduce:transition-none",
         typing
-          ? "border-[#D7FF3F]/25 bg-[#121214] shadow-[0_0_0_1px_rgba(0,0,0,0.4),0_0_56px_-12px_rgba(215,255,63,0.35),0_24px_64px_-24px_rgba(0,0,0,0.8)]"
-          : "border-white/[0.08] bg-[#121214] shadow-[0_0_0_1px_rgba(0,0,0,0.4),0_24px_64px_-24px_rgba(0,0,0,0.8)]",
+          ? "border-[var(--pro-accent)]/25 bg-[var(--pro-bg-elev)] shadow-[0_0_0_1px_rgba(0,0,0,0.4),0_24px_64px_-24px_rgba(0,0,0,0.8)]"
+          : "border-[var(--pro-border)] bg-[var(--pro-bg-elev)] shadow-[0_0_0_1px_rgba(0,0,0,0.4),0_24px_64px_-24px_rgba(0,0,0,0.8)]",
         className,
       )}
     >
@@ -513,7 +513,7 @@ export default function Composer({ variant = "hero", className, initialMedia = "
         <div
           role="group"
           aria-label="What to create"
-          className="flex rounded-[12px] border border-white/[0.08] bg-[#0D0D0F] p-1"
+          className="flex rounded-[12px] border border-[var(--pro-border)] bg-[var(--pro-bg-elev)] p-1"
         >
           {(
             [
@@ -529,8 +529,8 @@ export default function Composer({ variant = "hero", className, initialMedia = "
               className={cn(
                 "min-h-[44px] rounded-[9px] px-4 py-2 text-[13px] font-semibold transition-colors",
                 mediaMode === m.id
-                  ? "bg-[#D7FF3F] text-[#080808]"
-                  : "text-white/55 hover:text-white/85",
+                  ? "bg-[var(--pro-btn)] text-[var(--pro-btn-ink)]"
+                  : "text-[var(--pro-muted)] hover:text-[var(--pro-fg)]",
               )}
             >
               {m.label}
@@ -540,17 +540,17 @@ export default function Composer({ variant = "hero", className, initialMedia = "
         <Link
           href="/video-studio"
           title={`Voice-over & TTS, auto-captioning, trim + text overlay — ${formatINR(priceOf("video-studio"))} per finished video`}
-          className="inline-flex min-h-[44px] items-center gap-1.5 rounded-[12px] border border-dashed border-white/[0.14] px-4 py-2 text-[13px] font-semibold text-white/60 transition-colors hover:border-[#00F0FF]/50 hover:text-white/95"
+          className="inline-flex min-h-[44px] items-center gap-1.5 rounded-[12px] border border-dashed border-[var(--pro-border)] px-4 py-2 text-[13px] font-semibold text-[var(--pro-muted)] transition-colors hover:border-[var(--pro-accent)]/50 hover:text-[var(--pro-fg)]"
         >
           <Clapperboard className="h-3.5 w-3.5" aria-hidden />
           Edit video
-          <span className="text-[11px] font-medium text-white/35">{formatINR(priceOf("video-studio"))}</span>
+          <span className="text-[11px] font-medium text-[var(--pro-faint)]">{formatINR(priceOf("video-studio"))}</span>
         </Link>
         {mediaMode === "image" && (
           <div
             role="group"
             aria-label="Image pricing"
-            className="flex rounded-[12px] border border-white/[0.08] bg-[#0D0D0F] p-1"
+            className="flex rounded-[12px] border border-[var(--pro-border)] bg-[var(--pro-bg-elev)] p-1"
           >
             <button
               type="button"
@@ -559,8 +559,8 @@ export default function Composer({ variant = "hero", className, initialMedia = "
               className={cn(
                 "min-h-[44px] rounded-[9px] px-4 py-2 text-[13px] font-semibold transition-colors",
                 billingMode === "free"
-                  ? "bg-[#00F0FF] text-[#080808]"
-                  : "text-white/55 hover:text-white/85",
+                  ? "bg-[var(--pro-btn)] text-[var(--pro-btn-ink)]"
+                  : "text-[var(--pro-muted)] hover:text-[var(--pro-fg)]",
               )}
             >
               {freeLeft === 0
@@ -576,8 +576,8 @@ export default function Composer({ variant = "hero", className, initialMedia = "
               className={cn(
                 "min-h-[44px] rounded-[9px] px-4 py-2 text-[13px] font-semibold transition-colors",
                 billingMode === "paid"
-                  ? "bg-[#D7FF3F] text-[#080808]"
-                  : "text-white/55 hover:text-white/85",
+                  ? "bg-[var(--pro-btn)] text-[var(--pro-btn-ink)]"
+                  : "text-[var(--pro-muted)] hover:text-[var(--pro-fg)]",
               )}
             >
               Paid
@@ -586,7 +586,7 @@ export default function Composer({ variant = "hero", className, initialMedia = "
         )}
       </div>
       {mediaMode === "image" && billingMode === "free" && (
-        <p className="mb-4 text-[12px] leading-5 text-white/40">
+        <p className="mb-4 text-[12px] leading-5 text-[var(--pro-faint)]">
           Free previews carry a Etch watermark. Unlock the clean HD file
           for {formatINR(priceOf("single-image"))}.
         </p>
@@ -611,19 +611,19 @@ export default function Composer({ variant = "hero", className, initialMedia = "
                   className={cn(
                     "rounded-[12px] border px-3 py-2.5 text-left transition-colors min-h-[44px]",
                     active
-                      ? "border-[#D7FF3F]/60 bg-[#D7FF3F]/[0.07]"
-                      : "border-white/[0.08] bg-[#0D0D0F] hover:border-white/25",
+                      ? "border-[var(--pro-accent)]/60 bg-[var(--pro-accent)]/[0.07]"
+                      : "border-[var(--pro-border)] bg-[var(--pro-bg-elev)] hover:border-[var(--pro-border)]",
                   )}
                 >
                   <span className={cn(
                     "block text-[13px] font-semibold",
-                    active ? "text-[#F5F5F3]" : "text-white/70",
+                    active ? "text-[var(--pro-fg)]" : "text-[var(--pro-fg)]",
                   )}>
                     {s.label}
                   </span>
                   <span className={cn(
                     "mt-0.5 block text-[13px] font-semibold tabular-nums",
-                    active ? "text-[#D7FF3F]" : "text-white/45",
+                    active ? "text-[var(--pro-accent)]" : "text-[var(--pro-muted)]",
                   )}>
                     {formatINR(servicePricePaise(s.id))}
                   </span>
@@ -631,23 +631,23 @@ export default function Composer({ variant = "hero", className, initialMedia = "
               );
             })}
           </div>
-          <p className="mt-2 text-[12px] leading-5 text-white/40">
+          <p className="mt-2 text-[12px] leading-5 text-[var(--pro-faint)]">
             {COMPOSER_SERVICES.find((s) => s.id === service)?.blurb}
           </p>
         </div>
       )}
       {mediaMode === "video" && (
-        <p className="mb-4 text-[12px] leading-5 text-white/40">
+        <p className="mb-4 text-[12px] leading-5 text-[var(--pro-faint)]">
           {formatINR(priceOf("clip-5s"))} per 5s clip — fulfilled by an operator with human QC. AI-generated; a watermarked
           preview shows until you unlock the clean HD file.
         </p>
       )}
       {initialTemplate && (
-        <div className="mb-4 flex items-center gap-2.5 rounded-[10px] border border-[#D7FF3F]/25 bg-[#D7FF3F]/[0.06] px-3.5 py-2.5">
-          <Sparkles className="h-4 w-4 shrink-0 text-[#D7FF3F]" />
-          <p className="text-[12.5px] leading-5 text-white/70">
+        <div className="mb-4 flex items-center gap-2.5 rounded-[10px] border border-[var(--pro-accent)]/25 bg-[var(--pro-accent)]/[0.06] px-3.5 py-2.5">
+          <Sparkles className="h-4 w-4 shrink-0 text-[var(--pro-accent)]" />
+          <p className="text-[12.5px] leading-5 text-[var(--pro-fg)]">
             Template:{" "}
-            <span className="font-semibold text-[#F5F5F3]">{initialTemplate.name}</span>
+            <span className="font-semibold text-[var(--pro-fg)]">{initialTemplate.name}</span>
             {initialTemplate.photoSlots.length > 0 ? (
               <> — attach {initialTemplate.photoSlots.join(" + ")} below</>
             ) : (
@@ -663,7 +663,7 @@ export default function Composer({ variant = "hero", className, initialMedia = "
         </label>        <p
           className={cn(
             "shrink-0 pt-0.5 text-[12px] tabular-nums",
-            overLimit ? "font-medium text-red-300/90" : "text-white/35"
+            overLimit ? "font-medium text-red-300/90" : "text-[var(--pro-faint)]"
           )}
           aria-live="polite"
         >
@@ -681,7 +681,7 @@ export default function Composer({ variant = "hero", className, initialMedia = "
         maxLength={PROMPT_MAX_LENGTH}
         aria-invalid={overLimit}
         aria-describedby="vidish-prompt-limit"
-        className="w-full resize-none bg-transparent text-[15px] leading-6 text-[#F5F5F3] placeholder:text-white/30 outline-none"
+        className="w-full resize-none bg-transparent text-[15px] leading-6 text-[var(--pro-fg)] placeholder:text-[var(--pro-faint)] outline-none"
       />
       {overLimit && (
         <p id="vidish-prompt-limit" className="mt-2 text-[13px] text-red-300/90" role="alert">
@@ -710,13 +710,13 @@ export default function Composer({ variant = "hero", className, initialMedia = "
               {files.map((f, i) => (
                 <li
                   key={`${f.name}-${f.size}-${i}`}
-                  className="inline-flex max-w-full items-center gap-2 rounded-[10px] border border-white/[0.1] bg-[#0D0D0F] py-1.5 pl-3 pr-1.5"
+                  className="inline-flex max-w-full items-center gap-2 rounded-[10px] border border-[var(--pro-border)] bg-[var(--pro-bg-elev)] py-1.5 pl-3 pr-1.5"
                 >
                   <span className="min-w-0">
-                    <span className="block max-w-[180px] truncate text-[12px] font-medium text-white/80">
+                    <span className="block max-w-[180px] truncate text-[12px] font-medium text-[var(--pro-fg)]">
                       {f.name}
                     </span>
-                    <span className="block text-[11px] text-white/40 tabular-nums">
+                    <span className="block text-[11px] text-[var(--pro-faint)] tabular-nums">
                       {formatBytes(f.size)}
                     </span>
                   </span>
@@ -724,7 +724,7 @@ export default function Composer({ variant = "hero", className, initialMedia = "
                     type="button"
                     onClick={() => removeFile(i)}
                     aria-label={`Remove ${f.name}`}
-                    className="rounded-[6px] p-1.5 text-white/45 hover:bg-white/[0.06] hover:text-white/90"
+                    className="rounded-[6px] p-1.5 text-[var(--pro-muted)] hover:bg-[var(--pro-bg-sunken)] hover:text-[var(--pro-fg)]"
                   >
                     <X className="h-3.5 w-3.5" />
                   </button>
@@ -737,14 +737,14 @@ export default function Composer({ variant = "hero", className, initialMedia = "
               type="button"
               onClick={() => fileInputRef.current?.click()}
               disabled={files.length >= ATTACH_MAX_FILES}
-              className="inline-flex min-h-[44px] items-center gap-1.5 rounded-[8px] border border-white/[0.1] bg-[#0D0D0F] px-3 py-1.5 text-[12px] font-medium text-white/60 transition-colors hover:border-white/25 hover:text-white/90 disabled:cursor-not-allowed disabled:opacity-40"
+              className="inline-flex min-h-[44px] items-center gap-1.5 rounded-[8px] border border-[var(--pro-border)] bg-[var(--pro-bg-elev)] px-3 py-1.5 text-[12px] font-medium text-[var(--pro-muted)] transition-colors hover:border-[var(--pro-border)] hover:text-[var(--pro-fg)] disabled:cursor-not-allowed disabled:opacity-40"
             >
               <Paperclip className="h-3.5 w-3.5" />
               {files.length === 0
                 ? "Attach references"
                 : `Add more (${files.length}/${ATTACH_MAX_FILES})`}
             </button>
-            <span className="text-[11px] text-white/35">
+            <span className="text-[11px] text-[var(--pro-faint)]">
               Images, PDF, docs or notes · {formatBytes(ATTACH_MAX_FILE_BYTES)} each ·{" "}
               {formatBytes(ATTACH_MAX_TOTAL_BYTES)} total — the creator sees them with your brief.
             </span>
@@ -764,7 +764,7 @@ export default function Composer({ variant = "hero", className, initialMedia = "
           <div
             role="group"
             aria-label="Quality"
-            className="flex rounded-[10px] border border-white/[0.08] bg-[#0D0D0F] p-1"
+            className="flex rounded-[10px] border border-[var(--pro-border)] bg-[var(--pro-bg-elev)] p-1"
           >
             {QUALITIES.map((qt) => (
               <button
@@ -776,8 +776,8 @@ export default function Composer({ variant = "hero", className, initialMedia = "
                 className={cn(
                   "min-h-[44px] rounded-[8px] px-3 py-1.5 text-[13px] font-medium transition-colors",
                   quality === qt.id
-                    ? "bg-[#D7FF3F] text-[#080808]"
-                    : "text-white/55 hover:text-white/85",
+                    ? "bg-[var(--pro-btn)] text-[var(--pro-btn-ink)]"
+                    : "text-[var(--pro-muted)] hover:text-[var(--pro-fg)]",
                 )}
               >
                 {qt.label}
@@ -797,8 +797,8 @@ export default function Composer({ variant = "hero", className, initialMedia = "
               className={cn(
                 "min-h-[44px] rounded-full border px-3 py-1 text-[12px] font-medium tabular-nums transition-colors",
                 aspectRatio === ar.id
-                  ? "border-[#D7FF3F]/60 bg-[#D7FF3F]/[0.08] text-[#F5F5F3]"
-                  : "border-white/[0.08] text-white/50 hover:border-white/20 hover:text-white/80",
+                  ? "border-[var(--pro-accent)]/60 bg-[var(--pro-accent)]/[0.08] text-[var(--pro-fg)]"
+                  : "border-[var(--pro-border)] text-[var(--pro-muted)] hover:border-[var(--pro-border)] hover:text-[var(--pro-fg)]",
               )}
             >
               {ar.label}
@@ -808,37 +808,37 @@ export default function Composer({ variant = "hero", className, initialMedia = "
       </div>
 
       {/* price + generate row */}
-      <div className="mt-5 flex items-center justify-between gap-4 border-t border-white/[0.06] pt-4">
+      <div className="mt-5 flex items-center justify-between gap-4 border-t border-[var(--pro-border)] pt-4">
         <div className="min-w-0">
           {mediaMode === "video" && (
-            <p className="text-[13px] text-white/40 tabular-nums">
-              <span className="text-[18px] font-semibold text-[#F5F5F3]">{formatINR(priceOf("clip-5s"))}</span>{" "}
+            <p className="text-[13px] text-[var(--pro-faint)] tabular-nums">
+              <span className="text-[18px] font-semibold text-[var(--pro-fg)]">{formatINR(priceOf("clip-5s"))}</span>{" "}
               per 5s clip
             </p>
           )}
           {mediaMode === "image" && billingMode === "free" && (
-            <p className="text-[13px] text-white/40">
+            <p className="text-[13px] text-[var(--pro-faint)]">
               Free trial ·{" "}
-              <span className="font-medium text-[#F5F5F3]">
+              <span className="font-medium text-[var(--pro-fg)]">
                 {freeLeft === null ? `${freeCap} per day` : freeLeft === 0 ? "none left today" : `${freeLeft} of ${freeCap} left today`}
               </span>
             </p>
           )}
           {mediaMode === "image" && billingMode === "paid" && phase === "loading" && (
-            <p className="text-[13px] text-white/40 tabular-nums">
-              Estimated <span className="text-[#F5F5F3]">{formatINR(servicePricePaise(service))}</span>
-              <span className="ml-2 inline-block h-3 w-3 animate-spin rounded-full border-2 border-white/20 border-t-white/70 align-[-1px]" />
+            <p className="text-[13px] text-[var(--pro-faint)] tabular-nums">
+              Estimated <span className="text-[var(--pro-fg)]">{formatINR(servicePricePaise(service))}</span>
+              <span className="ml-2 inline-block h-3 w-3 animate-spin rounded-full border-2 border-[var(--pro-border)] border-t-white/70 align-[-1px]" />
             </p>
           )}
           {mediaMode === "image" && billingMode === "paid" && phase === "idle" && (
-            <p className="text-[13px] text-white/40 tabular-nums">
-              Estimated <span className="text-[#F5F5F3]">{formatINR(servicePricePaise(service))}</span>
+            <p className="text-[13px] text-[var(--pro-faint)] tabular-nums">
+              Estimated <span className="text-[var(--pro-fg)]">{formatINR(servicePricePaise(service))}</span>
             </p>
           )}
           {mediaMode === "image" && billingMode === "paid" && phase === "quoted" && quote && (
-            <p key={quote.totalPaise} className="v-price-swap text-[13px] text-white/60 tabular-nums">
+            <p key={quote.totalPaise} className="v-price-swap text-[13px] text-[var(--pro-muted)] tabular-nums">
               Exact price{" "}
-              <span className="text-[18px] font-semibold text-[#F5F5F3]">
+              <span className="text-[18px] font-semibold text-[var(--pro-fg)]">
                 {formatINR(quote.totalPaise)}
               </span>
             </p>
@@ -849,7 +849,7 @@ export default function Composer({ variant = "hero", className, initialMedia = "
             </p>
           )}
           {mediaMode === "image" && billingMode === "paid" && phase === "unavailable" && (
-            <p className="text-[13px] text-white/50">
+            <p className="text-[13px] text-[var(--pro-muted)]">
               Price unavailable right now — try again in a moment.
             </p>
           )}
@@ -861,8 +861,8 @@ export default function Composer({ variant = "hero", className, initialMedia = "
             onClick={handleVideoGenerate}
             disabled={!canVideoGenerate}
             className={cn(
-              "inline-flex shrink-0 items-center gap-2 rounded-[10px] bg-[#D7FF3F] px-5 py-2.5",
-              "text-[14px] font-semibold text-[#080808] transition-opacity",
+              "inline-flex shrink-0 items-center gap-2 rounded-[10px] bg-[var(--pro-btn)] px-5 py-2.5",
+              "text-[14px] font-semibold text-[var(--pro-btn-ink)] transition-opacity",
               canVideoGenerate ? "hover:opacity-95 active:opacity-90" : "cursor-not-allowed opacity-40",
             )}
           >
@@ -876,8 +876,8 @@ export default function Composer({ variant = "hero", className, initialMedia = "
             onClick={handleFreeGenerate}
             disabled={!canFreeGenerate}
             className={cn(
-              "inline-flex shrink-0 items-center gap-2 rounded-[10px] bg-[#00F0FF] px-5 py-2.5",
-              "text-[14px] font-semibold text-[#080808] transition-opacity",
+              "inline-flex shrink-0 items-center gap-2 rounded-[10px] bg-[var(--pro-btn)] px-5 py-2.5",
+              "text-[14px] font-semibold text-[var(--pro-btn-ink)] transition-opacity",
               canFreeGenerate ? "hover:opacity-95 active:opacity-90" : "cursor-not-allowed opacity-40",
             )}
           >
@@ -891,8 +891,8 @@ export default function Composer({ variant = "hero", className, initialMedia = "
             onClick={handleGenerate}
             disabled={!canGenerate}
             className={cn(
-              "inline-flex shrink-0 items-center gap-2 rounded-[10px] bg-[#D7FF3F] px-5 py-2.5",
-              "text-[14px] font-semibold text-[#080808] transition-opacity",
+              "inline-flex shrink-0 items-center gap-2 rounded-[10px] bg-[var(--pro-btn)] px-5 py-2.5",
+              "text-[14px] font-semibold text-[var(--pro-btn-ink)] transition-opacity",
               canGenerate ? "hover:opacity-95 active:opacity-90" : "cursor-not-allowed opacity-40",
             )}
           >
@@ -904,20 +904,20 @@ export default function Composer({ variant = "hero", className, initialMedia = "
       </div>
       {uploadProgress !== null && (
         <div className="mt-4" role="status" aria-label="Uploading reference files">
-          <div className="flex items-center justify-between text-[12px] text-white/55 tabular-nums">
+          <div className="flex items-center justify-between text-[12px] text-[var(--pro-muted)] tabular-nums">
             <span>Uploading reference files…</span>
             <span>{Math.round(uploadProgress * 100)}%</span>
           </div>
-          <div className="mt-1.5 h-1 overflow-hidden rounded-full bg-white/[0.08]">
+          <div className="mt-1.5 h-1 overflow-hidden rounded-full bg-[var(--pro-bg-sunken)]">
             <div
-              className="h-full rounded-full bg-[#D7FF3F] transition-[width] motion-reduce:transition-none"
+              className="h-full rounded-full bg-[var(--pro-btn)] transition-[width] motion-reduce:transition-none"
               style={{ width: `${Math.round(uploadProgress * 100)}%` }}
             />
           </div>
         </div>
       )}
       {status && (
-        <p className="mt-3 text-[13px] text-white/55" role="status">
+        <p className="mt-3 text-[13px] text-[var(--pro-muted)]" role="status">
           {status}
         </p>
       )}
@@ -933,10 +933,10 @@ export default function Composer({ variant = "hero", className, initialMedia = "
       />
       {mediaMode === "image" && billingMode === "paid" && phase === "quoted" && quote && (
         <>
-          <p className="mt-3 text-[12px] text-white/35">
+          <p className="mt-3 text-[12px] text-[var(--pro-faint)]">
             No subscription · Pay once for this render · Failed renders refunded
           </p>
-          <p className="mt-1.5 text-[12px] leading-5 text-white/35">
+          <p className="mt-1.5 text-[12px] leading-5 text-[var(--pro-faint)]">
             AI generation with human quality review — every paid generation is
             reviewed before delivery.
             {turnaround ? ` ${turnaround}` : ""}
@@ -944,7 +944,7 @@ export default function Composer({ variant = "hero", className, initialMedia = "
         </>
       )}
       {mediaMode === "image" && billingMode === "free" && (
-        <p className="mt-3 text-[12px] leading-5 text-white/35">
+        <p className="mt-3 text-[12px] leading-5 text-[var(--pro-faint)]">
           3 free AI previews a day, no payment needed. This is a preview, not a
           finished order — unlock the clean HD file for {formatINR(priceOf("single-image"))} if you love it.
         </p>

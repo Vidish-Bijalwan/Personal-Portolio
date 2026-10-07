@@ -106,7 +106,7 @@ export const USE_CASES: readonly UseCase[] = [
         a: "You do. Use them in listings, ads, menus and packaging however you like.",
       },
     ],
-    accent: "#D7FF3F",
+    accent: "#7da2ff",
     metaDescription:
       "AI product photography for sellers: studio-grade product shots, ad creatives and 5s product clips. Fixed price per creation, no subscription. Etch.",
   },
@@ -165,7 +165,7 @@ export const USE_CASES: readonly UseCase[] = [
         a: "Orders are fulfilled by an operator after payment confirmation — you pay, we make it, a human reviews it before delivery. You'll see live progress stages while you wait.",
       },
     ],
-    accent: "#00F0FF",
+    accent: "#7da2ff",
     metaDescription:
       "AI content for creators: 5s video clips, portraits, auto captions, GIFs and voice-overs. Fixed price per creation, no subscription. Etch.",
   },
@@ -224,7 +224,7 @@ export const USE_CASES: readonly UseCase[] = [
         a: "You do — full usage rights for ads, socials and campaigns.",
       },
     ],
-    accent: "#FF2D78",
+    accent: "#7da2ff",
     metaDescription:
       "AI ad creatives for marketers: product shots, ad variant packs, motion teasers. Fixed price per piece, no retainer, no subscription. Etch.",
   },

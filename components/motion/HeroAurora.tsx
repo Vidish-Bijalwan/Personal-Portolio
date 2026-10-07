@@ -25,15 +25,15 @@ export default function HeroAurora({ className }: HeroAuroraProps) {
     <div className={className} aria-hidden="true">
       <div className="absolute inset-0 bg-[#080808]" />
       <div
-        className="absolute -left-1/4 top-[-10%] h-[55%] w-[80%] rounded-full bg-[#D7FF3F]/[0.13] blur-[90px]"
+        className="absolute -left-1/4 top-[-10%] h-[55%] w-[80%] rounded-full bg-[var(--pro-accent)]/[0.13] blur-[90px]"
         style={reduced ? undefined : { animation: "v-aurora-a 14s ease-in-out infinite alternate" }}
       />
       <div
-        className="absolute -right-1/4 top-[22%] h-[48%] w-[75%] rounded-full bg-[#00F0FF]/[0.12] blur-[90px]"
+        className="absolute -right-1/4 top-[22%] h-[48%] w-[75%] rounded-full bg-[var(--pro-accent)]/[0.12] blur-[90px]"
         style={reduced ? undefined : { animation: "v-aurora-b 18s ease-in-out infinite alternate" }}
       />
       <div
-        className="absolute left-[15%] top-[52%] h-[40%] w-[70%] rounded-full bg-[#FF2D78]/[0.10] blur-[90px]"
+        className="absolute left-[15%] top-[52%] h-[40%] w-[70%] rounded-full bg-[var(--pro-accent)]/[0.10] blur-[90px]"
         style={reduced ? undefined : { animation: "v-aurora-a 22s ease-in-out infinite alternate-reverse" }}
       />
       {/* legibility veils */}
@@ -81,7 +81,7 @@ export function HeroCollage() {
               className="h-full w-full object-cover"
               loading="lazy"
             />
-            <span className="absolute bottom-1 left-1 rounded-full bg-black/70 px-1.5 py-px text-[10px] font-semibold tabular-nums text-[#D7FF3F]">
+            <span className="absolute bottom-1 left-1 rounded-full bg-black/70 px-1.5 py-px text-[10px] font-semibold tabular-nums text-[var(--pro-accent)]">
               {examplePrice(it)}
             </span>
           </span>

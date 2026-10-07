@@ -68,8 +68,8 @@ const TOOLS: ToolMeta[] = [
     icon: Mic,
     tagline: "AI narration, ducked under your audio",
     desc: "Upload a video — or pick one of your AI-generated clips — paste a script and choose a voice vibe.",
-    accent: "text-[#D7FF3F]",
-    border: "border-[#D7FF3F]/40",
+    accent: "text-[var(--pro-accent)]",
+    border: "border-[var(--pro-accent)]/40",
   },
   {
     badge: "AI-generated",
@@ -78,8 +78,8 @@ const TOOLS: ToolMeta[] = [
     icon: Captions,
     tagline: "Styled captions, burned in",
     desc: "Auto-transcribed by AI or set from your script text. Cyberpunk styling, readable and safe-area aware.",
-    accent: "text-[#00F0FF]",
-    border: "border-[#00F0FF]/40",
+    accent: "text-[var(--pro-accent)]",
+    border: "border-[var(--pro-accent)]/40",
   },
   {
     badge: "AI-generated",
@@ -88,8 +88,8 @@ const TOOLS: ToolMeta[] = [
     icon: Scissors,
     tagline: "Cut + title card",
     desc: "Set start and end seconds, add an optional title-card text overlay in three positions.",
-    accent: "text-[#FF2D78]",
-    border: "border-[#FF2D78]/40",
+    accent: "text-[var(--pro-accent)]",
+    border: "border-[var(--pro-accent)]/40",
   },
   {
     badge: "Real processing",
@@ -98,8 +98,8 @@ const TOOLS: ToolMeta[] = [
     icon: Minimize2,
     tagline: "Shrink the file, keep the video",
     desc: "Re-encode to H.264 at a smaller size — pick how aggressive the squeeze is.",
-    accent: "text-[#00F0FF]",
-    border: "border-[#00F0FF]/40",
+    accent: "text-[var(--pro-accent)]",
+    border: "border-[var(--pro-accent)]/40",
   },
   {
     badge: "Real processing",
@@ -108,8 +108,8 @@ const TOOLS: ToolMeta[] = [
     icon: Music,
     tagline: "Pull the audio out as MP3",
     desc: "Extract your video's soundtrack as a 128kbps MP3 — ringtones, voice notes, podcast cuts.",
-    accent: "text-[#D7FF3F]",
-    border: "border-[#D7FF3F]/40",
+    accent: "text-[var(--pro-accent)]",
+    border: "border-[var(--pro-accent)]/40",
   },
   {
     badge: "Real processing",
@@ -118,8 +118,8 @@ const TOOLS: ToolMeta[] = [
     icon: ImagePlay,
     tagline: "Clip → shareable GIF",
     desc: "Turn up to 10 seconds into an optimized looping GIF — palette-tuned, sized for sharing.",
-    accent: "text-[#FF2D78]",
-    border: "border-[#FF2D78]/40",
+    accent: "text-[var(--pro-accent)]",
+    border: "border-[var(--pro-accent)]/40",
   },
   {
     badge: "Real processing",
@@ -128,8 +128,8 @@ const TOOLS: ToolMeta[] = [
     icon: AudioLines,
     tagline: "Lay music or VO over video",
     desc: "Upload an MP3/WAV/M4A track and mix it over your video — or replace its audio entirely.",
-    accent: "text-[#00F0FF]",
-    border: "border-[#00F0FF]/40",
+    accent: "text-[var(--pro-accent)]",
+    border: "border-[var(--pro-accent)]/40",
   },
   {
     badge: "Real processing",
@@ -138,8 +138,8 @@ const TOOLS: ToolMeta[] = [
     icon: Waves,
     tagline: "Tame hum, hiss and rumble",
     desc: "Reduce steady background noise from your video's audio. Honest cleanup — not a studio remaster.",
-    accent: "text-[#D7FF3F]",
-    border: "border-[#D7FF3F]/40",
+    accent: "text-[var(--pro-accent)]",
+    border: "border-[var(--pro-accent)]/40",
   },
 ];
 
@@ -176,13 +176,13 @@ function FilePicker({
         className={cn(
           "flex w-full items-center gap-3 rounded-[12px] border border-dashed px-4 py-4 text-left transition-colors",
           file
-            ? "border-[#D7FF3F]/40 bg-[#D7FF3F]/[0.04]"
+            ? "border-[var(--pro-accent)]/40 bg-[var(--pro-accent)]/[0.04]"
             : "border-white/[0.15] bg-white/[0.02] hover:border-white/30",
         )}
       >
         <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px] bg-white/[0.06]">
           {file ? (
-            <FileVideo className="h-5 w-5 text-[#D7FF3F]" />
+            <FileVideo className="h-5 w-5 text-[var(--pro-accent)]" />
           ) : (
             <Upload className="h-5 w-5 text-white/50" />
           )}
@@ -558,11 +558,11 @@ export default function VideoStudioPage() {
       <VilishNav />
       <main className="mx-auto w-full max-w-3xl flex-1 px-4 pb-20 pt-8 sm:pt-12">
         <Reveal>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#00F0FF]">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--pro-accent)]">
             Etch · Video Studio · AI + real tools
           </p>
           <h1 className="font-display mt-2 text-[30px] font-semibold tracking-[-0.02em] sm:text-[40px]">
-            Give your video a <span className="v-iris-bg bg-clip-text text-transparent">studio finish</span>
+            Give your video a <span className="pro-accent-text">studio finish</span>
           </h1>
           <p className="mt-3 max-w-xl text-[14px] leading-6 text-white/60">
             Eight real video tools, queue-backed like everything else in
@@ -602,7 +602,7 @@ export default function VideoStudioPage() {
                   <span className="min-w-0">
                     <span className="flex items-center gap-1.5 text-[14px] font-semibold">
                       {t.label}
-                      {active && <Check className="h-4 w-4 text-[#D7FF3F]" />}
+                      {active && <Check className="h-4 w-4 text-[var(--pro-accent)]" />}
                     </span>
                     <span className="mt-0.5 block text-[12px] leading-5 text-white/50">
                       {t.tagline}
@@ -651,7 +651,7 @@ export default function VideoStudioPage() {
                           className={cn(
                             "rounded-[10px] border px-3 py-2.5 text-[13px] font-medium transition-colors",
                             ttsSource === s
-                              ? "border-[#D7FF3F]/50 bg-[#D7FF3F]/[0.08] text-[#F5F5F3]"
+                              ? "border-[var(--pro-accent)]/50 bg-[var(--pro-accent)]/[0.08] text-[#F5F5F3]"
                               : "border-white/[0.1] text-white/55 hover:border-white/25",
                           )}
                         >
@@ -690,11 +690,11 @@ export default function VideoStudioPage() {
                               className={cn(
                                 "flex items-center gap-3 rounded-[10px] border px-3.5 py-2.5 text-left transition-colors",
                                 clipId === c.id
-                                  ? "border-[#D7FF3F]/50 bg-[#D7FF3F]/[0.08]"
+                                  ? "border-[var(--pro-accent)]/50 bg-[var(--pro-accent)]/[0.08]"
                                   : "border-white/[0.1] hover:border-white/25",
                               )}
                             >
-                              <FileVideo className="h-4 w-4 shrink-0 text-[#D7FF3F]" />
+                              <FileVideo className="h-4 w-4 shrink-0 text-[var(--pro-accent)]" />
                               <span className="min-w-0">
                                 <span className="block truncate font-mono text-[12px] text-white/80">
                                   {c.id.slice(0, 8)}…
@@ -707,7 +707,7 @@ export default function VideoStudioPage() {
                                 </span>
                               </span>
                               {clipId === c.id && (
-                                <Check className="ml-auto h-4 w-4 shrink-0 text-[#D7FF3F]" />
+                                <Check className="ml-auto h-4 w-4 shrink-0 text-[var(--pro-accent)]" />
                               )}
                             </button>
                           ))}
@@ -730,7 +730,7 @@ export default function VideoStudioPage() {
                       rows={5}
                       maxLength={SCRIPT_MAX + 50}
                       placeholder="Paste the narration script — it'll be spoken over your video with the music ducked underneath."
-                      className="w-full resize-y rounded-[10px] border border-white/[0.12] bg-[#0c0c0e] px-3.5 py-3 text-[14px] leading-6 text-[#F5F5F3] placeholder:text-white/30 focus:border-[#D7FF3F]/60 focus:outline-none"
+                      className="w-full resize-y rounded-[10px] border border-white/[0.12] bg-[#0c0c0e] px-3.5 py-3 text-[14px] leading-6 text-[#F5F5F3] placeholder:text-white/30 focus:border-[var(--pro-accent)]/60 focus:outline-none"
                     />
                     <CharCount value={script} max={SCRIPT_MAX} />
                   </div>
@@ -749,7 +749,7 @@ export default function VideoStudioPage() {
                           className={cn(
                             "rounded-[10px] border px-3.5 py-2.5 text-left transition-colors",
                             voice === v.id
-                              ? "border-[#D7FF3F]/50 bg-[#D7FF3F]/[0.08]"
+                              ? "border-[var(--pro-accent)]/50 bg-[var(--pro-accent)]/[0.08]"
                               : "border-white/[0.1] hover:border-white/25",
                           )}
                         >
@@ -790,7 +790,7 @@ export default function VideoStudioPage() {
                           className={cn(
                             "rounded-[10px] border px-3 py-2.5 text-[13px] font-medium transition-colors",
                             capMode === m
-                              ? "border-[#00F0FF]/50 bg-[#00F0FF]/[0.08] text-[#F5F5F3]"
+                              ? "border-[var(--pro-accent)]/50 bg-[var(--pro-accent)]/[0.08] text-[#F5F5F3]"
                               : "border-white/[0.1] text-white/55 hover:border-white/25",
                           )}
                         >
@@ -814,12 +814,12 @@ export default function VideoStudioPage() {
                         rows={5}
                         maxLength={SCRIPT_MAX + 50}
                         placeholder="Paste the spoken words (or SRT). They'll be timed and styled as captions."
-                        className="w-full resize-y rounded-[10px] border border-white/[0.12] bg-[#0c0c0e] px-3.5 py-3 text-[14px] leading-6 text-[#F5F5F3] placeholder:text-white/30 focus:border-[#00F0FF]/60 focus:outline-none"
+                        className="w-full resize-y rounded-[10px] border border-white/[0.12] bg-[#0c0c0e] px-3.5 py-3 text-[14px] leading-6 text-[#F5F5F3] placeholder:text-white/30 focus:border-[var(--pro-accent)]/60 focus:outline-none"
                       />
                       <CharCount value={capText} max={SCRIPT_MAX} />
                     </div>
                   ) : (
-                    <p className="rounded-[10px] border border-[#00F0FF]/20 bg-[#00F0FF]/[0.04] px-4 py-3 text-[12px] leading-5 text-white/55">
+                    <p className="rounded-[10px] border border-[var(--pro-accent)]/20 bg-[var(--pro-accent)]/[0.04] px-4 py-3 text-[12px] leading-5 text-white/55">
                       AI transcription will listen to your video and burn in
                       styled cyberpunk captions. Transcription is AI-generated —
                       give it a watch before you post.
@@ -849,7 +849,7 @@ export default function VideoStudioPage() {
                         value={trimStart}
                         onChange={(e) => setTrimStart(e.target.value)}
                         placeholder="0"
-                        className="w-full rounded-[10px] border border-white/[0.12] bg-[#0c0c0e] px-3.5 py-2.5 text-[14px] text-[#F5F5F3] placeholder:text-white/30 focus:border-[#FF2D78]/60 focus:outline-none"
+                        className="w-full rounded-[10px] border border-white/[0.12] bg-[#0c0c0e] px-3.5 py-2.5 text-[14px] text-[#F5F5F3] placeholder:text-white/30 focus:border-[var(--pro-accent)]/60 focus:outline-none"
                       />
                     </div>
                     <div>
@@ -865,7 +865,7 @@ export default function VideoStudioPage() {
                         value={trimEnd}
                         onChange={(e) => setTrimEnd(e.target.value)}
                         placeholder="15"
-                        className="w-full rounded-[10px] border border-white/[0.12] bg-[#0c0c0e] px-3.5 py-2.5 text-[14px] text-[#F5F5F3] placeholder:text-white/30 focus:border-[#FF2D78]/60 focus:outline-none"
+                        className="w-full rounded-[10px] border border-white/[0.12] bg-[#0c0c0e] px-3.5 py-2.5 text-[14px] text-[#F5F5F3] placeholder:text-white/30 focus:border-[var(--pro-accent)]/60 focus:outline-none"
                       />
                     </div>
                   </div>
@@ -882,7 +882,7 @@ export default function VideoStudioPage() {
                       onChange={(e) => setTrimText(e.target.value)}
                       maxLength={150}
                       placeholder="e.g. Midnight in the Hills"
-                      className="w-full rounded-[10px] border border-white/[0.12] bg-[#0c0c0e] px-3.5 py-2.5 text-[14px] text-[#F5F5F3] placeholder:text-white/30 focus:border-[#FF2D78]/60 focus:outline-none"
+                      className="w-full rounded-[10px] border border-white/[0.12] bg-[#0c0c0e] px-3.5 py-2.5 text-[14px] text-[#F5F5F3] placeholder:text-white/30 focus:border-[var(--pro-accent)]/60 focus:outline-none"
                     />
                     {trimText.trim() && (
                       <div className="mt-2 flex gap-2">
@@ -895,7 +895,7 @@ export default function VideoStudioPage() {
                             className={cn(
                               "rounded-[8px] border px-3 py-1.5 text-[12px] font-medium transition-colors",
                               trimPos === p.id
-                                ? "border-[#FF2D78]/50 bg-[#FF2D78]/[0.1] text-[#F5F5F3]"
+                                ? "border-[var(--pro-accent)]/50 bg-[var(--pro-accent)]/[0.1] text-[#F5F5F3]"
                                 : "border-white/[0.1] text-white/55 hover:border-white/25",
                             )}
                           >
@@ -929,7 +929,7 @@ export default function VideoStudioPage() {
                           className={cn(
                             "rounded-[10px] border px-3.5 py-2.5 text-left transition-colors",
                             compQuality === q.id
-                              ? "border-[#00F0FF]/50 bg-[#00F0FF]/[0.08]"
+                              ? "border-[var(--pro-accent)]/50 bg-[var(--pro-accent)]/[0.08]"
                               : "border-white/[0.1] hover:border-white/25",
                           )}
                         >
@@ -953,7 +953,7 @@ export default function VideoStudioPage() {
                     onPick={pickFile(setConvFile, setConvFileError)}
                     error={convFileError}
                   />
-                  <p className="rounded-[10px] border border-[#D7FF3F]/20 bg-[#D7FF3F]/[0.04] px-4 py-3 text-[12px] leading-5 text-white/55">
+                  <p className="rounded-[10px] border border-[var(--pro-accent)]/20 bg-[var(--pro-accent)]/[0.04] px-4 py-3 text-[12px] leading-5 text-white/55">
                     Extracts the full audio track as a 128kbps MP3 — same
                     length as your video. The preview streams the audio;
                     the download unlocks after payment.
@@ -982,7 +982,7 @@ export default function VideoStudioPage() {
                         value={gifStart}
                         onChange={(e) => setGifStart(e.target.value)}
                         placeholder="0"
-                        className="w-full rounded-[10px] border border-white/[0.12] bg-[#0c0c0e] px-3.5 py-2.5 text-[14px] text-[#F5F5F3] placeholder:text-white/30 focus:border-[#FF2D78]/60 focus:outline-none"
+                        className="w-full rounded-[10px] border border-white/[0.12] bg-[#0c0c0e] px-3.5 py-2.5 text-[14px] text-[#F5F5F3] placeholder:text-white/30 focus:border-[var(--pro-accent)]/60 focus:outline-none"
                       />
                     </div>
                     <div>
@@ -998,7 +998,7 @@ export default function VideoStudioPage() {
                         value={gifEnd}
                         onChange={(e) => setGifEnd(e.target.value)}
                         placeholder="5"
-                        className="w-full rounded-[10px] border border-white/[0.12] bg-[#0c0c0e] px-3.5 py-2.5 text-[14px] text-[#F5F5F3] placeholder:text-white/30 focus:border-[#FF2D78]/60 focus:outline-none"
+                        className="w-full rounded-[10px] border border-white/[0.12] bg-[#0c0c0e] px-3.5 py-2.5 text-[14px] text-[#F5F5F3] placeholder:text-white/30 focus:border-[var(--pro-accent)]/60 focus:outline-none"
                       />
                     </div>
                   </div>
@@ -1020,7 +1020,7 @@ export default function VideoStudioPage() {
                             className={cn(
                               "rounded-[8px] border px-3 py-1.5 text-[12px] font-medium transition-colors",
                               gifFps === f.id
-                                ? "border-[#FF2D78]/50 bg-[#FF2D78]/[0.1] text-[#F5F5F3]"
+                                ? "border-[var(--pro-accent)]/50 bg-[var(--pro-accent)]/[0.1] text-[#F5F5F3]"
                                 : "border-white/[0.1] text-white/55 hover:border-white/25",
                             )}
                           >
@@ -1043,7 +1043,7 @@ export default function VideoStudioPage() {
                             className={cn(
                               "rounded-[8px] border px-3 py-1.5 text-[12px] font-medium transition-colors",
                               gifWidth === w.id
-                                ? "border-[#FF2D78]/50 bg-[#FF2D78]/[0.1] text-[#F5F5F3]"
+                                ? "border-[var(--pro-accent)]/50 bg-[var(--pro-accent)]/[0.1] text-[#F5F5F3]"
                                 : "border-white/[0.1] text-white/55 hover:border-white/25",
                             )}
                           >
@@ -1095,7 +1095,7 @@ export default function VideoStudioPage() {
                           className={cn(
                             "rounded-[10px] border px-3.5 py-2.5 text-left transition-colors",
                             aaMode === m.id
-                              ? "border-[#00F0FF]/50 bg-[#00F0FF]/[0.08]"
+                              ? "border-[var(--pro-accent)]/50 bg-[var(--pro-accent)]/[0.08]"
                               : "border-white/[0.1] hover:border-white/25",
                           )}
                         >
@@ -1133,7 +1133,7 @@ export default function VideoStudioPage() {
                           className={cn(
                             "rounded-[10px] border px-3.5 py-2.5 text-left transition-colors",
                             dnStrength === s.id
-                              ? "border-[#D7FF3F]/50 bg-[#D7FF3F]/[0.08]"
+                              ? "border-[var(--pro-accent)]/50 bg-[var(--pro-accent)]/[0.08]"
                               : "border-white/[0.1] hover:border-white/25",
                           )}
                         >
@@ -1159,7 +1159,7 @@ export default function VideoStudioPage() {
             <div className="mt-6 rounded-[12px] border border-white/[0.08] bg-[#0c0c0e] p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-[13px] text-white/60">
-                  <ShieldCheck className="h-4 w-4 text-[#D7FF3F]" />
+                  <ShieldCheck className="h-4 w-4 text-[var(--pro-accent)]" />
                   {JOB_PRICE} flat · one UPI payment · no subscription
                 </div>
               </div>
@@ -1173,7 +1173,7 @@ export default function VideoStudioPage() {
                 onClick={submit}
                 disabled={busy}
                 className={cn(
-                  "v-iris-bg mt-4 flex w-full items-center justify-center gap-2 rounded-[10px] px-5 py-3 text-[15px] font-semibold text-[#080808]",
+                  "pro-cta mt-4 flex w-full items-center justify-center gap-2 rounded-[10px] px-5 py-3 text-[15px] font-semibold text-[var(--pro-btn-ink)]",
                   busy ? "cursor-wait opacity-70" : "hover:opacity-95",
                 )}
               >

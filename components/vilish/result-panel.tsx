@@ -72,7 +72,7 @@ export function ResultPanel({
       aria-label="Creation details"
       className="w-full rounded-[18px] border border-white/[0.09] bg-[#101012] p-5 sm:p-6"
     >
-      <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#D7FF3F]">
+      <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--pro-accent)]">
         Creation details
       </p>
 
@@ -88,11 +88,11 @@ export function ResultPanel({
 
       <section className="mt-5" aria-label="What the grill understood">
         <div className="flex flex-wrap gap-2">
-          <DetailChip k="Subject" v={subject} accent="#D7FF3F" />
+          <DetailChip k="Subject" v={subject} accent="var(--pro-accent)" />
           {styles.map((s) => (
-            <DetailChip key={s} k="Style" v={s} accent="#00F0FF" />
+            <DetailChip key={s} k="Style" v={s} accent="var(--pro-accent)" />
           ))}
-          {mood && <DetailChip k="Mood" v={mood} accent="#FF2D78" />}
+          {mood && <DetailChip k="Mood" v={mood} accent="var(--pro-accent)" />}
         </div>
       </section>
 
@@ -155,7 +155,7 @@ export function MoreFromGrill() {
         </h2>
         <Link
           href="/examples"
-          className="inline-flex shrink-0 items-center gap-1 text-[13px] font-medium text-[#D7FF3F] hover:opacity-90"
+          className="inline-flex shrink-0 items-center gap-1 text-[13px] font-medium text-[var(--pro-accent)] hover:opacity-90"
         >
           All examples
           <ArrowRight className="h-3.5 w-3.5" />
@@ -184,7 +184,7 @@ export function MoreFromGrill() {
                 {item.prompt.length > 48 ? `${item.prompt.slice(0, 48)}…` : item.prompt}
               </p>
               <p className="mt-1 text-[12px] text-white/45">
-                from <span className="font-semibold text-[#D7FF3F]">{examplePrice(item)}</span>
+                from <span className="font-semibold text-[var(--pro-accent)]">{examplePrice(item)}</span>
               </p>
             </div>
           </Link>

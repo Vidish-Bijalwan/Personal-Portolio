@@ -398,7 +398,7 @@ export default function BurgerGrill({
                 transform={`rotate(${s.rot} ${s.cx} ${s.cy})`}
               />
             ))}
-            <g className="fg-ambient" fill="#D7FF3F">
+            <g className="fg-ambient" fill="#FFE9A8">
               <path
                 d="M84,120 l3.5,9 9,3.5 -9,3.5 -3.5,9 -3.5,-9 -9,-3.5 9,-3.5 z"
                 className="fg-twinkle"
@@ -407,7 +407,7 @@ export default function BurgerGrill({
                 d="M338,132 l3,8 8,3 -8,3 -3,8 -3,-8 -8,-3 8,-3 z"
                 className="fg-twinkle"
                 style={{ animationDelay: "-0.8s" }}
-                fill="#00F0FF"
+                fill="#FFC93C"
               />
             </g>
           </g>

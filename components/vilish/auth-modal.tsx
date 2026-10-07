@@ -206,7 +206,7 @@ export default function AuthModal({ open, onClose, onAuthenticated }: AuthModalP
           <button
             type="submit"
             disabled={busy}
-            className="v-iris-bg flex w-full items-center justify-center gap-2 rounded-[10px] px-4 py-3 text-[14px] font-semibold text-[#080808] transition-opacity hover:opacity-90 disabled:opacity-50"
+            className="pro-cta flex w-full items-center justify-center gap-2 rounded-[10px] px-4 py-3 text-[14px] font-semibold text-[var(--pro-btn-ink)] transition-opacity hover:opacity-90 disabled:opacity-50"
           >
             {busy && <Loader2 className="h-4 w-4 animate-spin" />}
             {mode === "login" ? "Sign in" : "Create account"}

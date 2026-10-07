@@ -68,7 +68,7 @@ export default function PrivacyPage() {
             Privacy
           </p>
           <h1 className="font-display mt-3 text-[34px] font-semibold leading-[1.05] tracking-[-0.02em] sm:text-[52px]">
-            Your data, <span className="v-iris-text">your business.</span>
+            Your data, <span className="pro-accent-text">your business.</span>
           </h1>
           <p className="mt-4 max-w-xl text-[15px] leading-7 text-white/[0.58]">
             Etch is a pay-per-creation studio run by one person. This policy
@@ -107,7 +107,7 @@ export default function PrivacyPage() {
             </p>
             <a
               href="mailto:vidishbijalwan@gmail.com"
-              className="mt-6 inline-flex min-h-[44px] items-center gap-2 rounded-[12px] bg-[#D7FF3F] px-7 py-3 text-[15px] font-semibold text-[#080808] hover:opacity-95"
+              className="mt-6 inline-flex min-h-[44px] items-center gap-2 rounded-[12px] bg-[var(--pro-btn)] px-7 py-3 text-[15px] font-semibold text-[var(--pro-btn-ink)] hover:opacity-95"
             >
               vidishbijalwan@gmail.com <ArrowRight className="h-4 w-4" />
             </a>

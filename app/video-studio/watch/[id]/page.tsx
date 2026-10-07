@@ -282,7 +282,7 @@ export default function VideoStudioWatchPage() {
         {/* initial load */}
         {!data && !fetchError && (
           <div className="flex flex-1 flex-col items-center justify-center py-24 text-center">
-            <Loader2 className="h-8 w-8 animate-spin text-[#00F0FF]" />
+            <Loader2 className="h-8 w-8 animate-spin text-[var(--pro-accent)]" />
             <p className="mt-4 text-[14px] text-white/50">Finding your job…</p>
           </div>
         )}
@@ -318,7 +318,7 @@ export default function VideoStudioWatchPage() {
             )}
             <Link
               href="/video-studio"
-              className="mt-7 inline-flex items-center gap-2 min-h-[44px] rounded-[10px] bg-[#D7FF3F] px-5 py-2.5 text-[14px] font-semibold text-[#080808] hover:opacity-95"
+              className="mt-7 inline-flex items-center gap-2 min-h-[44px] rounded-[10px] bg-[var(--pro-btn)] px-5 py-2.5 text-[14px] font-semibold text-[var(--pro-btn-ink)] hover:opacity-95"
             >
               <RefreshCcw className="h-4 w-4" />
               Try again
@@ -329,7 +329,7 @@ export default function VideoStudioWatchPage() {
         {/* processing / queued */}
         {data && data.status !== "failed" && data.status !== "done" && (
           <section className="flex flex-1 flex-col items-center py-8 text-center" aria-live="polite">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#00F0FF]">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--pro-accent)]">
               {meta.label} · {JOB_PRICE} · {meta.badge}
             </p>
             <h1 className="font-display mt-2 text-[26px] font-semibold tracking-[-0.02em] sm:text-[32px]">
@@ -341,7 +341,7 @@ export default function VideoStudioWatchPage() {
             </div>
 
             <p className="font-display mt-4 flex items-center gap-2 text-[16px] font-medium text-[#F5F5F3]">
-              <ToolIcon className="h-4 w-4 text-[#00F0FF]" />
+              <ToolIcon className="h-4 w-4 text-[var(--pro-accent)]" />
               {stageText}
             </p>
             <p key={captionIdx} className="fg-caption mt-1.5 h-6 text-[13px] text-white/45">
@@ -358,7 +358,7 @@ export default function VideoStudioWatchPage() {
             >
               <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/[0.08]">
                 <div
-                  className="h-full rounded-full bg-gradient-to-r from-[#D7FF3F] via-[#00F0FF] to-[#FF2D78] transition-[width] duration-700 ease-out motion-reduce:transition-none"
+                  className="h-full rounded-full bg-[var(--pro-accent)] transition-[width] duration-700 ease-out motion-reduce:transition-none"
                   style={{ width: `${progress}%` }}
                 />
               </div>
@@ -382,7 +382,7 @@ export default function VideoStudioWatchPage() {
                 onClick={openPayment}
                 disabled={payBusy}
                 className={cn(
-                  "v-iris-bg mt-3 flex min-h-[44px] w-full items-center justify-center gap-2 rounded-[10px] px-5 py-2.5 text-[14px] font-semibold text-[#080808]",
+                  "pro-cta mt-3 flex min-h-[44px] w-full items-center justify-center gap-2 rounded-[10px] px-5 py-2.5 text-[14px] font-semibold text-[var(--pro-btn-ink)]",
                   payBusy ? "cursor-wait opacity-70" : "hover:opacity-95",
                 )}
               >
@@ -402,7 +402,7 @@ export default function VideoStudioWatchPage() {
         {/* done + locked: watermarked preview with unlock CTA */}
         {data && data.status === "done" && !data.unlocked && (
           <section className="flex flex-1 flex-col items-center py-8 text-center">
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-[#00F0FF]/40 bg-[#00F0FF]/[0.08] px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.1em] text-[#00F0FF]">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--pro-accent)]/40 bg-[var(--pro-accent)]/[0.08] px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.1em] text-[var(--pro-accent)]">
               <Sparkles className="h-3.5 w-3.5" />
               Your {meta.label.toLowerCase()} preview — {meta.badge}
             </span>
@@ -451,7 +451,7 @@ export default function VideoStudioWatchPage() {
               onClick={openPayment}
               disabled={payBusy}
               className={cn(
-                "v-iris-bg mt-5 inline-flex items-center gap-2 rounded-[10px] px-6 py-3 text-[15px] font-semibold text-[#080808]",
+                "pro-cta mt-5 inline-flex items-center gap-2 rounded-[10px] px-6 py-3 text-[15px] font-semibold text-[var(--pro-btn-ink)]",
                 payBusy ? "cursor-wait opacity-70" : "hover:opacity-95",
               )}
             >
@@ -494,7 +494,7 @@ export default function VideoStudioWatchPage() {
             <a
               href={cleanUrl}
               download
-              className="mt-6 inline-flex items-center gap-2 rounded-[10px] bg-[#D7FF3F] px-6 py-3 text-[15px] font-semibold text-[#080808] hover:opacity-95"
+              className="mt-6 inline-flex items-center gap-2 rounded-[10px] bg-[var(--pro-btn)] px-6 py-3 text-[15px] font-semibold text-[var(--pro-btn-ink)] hover:opacity-95"
             >
               <Download className="h-4 w-4" />
               Download clean {meta.fileNoun}

@@ -1,3 +1,10 @@
+/**
+ * /create — reskinned into the Etch pro design language (2026-10-07).
+ *
+ * Pro-theme tokens only: .pro-surface, .pro-display, .pro-card, .pro-body,
+ * and colors via var(--pro-*) so both dark and light themes work.
+ * Copy speaks to small business owners buying ads — professional, no slang.
+ */
 import Link from "next/link";
 import { ArrowRight, BadgeCheck, ShieldCheck, Wallet } from "lucide-react";
 import VilishNav from "@/components/vilish/nav";
@@ -6,16 +13,15 @@ import Composer from "@/components/vilish/composer";
 import FulfillmentNotices from "@/components/vilish/fulfillment-notices";
 import Reveal from "@/components/motion/Reveal";
 import { Stagger, StaggerItem } from "@/components/motion/Stagger";
-
-export const metadata = {
-  title: "Create AI images & videos — pay per piece | Etch",
-  description:
-    "Start your creation: describe it, see the exact price, pay once with UPI. Images from ₹19, video tools from ₹39. No subscription.",
-  alternates: { canonical: "/create" },
-};
 import { PRICE_CATALOG, composerServiceById, priceOf, type ComposerServiceId } from "@/src/lib/pricing/catalog";
 import { templateById } from "@/src/lib/trends/templates";
 import { formatINR } from "@/src/lib/vilish/types";
+
+export const metadata = {
+  title: "Make an ad for your product — pay per creation | Etch",
+  description: `Describe your ad in plain words, see the exact price before you pay. Images from ${formatINR(priceOf("single-image"))}, 5-second clips from ${formatINR(priceOf("clip-5s"))}. One UPI payment, no subscription.`,
+  alternates: { canonical: "/create" },
+};
 
 const TRUST = [
   { icon: Wallet, label: "UPI payments" },
@@ -32,12 +38,12 @@ const NEXT = [
   {
     num: "02",
     title: "Human review + creation",
-    text: "A human reviews your brief and creates your piece — checked before anything ships.",
+    text: "A human reviews your brief and creates your ad — checked before anything ships.",
   },
   {
     num: "03",
     title: "QC + delivery",
-    text: "Your creation passes quality control, then lands in your hands to download.",
+    text: "Your ad passes quality control, then lands in your hands to download and post.",
   },
 ];
 
@@ -46,13 +52,9 @@ const TEASER = PRICE_CATALOG.filter((p) =>
   ["single-image", "product-photo", "pack-4", "clip-5s", "video-studio"].includes(p.id),
 ).map((p) => ({ label: p.id === "video-studio" ? "Video Studio job" : p.label, price: formatINR(p.paise) }));
 
-/** Standard eyebrow, matching the homepage section headers. */
+/** Standard eyebrow in the pro design language. */
 function Eyebrow({ children }: { children: string }) {
-  return (
-    <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-white/45">
-      {children}
-    </p>
-  );
+  return <p className="pro-eyebrow">{children}</p>;
 }
 
 export default async function CreatePage({
@@ -75,41 +77,47 @@ export default async function CreatePage({
     : undefined;
 
   return (
-    <div className="min-h-screen bg-[#080808] font-sans text-[#F5F5F3] antialiased">
+    <div className="pro-surface pro-body min-h-screen">
       <VilishNav />
 
       <main>
         {/* ── composer hero ─────────────────────────────────── */}
         <section className="relative overflow-hidden">
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_50%_at_50%_0%,rgba(215,255,63,0.07)_0%,transparent_60%)]"
-          />
           <div className="relative mx-auto w-full max-w-3xl px-4 pb-8 pt-16 text-center sm:pt-24">
             <Stagger className="flex flex-col items-center">
               <StaggerItem>
-                <Eyebrow>Create — pay per creation</Eyebrow>
+                <Eyebrow>Ads for your business — pay per creation</Eyebrow>
               </StaggerItem>
               <StaggerItem>
-                <h1 className="font-display mt-5 text-[36px] font-semibold leading-[1.06] tracking-[-0.02em] sm:text-[56px]">
+                <h1
+                  className="pro-display mt-5 text-[36px] font-bold leading-[1.06] sm:text-[56px]"
+                  style={{ color: "var(--pro-fg)" }}
+                >
                   {isVideo ? (
                     <>
                       Describe the clip.{" "}
-                      <span className="v-iris-text">We&apos;ll make it move.</span>
+                      <span style={{ color: "var(--pro-accent)" }}>
+                        We&apos;ll make it move.
+                      </span>
                     </>
                   ) : (
                     <>
-                      Describe it.{" "}
-                      <span className="v-iris-text">We&apos;ll make it real.</span>
+                      Describe your product.{" "}
+                      <span style={{ color: "var(--pro-accent)" }}>
+                        We&apos;ll design the ad.
+                      </span>
                     </>
                   )}
                 </h1>
               </StaggerItem>
               <StaggerItem>
-                <p className="mx-auto mt-5 max-w-xl text-[15px] leading-7 text-white/[0.62] sm:text-[16px]">
+                <p
+                  className="pro-body mx-auto mt-5 max-w-xl text-[15px] leading-7 sm:text-[16px]"
+                  style={{ color: "var(--pro-muted)" }}
+                >
                   {isVideo
                     ? `Describe the 5-second clip. ${formatINR(priceOf("clip-5s"))} — exact price shown before you pay, fulfilled by an operator with human QC.`
-                    : "Type what you want in plain words — you see the exact price before anything is charged. One UPI payment, human quality review, your finished piece to download."}
+                    : "Type what you want in plain words — you see the exact price before anything is charged. One UPI payment, human quality review, your finished ad to download."}
                 </p>
               </StaggerItem>
               <StaggerItem>
@@ -117,9 +125,15 @@ export default async function CreatePage({
                   {TRUST.map((t) => (
                     <li
                       key={t.label}
-                      className="flex items-center gap-2 text-[13px] text-white/60"
+                      className="pro-body flex items-center gap-2 text-[13px] font-medium"
+                      style={{ color: "var(--pro-muted)" }}
                     >
-                      <t.icon className="h-4 w-4 text-white/75" strokeWidth={1.8} />
+                      <t.icon
+                        className="h-4 w-4"
+                        strokeWidth={1.8}
+                        style={{ color: "var(--pro-accent)" }}
+                        aria-hidden
+                      />
                       {t.label}
                     </li>
                   ))}
@@ -129,14 +143,11 @@ export default async function CreatePage({
 
             {/* The composer, presented as the hero element */}
             <Reveal delay={0.3} className="mt-10 text-left">
-              <div className="relative">
-                <span
-                  aria-hidden
-                  className="v-iris-bg pointer-events-none absolute -inset-px rounded-[22px] opacity-30 blur-md sm:opacity-35 sm:blur-xl"
-                />
-                <div className="v-iris-border relative rounded-[20px] border bg-[#0C0C0E] p-4 sm:p-7">
-                  <Composer variant="page" initialMedia={initialMedia} initialService={initialService} initialTemplate={template ?? undefined} initialPrompt={typeof sp?.prompt === "string" ? sp.prompt.slice(0, 2000) : undefined} />
-                </div>
+              <div
+                className="pro-card p-4 sm:p-7"
+                style={{ boxShadow: "var(--pro-card-shadow)" }}
+              >
+                <Composer variant="page" initialMedia={initialMedia} initialService={initialService} initialTemplate={template ?? undefined} initialPrompt={typeof sp?.prompt === "string" ? sp.prompt.slice(0, 2000) : undefined} />
               </div>
             </Reveal>
 
@@ -144,7 +155,10 @@ export default async function CreatePage({
               <FulfillmentNotices />
             </div>
             <Reveal delay={0.1}>
-              <p className="mx-auto mt-6 max-w-xl text-center text-[13px] leading-6 text-white/40">
+              <p
+                className="pro-body mx-auto mt-6 max-w-xl text-center text-[13px] leading-6"
+                style={{ color: "var(--pro-faint)" }}
+              >
                 Every order is quoted at a fixed, human-reviewed price — the
                 number you see is the number you pay. If a render fails,
                 you&apos;re refunded automatically — no support ticket, no wait.
@@ -156,30 +170,46 @@ export default async function CreatePage({
         {/* ── what happens next ─────────────────────────────── */}
         <section
           aria-label="What happens next"
-          className="border-t border-white/[0.08] bg-[#0B0B0C]"
+          className="border-t"
+          style={{ borderColor: "var(--pro-border-soft)" }}
         >
           <div className="mx-auto max-w-5xl px-4 py-16 sm:py-20">
             <Reveal>
               <Eyebrow>After you create</Eyebrow>
-              <h2 className="font-display mt-3 text-[26px] font-semibold tracking-[-0.01em] sm:text-[34px]">
-                Three steps. <span className="text-[#00F0FF]">Zero guesswork.</span>
+              <h2
+                className="pro-display mt-3 text-[26px] font-bold sm:text-[34px]"
+                style={{ color: "var(--pro-fg)" }}
+              >
+                Three steps.{" "}
+                <span style={{ color: "var(--pro-accent)" }}>Zero guesswork.</span>
               </h2>
             </Reveal>
-            <Stagger className="mt-10 grid grid-cols-1 gap-10 sm:grid-cols-3 sm:gap-6">
+            <Stagger className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-3 sm:gap-6">
               {NEXT.map((n) => (
-                <StaggerItem key={n.num} className="relative">
-                  <span
-                    aria-hidden
-                    className="font-display inline-block text-[44px] font-semibold leading-none tracking-[-0.02em] text-white/[0.92] tabular-nums sm:text-[52px]"
+                <StaggerItem key={n.num} className="h-full">
+                  <div
+                    className="pro-card pro-lift h-full p-7"
+                    style={{ boxShadow: "var(--pro-card-shadow)" }}
                   >
-                    {n.num}
-                  </span>
-                  <h3 className="mt-4 text-[17px] font-semibold text-[#F5F5F3]">
-                    {n.title}
-                  </h3>
-                  <p className="mt-1.5 max-w-[28ch] text-[14px] leading-6 text-white/55">
-                    {n.text}
-                  </p>
+                    <p
+                      className="pro-display text-[13px] font-bold tabular-nums"
+                      style={{ color: "var(--pro-accent)", letterSpacing: "0.18em" }}
+                    >
+                      {n.num}
+                    </p>
+                    <h3
+                      className="pro-display mt-4 text-[20px] font-bold leading-snug"
+                      style={{ color: "var(--pro-fg)" }}
+                    >
+                      {n.title}
+                    </h3>
+                    <p
+                      className="pro-body mt-3 max-w-[28ch] text-[14.5px] leading-[1.7]"
+                      style={{ color: "var(--pro-muted)" }}
+                    >
+                      {n.text}
+                    </p>
+                  </div>
                 </StaggerItem>
               ))}
             </Stagger>
@@ -189,7 +219,8 @@ export default async function CreatePage({
         {/* ── pricing hint ──────────────────────────────────── */}
         <section
           aria-label="Pricing hint"
-          className="border-t border-white/[0.08]"
+          className="border-t"
+          style={{ borderColor: "var(--pro-border-soft)" }}
         >
           <div className="mx-auto max-w-3xl px-4 py-14 text-center sm:py-16">
             <Reveal>
@@ -198,9 +229,15 @@ export default async function CreatePage({
             <Stagger className="mt-6 flex flex-wrap items-center justify-center gap-x-10 gap-y-3">
               {TEASER.map((t) => (
                 <StaggerItem key={t.label}>
-                  <p className="text-[13px] text-white/55">
+                  <p
+                    className="pro-body text-[13px]"
+                    style={{ color: "var(--pro-muted)" }}
+                  >
                     {t.label}{" "}
-                    <span className="font-semibold tabular-nums text-[#F5F5F3]">
+                    <span
+                      className="pro-body font-semibold tabular-nums"
+                      style={{ color: "var(--pro-fg)" }}
+                    >
                       {t.price}
                     </span>
                   </p>
@@ -210,7 +247,8 @@ export default async function CreatePage({
             <Reveal delay={0.1} className="mt-7">
               <Link
                 href="/pricing"
-                className="inline-flex items-center gap-1.5 text-[14px] font-medium text-[#F5F5F3] underline decoration-white/25 underline-offset-4 hover:decoration-white/60"
+                className="pro-body inline-flex items-center gap-1.5 text-[14px] font-medium underline underline-offset-4"
+                style={{ color: "var(--pro-fg)", textDecorationColor: "var(--pro-border)" }}
               >
                 See full pricing <ArrowRight className="h-4 w-4" strokeWidth={1.8} />
               </Link>
@@ -219,19 +257,32 @@ export default async function CreatePage({
         </section>
 
         {/* ── examples link ─────────────────────────────────── */}
-        <section aria-label="Examples" className="border-t border-white/[0.08]">
+        <section
+          aria-label="Examples"
+          className="border-t"
+          style={{ borderColor: "var(--pro-border-soft)" }}
+        >
           <div className="mx-auto max-w-5xl px-4 py-14 text-center sm:py-16">
             <Reveal>
-              <h2 className="font-display text-[24px] font-semibold tracking-[-0.01em] sm:text-[30px]">
-                Not sure what to make?{" "}
-                <span className="v-iris-text">See what&apos;s possible.</span>
+              <h2
+                className="pro-display text-[24px] font-bold sm:text-[30px]"
+                style={{ color: "var(--pro-fg)" }}
+              >
+                Need ideas for your next ad?{" "}
+                <span style={{ color: "var(--pro-accent)" }}>
+                  See what&apos;s possible.
+                </span>
               </h2>
-              <p className="mx-auto mt-3 max-w-md text-[14px] leading-6 text-white/[0.55]">
+              <p
+                className="pro-body mx-auto mt-3 max-w-md text-[14px] leading-6"
+                style={{ color: "var(--pro-muted)" }}
+              >
                 Every example shows the prompt and the exact price it sold for.
               </p>
               <Link
                 href="/examples"
-                className="mt-7 inline-flex items-center gap-1.5 text-[14px] font-medium text-[#F5F5F3] underline decoration-white/25 underline-offset-4 hover:decoration-white/60"
+                className="pro-body mt-7 inline-flex items-center gap-1.5 text-[14px] font-medium underline underline-offset-4"
+                style={{ color: "var(--pro-fg)", textDecorationColor: "var(--pro-border)" }}
               >
                 Browse examples <ArrowRight className="h-4 w-4" strokeWidth={1.8} />
               </Link>

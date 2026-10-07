@@ -27,12 +27,12 @@ export default function BlogIndexPage() {
     <>
       <VilishNav />
       <main className="relative mx-auto max-w-6xl px-4 pb-24 pt-28 sm:px-6 sm:pt-32">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#00F0FF]">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--pro-accent)]">
           Etch Blog
         </p>
         <h1 className="font-display mt-3 max-w-[20ch] text-[32px] font-semibold leading-tight tracking-[-0.02em] text-[#F5F5F3] sm:text-[44px]">
           Guides to creating with AI,{" "}
-          <span className="text-[#D7FF3F]">priced honestly</span>
+          <span className="text-[var(--pro-accent)]">priced honestly</span>
         </h1>
         <p className="mt-4 max-w-[60ch] text-[15.5px] leading-7 text-white/60">
           No hype, no fake statistics — just practical walkthroughs with real
@@ -59,11 +59,11 @@ export default function BlogIndexPage() {
 
         <p className="mt-12 text-center text-[13.5px] text-white/40">
           New guides publish daily.{" "}
-          <Link href="/pricing" className="text-[#00F0FF] hover:text-[#D7FF3F]">
+          <Link href="/pricing" className="text-[var(--pro-accent)] hover:text-[var(--pro-accent)]">
             See real prices
           </Link>{" "}
           or{" "}
-          <Link href="/create" className="text-[#00F0FF] hover:text-[#D7FF3F]">
+          <Link href="/create" className="text-[var(--pro-accent)] hover:text-[var(--pro-accent)]">
             start creating
           </Link>
           .

@@ -72,7 +72,7 @@ export default function AboutPage() {
             About
           </p>
           <h1 className="font-display mt-3 max-w-[24ch] text-[34px] font-semibold leading-[1.08] tracking-[-0.02em] sm:text-[52px]">
-            An AI studio with <span className="v-iris-text">a human</span> in the loop.
+            An AI studio with <span className="pro-accent-text">a human</span> in the loop.
           </h1>
           <p className="mt-5 max-w-2xl text-[15px] leading-7 text-white/[0.62]">
             Etch is a pay-per-creation AI media studio. No subscription, no
@@ -156,7 +156,7 @@ export default function AboutPage() {
             <div className="mt-8 flex flex-wrap items-center gap-4">
               <Link
                 href="/create"
-                className="v-iris-bg inline-flex items-center gap-2 rounded-[12px] px-7 py-3.5 text-[15px] font-semibold text-[#080808]"
+                className="pro-cta inline-flex items-center gap-2 rounded-[12px] px-7 py-3.5 text-[15px] font-semibold text-[var(--pro-btn-ink)]"
               >
                 Start creating <ArrowRight className="h-4 w-4" strokeWidth={2} />
               </Link>
