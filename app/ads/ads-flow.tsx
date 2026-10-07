@@ -38,47 +38,8 @@ import {
 import { composerServiceById, priceOf } from "@/src/lib/pricing/catalog";
 import { formatINR } from "@/src/lib/vilish/types";
 import { cn } from "@/lib/utils";
-import conceptArtRaw from "@/data/ad-concepts/concept-art.json";
-
-/* Per-concept card art: unique thumbnails generated for every concept
-   (public/pro/ads-concepts/<id>.jpg). Falls back to the category art
-   when a concept has no dedicated thumbnail yet. */
-const CONCEPT_ART: Record<string, string> = Object.fromEntries(
-  Object.entries(conceptArtRaw as Record<string, unknown>)
-    .filter(([, v]) => typeof v === "string" && (v as string).length > 0)
-    .map(([k, v]) => [k, `/pro/${v as string}`])
-);
-
-/* Card art: reuse the shipped pro hero images as decorative style
-   references, mapped by concept category family. */
-const CATEGORY_ART: Record<string, string> = {
-  beauty: "/pro/ad-skincare.jpg",
-  fashion: "/pro/ad-apparel.jpg",
-  studio: "/pro/hero-perfume.jpg",
-  "technical-showcase": "/pro/hero-watch-exploded.jpg",
-  tech: "/pro/hero-watch-exploded.jpg",
-  premium: "/pro/hero-watch-exploded.jpg",
-  unboxing: "/pro/hero-watch-exploded.jpg",
-  lifestyle: "/pro/hero-watch-box.jpg",
-  promotional: "/pro/hero-watch-box.jpg",
-  seasonal: "/pro/hero-watch-box.jpg",
-  festive: "/pro/hero-watch-box.jpg",
-  "social-proof": "/pro/hero-watch-box.jpg",
-  food: "/pro/ad-burger.jpg",
-  dynamic: "/pro/ad-shoe.jpg",
-  urban: "/pro/ad-shoe.jpg",
-  stylized: "/pro/ad-apparel.jpg",
-  transformation: "/pro/ad-skincare.jpg",
-  video: "/pro/hero-headphones.jpg",
-};
-
-function artForConcept(c: { id: string; category: string }): string {
-  return CONCEPT_ART[c.id] ?? CATEGORY_ART[c.category] ?? "/pro/hero-headphones.jpg";
-}
-
-function artFor(category: string): string {
-  return CATEGORY_ART[category] ?? "/pro/hero-headphones.jpg";
-}
+import { artForConcept } from "./concept-art";
+import AdsCustomize from "./ads-customize";
 
 function prettyCategory(c: string): string {
   return c
@@ -504,147 +465,25 @@ export default function AdsFlow() {
 
       {/* ------------------------------ Step 3 ------------------------------ */}
       {step === 3 && (
-        <section className="mt-8 grid gap-6 lg:grid-cols-2">
-          <div className="space-y-6">
-            <div className="pro-card p-7" style={{ boxShadow: "var(--pro-card-shadow)" }}>
-              <h2 className="pro-display text-xl font-bold" style={{ color: "var(--pro-fg)" }}>
-                Colors
-              </h2>
-              <div className="mt-4 grid gap-2.5 sm:grid-cols-2">
-                {palettes.map((p) => {
-                  const active = p.name === paletteName;
-                  return (
-                    <button
-                      key={p.name}
-                      type="button"
-                      onClick={() => setPaletteName(p.name)}
-                      aria-pressed={active}
-                      className="rounded-[10px] border p-3 text-left"
-                      style={{
-                        borderColor: active ? "var(--pro-accent)" : "var(--pro-border-soft)",
-                        background: active ? "var(--pro-bg-elev)" : "transparent",
-                      }}
-                    >
-                      <span className="flex gap-1">
-                        {p.colors.map((col) => (
-                          <span
-                            key={col}
-                            className="h-6 w-6 rounded-full border"
-                            style={{ background: col, borderColor: "var(--pro-border-soft)" }}
-                            title={col}
-                          />
-                        ))}
-                      </span>
-                      <span className="mt-2 block text-[13.5px] font-semibold" style={{ color: "var(--pro-fg)" }}>
-                        {p.name}
-                      </span>
-                      <span className="block text-[12px]" style={{ color: "var(--pro-faint)" }}>
-                        {p.mood}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            <div className="pro-card p-7" style={{ boxShadow: "var(--pro-card-shadow)" }}>
-              <h2 className="pro-display text-xl font-bold" style={{ color: "var(--pro-fg)" }}>
-                Typography
-              </h2>
-              <div className="mt-4 space-y-2">
-                {typographies.map((t) => {
-                  const active = t.name === typographyName;
-                  return (
-                    <button
-                      key={t.name}
-                      type="button"
-                      onClick={() => setTypographyName(t.name)}
-                      aria-pressed={active}
-                      className="w-full rounded-[10px] border p-3.5 text-left"
-                      style={{
-                        borderColor: active ? "var(--pro-accent)" : "var(--pro-border-soft)",
-                        background: active ? "var(--pro-bg-elev)" : "transparent",
-                      }}
-                    >
-                      <span className="flex items-center justify-between">
-                        <span className="text-[14px] font-semibold" style={{ color: "var(--pro-fg)" }}>
-                          {t.name}
-                        </span>
-                        {active && <Check className="h-4 w-4" style={{ color: "var(--pro-accent)" }} />}
-                      </span>
-                      <span className="mt-0.5 block text-[12.5px]" style={{ color: "var(--pro-muted)" }}>
-                        {t.mood}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            <div className="pro-card p-7" style={{ boxShadow: "var(--pro-card-shadow)" }}>
-              <h2 className="pro-display text-xl font-bold" style={{ color: "var(--pro-fg)" }}>
-                Layout
-              </h2>
-              <div className="mt-4 space-y-2">
-                {layouts.map((l) => {
-                  const active = l.name === layoutName;
-                  return (
-                    <button
-                      key={l.name}
-                      type="button"
-                      onClick={() => setLayoutName(l.name)}
-                      aria-pressed={active}
-                      className="w-full rounded-[10px] border p-3.5 text-left"
-                      style={{
-                        borderColor: active ? "var(--pro-accent)" : "var(--pro-border-soft)",
-                        background: active ? "var(--pro-bg-elev)" : "transparent",
-                      }}
-                    >
-                      <span className="flex items-center justify-between">
-                        <span className="text-[14px] font-semibold" style={{ color: "var(--pro-fg)" }}>
-                          {l.name}
-                        </span>
-                        {active && <Check className="h-4 w-4" style={{ color: "var(--pro-accent)" }} />}
-                      </span>
-                      <span className="mt-0.5 block text-[12.5px]" style={{ color: "var(--pro-muted)" }}>
-                        Eye path: {l.eye_path}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-
-          <div className="lg:sticky lg:top-24 lg:self-start">
-            <div className="pro-card p-7" style={{ boxShadow: "var(--pro-card-shadow)" }}>
-              <h2 className="pro-display text-xl font-bold" style={{ color: "var(--pro-fg)" }}>
-                Live prompt preview
-              </h2>
-              <p className="mt-1.5 text-[13px]" style={{ color: "var(--pro-muted)" }}>
-                This exact prompt goes to the composer on the next step.
-              </p>
-              <p
-                className="mt-4 max-h-[420px] overflow-y-auto whitespace-pre-wrap rounded-[10px] border p-4 text-[13.5px] leading-relaxed"
-                style={{
-                  borderColor: "var(--pro-border-soft)",
-                  background: "var(--pro-bg-sunken)",
-                  color: "var(--pro-fg)",
-                }}
-              >
-                {finalPrompt}
-              </p>
-              <div className="mt-6 flex items-center gap-3">
-                <button type="button" onClick={() => setStep(2)} className="pro-btn-secondary inline-flex">
-                  <ArrowLeft className="mr-2 h-4 w-4" /> Back
-                </button>
-                <button type="button" onClick={() => setStep(4)} className="pro-btn-primary inline-flex">
-                  Review & create <ArrowRight className="ml-2 h-4 w-4" />
-                </button>
-              </div>
-            </div>
-          </div>
-        </section>
+        <AdsCustomize
+          product={product}
+          concept={concept}
+          media={media}
+          concepts={concepts}
+          palettes={palettes}
+          typographies={typographies}
+          layouts={layouts}
+          paletteName={paletteName}
+          typographyName={typographyName}
+          layoutName={layoutName}
+          onPaletteChange={setPaletteName}
+          onTypographyChange={setTypographyName}
+          onLayoutChange={setLayoutName}
+          onConceptChange={setConceptId}
+          finalPrompt={finalPrompt}
+          onBack={() => setStep(2)}
+          onNext={() => setStep(4)}
+        />
       )}
 
       {/* ------------------------------ Step 4 ------------------------------ */}
