@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -13,103 +12,56 @@ import {
   Zap,
   type LucideIcon,
 } from "lucide-react";
-import { Reveal, Section } from "./reveal";
+import { Reveal, Parallax, Section } from "./reveal";
 import type { GalleryItem } from "./gallery";
 import { Gallery } from "./gallery";
+import { HeroCarousel, type CarouselSlide } from "./carousel";
 import type { FaqItem } from "./faq";
 import { FaqSection } from "./faq";
+import type { ToolEntry } from "@/src/lib/tools/directory";
 
 /* ── Hero ─────────────────────────────────────────── */
 
 export function Hero({
   singleImagePrice,
-  heroImage,
+  slides,
 }: {
   singleImagePrice: string;
-  heroImage: { src: string; alt: string; prompt: string; href: string };
+  slides: CarouselSlide[];
 }) {
   return (
     <section className="relative overflow-hidden">
       <div className="mx-auto w-full max-w-6xl px-4 pb-16 pt-16 sm:px-6 sm:pb-24 sm:pt-24">
-        <Reveal className="mx-auto max-w-3xl text-center">
-          <p className="pro-eyebrow">Pay-per-creation AI studio</p>
-          <h1
-            className="pro-display mt-5 text-[38px] font-bold leading-[1.06] sm:text-[60px]"
-            style={{ color: "var(--pro-fg)" }}
-          >
-            Studio-quality AI images and video, priced per creation.
-          </h1>
-          <p
-            className="pro-body mx-auto mt-6 max-w-[58ch] text-[16.5px] leading-[1.65] sm:text-[18px]"
-            style={{ color: "var(--pro-muted)" }}
-          >
-            No subscriptions. No expiring credits. See the exact price before
-            you pay — from {singleImagePrice} per image, payable over UPI.
-          </p>
-          <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <Link href="/create" className="pro-btn-primary w-full sm:w-auto">
-              Start creating
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-            <Link href="/examples" className="pro-btn-secondary w-full sm:w-auto">
-              See examples
-            </Link>
-          </div>
-        </Reveal>
-
-        {/* Product visual — a real finished creation in real UI chrome */}
-        <Reveal delay={140} className="mx-auto mt-14 max-w-4xl sm:mt-16">
-          <figure
-            className="overflow-hidden rounded-[20px] border"
-            style={{
-              borderColor: "var(--pro-border-soft)",
-              background: "var(--pro-bg-elev)",
-              boxShadow: "var(--pro-card-shadow)",
-            }}
-          >
-            <div className="relative aspect-[16/9] w-full">
-              <Image
-                src={heroImage.src}
-                alt={heroImage.alt}
-                fill
-                sizes="(max-width: 1024px) 100vw, 896px"
-                className="object-cover"
-                priority
-              />
-            </div>
-            <figcaption
-              className="flex flex-col gap-3 border-t px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6"
-              style={{ borderColor: "var(--pro-border-soft)" }}
+        <Parallax amount={44}>
+          <Reveal className="mx-auto max-w-3xl text-center">
+            <p className="pro-eyebrow">Pay-per-creation AI studio</p>
+            <h1
+              className="pro-display mt-5 text-[38px] font-bold leading-[1.06] sm:text-[60px]"
+              style={{ color: "var(--pro-fg)" }}
             >
-              <p
-                className="pro-body truncate text-[13.5px]"
-                style={{ color: "var(--pro-muted)" }}
-              >
-                &ldquo;{heroImage.prompt}&rdquo;
-              </p>
-              <div className="flex shrink-0 items-center gap-3">
-                <span
-                  className="pro-body rounded-full px-3 py-1.5 text-[13px] font-bold tabular-nums"
-                  style={{
-                    background: "var(--pro-bg-sunken)",
-                    color: "var(--pro-fg)",
-                    border: "1px solid var(--pro-border-soft)",
-                  }}
-                >
-                  {singleImagePrice} · one image
-                </span>
-                <Link
-                  href={heroImage.href}
-                  className="pro-body inline-flex min-h-[40px] items-center gap-1.5 text-[13.5px] font-semibold"
-                  style={{ color: "var(--pro-accent)" }}
-                >
-                  Make one like this
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
-              </div>
-            </figcaption>
-          </figure>
-        </Reveal>
+              Studio-quality AI images and video, priced per creation.
+            </h1>
+            <p
+              className="pro-body mx-auto mt-6 max-w-[58ch] text-[16.5px] leading-[1.65] sm:text-[18px]"
+              style={{ color: "var(--pro-muted)" }}
+            >
+              No subscriptions. No expiring credits. See the exact price before
+              you pay — from {singleImagePrice} per image, payable over UPI.
+            </p>
+            <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
+              <Link href="/create" className="pro-btn-primary w-full sm:w-auto">
+                Start creating
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+              <Link href="/examples" className="pro-btn-secondary w-full sm:w-auto">
+                See examples
+              </Link>
+            </div>
+          </Reveal>
+        </Parallax>
+
+        {/* Infinite hero carousel — real finished work, prompt on click */}
+        <HeroCarousel slides={slides} />
       </div>
     </section>
   );
@@ -298,6 +250,260 @@ export function ExamplesGallery({ items }: { items: GalleryItem[] }) {
   );
 }
 
+/* ── Templates (restored from the classic homepage) ── */
+
+export interface TemplateCardItem {
+  id: string;
+  name: string;
+  description: string;
+  badge?: string;
+  price: string;
+  aspect: string;
+  inputsLabel: string;
+  href: string;
+}
+
+export function TemplatesShowcase({ templates }: { templates: TemplateCardItem[] }) {
+  return (
+    <Section
+      eyebrow="Templates"
+      title="Start from a ready-made template."
+      lede="Pick a look and make it yours. Every template shows its exact price before you pay — some ask for a photo, some need only words."
+    >
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {templates.map((t, i) => (
+          <Reveal key={t.id} delay={(i % 3) * 70}>
+            <article
+              className="pro-card pro-lift flex h-full flex-col p-6"
+              style={{ boxShadow: "var(--pro-card-shadow)" }}
+            >
+              <div className="flex items-center justify-between gap-2">
+                <span
+                  className="pro-body text-[12px] font-bold uppercase"
+                  style={{ color: "var(--pro-faint)", letterSpacing: "0.14em" }}
+                >
+                  {t.aspect} · {t.inputsLabel}
+                </span>
+                {t.badge ? (
+                  <span
+                    className="pro-body shrink-0 rounded-full px-2.5 py-1 text-[11.5px] font-bold"
+                    style={{
+                      background: "var(--pro-bg-sunken)",
+                      color: "var(--pro-accent)",
+                      border: "1px solid var(--pro-border-soft)",
+                    }}
+                  >
+                    {t.badge}
+                  </span>
+                ) : null}
+              </div>
+              <h3
+                className="pro-display mt-4 text-[19px] font-bold"
+                style={{ color: "var(--pro-fg)" }}
+              >
+                {t.name}
+              </h3>
+              <p
+                className="pro-body mt-2 flex-1 text-[14px] leading-[1.65]"
+                style={{ color: "var(--pro-muted)" }}
+              >
+                {t.description}
+              </p>
+              <div
+                className="mt-5 flex items-center justify-between border-t pt-4"
+                style={{ borderColor: "var(--pro-border-soft)" }}
+              >
+                <span
+                  className="pro-display text-[20px] font-bold tabular-nums"
+                  style={{ color: "var(--pro-fg)" }}
+                >
+                  {t.price}
+                </span>
+                <Link
+                  href={t.href}
+                  className="pro-body inline-flex min-h-[40px] items-center gap-1.5 text-[14px] font-semibold"
+                  style={{ color: "var(--pro-accent)" }}
+                  aria-label={`Use template: ${t.name}, ${t.price}`}
+                >
+                  Use template
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+              </div>
+            </article>
+          </Reveal>
+        ))}
+      </div>
+      <Reveal className="mt-8 text-center">
+        <Link href="/trends" className="pro-btn-secondary">
+          Browse all templates
+          <ArrowRight className="h-4 w-4" />
+        </Link>
+      </Reveal>
+    </Section>
+  );
+}
+
+/* ── Tools directory (restored from the classic homepage) ── */
+
+export function ToolsDirectory({
+  groups,
+}: {
+  groups: { label: string; tools: ToolEntry[] }[];
+}) {
+  return (
+    <Section
+      eyebrow="Tools"
+      title="Every tool. One honest price."
+      lede="Twelve tools, all live right now — AI generation and real media processing. Each card opens the real thing at its exact price."
+    >
+      <div className="flex flex-col gap-10">
+        {groups.map((g) => (
+          <div key={g.label}>
+            <p
+              className="pro-body mb-4 text-[12.5px] font-bold uppercase"
+              style={{ color: "var(--pro-faint)", letterSpacing: "0.16em" }}
+            >
+              {g.label}
+            </p>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {g.tools.map((t, i) => {
+                const Icon = t.icon;
+                return (
+                  <Reveal key={t.id} delay={(i % 4) * 60}>
+                    <Link
+                      href={t.href}
+                      className="pro-card pro-lift flex h-full flex-col p-5"
+                      style={{ boxShadow: "var(--pro-card-shadow)" }}
+                      aria-label={`${t.name} — ${t.price}. Open the tool.`}
+                    >
+                      <span className="flex items-center justify-between">
+                        <span
+                          className="flex h-10 w-10 items-center justify-center rounded-[10px]"
+                          style={{ background: "var(--pro-bg-sunken)" }}
+                        >
+                          <Icon
+                            className="h-5 w-5"
+                            strokeWidth={1.9}
+                            style={{ color: "var(--pro-accent)" }}
+                            aria-hidden
+                          />
+                        </span>
+                        <span
+                          className="pro-body rounded-full px-2.5 py-1 text-[11px] font-bold"
+                          style={{
+                            background: "var(--pro-bg-sunken)",
+                            color: "var(--pro-muted)",
+                            border: "1px solid var(--pro-border-soft)",
+                          }}
+                        >
+                          {t.badge}
+                        </span>
+                      </span>
+                      <span
+                        className="pro-display mt-4 text-[16.5px] font-bold"
+                        style={{ color: "var(--pro-fg)" }}
+                      >
+                        {t.name}
+                      </span>
+                      <span
+                        className="pro-body mt-1.5 flex-1 text-[13px] leading-[1.6]"
+                        style={{ color: "var(--pro-muted)" }}
+                      >
+                        {t.tagline}
+                      </span>
+                      <span
+                        className="pro-body mt-4 inline-flex items-center gap-1.5 text-[14px] font-bold tabular-nums"
+                        style={{ color: "var(--pro-fg)" }}
+                      >
+                        {t.price}
+                        <ArrowRight
+                          className="h-4 w-4"
+                          style={{ color: "var(--pro-accent)" }}
+                          aria-hidden
+                        />
+                      </span>
+                    </Link>
+                  </Reveal>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+      </div>
+    </Section>
+  );
+}
+
+/* ── Blog teasers (restored from the classic homepage) ── */
+
+export interface BlogTeaser {
+  slug: string;
+  title: string;
+  description: string;
+  category: string;
+  date: string;
+  readingMinutes: number;
+}
+
+function formatDate(iso: string): string {
+  const d = new Date(iso + "T00:00:00");
+  if (Number.isNaN(d.getTime())) return iso;
+  return d.toLocaleDateString("en-IN", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+}
+
+export function BlogTeasers({ posts }: { posts: BlogTeaser[] }) {
+  return (
+    <Section
+      eyebrow="From the blog"
+      title="Guides worth your time."
+      lede="Practical write-ups on AI image and video costs, quality, and workflows — written for people who make things."
+    >
+      <div className="grid gap-4 md:grid-cols-3">
+        {posts.map((p, i) => (
+          <Reveal key={p.slug} delay={(i % 3) * 70}>
+            <Link
+              href={`/blog/${p.slug}`}
+              className="pro-card pro-lift flex h-full flex-col p-6"
+              style={{ boxShadow: "var(--pro-card-shadow)" }}
+              aria-label={`Read: ${p.title}`}
+            >
+              <p className="pro-eyebrow">{p.category}</p>
+              <h3
+                className="pro-display mt-3 text-[19px] font-bold leading-snug"
+                style={{ color: "var(--pro-fg)" }}
+              >
+                {p.title}
+              </h3>
+              <p
+                className="pro-body mt-2.5 line-clamp-2 flex-1 text-[14px] leading-[1.65]"
+                style={{ color: "var(--pro-muted)" }}
+              >
+                {p.description}
+              </p>
+              <p
+                className="pro-body mt-5 text-[12.5px] font-semibold"
+                style={{ color: "var(--pro-faint)" }}
+              >
+                {formatDate(p.date)} · {p.readingMinutes} min read
+              </p>
+            </Link>
+          </Reveal>
+        ))}
+      </div>
+      <Reveal className="mt-8 text-center">
+        <Link href="/blog" className="pro-btn-secondary">
+          Read all guides
+          <ArrowRight className="h-4 w-4" />
+        </Link>
+      </Reveal>
+    </Section>
+  );
+}
+
 /* ── Pricing ── */
 
 export interface PriceTier {
@@ -331,7 +537,7 @@ export function PricingTable({ tiers }: { tiers: PriceTier[] }) {
           return (
             <Reveal key={t.id} delay={i * 70}>
               <article
-                className="pro-card flex h-full flex-col p-7"
+                className="pro-card pro-lift flex h-full flex-col p-7"
                 style={{
                   boxShadow: "var(--pro-card-shadow)",
                   borderColor: t.featured

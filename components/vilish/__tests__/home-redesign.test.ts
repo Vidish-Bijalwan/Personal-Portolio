@@ -66,3 +66,43 @@ describe("homepage redesign: no invented numbers", () => {
     }
   });
 });
+
+describe("homepage tweak round: hi-def carousel + restored sections", () => {
+  it("every /pro/hero-*.jpg referenced on the homepage exists on disk", () => {
+    const refs = pageSrc.match(/\/pro\/hero-[\w-]+\.jpg/g) ?? [];
+    expect(refs.length).toBeGreaterThanOrEqual(3);
+    for (const r of new Set(refs)) {
+      expect(() => readFileSync(join(root, "public", r.replace(/^\//, "")))).not.toThrow();
+    }
+  });
+
+  it("hero slides store their exact generation prompts verbatim", () => {
+    const m = pageSrc.match(/function loadHeroSlides\(\)[\s\S]*?\n\}/);
+    expect(m).not.toBeNull();
+    const prompts = [...m![0].matchAll(/prompt:\s*"([^"]{40,})"/g)].map((x) => x[1]);
+    expect(prompts.length).toBeGreaterThanOrEqual(3);
+  });
+
+  it("restored sections link to their real destinations", () => {
+    const sectionsSrc = readFileSync(
+      join(root, "components", "vilish", "home", "sections.tsx"),
+      "utf8",
+    );
+    for (const href of ['href="/trends"', 'href="/blog"', "templateHref", "toolsByGroup"]) {
+      expect(sectionsSrc + pageSrc).toContain(href);
+    }
+    const dialogSrc = readFileSync(
+      join(root, "components", "vilish", "home", "prompt-dialog.tsx"),
+      "utf8",
+    );
+    expect(dialogSrc).toContain("/create?prompt=");
+    expect(dialogSrc).toContain("navigator.clipboard.writeText");
+  });
+
+  it("templates, tools and blog data resolve against their registries", () => {
+    // Static shape check: the pickers reference real registry exports.
+    expect(pageSrc).toContain("TEMPLATES");
+    expect(pageSrc).toContain("toolsByGroup(");
+    expect(pageSrc).toContain("BLOG_POSTS");
+  });
+});

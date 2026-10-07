@@ -52,6 +52,49 @@ export function Reveal({
   );
 }
 
+/** Calm scroll parallax — a gentle drift, never a ride. Skipped entirely
+ *  under prefers-reduced-motion. */
+export function Parallax({
+  children,
+  className,
+  amount = 48,
+}: {
+  children: ReactNode;
+  className?: string;
+  amount?: number;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (
+      typeof window === "undefined" ||
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ) {
+      return;
+    }
+    let raf = 0;
+    const onScroll = () => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        const y = Math.min(window.scrollY * 0.07, amount);
+        if (ref.current) ref.current.style.transform = `translate3d(0, ${y}px, 0)`;
+      });
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      cancelAnimationFrame(raf);
+    };
+  }, [amount]);
+
+  return (
+    <div ref={ref} className={className} style={{ willChange: "transform" }}>
+      {children}
+    </div>
+  );
+}
+
 /** Consistent section shell: eyebrow, title, lede, generous whitespace. */
 export function Section({
   id,

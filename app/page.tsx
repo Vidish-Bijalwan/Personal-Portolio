@@ -28,10 +28,25 @@ import {
   PricingTable,
   TrustStrip,
   WhyPillars,
+  TemplatesShowcase,
+  ToolsDirectory,
+  BlogTeasers,
   type FaqItem,
   type PriceTier,
+  type TemplateCardItem,
+  type BlogTeaser,
 } from "@/components/vilish/home/sections";
+import type { CarouselSlide } from "@/components/vilish/home/carousel";
 import type { GalleryItem } from "@/components/vilish/home/gallery";
+import {
+  TEMPLATES,
+  templateHref,
+  templatePricePaise,
+  templateInputsLabel,
+  type Template,
+} from "@/src/lib/trends/templates";
+import { toolsByGroup } from "@/src/lib/tools/directory";
+import { BLOG_POSTS } from "@/src/lib/blog/index";
 
 /* The "why pay-per-creation" pillars. Copy must stay digit-free —
    no invented numbers of any kind (homepage redesign gate). */
@@ -152,41 +167,80 @@ function loadGallery(): GalleryItem[] {
   }));
 }
 
-function loadHero(): { src: string; alt: string; prompt: string; href: string } {
-  const dir = path.join(process.cwd(), "public", "examples");
-  try {
-    const raw = JSON.parse(
-      readFileSync(path.join(dir, "manifest.json"), "utf8"),
-    ) as unknown[];
-    const items = (Array.isArray(raw) ? raw : []).filter(isExampleItem);
-    const hero =
-      items.find((it: ExampleItem) => it.src.includes("5-watch-ad")) ?? items[0];
-    if (hero) {
-      return {
-        src: hero.src,
-        alt: hero.alt ?? hero.prompt,
-        prompt:
-          hero.prompt.length > 110
-            ? hero.prompt.slice(0, 110).trimEnd() + "…"
-            : hero.prompt,
-        href: exampleHref(hero),
-      };
-    }
-  } catch {
-    /* fall through to fallback */
-  }
-  return {
-    src: "/examples/5-watch-ad.webp",
-    alt: "Studio product shot of a steel chronograph — AI-generated example",
-    prompt: "Studio product shot of a steel chronograph",
-    href: "/create?service=product-photo",
-  };
+function loadHeroSlides(): CarouselSlide[] {
+  const price = formatINR(priceOf("single-image"));
+  const slides: { src: string; alt: string; prompt: string }[] = [
+    {
+      src: "/pro/hero-watch-exploded.jpg",
+      alt: "Exploded view of a luxury chronograph — every component floating in layers",
+      prompt:
+        "Luxury chronograph watch exploded view: disassembled components — dial, gears, hands, crown, sapphire crystal, steel case — floating in precise vertical layers above a dark reflective studio surface, dramatic rim lighting, deep charcoal background with a soft spotlight glow, premium advertising photography, photorealistic, ultra detailed",
+    },
+    {
+      src: "/pro/hero-watch-box.jpg",
+      alt: "Luxury chronograph resting in an open presentation box",
+      prompt:
+        "Luxury chronograph watch resting inside an open dark presentation box lined with black velvet, elegant warm spotlight from above, dark premium studio background with soft golden bokeh, refined product advertising photography, photorealistic, ultra detailed",
+    },
+    {
+      src: "/pro/hero-headphones.jpg",
+      alt: "Matte black wireless headphones floating above a dark stone pedestal",
+      prompt:
+        "Premium matte black wireless over-ear headphones floating above a dark stone pedestal, dramatic studio lighting with subtle blue rim light, deep dark premium background, luxury tech advertisement photography, photorealistic, ultra detailed",
+    },
+    {
+      src: "/pro/hero-perfume.jpg",
+      alt: "Glass perfume bottle with gold cap on marble in golden backlight",
+      prompt:
+        "Elegant glass perfume bottle with gold cap on a marble surface, dark moody premium background with soft golden backlight and gentle mist, luxury fragrance advertisement photography, photorealistic, ultra detailed",
+    },
+  ];
+  return slides.map((s) => ({
+    ...s,
+    price,
+    href: "/create?service=single-image",
+  }));
+}
+
+/** Restored sections: templates first by badge, then newest. */
+function pickTemplates(): TemplateCardItem[] {
+  const rank = (t: Template) => (t.badge ? 0 : 1);
+  return [...TEMPLATES]
+    .sort((a, b) => rank(a) - rank(b) || (a.addedOn < b.addedOn ? 1 : -1))
+    .slice(0, 6)
+    .map((t) => ({
+      id: t.id,
+      name: t.name,
+      description: t.description,
+      badge: t.badge,
+      price: formatINR(templatePricePaise(t)),
+      aspect: t.aspect,
+      inputsLabel: templateInputsLabel(t),
+      href: templateHref(t),
+    }));
+}
+
+function pickBlogTeasers(): BlogTeaser[] {
+  return BLOG_POSTS.slice(0, 3).map((p) => ({
+    slug: p.slug,
+    title: p.title,
+    description: p.description,
+    category: p.category,
+    date: p.date,
+    readingMinutes: p.readingMinutes,
+  }));
 }
 
 export default function HomePage() {
   const singleImagePrice = formatINR(priceOf("single-image"));
   const gallery = loadGallery();
-  const heroImage = loadHero();
+  const heroSlides = loadHeroSlides();
+  const templates = pickTemplates();
+  const toolGroups = [
+    { label: "Create", tools: toolsByGroup("create") },
+    { label: "Video Studio", tools: toolsByGroup("video-studio") },
+  ];
+  const blogTeasers = pickBlogTeasers();
 
   const tiers: PriceTier[] = TIER_META.map((t) => ({
     ...t,
@@ -228,11 +282,14 @@ export default function HomePage() {
       />
       <VilishNav />
       <main>
-        <Hero singleImagePrice={singleImagePrice} heroImage={heroImage} />
+        <Hero singleImagePrice={singleImagePrice} slides={heroSlides} />
         <TrustStrip />
         <HowItWorks />
         <WhyPillars pillars={WHY_PILLARS} />
         <ExamplesGallery items={gallery} />
+        <TemplatesShowcase templates={templates} />
+        <ToolsDirectory groups={toolGroups} />
+        <BlogTeasers posts={blogTeasers} />
         <PricingTable tiers={tiers} />
         <FaqSection items={faqs} />
         <FinalCta />
