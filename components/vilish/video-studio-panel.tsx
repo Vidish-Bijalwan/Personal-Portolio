@@ -242,9 +242,16 @@ function CharCount({ value, max }: { value: string; max: number }) {
   );
 }
 
-export default function VideoStudioPanel({ chrome = true }: { chrome?: boolean }) {
+export default function VideoStudioPanel({
+  chrome = true,
+  initialTool,
+}: {
+  chrome?: boolean;
+  /** Deep-link support, e.g. /video-studio?tool=caption. */
+  initialTool?: VideoTool;
+}) {
   const router = useRouter();
-  const [tool, setTool] = useState<VideoTool>("tts");
+  const [tool, setTool] = useState<VideoTool>(initialTool ?? "tts");
   const [busy, setBusy] = useState(false);
   const [submitError, setSubmitError] = useState("");
   const [authNeeded, setAuthNeeded] = useState(false);
