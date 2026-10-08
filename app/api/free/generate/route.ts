@@ -16,7 +16,7 @@ import {
   canonicalMimeFor,
   validateUploads,
 } from '@/lib/vilish/attachments';
-import { needsReferencePhoto } from '@/lib/person-reference';
+import { MISSING_REFERENCE_MESSAGE, needsReferencePhoto } from '@/lib/person-reference';
 
 /**
  * POST /api/free/generate
@@ -123,7 +123,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(
       {
         code: 'MISSING_REFERENCE',
-        error: 'This prompt asks for a specific person — attach their photo first.',
+        error: MISSING_REFERENCE_MESSAGE,
       },
       { status: 400 }
     );

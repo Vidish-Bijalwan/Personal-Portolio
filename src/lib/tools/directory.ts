@@ -47,6 +47,8 @@ export interface ToolEntry {
   icon: LucideIcon;
   /** "AI" for AI-generation tools, "Real processing" for ffmpeg/utility tools. */
   badge: "AI" | "Real processing";
+  /** What the user walks away with — honest, no fake claims. */
+  delivers: string;
 }
 
 const VS_JOB = `${formatINR(priceOf("video-studio"))}/job`;
@@ -65,6 +67,7 @@ export const TOOL_DIRECTORY: readonly ToolEntry[] = [
     group: "create",
     icon: ImageIcon,
     badge: "AI",
+    delivers: "1 HD image, watermarked preview first — pay to unlock the clean file",
   },
   {
     id: "pack-4",
@@ -75,6 +78,7 @@ export const TOOL_DIRECTORY: readonly ToolEntry[] = [
     group: "create",
     icon: Layers,
     badge: "AI",
+    delivers: "4 variations on one brief, pick your favourite to unlock",
   },
   {
     id: "product-photo",
@@ -85,6 +89,7 @@ export const TOOL_DIRECTORY: readonly ToolEntry[] = [
     group: "create",
     icon: ShoppingBag,
     badge: "AI",
+    delivers: "Studio-lit product shot on a clean backdrop, HD download",
   },
   {
     id: "clip-5s",
@@ -95,6 +100,7 @@ export const TOOL_DIRECTORY: readonly ToolEntry[] = [
     group: "create",
     icon: Clapperboard,
     badge: "AI",
+    delivers: "5-second HD clip, watermarked preview first — pay to unlock",
   },
   {
     id: "tts",
@@ -105,6 +111,7 @@ export const TOOL_DIRECTORY: readonly ToolEntry[] = [
     group: "video-studio",
     icon: Mic,
     badge: "AI",
+    delivers: "Natural voice-over MP3 from your script, ready to drop into edits",
   },
   {
     id: "caption",
@@ -115,6 +122,7 @@ export const TOOL_DIRECTORY: readonly ToolEntry[] = [
     group: "video-studio",
     icon: Captions,
     badge: "AI",
+    delivers: "Timed captions file + burned-in video, synced to your audio",
   },
   {
     id: "trim",
@@ -125,6 +133,7 @@ export const TOOL_DIRECTORY: readonly ToolEntry[] = [
     group: "video-studio",
     icon: Scissors,
     badge: "Real processing",
+    delivers: "Trimmed clip with your text overlay, exported HD",
   },
   {
     id: "compress",
@@ -135,6 +144,7 @@ export const TOOL_DIRECTORY: readonly ToolEntry[] = [
     group: "video-studio",
     icon: Minimize2,
     badge: "Real processing",
+    delivers: "Smaller file, same watchable quality — pick the size",
   },
   {
     id: "convert",
@@ -145,6 +155,7 @@ export const TOOL_DIRECTORY: readonly ToolEntry[] = [
     group: "video-studio",
     icon: FileAudio,
     badge: "Real processing",
+    delivers: "Clean MP3 audio extracted from your MP4",
   },
   {
     id: "gif",
@@ -155,6 +166,7 @@ export const TOOL_DIRECTORY: readonly ToolEntry[] = [
     group: "video-studio",
     icon: Film,
     badge: "Real processing",
+    delivers: "Looping GIF from any moment of your video",
   },
   {
     id: "add-audio",
@@ -165,6 +177,7 @@ export const TOOL_DIRECTORY: readonly ToolEntry[] = [
     group: "video-studio",
     icon: AudioLines,
     badge: "Real processing",
+    delivers: "Your audio mixed under the video, levels balanced",
   },
   {
     id: "denoise",
@@ -175,6 +188,7 @@ export const TOOL_DIRECTORY: readonly ToolEntry[] = [
     group: "video-studio",
     icon: Waves,
     badge: "Real processing",
+    delivers: "Cleaner audio with background hiss removed",
   },
 ] as const;
 

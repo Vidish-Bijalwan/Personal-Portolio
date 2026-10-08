@@ -51,3 +51,37 @@ export function needsReferencePhoto(prompt: string | null | undefined): boolean 
   if (!p) return false;
   return REFERENCE_RES.some((re) => re.test(p));
 }
+
+/**
+ * Reference-field UI state, driven by the same detection as the server
+ * guard so the label and the validation can never disagree.
+ *
+ * - Prompt asks for a person + no file attached → field is REQUIRED, with
+ *   a warning explaining why.
+ * - Prompt asks for a person + file attached → requirement satisfied.
+ * - Prompt doesn't ask for a person → field stays optional.
+ */
+export interface ReferenceFieldState {
+  required: boolean;
+  labelSuffix: string;
+  warning: string | null;
+}
+
+export function referenceFieldState(
+  prompt: string | null | undefined,
+  hasFile: boolean
+): ReferenceFieldState {
+  const needsPhoto = needsReferencePhoto(prompt);
+  const required = needsPhoto && !hasFile;
+  return {
+    required,
+    labelSuffix: required ? "(required)" : "(optional)",
+    warning: required
+      ? "Your prompt asks for a specific person — attach their photo to generate."
+      : null,
+  };
+}
+
+/** The explicit pre-submit block message (never contradicts the label). */
+export const MISSING_REFERENCE_MESSAGE =
+  "This prompt asks for a specific person — you have to attach their photo to generate.";

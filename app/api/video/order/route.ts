@@ -4,6 +4,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { db } from '@/lib/db/client';
 import { generations } from '@/lib/db/schema';
 import { requireSession } from '@/lib/auth';
+import { needsReferencePhoto } from '@/lib/person-reference';
 import { PROMPT_MAX, isValidPrompt } from '@/lib/free/policy';
 import {
   VIDEO_DURATION_MAX_S,
@@ -54,6 +55,20 @@ export async function POST(req: NextRequest) {
       { status: 400 }
     );
   }
+  // Pre-generation reference-photo check: video orders take no reference
+  // files, so a prompt that asks for a specific person can never be
+  // fulfilled — fail fast instead of queueing a doomed row.
+  if (needsReferencePhoto(prompt)) {
+    return NextResponse.json(
+      {
+        code: 'MISSING_REFERENCE',
+        error:
+          'This prompt asks for a specific person, but video clips cannot use a reference photo yet — describe the person instead.',
+      },
+      { status: 400 }
+    );
+  }
+
   const aspectRatio =
     typeof body?.aspectRatio === 'string' && body.aspectRatio.length <= 16
       ? body.aspectRatio

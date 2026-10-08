@@ -133,9 +133,10 @@ describe("neon-final fix: no neon cursor, tools in nav", () => {
     }
   });
 
-  it("nav has a Tools link to /#tools and the tools section has the anchor", () => {
-    expect(navSrc).toContain('href: "/#tools"');
-    expect(navSrc).toContain('label: "Tools"');
+  it("nav has a Tools dropdown listing every tool, and the tools section has the anchor", () => {
+    // Tools is now a dropdown (not a plain /#tools link) with direct links.
+    expect(navSrc).toContain("ToolsDropdown");
+    expect(navSrc).toContain("TOOL_DIRECTORY");
     const sectionsSrc = readFileSync(
       join(root, "components", "vilish", "home", "sections.tsx"),
       "utf8",

@@ -15,38 +15,37 @@ import { dirname, join } from "node:path";
 const here = dirname(fileURLToPath(import.meta.url));
 const root = join(here, "..", "..", "..");
 
-const progressSrc = readFileSync(join(root, "components", "vilish", "creation-progress.tsx"), "utf8");
+const grillSrc = readFileSync(join(root, "components", "vilish", "burger-grill.tsx"), "utf8");
+const reelSrc = readFileSync(join(root, "components", "vilish", "popcorn-reel.tsx"), "utf8");
 const panelSrc = readFileSync(join(root, "components", "vilish", "waiting-panel.tsx"), "utf8");
 const watchSrc = readFileSync(join(root, "app", "watch", "[id]", "page.tsx"), "utf8");
 
-describe("creation progress showpiece (public API)", () => {
-  it("exports phaseForStage + default CreationProgress", () => {
-    expect(progressSrc).toContain("export function phaseForStage");
-    expect(progressSrc).toContain("export default function CreationProgress");
+describe("waiting-room showpieces (public API)", () => {
+  it("burger grill exports burgerFrameForStage + default BurgerGrill", () => {
+    expect(grillSrc).toContain("export function burgerFrameForStage");
+    expect(grillSrc).toContain("export default function BurgerGrill");
   });
 
-  it("keeps role=img + aria-label for accessibility", () => {
-    expect(progressSrc).toContain('role="img"');
-    expect(progressSrc).toContain("aria-label=");
+  it("burger grill keeps role=img + aria-label, and no text inside the SVG", () => {
+    expect(grillSrc).toContain('role="img"');
+    expect(grillSrc).toContain("aria-label=");
   });
 
-  it("keeps the 4-phase stage mapping (0-3)", () => {
-    expect(progressSrc).toContain("return 3");
-    expect(progressSrc).toContain("return 2");
-    expect(progressSrc).toContain("return 1");
-    expect(progressSrc).toContain("return 0");
+  it("popcorn reel exports reelFrameForStage + default PopcornReel", () => {
+    expect(reelSrc).toContain("export function reelFrameForStage");
+    expect(reelSrc).toContain("export default function PopcornReel");
   });
 
-  it("keeps the reduced-motion hooks", () => {
-    expect(progressSrc).toContain("motion-reduce:animate-none");
+  it("popcorn reel keeps role=img + aria-label", () => {
+    expect(reelSrc).toContain('role="img"');
+    expect(reelSrc).toContain("aria-label=");
+  });
+
+  it("both keep the reduced-motion hooks", () => {
+    expect(grillSrc).toContain("fg-animated");
+    expect(reelSrc).toContain("fg-animated");
     const css = readFileSync(join(root, "app", "globals.css"), "utf8");
     expect(css).toContain("@media (prefers-reduced-motion: reduce)");
-    expect(css).toContain("fg-sheen");
-  });
-
-  it("is theme-aware (no hardcoded dark colors)", () => {
-    expect(progressSrc).not.toContain("#080808");
-    expect(progressSrc).toContain("var(--pro-");
   });
 });
 

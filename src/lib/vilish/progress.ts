@@ -13,6 +13,28 @@
 export function progressForStage(
   stage: string | null | undefined,
   status: string | null | undefined,
+  createdAt?: string | number | Date | null,
+): number {
+  const base = progressBaseForStage(stage, status);
+  // Terminal states never creep.
+  if (base >= 100) return base;
+  // Time-aware creep: the bar moves forward as real seconds pass, so it
+  // never looks stuck at 20% for 2.5 minutes. Elapsed time pushes the
+  // progress toward (but never past) the next stage's threshold.
+  if (createdAt) {
+    const elapsedSec = Math.max(0, (Date.now() - new Date(createdAt).getTime()) / 1000);
+    // ~1% per 6s of real waiting, capped at 12% above the stage base.
+    // This keeps the bar honest: stage jumps still dominate, time just
+    // fills the gaps between watcher updates (watcher runs every ~60s).
+    const creep = Math.min(12, Math.floor(elapsedSec / 6));
+    return Math.min(97, base + creep);
+  }
+  return base;
+}
+
+function progressBaseForStage(
+  stage: string | null | undefined,
+  status: string | null | undefined,
 ): number {
   const s = (status ?? "").toLowerCase().trim();
   if (s === "done" || s === "ready" || s === "delivered" || s === "complete") {

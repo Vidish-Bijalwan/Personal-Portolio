@@ -11,7 +11,7 @@ import {
 } from '@/lib/vilish/attachments';
 import { getFulfillmentConfig } from '@/lib/fulfillment/config';
 import { isAdminOverride } from '@/lib/fulfillment/guards';
-import { needsReferencePhoto } from '@/lib/person-reference';
+import { MISSING_REFERENCE_MESSAGE, needsReferencePhoto } from '@/lib/person-reference';
 import { isAdminEmail } from '@/lib/admin';
 
 /** Start of the current day in Asia/Kolkata, as a UTC Date. */
@@ -180,7 +180,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(
       {
         code: 'MISSING_REFERENCE',
-        error: 'This prompt asks for a specific person — attach their photo first.',
+        error: MISSING_REFERENCE_MESSAGE,
       },
       { status: 400 }
     );

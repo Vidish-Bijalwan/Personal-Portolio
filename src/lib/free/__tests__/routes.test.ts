@@ -640,6 +640,27 @@ describe('POST /api/video/order', () => {
     expect(after.length).toBe(before.length);
   });
 
+  it('400s MISSING_REFERENCE when a video prompt asks for a person (no reference mechanism)', async () => {
+    mockAuth.userId = 'user-1';
+    const { status, body } = await json(
+      await h('POST', FILE)(
+        req('POST', '/api/video/order', {
+          prompt: 'Animate the person in the reference waving at the camera',
+        }),
+        { params: Promise.resolve({}) }
+      )
+    );
+    expect(status).toBe(400);
+    expect(body.code).toBe('MISSING_REFERENCE');
+    // no row queued
+    const db = client.getDb();
+    const rows = await db
+      .select()
+      .from(schema.generations)
+      .where(eq(schema.generations.prompt, 'Animate the person in the reference waving at the camera'));
+    expect(rows).toHaveLength(0);
+  });
+
   it('stores custom durations on the row (unlock prices them later)', async () => {
     mockAuth.userId = 'user-1';
     const db = client.getDb();
@@ -1140,6 +1161,45 @@ describe('POST /api/gen/[id]/retry', () => {
     expect(status).toBe(201);
     const fresh = await stored(body.id);
     expect(fresh.prompt).toBe(safer);
+  });
+
+  it('400s MISSING_REFERENCE when the prompt needs a person but the original has no photo', async () => {
+    mockAuth.userId = 'retry-user-5';
+    await seedUser('retry-user-5');
+    const row = await insertGeneration('retry-user-5', {
+      status: 'failed',
+      errorCode: 'missing_reference',
+      prompt: 'Put the person in the reference on a beach',
+    });
+    const { status, body } = await json(await call(row.id));
+    expect(status).toBe(400);
+    expect(body.code).toBe('MISSING_REFERENCE');
+  });
+
+  it('carries the original photo to the new row when retrying a photo-based generation', async () => {
+    mockAuth.userId = 'retry-user-6';
+    await seedUser('retry-user-6');
+    const row = await insertGeneration('retry-user-6', {
+      status: 'failed',
+      errorCode: 'technical',
+      prompt: 'Put the person in the reference on a beach',
+    });
+    const db = client.getDb();
+    await db.insert(schema.freeGenerationAttachments).values({
+      generationId: row.id,
+      filename: 'ref.png',
+      mimeType: 'image/png',
+      byteSize: 8,
+      data: Buffer.from([0x89, 0x50, 0x4e, 0x47, 0xde, 0xad, 0xbe, 0xef]),
+    });
+    const { status, body } = await json(await call(row.id));
+    expect(status).toBe(201);
+    const copied = await db
+      .select()
+      .from(schema.freeGenerationAttachments)
+      .where(eq(schema.freeGenerationAttachments.generationId, body.id));
+    expect(copied).toHaveLength(1);
+    expect(copied[0].filename).toBe('ref.png');
   });
 
   it('rejects invalid rephrase prompts and finished rows', async () => {

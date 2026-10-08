@@ -17,7 +17,7 @@ import { cn } from "@/lib/utils";
 import { cssAspectRatio } from "@/src/lib/media/aspect";
 import VilishNav from "@/components/vilish/nav";
 import VilishFooter from "@/components/vilish/footer";
-import CreationProgress, { phaseForStage } from "@/components/vilish/creation-progress";
+import BurgerGrill, { burgerFrameForStage } from "@/components/vilish/burger-grill";
 import { displayStage } from "@/src/lib/vilish/stage-copy";
 import WaitingPanel from "@/components/vilish/waiting-panel";
 import { REMIX_PRESETS } from "@/components/vilish/waiting-panel";
@@ -355,7 +355,7 @@ export default function WatchRoomPage() {
   const caption = captions[captionIdx % captions.length];
   const stageText = displayStage(data?.stage);
   // Real progress from the pipeline stage + status.
-  const progress = data ? progressForStage(data.stage, data.status) : 8;
+  const progress = data ? progressForStage(data.stage, data.status, data.created_at) : 8;
   // Paid videos are generate-first: the unlock price comes from the
   // server (videoClipPricePaise(durationSeconds)); images stay flat.
   const unlockPrice =
@@ -542,11 +542,8 @@ export default function WatchRoomPage() {
                     </p>
                   )}
 
-                  <div className="mt-6 w-full max-w-[520px]">
-                    <CreationProgress
-                      aspectRatio={cssAspectRatio(data?.aspect_ratio)}
-                      phase={phaseForStage(data?.stage)}
-                    />
+                  <div className="mt-6 w-full max-w-[420px]">
+                    <BurgerGrill frame={burgerFrameForStage(data?.stage)} />
                   </div>
 
                   <p className="font-display mt-4 text-[16px] font-medium text-[#F5F5F3]">

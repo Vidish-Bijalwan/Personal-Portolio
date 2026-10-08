@@ -115,7 +115,7 @@ function ExampleBadge() {
 
 function CategoryChip({ category }: { category: ExampleCategory }) {
   return (
-    <span className="pro-dark-zone rounded-full bg-black/60 px-2.5 py-1 text-[11px] font-medium uppercase tracking-[0.08em] text-white/[0.75] backdrop-blur-sm">
+    <span className="pro-dark-zone rounded-full bg-black/70 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-white backdrop-blur-sm">
       {CATEGORY_LABEL[category]}
     </span>
   );
