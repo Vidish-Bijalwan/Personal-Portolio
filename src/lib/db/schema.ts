@@ -321,9 +321,43 @@ export const generations = pgTable('generations', {
    *  vs 'technical'. status stays 'failed'; never consumes quota. */
   errorCode: text('error_code'),
   unlocked: boolean('unlocked').notNull().default(false),
+  /**
+   * Speculative pre-generation (fast-gen): deterministic hash of the
+   * normalized prompt + quality + aspect_ratio + media_type, set only on
+   * rows with tier='speculative'. The free-generate route matches a
+   * client-supplied specHash against this column to convert a ready (or
+   * in-flight) speculative row into a real free-tier row instead of
+   * queueing a fresh one. Null for all non-speculative rows.
+   */
+  specHash: text('spec_hash'),
+  /** TTL for speculative rows: the claim endpoint deletes expired,
+   *  still-queued speculative rows so abandoned typing never clogs the
+   *  worker. Null for non-speculative rows. */
+  specExpiresAt: timestamp('spec_expires_at', { withTimezone: true }),
   createdAt: createdAt(),
   updatedAt: updatedAt(),
   deliveredAt: timestamp('delivered_at', { withTimezone: true }),
+});
+
+/**
+ * Fast-gen instant trigger: a lightweight wake-up record written by the
+ * order-creation routes (free + paid image flows) the moment a
+ * `generations` row is queued. The fulfillment worker cannot be reached
+ * inbound, so it polls GET
+ * /api/admin/fulfillment/generations/trigger (x-admin-token) on a fast
+ * cadence and starts the claim→generate→deliver pipeline immediately on
+ * a fresh trigger instead of waiting for the next 1-minute poll.
+ * The claim endpoint marks triggers consumed for the rows it claims, so
+ * a trigger never outlives its generation; the 1-minute poll remains the
+ * fallback for anything the fast path misses.
+ */
+export const generationTriggers = pgTable('generation_triggers', {
+  id: id(),
+  generationId: uuid('generation_id')
+    .notNull()
+    .references(() => generations.id, { onDelete: 'cascade' }),
+  consumedAt: timestamp('consumed_at', { withTimezone: true }),
+  createdAt: createdAt(),
 });
 
 /**

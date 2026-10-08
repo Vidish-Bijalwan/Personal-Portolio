@@ -1,8 +1,9 @@
 export const dynamic = 'force-dynamic';
 
 import { NextResponse, type NextRequest } from 'next/server';
-import { sql } from 'drizzle-orm';
+import { and, inArray, isNull, sql } from 'drizzle-orm';
 import { db } from '@/lib/db/client';
+import { generationTriggers } from '@/lib/db/schema';
 import { adminAuthFail } from '@/lib/fulfillment/guards';
 import {
   failureMessageFor,
@@ -52,6 +53,15 @@ async function handleClaim(req: NextRequest) {
 
   if (action === 'claim') {
     const limit = Math.min(Math.max(Number(body?.limit) || 2, 1), 5);
+    // Fast-gen (c): reap abandoned speculative pre-generations — non-charging
+    // rows (tier='speculative') still queued past their TTL. They never
+    // consumed cap and are invisible to users, so a hard delete is safe;
+    // this keeps typing-abandoned rows from clogging the worker.
+    await db.execute(sql`
+      DELETE FROM generations
+      WHERE tier = 'speculative'
+        AND status = 'queued'
+        AND spec_expires_at < now()`);
     await db.execute(sql`
       UPDATE generations
       SET status = CASE WHEN attempts >= ${MAX_ATTEMPTS} THEN 'failed' ELSE 'queued' END,
@@ -81,6 +91,23 @@ async function handleClaim(req: NextRequest) {
                 g.media_type, g.tier, g.attempts
     `)) as unknown as { rows?: unknown[] } | unknown[];
     const claimed = Array.isArray(raw) ? raw : raw.rows ?? [];
+    // Fast-gen (b): a trigger never outlives its generation — consume the
+    // trigger records for the rows just claimed, whichever poller got here
+    // first (fast trigger watcher or the 1-minute fallback).
+    const claimedIds = (claimed as { id?: unknown }[])
+      .map((r) => r?.id)
+      .filter((v): v is string => typeof v === 'string' && v.length > 0);
+    if (claimedIds.length > 0) {
+      await db
+        .update(generationTriggers)
+        .set({ consumedAt: new Date() })
+        .where(
+          and(
+            isNull(generationTriggers.consumedAt),
+            inArray(generationTriggers.generationId, claimedIds)
+          )
+        );
+    }
     return NextResponse.json({ claimed });
   }
 

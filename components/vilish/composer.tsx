@@ -1,6 +1,6 @@
 "use client";
 
-import { lazy, Suspense, useCallback, useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowRight, Clapperboard, Loader2, Paperclip, Sparkles, X } from "lucide-react";
@@ -40,6 +40,7 @@ import {
   needsReferencePhoto,
   referenceFieldState,
 } from "@/lib/person-reference";
+import { SPEC_DEBOUNCE_MS, speculativeHash } from "@/src/lib/fast-gen/spec";
 import {
   UPLOAD_EDGE_LIMIT_BYTES,
   type ManualPayment,
@@ -243,6 +244,60 @@ export default function Composer({ variant = "hero", className, initialMedia = "
   const overLimit = countPromptChars(prompt) > PROMPT_MAX_LENGTH;
   const promptOk = prompt.trim().length >= 3 && !overLimit;
 
+  // ── fast-gen (c): speculative pre-generation ───────────────────────────
+  // While the user types a free image prompt, debounce ~3s of idle and
+  // start a NON-CHARGING speculative render in the background. Generate
+  // with a matching hash converts the ready/in-flight row instead of
+  // queueing fresh. Skipped for prompts with attachments or that need a
+  // reference photo (speculative rows carry no files).
+  const [specHash, setSpecHash] = useState<string | null>(null);
+  const [specWarming, setSpecWarming] = useState(false);
+  const specAbortRef = useRef<AbortController | null>(null);
+  const currentSpecHash = useMemo(() => {
+    if (mediaMode !== "image" || billingMode !== "free" || !promptOk) return null;
+    return speculativeHash({ prompt: prompt.trim(), quality, aspectRatio, mediaType: "image" });
+  }, [mediaMode, billingMode, promptOk, prompt, quality, aspectRatio]);
+
+  useEffect(() => {
+    if (!currentSpecHash || files.length > 0 || needsReferencePhoto(prompt)) {
+      specAbortRef.current?.abort();
+      setSpecWarming(false);
+      return;
+    }
+    if (currentSpecHash === specHash) return; // already warming for this exact spec
+    setSpecWarming(true);
+    const ctrl = new AbortController();
+    specAbortRef.current = ctrl;
+    const t = setTimeout(() => {
+      void (async () => {
+        try {
+          const res = await fetch("/api/gen/speculative", {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({
+              prompt: prompt.trim(),
+              quality,
+              aspectRatio,
+              specHash: currentSpecHash,
+            }),
+            signal: ctrl.signal,
+          });
+          // 401 (logged out) or any error: stay silent — the normal
+          // Generate flow handles auth and errors.
+          if (res.ok) setSpecHash(currentSpecHash);
+        } catch {
+          /* network/abort: silent — normal Generate flow is the fallback */
+        } finally {
+          setSpecWarming(false);
+        }
+      })();
+    }, SPEC_DEBOUNCE_MS);
+    return () => {
+      clearTimeout(t);
+      ctrl.abort();
+    };
+  }, [currentSpecHash, files.length, prompt, quality, aspectRatio, specHash]);
+
   // price quote only runs for the paid image flow
   useEffect(() => {
     if (mediaMode !== "image" || billingMode !== "paid" || !promptOk) {
@@ -439,10 +494,20 @@ export default function Composer({ variant = "hero", className, initialMedia = "
         for (const f of files) form.append("files", f);
         res = await fetch("/api/free/generate", { method: "POST", body: form });
       } else {
+        // Fast-gen (c): hand the speculative hash over only when it still
+        // matches the exact prompt+options — the server re-verifies and
+        // falls back to the normal flow on any mismatch.
+        const submitSpecHash =
+          currentSpecHash && currentSpecHash === specHash ? specHash : null;
         res = await fetch("/api/free/generate", {
           method: "POST",
           headers: { "content-type": "application/json" },
-          body: JSON.stringify({ prompt: prompt.trim(), quality, aspectRatio }),
+          body: JSON.stringify({
+            prompt: prompt.trim(),
+            quality,
+            aspectRatio,
+            ...(submitSpecHash ? { specHash: submitSpecHash } : {}),
+          }),
         });
       }
       if (res.status === 401) {
@@ -481,6 +546,7 @@ export default function Composer({ variant = "hero", className, initialMedia = "
         return;
       }
       void refreshFreeRemaining();
+      setSpecHash(null);
       router.push(`/watch/${body.id}`);
     } finally {
       setFreeSending(false);
@@ -1083,6 +1149,12 @@ export default function Composer({ variant = "hero", className, initialMedia = "
         <p className="mt-3 text-[12px] leading-5 text-[var(--pro-faint)]">
           3 free AI previews a day, no payment needed. This is a preview, not a
           finished order — unlock the clean HD file for {formatINR(priceOf("single-image"))} if you love it.
+          {specWarming && (
+            <span className="ml-1.5 inline-flex items-center gap-1">
+              <span className="inline-block h-2.5 w-2.5 animate-spin rounded-full border border-[var(--pro-border)] border-t-white/70 align-[-1px]" aria-hidden />
+              Warming up your preview…
+            </span>
+          )}
         </p>
       )}
       {ordersAccepting === false && (

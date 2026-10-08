@@ -13,6 +13,7 @@ import { getFulfillmentConfig } from '@/lib/fulfillment/config';
 import { isAdminOverride } from '@/lib/fulfillment/guards';
 import { MISSING_REFERENCE_MESSAGE, needsReferencePhoto } from '@/lib/person-reference';
 import { isAdminEmail } from '@/lib/admin';
+import { queueGenerationTrigger } from '@/lib/fast-gen/trigger';
 
 /** Start of the current day in Asia/Kolkata, as a UTC Date. */
 function istDayStart(now: Date): Date {
@@ -261,6 +262,10 @@ export async function POST(req: NextRequest) {
       );
     }
   }
+
+  // Fast-gen (b): wake the fulfillment worker immediately — the 1-minute
+  // claim poll stays as the fallback if the fast path misses.
+  await queueGenerationTrigger(genRow.id);
 
   return NextResponse.json(
     {
