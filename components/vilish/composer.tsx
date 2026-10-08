@@ -98,6 +98,9 @@ interface ComposerProps {
   /** Raw prompt deep link, e.g. /create?prompt=... from the watch-room remix
    *  fallback — pre-fills the prompt box. Template wins when both are set. */
   initialPrompt?: string;
+  /** Madam Muse handover: pre-attach reference files (validated on init).
+   *  Used only by the unified intake's Continue step. */
+  initialFiles?: File[];
 }
 
 const ACCEPT_ATTR = ".png,.jpg,.jpeg,.webp,.gif,.pdf,.doc,.docx,.txt,.md";
@@ -110,7 +113,7 @@ function formatBytes(bytes: number): string {
 
 const VideoStudioPanel = lazy(() => import("./video-studio-panel"));
 
-export default function Composer({ variant = "hero", className, initialMedia = "image", initialService, initialTemplate, initialPrompt }: ComposerProps) {
+export default function Composer({ variant = "hero", className, initialMedia = "image", initialService, initialTemplate, initialPrompt, initialFiles }: ComposerProps) {
   const router = useRouter();
   const [prompt, setPrompt] = useState(initialTemplate?.prompt ?? initialPrompt ?? "");
   const [quality, setQuality] = useState<QualityTier>("studio");
@@ -145,7 +148,14 @@ export default function Composer({ variant = "hero", className, initialMedia = "
   const [videoDuration, setVideoDuration] = useState(VIDEO_DURATION_MIN_S);
 
   // reference attachments (stored with the order, shown to the operator)
-  const [files, setFiles] = useState<File[]>([]);
+  // Madam Muse handover may pre-attach validated files on first mount.
+  const [files, setFiles] = useState<File[]>(() => {
+    if (!initialFiles || initialFiles.length === 0) return [];
+    const check = validateUploads(
+      initialFiles.map((f) => ({ name: f.name, size: f.size, type: f.type })),
+    );
+    return check.ok ? initialFiles : [];
+  });
   // Live reference-photo requirement: the label and the pre-submit guard
   // share this state, so they can never contradict each other.
   const refField = referenceFieldState(prompt, files.length > 0);
