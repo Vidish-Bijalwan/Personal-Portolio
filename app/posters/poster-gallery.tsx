@@ -81,16 +81,6 @@ export default function PosterGallery() {
                 the clean file.
               </p>
             </StaggerItem>
-            <StaggerItem>
-              <Link
-                href="/create#how-it-works"
-                className="pro-body inline-flex items-center gap-1.5 text-[13.5px] font-medium underline underline-offset-4"
-                style={{ color: "var(--pro-fg)", textDecorationColor: "var(--pro-border)" }}
-              >
-                New to Etch? See how the creation flow works{" "}
-                <ArrowRight className="h-3.5 w-3.5" strokeWidth={2} />
-              </Link>
-            </StaggerItem>
           </Stagger>
 
           {/* category filter */}
