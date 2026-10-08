@@ -54,18 +54,18 @@ export const metadata = {
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_SITE_URL ?? "https://vidish.me",
   ),
-  title: "AI Image Generator India — ₹15 per Creation | Etch",
+  title: "AI Image Generator India — ₹19 per Creation | Etch",
   description:
-    "Generate custom AI images for a fixed ₹15 each. No subscription, pay with UPI, human-reviewed quality. Portraits, product photos, posters & more.",
+    "Generate custom AI images for a fixed ₹19 each. No subscription, pay with UPI, human-reviewed quality. Portraits, product photos, posters & more.",
   icons: {
     icon: "/icon.svg",
   },
   // Web app manifest (app/manifest.ts): PWA installability + share_target.
   manifest: "/manifest.webmanifest",
   openGraph: {
-    title: "AI Image Generator India — ₹15 per Creation | Etch",
+    title: "AI Image Generator India — ₹19 per Creation | Etch",
     description:
-      "Generate custom AI images for a fixed ₹15 each. No subscription, pay with UPI, human-reviewed quality. Portraits, product photos, posters & more.",
+      "Generate custom AI images for a fixed ₹19 each. No subscription, pay with UPI, human-reviewed quality. Portraits, product photos, posters & more.",
     siteName: "Etch",
     type: "website",
     images: [
@@ -79,9 +79,9 @@ export const metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "AI Image Generator India — ₹15 per Creation | Etch",
+    title: "AI Image Generator India — ₹19 per Creation | Etch",
     description:
-      "Generate custom AI images for a fixed ₹15 each. No subscription, pay with UPI, human-reviewed quality. Portraits, product photos, posters & more.",
+      "Generate custom AI images for a fixed ₹19 each. No subscription, pay with UPI, human-reviewed quality. Portraits, product photos, posters & more.",
     images: ["/og-image.png"],
   },
 }

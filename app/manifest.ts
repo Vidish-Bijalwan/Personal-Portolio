@@ -14,7 +14,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: "Etch — AI images & video ads, pay per creation",
     short_name: "Etch",
     description:
-      "Describe your ad in plain words, see the exact price before you pay. AI images from ₹15, video clips, human quality review.",
+      "Describe your ad in plain words, see the exact price before you pay. AI images from ₹19, video clips, human quality review.",
     start_url: "/",
     scope: "/",
     display: "standalone",
