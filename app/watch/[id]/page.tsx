@@ -9,6 +9,7 @@ import {
   Download,
   Loader2,
   RefreshCcw,
+  SearchX,
   Sparkles,
   TriangleAlert,
 } from "lucide-react";
@@ -17,7 +18,7 @@ import { cssAspectRatio } from "@/src/lib/media/aspect";
 import VilishNav from "@/components/vilish/nav";
 import VilishFooter from "@/components/vilish/footer";
 import BurgerGrill, { burgerFrameForStage } from "@/components/vilish/burger-grill";
-import PopcornReel, { reelFrameForStage } from "@/components/vilish/popcorn-reel";
+import { displayStage } from "@/src/lib/vilish/stage-copy";
 import WaitingPanel from "@/components/vilish/waiting-panel";
 import { REMIX_PRESETS } from "@/components/vilish/waiting-panel";
 import { MoreFromGrill, ResultPanel } from "@/components/vilish/result-panel";
@@ -64,17 +65,17 @@ function formatElapsed(ms: number): string {
 }
 
 const IMAGE_CAPTIONS = [
-  "Seasoning the pixels…",
-  "Flipping the patty…",
-  "Melting the cheese…",
-  "Plating it up…",
+  "Preparing your canvas…",
+  "Composing the details…",
+  "Refining the quality…",
+  "Finalizing your file…",
 ];
 
 const VIDEO_CAPTIONS = [
-  "Popping the kernels…",
-  "Threading the projector…",
-  "Cutting the final scene…",
-  "Rolling the credits…",
+  "Preparing your clip…",
+  "Rendering the frames…",
+  "Polishing the cut…",
+  "Finalizing your file…",
 ];
 
 export default function WatchRoomPage() {
@@ -83,6 +84,8 @@ export default function WatchRoomPage() {
   const id = params.id;
   const [data, setData] = useState<GenStatus | null>(null);
   const [fetchError, setFetchError] = useState("");
+  const [notFound, setNotFound] = useState(false);
+  const notFoundRef = useRef(false);
   const [captionIdx, setCaptionIdx] = useState(0);
   const [previewOk, setPreviewOk] = useState(true);
   const dataRef = useRef<GenStatus | null>(null);
@@ -201,13 +204,19 @@ export default function WatchRoomPage() {
   const fetchStatus = async () => {
     try {
       const r = await fetch(`/api/gen/${encodeURIComponent(id)}/status`, { cache: "no-store" });
+      if (r.status === 404 || r.status === 403) {
+        notFoundRef.current = true;
+        setNotFound(true);
+        setFetchError("");
+        return null;
+      }
       if (!r.ok) throw new Error(`status ${r.status}`);
       const b = (await r.json()) as GenStatus;
       setData(b);
       setFetchError("");
       return b;
     } catch {
-      setFetchError("Lost the kitchen for a moment — retrying…");
+      setFetchError("Connection interrupted — retrying…");
       return null;
     }
   };
@@ -218,6 +227,10 @@ export default function WatchRoomPage() {
     let timer: ReturnType<typeof setInterval> | null = null;
     const tick = async () => {
       const cur = dataRef.current;
+      if (notFoundRef.current) {
+        if (timer) clearInterval(timer);
+        return;
+      }
       if (cur && (cur.status === "done" || cur.status === "failed")) {
         if (timer) clearInterval(timer);
         return;
@@ -340,11 +353,9 @@ export default function WatchRoomPage() {
   const refused = data?.error_code === "content_refused";
   const captions = isVideo ? VIDEO_CAPTIONS : IMAGE_CAPTIONS;
   const caption = captions[captionIdx % captions.length];
-  const stageText =
-    data?.stage ??
-    (isVideo ? "Setting up the projector…" : "Warming up the grill…");
+  const stageText = displayStage(data?.stage);
   // Real progress from the pipeline stage + status.
-  const progress = data ? progressForStage(data.stage, data.status) : 8;
+  const progress = data ? progressForStage(data.stage, data.status, data.created_at) : 8;
   // Paid videos are generate-first: the unlock price comes from the
   // server (videoClipPricePaise(durationSeconds)); images stay flat.
   const unlockPrice =
@@ -372,8 +383,27 @@ export default function WatchRoomPage() {
           </div>
         )}
 
+        {/* unknown / inaccessible order id — not a transient error, stop here */}
+        {!data && notFound && (
+          <div className="flex flex-1 flex-col items-center justify-center py-24 text-center">
+            <SearchX className="h-8 w-8 text-[var(--pro-muted)]" />
+            <h1 className="font-display mt-4 text-[22px] font-semibold tracking-[-0.02em]">
+              We couldn&apos;t find that creation
+            </h1>
+            <p className="mt-3 max-w-sm text-[14px] leading-6 text-white/60">
+              This link may be old, mistyped, or belong to a different account.
+            </p>
+            <Link
+              href="/create"
+              className="mt-6 inline-flex items-center gap-2 rounded-[10px] bg-[var(--pro-btn)] px-5 py-2.5 text-[14px] font-medium text-[var(--pro-btn-ink)]"
+            >
+              Start a new creation
+            </Link>
+          </div>
+        )}
+
         {/* fetch error before first status */}
-        {!data && fetchError && (
+        {!data && !notFound && fetchError && (
           <div className="flex flex-1 flex-col items-center justify-center py-24 text-center">
             <TriangleAlert className="h-8 w-8 text-amber-200/80" />
             <p className="mt-4 max-w-sm text-[14px] leading-6 text-white/60">{fetchError}</p>
@@ -393,9 +423,7 @@ export default function WatchRoomPage() {
             <h1 className="font-display text-[26px] font-semibold tracking-[-0.02em] sm:text-[32px]">
               {refused
                 ? "The model declined this prompt"
-                : isVideo
-                  ? "The projector jammed"
-                  : "The grill flared up"}
+                : "Something went wrong"}
             </h1>
             <p className="mt-3 max-w-md text-[14px] leading-6 text-white/60">
               {refused
@@ -483,7 +511,7 @@ export default function WatchRoomPage() {
           </section>
         )}
 
-        {/* cooking / generating — the waiting room.
+        {/* generating — the waiting room.
             Generate-first: no payment gate here for any tier; the
             watermarked preview unlocks clean HD after it lands. */}
         {data && data.status !== "failed" && data.status !== "done" && (
@@ -495,7 +523,7 @@ export default function WatchRoomPage() {
                     {data.tier === "free" ? "Free preview" : isVideo ? "Paid clip" : "Paid order"} · AI-generated
                   </p>
                   <h1 className="font-display mt-2 text-[26px] font-semibold tracking-[-0.02em] sm:text-[32px]">
-                    {isVideo ? "Your clip is in the projector" : "Your creation is on the grill"}
+                    {isVideo ? "Creating your video" : "Creating your image"}
                   </h1>
                   {isVideo && data.tier === "paid" && !data.unlocked && data.unlock_price_paise != null && (
                     <p className="mt-2 max-w-md text-[13px] leading-5 text-white/45">
@@ -514,12 +542,8 @@ export default function WatchRoomPage() {
                     </p>
                   )}
 
-                  <div className="mt-6 w-full max-w-[520px]">
-                    {isVideo ? (
-                      <PopcornReel frame={reelFrameForStage(data.stage)} />
-                    ) : (
-                      <BurgerGrill frame={burgerFrameForStage(data.stage)} className="max-w-[520px]" />
-                    )}
+                  <div className="mt-6 w-full max-w-[420px]">
+                    <BurgerGrill frame={burgerFrameForStage(data?.stage)} />
                   </div>
 
                   <p className="font-display mt-4 text-[16px] font-medium text-[#F5F5F3]">
@@ -555,7 +579,7 @@ export default function WatchRoomPage() {
                       Waiting {formatElapsed(nowMs - new Date(data.created_at).getTime())}
                       {data.status === "queued" && data.queue_position != null && (
                         <>
-                          {" "}· You&apos;re #{data.queue_position} in the grill queue
+                          {" "}· You&apos;re #{data.queue_position} in the queue
                         </>
                       )}
                     </p>
@@ -566,8 +590,8 @@ export default function WatchRoomPage() {
                   {data.stuck && (
                     <div className="mt-5 w-full max-w-[420px] rounded-[14px] border border-amber-200/25 bg-amber-200/[0.06] px-5 py-4">
                       <p className="text-[13px] leading-6 text-amber-100/90">
-                        Etch&apos;s kitchen looks backed up — this one&apos;s taking
-                        longer than usual.
+                        We&apos;re experiencing high demand — this is taking longer
+                        than usual.
                       </p>
                       <button
                         type="button"

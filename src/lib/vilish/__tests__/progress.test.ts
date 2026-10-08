@@ -51,3 +51,25 @@ describe("progressForStage", () => {
     }
   });
 });
+
+describe("progressForStage time-aware creep", () => {
+  it("adds elapsed-time creep on top of the stage base", () => {
+    const twoMinAgo = new Date(Date.now() - 120_000).toISOString();
+    // "Preparing" base is 20; 120s / 6 = 20, capped at +12 → 32
+    expect(progressForStage("Warming up", "processing", twoMinAgo)).toBe(32);
+  });
+
+  it("does not creep without a createdAt", () => {
+    expect(progressForStage("Warming up", "processing")).toBe(20);
+  });
+
+  it("never exceeds 97 before done", () => {
+    const longAgo = new Date(Date.now() - 3600_000).toISOString();
+    expect(progressForStage("Polishing the final cut", "processing", longAgo)).toBeLessThanOrEqual(97);
+  });
+
+  it("done still returns 100 regardless of time", () => {
+    const longAgo = new Date(Date.now() - 3600_000).toISOString();
+    expect(progressForStage("anything", "done", longAgo)).toBe(100);
+  });
+});

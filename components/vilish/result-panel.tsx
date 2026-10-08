@@ -48,7 +48,7 @@ function formatFinished(iso: string): string {
 
 /**
  * ResultPanel — the done-state side panel. Creation details: the prompt,
- * what the grill understood, aspect ratio, and when the preview landed.
+ * what we understood, aspect ratio, and when the preview landed.
  * Every value comes from the status API — nothing is invented.
  */
 export function ResultPanel({
@@ -86,7 +86,7 @@ export function ResultPanel({
         </p>
       </section>
 
-      <section className="mt-5" aria-label="What the grill understood">
+      <section className="mt-5" aria-label="What we understood">
         <div className="flex flex-wrap gap-2">
           <DetailChip k="Subject" v={subject} accent="var(--pro-accent)" />
           {styles.map((s) => (
@@ -148,10 +148,10 @@ export function MoreFromGrill() {
   if (items.length === 0) return null;
 
   return (
-    <section aria-label="More from the grill" className="mt-12 w-full">
+    <section aria-label="Keep creating" className="mt-12 w-full">
       <div className="flex items-baseline justify-between gap-4">
         <h2 className="font-display text-[19px] font-semibold tracking-[-0.01em] text-[#F5F5F3] sm:text-[22px]">
-          More from the grill
+          Keep creating
         </h2>
         <Link
           href="/examples"

@@ -14,6 +14,7 @@
  */
 
 import { useMemo, useRef, useState } from "react";
+import { referenceFieldState } from "@/lib/person-reference";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -100,10 +101,16 @@ export default function AdsFlow() {
   const [step, setStep] = useState(1);
   const [product, setProduct] = useState("");
   const [refFile, setRefFile] = useState<File | null>(null);
+  // The reference label tracks the product description live, using the same
+  // detection as the generation guard — label and validation can't disagree.
+  const refField = referenceFieldState(product, refFile !== null);
   const [refPreview, setRefPreview] = useState<string | null>(null);
   const [category, setCategory] = useState("all");
   const [media, setMedia] = useState<ConceptMedia>("image");
   const [conceptId, setConceptId] = useState<string | null>(null);
+  // Which accordion section opens in step 3. Selecting a concept jumps
+  // straight to Colors (concept grid collapses, no extra click).
+  const [customizeOpenId, setCustomizeOpenId] = useState<string | null>(null);
   const [paletteName, setPaletteName] = useState<string>(() => palettes[0]?.name ?? "");
   const [typographyName, setTypographyName] = useState<string>(() => typographies[0]?.name ?? "");
   const [layoutName, setLayoutName] = useState<string>(() => layouts[0]?.name ?? "");
@@ -244,8 +251,7 @@ export default function AdsFlow() {
               <button
                 type="button"
                 onClick={() => setStep(2)}
-                disabled={product.trim().length === 0}
-                className="pro-btn-primary inline-flex disabled:cursor-not-allowed disabled:opacity-40"
+                className="pro-btn-primary inline-flex"
               >
                 Pick a concept <ArrowRight className="ml-2 h-4 w-4" />
               </button>
@@ -253,7 +259,6 @@ export default function AdsFlow() {
               <button
                 type="button"
                 onClick={() => { setConceptId(null); setStep(3); }}
-                disabled={product.trim().length === 0}
                 className="pro-body inline-flex items-center gap-1.5 text-[14px] font-medium underline underline-offset-4 disabled:cursor-not-allowed disabled:opacity-40"
                 style={{ color: "var(--pro-muted)", textDecorationColor: "var(--pro-border)" }}
               >
@@ -264,8 +269,19 @@ export default function AdsFlow() {
 
           <div className="pro-card p-7" style={{ boxShadow: "var(--pro-card-shadow)" }}>
             <h2 className="pro-display text-xl font-bold" style={{ color: "var(--pro-fg)" }}>
-              Reference photo <span style={{ color: "var(--pro-faint)" }} className="text-[14px] font-medium">(optional)</span>
+              Reference photo{" "}
+              <span
+                className="text-[14px] font-medium"
+                style={{ color: refField.required ? "#f59e0b" : "var(--pro-faint)" }}
+              >
+                {refField.labelSuffix}
+              </span>
             </h2>
+            {refField.warning && (
+              <p className="mt-2 text-[13.5px] font-medium" style={{ color: "#f59e0b" }} role="alert">
+                {refField.warning}
+              </p>
+            )}
             <p className="mt-1.5 text-[14px]" style={{ color: "var(--pro-muted)" }}>
               A photo of your product helps keep the ad true to it. It stays in this
               tab — nothing is uploaded.
@@ -391,7 +407,11 @@ export default function AdsFlow() {
                   <button
                     key={c.id}
                     type="button"
-                    onClick={() => setConceptId(c.id)}
+                    onClick={() => {
+                      setConceptId(c.id);
+                      setCustomizeOpenId("palette");
+                      setStep(3);
+                    }}
                     aria-pressed={selected}
                     className={cn("pro-card pro-lift overflow-hidden text-left")}
                     style={{
@@ -447,7 +467,6 @@ export default function AdsFlow() {
             <button
               type="button"
               onClick={() => setStep(3)}
-              disabled={product.trim().length === 0}
               title={concept ? "Style the selected concept" : "Skip the concept library — style your own description"}
               className="pro-btn-primary inline-flex disabled:cursor-not-allowed disabled:opacity-40"
             >
@@ -479,7 +498,12 @@ export default function AdsFlow() {
           onPaletteChange={setPaletteName}
           onTypographyChange={setTypographyName}
           onLayoutChange={setLayoutName}
-          onConceptChange={setConceptId}
+          onConceptChange={(id) => {
+            setConceptId(id);
+            // Changing the concept collapses it and opens Colors.
+            setCustomizeOpenId("palette");
+          }}
+          initialOpenId={customizeOpenId}
           finalPrompt={finalPrompt}
           onBack={() => setStep(2)}
           onNext={() => setStep(4)}

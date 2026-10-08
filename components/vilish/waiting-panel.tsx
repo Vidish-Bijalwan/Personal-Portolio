@@ -20,7 +20,7 @@ export const REMIX_PRESETS: RemixPreset[] = [
 ];
 
 const TIPS = [
-  "Free previews render one at a time — yours is in the grill queue.",
+  "Free previews render one at a time — yours is in the queue.",
   "Lighting words like \u201crim light\u201d shape the result more than adjectives.",
   "Your full-res file unlocks after the preview — only if you love it.",
 ];
@@ -69,7 +69,7 @@ export default function WaitingPanel({
         While you wait
       </p>
 
-      {/* 1 — what the grill understood */}
+      {/* 1 — what we understood from the prompt */}
       <section className="mt-4" aria-label="What we understood from your prompt">
         <p className="flex items-center gap-1.5 text-[13px] font-semibold text-white/85">
           <Sparkles className="h-3.5 w-3.5 text-[var(--pro-accent)]" />

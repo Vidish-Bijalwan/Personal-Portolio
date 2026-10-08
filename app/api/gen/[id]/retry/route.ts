@@ -3,7 +3,8 @@ export const dynamic = 'force-dynamic';
 import { NextResponse, type NextRequest } from 'next/server';
 import { eq } from 'drizzle-orm';
 import { db } from '@/lib/db/client';
-import { generations } from '@/lib/db/schema';
+import { freeGenerationAttachments, generations } from '@/lib/db/schema';
+import { MISSING_REFERENCE_MESSAGE, needsReferencePhoto } from '@/lib/person-reference';
 import { requireSession } from '@/lib/auth';
 import { getOwnedGeneration, countFreeImagesToday } from '@/lib/free/access';
 import {
@@ -63,6 +64,24 @@ export async function POST(
     prompt = body.prompt.trim();
   }
 
+  // Pre-generation reference-photo check: the retry mints a fresh queued
+  // row with no new file upload. If the (possibly rephrased) prompt asks
+  // for a specific person, the original's reference photo — if any — is
+  // carried over; otherwise fail fast instead of queueing a doomed row.
+  const originalAttachments = await db
+    .select()
+    .from(freeGenerationAttachments)
+    .where(eq(freeGenerationAttachments.generationId, gen.id));
+  if (needsReferencePhoto(prompt) && originalAttachments.length === 0) {
+    return NextResponse.json(
+      {
+        code: 'MISSING_REFERENCE',
+        error: MISSING_REFERENCE_MESSAGE,
+      },
+      { status: 400 }
+    );
+  }
+
   if (gen.tier === 'free' && gen.mediaType === 'image') {
     const used = await countFreeImagesToday(user.id);
     if (used >= FREE_DAILY_CAP) {
@@ -104,6 +123,20 @@ export async function POST(
       jobId: gen.jobId,
     })
     .returning({ id: generations.id });
+
+  // Carry the original's reference photo(s) to the new attempt so a
+  // transient failure doesn't lose them (and the guard above stays sound).
+  if (originalAttachments.length > 0) {
+    await db.insert(freeGenerationAttachments).values(
+      originalAttachments.map((a) => ({
+        generationId: row.id,
+        filename: a.filename,
+        mimeType: a.mimeType,
+        byteSize: a.byteSize,
+        data: a.data,
+      }))
+    );
+  }
 
   return NextResponse.json({ id: row.id }, { status: 201 });
 }

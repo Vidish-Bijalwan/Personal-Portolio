@@ -37,9 +37,19 @@ export default function Counter({
   const ref = useRef<HTMLSpanElement>(null)
   const inView = useInView(ref, { once: true, margin: "-10% 0px -10% 0px" })
   const raw = useMotionValue(0)
+  const firstRun = useRef(true)
 
   useEffect(() => {
+    const wasFirstRun = firstRun.current
+    firstRun.current = false
     if (!inView || reduced) return
+    // Visible at mount: the final value is already painted below — no
+    // animation needed (and no 0 → price flicker).
+    if (wasFirstRun) return
+    // Scrolled into view later: count up from 0.
+    raw.set(0)
+    if (ref.current)
+      ref.current.textContent = `${prefix}${format(0, decimals)}${suffix}`
     const controls = animate(raw, to, {
       duration,
       ease: [0.16, 1, 0.3, 1],
@@ -51,9 +61,10 @@ export default function Counter({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [inView, reduced, to, duration, decimals, prefix, suffix])
 
-  // Static text: reduced motion and SSR render the final value immediately —
-  // the span reserves space from first paint, so no layout shift.
-  const initialText = `${prefix}${format(reduced ? to : 0, decimals)}${suffix}`
+  // Static text: the FINAL value from first paint — SSR, no-JS, and
+  // crawlers see the real price, never ₹0. The animation only runs when
+  // the element scrolls into view after mount.
+  const initialText = `${prefix}${format(to, decimals)}${suffix}`
 
   return (
     <span ref={ref} className={className} suppressHydrationWarning>

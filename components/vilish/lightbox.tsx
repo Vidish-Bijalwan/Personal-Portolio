@@ -112,7 +112,7 @@ export default function Lightbox({ items, index, onClose, onIndex }: LightboxPro
               alt={item.alt ?? item.caption}
               width={1280}
               height={960}
-              className="max-h-[62vh] w-full object-contain"
+              className="mx-auto max-h-[62vh] w-auto max-w-full object-contain"
               priority
             />
           )}

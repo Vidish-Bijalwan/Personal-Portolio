@@ -124,7 +124,9 @@ describe("ads-flow.tsx — step 3 wiring", () => {
     expect(src).toContain('import AdsCustomize from "./ads-customize"');
     expect(src).toContain("<AdsCustomize");
     expect(src).toContain("concept={concept}");
-    expect(src).toContain("onConceptChange={setConceptId}");
+    expect(src).toContain("onConceptChange={");
+    // Concept changes auto-advance the accordion to Colors.
+    expect(src).toContain('setCustomizeOpenId("palette")');
     expect(src).toContain("onPaletteChange={setPaletteName}");
     expect(src).toContain("onTypographyChange={setTypographyName}");
     expect(src).toContain("onLayoutChange={setLayoutName}");
