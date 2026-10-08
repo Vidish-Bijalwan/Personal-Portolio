@@ -21,6 +21,10 @@ export interface LightboxItem {
   kind?: "image" | "video";
   /** Poster image for video items (shown while loading and under reduced motion). */
   poster?: string;
+  /** Story-first: the client scenario — who needed it and why. */
+  scenario?: string;
+  /** Story-first: what was created on Etch for that scenario. */
+  deliverable?: string;
 }
 
 /** Wrap-around navigation for the lightbox arrows. dir: 1 = next, -1 = prev. */

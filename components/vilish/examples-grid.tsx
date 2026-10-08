@@ -240,6 +240,23 @@ export default function ExamplesGrid({ items }: { items: ExampleItem[] }) {
                     </span>
                   </span>
                 </button>
+                {item.scenario && (
+                  <div className="px-4 pt-3">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/[0.38]">
+                      The brief
+                    </p>
+                    <p className="mt-1 line-clamp-2 text-[13.5px] leading-5 text-white/[0.72]">
+                      {item.scenario}
+                    </p>
+                  </div>
+                )}
+                {item.deliverable && (
+                  <div className="px-4 pt-2">
+                    <p className="text-[12.5px] font-medium text-white/[0.55]">
+                      Made on Etch: {item.deliverable}
+                    </p>
+                  </div>
+                )}
                 <div className="flex min-h-[44px] items-center justify-between gap-2 border-t border-white/[0.06] px-4 py-2">
                   <span className="text-[13px] font-semibold tabular-nums text-[#F5F5F3]">
                     {examplePrice(item)}

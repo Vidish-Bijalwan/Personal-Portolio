@@ -14,6 +14,7 @@ import VilishFooter from "@/components/vilish/footer";
 import SectionHeader from "@/components/vilish/section-header";
 import Reveal from "@/components/motion/Reveal";
 import { Stagger, StaggerItem } from "@/components/motion/Stagger";
+import ExplainerVideo from "@/components/tools/ExplainerVideo";
 import { cn } from "@/lib/utils";
 import { TOOL_DIRECTORY, toolById, toolsByGroup } from "@/src/lib/tools/directory";
 import { toolDetail } from "@/src/lib/tools/details";
@@ -207,6 +208,13 @@ export default async function ToolDetailPage({
                 </>
               }
             />
+            <Reveal className="mt-10">
+              <ExplainerVideo
+                src={`/tools/explainers/${tool.id}.mp4`}
+                poster={`/tools/explainers/${tool.id}-poster.jpg`}
+                label={`How the ${tool.name} tool works`}
+              />
+            </Reveal>
             <Stagger className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-3">
               {detail.steps.map((s, i) => (
                 <StaggerItem key={s.title}>

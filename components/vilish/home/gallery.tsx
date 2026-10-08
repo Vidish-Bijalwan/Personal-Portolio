@@ -15,6 +15,10 @@ export interface GalleryItem {
   price: string;
   href: string;
   badge: string;
+  /** Story-first: the client scenario — who needed it and why. */
+  scenario?: string;
+  /** Story-first: what was created on Etch for that scenario. */
+  deliverable?: string;
 }
 
 /**
@@ -51,20 +55,27 @@ export function Gallery({ items }: { items: GalleryItem[] }) {
                 loading="lazy"
               />
               <span
-                className="absolute inset-x-0 bottom-0 flex items-center justify-between gap-2 px-3.5 py-3"
+                className="absolute inset-x-0 bottom-0 flex flex-col gap-1.5 px-3.5 pb-3 pt-8"
                 style={{
                   background:
-                    "linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.72) 100%)",
+                    "linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.78) 100%)",
                 }}
               >
-                <span className="pro-body truncate text-[12.5px] font-semibold text-white">
-                  {item.badge}
-                </span>
-                <span
-                  className="pro-body shrink-0 rounded-full px-2.5 py-1 text-[12px] font-bold tabular-nums"
-                  style={{ background: "rgba(255,255,255,0.94)", color: "#0e1526" }}
-                >
-                  {item.price}
+                {item.scenario && (
+                  <span className="pro-body line-clamp-2 text-[11.5px] leading-4 text-white/[0.75]">
+                    {item.scenario}
+                  </span>
+                )}
+                <span className="flex items-center justify-between gap-2">
+                  <span className="pro-body truncate text-[12.5px] font-semibold text-white">
+                    {item.badge}
+                  </span>
+                  <span
+                    className="pro-body shrink-0 rounded-full px-2.5 py-1 text-[12px] font-bold tabular-nums"
+                    style={{ background: "rgba(255,255,255,0.94)", color: "#0e1526" }}
+                  >
+                    {item.price}
+                  </span>
                 </span>
               </span>
             </button>

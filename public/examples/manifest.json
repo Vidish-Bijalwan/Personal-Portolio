@@ -1,35 +1,43 @@
 [
   {
-    "alt": "AI-generated product photo of a premium sneaker floating in a dark studio",
+    "alt": "AI-generated launch poster of a dusty trail shoe on a granite boulder at dawn in the Nandi Hills",
     "category": "ad",
     "model": "Studio quality",
-    "prompt": "Cinematic product photograph of a premium sneaker floating in a dark studio, dramatic rim lighting, deep shadows, subtle smoke",
+    "prompt": "Trail running shoe caked in red laterite dust on a granite boulder at dawn, misty Nandi Hills ridges behind, warm low sun rim light — launch-poster editorial product shot",
     "src": "/examples/1-sneaker-ad.webp",
-    "service": "single-image"
+    "service": "single-image",
+    "scenario": "Stride & Thread, a Bengaluru running-shoe startup, needed launch posters for their first trail-shoe drop — shot overnight on zero budget.",
+    "deliverable": "Launch poster, 1:1 feed + 9:16 story crops"
   },
   {
-    "alt": "AI-generated stylized digital portrait with neon city lights reflected in her eyes",
+    "alt": "AI-generated portfolio cover portrait of a bride at night with diya-flame bokeh",
     "category": "image",
     "model": "Studio quality",
-    "prompt": "Stylized digital portrait with neon city lights reflected in her eyes, cinematic color grade, editorial photography style",
+    "prompt": "Close portrait of a bride in a maroon lehenga and gold temple jewelry at night, diya-flame bokeh behind, blue-hour tones, 35mm film grain",
     "src": "/examples/2-neon-portrait.webp",
-    "service": "single-image"
+    "service": "single-image",
+    "scenario": "Naina Kapoor, a Mumbai wedding photographer, needed a moody portfolio cover for her new After Dark night-wedding series.",
+    "deliverable": "Portfolio cover, 4:5, warm/cool duotone variants"
   },
   {
-    "alt": "AI-generated travel poster of Himalayan peaks at dawn with a tiny trekker silhouette",
+    "alt": "AI-generated retro screen-print travel poster of a trekker on a Himalayan ridge at dawn",
     "category": "image",
     "model": "Studio quality",
-    "prompt": "Epic travel poster of Himalayan peaks at dawn, dramatic clouds, tiny trekker silhouette, vintage adventure poster aesthetic",
+    "prompt": "Retro screen-printed travel poster: trekker with backpack and poles on a snowy ridge at dawn, prayer flags in the foreground, sunburst over jagged peaks, indigo/cream/saffron palette, print grain",
     "src": "/examples/3-travel-poster.webp",
-    "service": "single-image"
+    "service": "single-image",
+    "scenario": "Himalaya Trails, a Manali trek operator, needed a poster for their October Kedarkantha departures — pinned on a cafe noticeboard in Old Manali.",
+    "deliverable": "A3 print poster, screen-print style"
   },
   {
-    "alt": "AI-generated food photography of a gourmet burger with melting cheese on dark slate",
+    "alt": "AI-generated promo photo of cardamom buns and kulhad chai by a rain-streaked window",
     "category": "ad",
     "model": "Product photo",
-    "prompt": "Overhead food photography of a gourmet burger with melting cheese on dark slate, dramatic side lighting, restaurant advertising style",
+    "prompt": "Cardamom buns and steaming kulhad chai on a rustic wooden table, rain-streaked window behind, marigold petals scattered, warm tungsten side light",
     "src": "/examples/4-food-photo.webp",
-    "service": "product-photo"
+    "service": "product-photo",
+    "scenario": "Crumb & Co., a Dehradun bakery launching its monsoon menu, needed a promo poster made in 10 minutes.",
+    "deliverable": "4:5 promo poster, 3 palette variants"
   },
   {
     "alt": "AI-generated product photo of a steel chronograph watch floating in a dark studio",
@@ -37,15 +45,19 @@
     "model": "Product photo",
     "prompt": "Studio product shot of a steel chronograph floating in a dark studio, dramatic rim light tracing the case, deep shadows, luxury watch advertising",
     "src": "/examples/5-watch-ad.webp",
-    "service": "product-photo"
+    "service": "product-photo",
+    "scenario": "A Mumbai watchmaker launching a steel chronograph needed a marketplace hero shot without renting a studio.",
+    "deliverable": "Marketplace hero photo, 2000px"
   },
   {
-    "alt": "AI-generated 1980s movie poster of a lone astronaut before a colossal alien monolith",
+    "alt": "AI-generated hand-painted teaser poster of a figure with a signal lamp before a broken satellite dish",
     "category": "image",
     "model": "Studio quality",
-    "prompt": "Painterly 1980s movie poster of a lone astronaut standing before a colossal alien monolith, dramatic scale, retro sci-fi illustration style",
+    "prompt": "Hand-painted 1980s sci-fi teaser poster: lone figure holding a flickering signal lamp on a monsoon-soaked Deccan plateau at dusk, colossal broken satellite dish silhouette behind, dramatic painted storm clouds",
     "src": "/examples/6-movie-poster.webp",
-    "service": "single-image"
+    "service": "single-image",
+    "scenario": "A Pune indie filmmaker needed a teaser poster for his sci-fi short Signal Lost — festival submission deadline in 6 hours.",
+    "deliverable": "Teaser poster 2:3 + social crop"
   },
   {
     "alt": "AI-generated fine-art portrait of a golden retriever in a dark room with Rembrandt lighting",
@@ -53,7 +65,9 @@
     "model": "Studio quality",
     "prompt": "Fine-art studio portrait of a golden retriever in a dark room, Rembrandt lighting sculpting the fur, soulful eyes, museum-grade pet photography",
     "src": "/examples/7-pet-portrait.webp",
-    "service": "single-image"
+    "service": "single-image",
+    "scenario": "A Gurgaon pet photographer needed a sample for her Soulful Seniors series pitch to a pet-care brand.",
+    "deliverable": "Series sample portrait, print-ready"
   },
   {
     "alt": "AI-generated cinematic photo of a sports car on a rain-wet neon street at night",
@@ -61,15 +75,19 @@
     "model": "Studio quality",
     "prompt": "Sports car parked on a rain-wet street at night, neon signs reflected in the wet asphalt, cinematic night photography, moody atmosphere",
     "src": "/examples/8-sportscar.webp",
-    "service": "single-image"
+    "service": "single-image",
+    "scenario": "A Bengaluru detailing studio needed a moody hero image for their ceramic-coating ad.",
+    "deliverable": "Ad hero image, 16:9"
   },
   {
-    "alt": "AI-generated high-fashion editorial portrait with sculptural black spiked hair",
+    "alt": "AI-generated festive fashion editorial of a model in a bandhani saree in a Jaipur haveli courtyard",
     "category": "image",
     "model": "Studio quality",
-    "prompt": "High-fashion editorial portrait, model with sculptural black spiked hair, charcoal studio backdrop, dramatic lighting, magazine cover aesthetic",
+    "prompt": "Fashion editorial: model in an emerald bandhani saree with gold gota-patti work in a Jaipur haveli courtyard at dusk, marigold torans and rows of lit diyas, warm rim light",
     "src": "/examples/9-fashion-editorial.webp",
-    "service": "single-image"
+    "service": "single-image",
+    "scenario": "Meher, a Jaipur boutique, needed Instagram creatives for their festive Diwali sale — overnight.",
+    "deliverable": "Instagram carousel set of 4, 4:5"
   },
   {
     "alt": "AI-generated luxury shot of a faceted glass perfume bottle with golden liquid",
@@ -77,7 +95,9 @@
     "model": "Product photo",
     "prompt": "Luxury commercial shot of a faceted glass perfume bottle with golden liquid, dark backdrop, sculpted studio lighting, premium fragrance advertising",
     "src": "/examples/10-perfume-ad.webp",
-    "service": "product-photo"
+    "service": "product-photo",
+    "scenario": "A Goa indie perfumer needed a festive-season ad for their oud-rose attar — no photographer on the island.",
+    "deliverable": "Ad creative set of 3"
   },
   {
     "alt": "AI-generated video example: stylized neon portrait animating in a 5s loop",
@@ -86,7 +106,9 @@
     "poster": "/examples/videos/poster-1-portrait.jpg",
     "prompt": "AI video example — animated neon portrait loop, 5s clip, made in minutes",
     "src": "/examples/videos/clip-1-portrait.mp4",
-    "service": "clip-5s"
+    "service": "clip-5s",
+    "scenario": "A Mumbai portrait photographer wanted a living header for her new portfolio site.",
+    "deliverable": "5-second site-header loop"
   },
   {
     "alt": "AI-generated video example: premium product shot with slow cinematic motion",
@@ -95,7 +117,9 @@
     "poster": "/examples/videos/poster-2-product.jpg",
     "prompt": "AI video example — product shot in motion, 5s clip, made in minutes",
     "src": "/examples/videos/clip-2-product.mp4",
-    "service": "clip-5s"
+    "service": "clip-5s",
+    "scenario": "Orbit Toys needed a 5-second turntable spin for their astronaut figure's marketplace video slot.",
+    "deliverable": "5-second listing video"
   },
   {
     "alt": "AI-generated video example: cinematic night cityscape with slow aerial motion",
@@ -104,31 +128,39 @@
     "poster": "/examples/videos/poster-3-city.jpg",
     "prompt": "AI video example — night-city aerial drift, 5s clip, made in minutes",
     "src": "/examples/videos/clip-3-city.mp4",
-    "service": "clip-5s"
+    "service": "clip-5s",
+    "scenario": "A Gurgaon real-estate marketer needed a night-city opener for a YouTube pre-roll.",
+    "deliverable": "5-second pre-roll opener"
   },
   {
-    "alt": "AI-generated cyberpunk street food stall at night in the rain with glowing neon signs",
+    "alt": "AI-generated night-market ad photo of steaming momos at a Delhi street-food cart",
     "category": "ad",
     "model": "Studio quality",
-    "prompt": "Cyberpunk street food stall in the rain, glowing neon signs, steam rising from ramen bowls, dark moody premium advertisement",
+    "prompt": "Bamboo steamers of glistening momos with thick steam rising, vendor's hands lifting a lid, rainy Delhi night street with warm string lights, steel plate of red chutney beside",
     "src": "/examples/17-cyberpunk-ramen.webp",
-    "service": "single-image"
+    "service": "single-image",
+    "scenario": "Momo Ghar, a Delhi street-food cart newly on Zomato, needed an ad that makes their steamy momos irresistible at midnight.",
+    "deliverable": "Ad creative 1:1, 2 variants"
   },
   {
-    "alt": "AI-generated astronaut figure as a luxury product shot in a dark studio",
+    "alt": "AI-generated lifestyle product photo of an astronaut toy on a handmade moon diorama",
     "category": "image",
     "model": "Studio quality",
-    "prompt": "Astronaut figure as a luxury product shot floating in a dark studio, dramatic rim lighting, deep shadows, premium advertising",
+    "prompt": "Astronaut toy figure standing on a handmade cratered-plaster moon diorama on a child's desk in warm lamplight, fairy-light stars behind, shallow depth of field",
     "src": "/examples/18-astronaut-product.webp",
-    "service": "single-image"
+    "service": "single-image",
+    "scenario": "Orbit Toys, a Jaipur startup, needed marketplace photos for their astronaut action figure — flat white-background shots kept getting rejected.",
+    "deliverable": "Product photo pack of 4"
   },
   {
-    "alt": "AI-generated dancer frozen mid-motion with flowing silk in a dark studio",
+    "alt": "AI-generated invitation poster of a Kathak dancer mid-spin in a candle-lit haveli hall",
     "category": "image",
     "model": "Studio quality",
-    "prompt": "Contemporary dancer frozen mid-motion with flowing silk fabric swirling around, dark studio, dramatic side lighting, fine-art motion",
+    "prompt": "Kathak dancer frozen mid-spin, crimson silk skirt flaring in a circle, ghungroo bells catching light, candle-lit Lucknow haveli hall with brass diyas",
     "src": "/examples/19-dancer-silk.webp",
-    "service": "single-image"
+    "service": "single-image",
+    "scenario": "Aarohi Sharma, a Lucknow Kathak dancer, needed a poster for her first solo baithak — printed invitations for gharana elders.",
+    "deliverable": "Invitation poster, 4:5"
   },
   {
     "alt": "AI-generated vintage classic car in a dark studio with dramatic rim light",
@@ -136,7 +168,9 @@
     "model": "Studio quality",
     "prompt": "Vintage classic car in a dark studio, dramatic rim light tracing the chrome curves, deep shadows, luxury automotive advertising",
     "src": "/examples/20-vintage-car.webp",
-    "service": "single-image"
+    "service": "single-image",
+    "scenario": "A Mumbai vintage-car restorer needed a hero shot for their 1962 auction listing.",
+    "deliverable": "Auction listing hero"
   },
   {
     "alt": "AI-generated macro of a coffee liquid crown splash frozen mid-air",
@@ -144,7 +178,9 @@
     "model": "Studio quality",
     "prompt": "Macro photograph of a coffee liquid crown splash frozen in mid-air, dark background, dramatic side lighting, high-speed capture",
     "src": "/examples/21-coffee-splash.webp",
-    "service": "single-image"
+    "service": "single-image",
+    "scenario": "A Coorg coffee estate needed a striking pour shot for their new monsoon-blend packaging.",
+    "deliverable": "Packaging key visual"
   },
   {
     "alt": "AI-generated ethereal portrait surrounded by glowing bioluminescent jellyfish",
@@ -152,7 +188,9 @@
     "model": "Studio quality",
     "prompt": "Ethereal portrait surrounded by glowing bioluminescent jellyfish, dark underwater atmosphere, cyan and violet glow, fine-art",
     "src": "/examples/22-jellyfish-portrait.webp",
-    "service": "single-image"
+    "service": "single-image",
+    "scenario": "A Kochi marine-conservation NGO needed a dreamlike cover for their reef fundraiser invite.",
+    "deliverable": "Invite cover art"
   },
   {
     "alt": "AI-generated extreme macro of a bronze chess knight in dramatic light",
@@ -160,15 +198,19 @@
     "model": "Studio quality",
     "prompt": "Extreme macro of a bronze chess knight piece, dramatic chiaroscuro lighting, dark background, luxury product photography",
     "src": "/examples/23-chess-knight.webp",
-    "service": "single-image"
+    "service": "single-image",
+    "scenario": "A Delhi board-game cafe needed a dramatic cover for their chess-night league menu.",
+    "deliverable": "Menu cover art"
   },
   {
-    "alt": "AI-generated hot air balloons over a desert canyon at dawn",
+    "alt": "AI-generated website hero of hot-air balloons over Pushkar desert dunes at dawn",
     "category": "image",
     "model": "Studio quality",
-    "prompt": "Hot air balloons drifting over a vast desert canyon at dawn, epic scale, warm golden light against deep blue shadows",
+    "prompt": "Hot-air balloons rising over Pushkar desert dunes at dawn, tiny camel caravan below, marigold-orange light, Aravalli silhouettes",
     "src": "/examples/24-balloon-canyon.webp",
-    "service": "single-image"
+    "service": "single-image",
+    "scenario": "SkyWaltz, a Pushkar balloon safari company, needed a hero image for their winter booking page — their old one was a stock photo tourists recognized.",
+    "deliverable": "Website hero, 16:9"
   },
   {
     "alt": "AI-generated video example: luxury perfume bottle rotating on a dark studio turntable",
@@ -177,7 +219,9 @@
     "poster": "/examples/videos/poster-4-product-spin.jpg",
     "prompt": "luxury perfume bottle rotating on a dark studio turntable, 5s clip",
     "src": "/examples/videos/v-01-product-spin.mp4",
-    "service": "clip-5s"
+    "service": "clip-5s",
+    "scenario": "A Goa indie perfumer needed a 5-second turntable spin for the festive ad's landing page.",
+    "deliverable": "5-second listing video"
   },
   {
     "alt": "AI-generated video example: slow aerial flythrough of a neon-lit cyberpunk city",
@@ -186,7 +230,9 @@
     "poster": "/examples/videos/poster-5-neon-flythrough.jpg",
     "prompt": "slow aerial flythrough of a neon-lit cyberpunk city at night, 5s clip",
     "src": "/examples/videos/v-02-neon-flythrough.mp4",
-    "service": "clip-5s"
+    "service": "clip-5s",
+    "scenario": "A Bengaluru synthwave event crew needed a 5-second flythrough for their gig announcement reel.",
+    "deliverable": "5-second announcement opener"
   },
   {
     "alt": "AI-generated video example: golden liquid splash in extreme slow motion",
@@ -195,7 +241,9 @@
     "poster": "/examples/videos/poster-6-liquid-splash.jpg",
     "prompt": "golden liquid splash swirling in extreme slow motion, 5s clip",
     "src": "/examples/videos/v-03-liquid-splash.mp4",
-    "service": "clip-5s"
+    "service": "clip-5s",
+    "scenario": "A Kerala cold-pressed oil brand needed a slow-motion pour for their D2C site hero.",
+    "deliverable": "5-second site hero clip"
   },
   {
     "alt": "AI-generated video example: portrait with hair drifting in the breeze",
@@ -204,6 +252,8 @@
     "poster": "/examples/videos/poster-7-portrait-breeze.jpg",
     "prompt": "portrait with hair drifting gently in the breeze under neon glow, 5s clip",
     "src": "/examples/videos/v-04-portrait-breeze.mp4",
-    "service": "clip-5s"
+    "service": "clip-5s",
+    "scenario": "A Delhi salon needed a 5-second Instagram ad for their monsoon hair-spa offer.",
+    "deliverable": "5-second Instagram ad"
   }
 ]

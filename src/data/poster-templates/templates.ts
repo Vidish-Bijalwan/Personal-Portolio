@@ -11,6 +11,11 @@
  * quoted exact-text instructions in the prompt.
  */
 
+import { BATCH_A } from "./batch-a";
+import { BATCH_B } from "./batch-b";
+import { BATCH_C } from "./batch-c";
+import { BATCH_D } from "./batch-d";
+
 export interface PosterField {
   key: string;
   label: string;
@@ -619,6 +624,10 @@ export const POSTER_TEMPLATES: PosterTemplate[] = [
     style:
       "Bold confident headline, prominent date chip as a design element. Clean structured layout with clear hierarchy. Knowledgeable, premium learning-event feel.",
   },
+  ...BATCH_A,
+  ...BATCH_B,
+  ...BATCH_C,
+  ...BATCH_D,
 ];
 
 export function templateById(id: string): PosterTemplate | undefined {

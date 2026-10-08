@@ -13,6 +13,10 @@ export interface PromptItem {
   price: string;
   badge: string;
   href: string;
+  /** Story-first: the client scenario — who needed it and why. */
+  scenario?: string;
+  /** Story-first: what was created on Etch for that scenario. */
+  deliverable?: string;
 }
 
 /**
@@ -109,6 +113,28 @@ export function PromptDialog({
           />
         </div>
         <div className="flex max-h-[90vh] flex-col gap-5 overflow-y-auto p-6 sm:p-8">
+          {item.scenario && (
+            <div>
+              <p className="pro-eyebrow">The brief</p>
+              <p
+                className="mt-2 text-[14.5px] leading-[1.7]"
+                style={{ color: "var(--pro-fg)" }}
+              >
+                {item.scenario}
+              </p>
+            </div>
+          )}
+          {item.deliverable && (
+            <div>
+              <p className="pro-eyebrow">Made on Etch</p>
+              <p
+                className="mt-2 text-[14px] font-medium leading-[1.7]"
+                style={{ color: "var(--pro-fg)" }}
+              >
+                {item.deliverable}
+              </p>
+            </div>
+          )}
           <div>
             <p className="pro-eyebrow">The exact prompt</p>
             <div
