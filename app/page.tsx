@@ -276,11 +276,28 @@ export default function HomePage() {
     },
   ];
 
+  /* FAQPage schema built from the exact same FAQ copy rendered on the page,
+     so the structured data can never drift from what users see. */
+  const jsonLd = {
+    ...JSON_LD,
+    "@graph": [
+      ...JSON_LD["@graph"],
+      {
+        "@type": "FAQPage",
+        mainEntity: faqs.map((f) => ({
+          "@type": "Question",
+          name: f.q,
+          acceptedAnswer: { "@type": "Answer", text: f.a },
+        })),
+      },
+    ],
+  };
+
   return (
     <div className="pro-surface pro-body min-h-screen">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(JSON_LD) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <VilishNav />
       <main>
