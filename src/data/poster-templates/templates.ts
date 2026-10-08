@@ -118,7 +118,7 @@ export const POSTER_TEMPLATES: PosterTemplate[] = [
       {
         id: "ember",
         name: "Ember",
-        prompt: "fiery red-orange gradient background with deep charcoal vignette, golden-yellow accents",
+        prompt: "vivid red-orange gradient background with deep charcoal vignette, golden-yellow accents",
         swatches: ["#E63900", "#FFB300"],
       },
       {
@@ -282,7 +282,7 @@ export const POSTER_TEMPLATES: PosterTemplate[] = [
         swatches: ["#000000", "#06B6D4"],
       },
     ],
-    hero: "a DJ at glowing turntables in a dark club, laser beams cutting through haze, ecstatic crowd, explosive electronic-music energy",
+    hero: "a DJ at glowing turntables in a dark club, laser beams cutting through haze, ecstatic crowd, high-voltage electronic-music energy",
     style:
       "Slanted, aggressive condensed headline with motion energy. Sharp diagonal composition. Sticker date chip. Raw club-flyer intensity.",
   },
@@ -356,7 +356,7 @@ export const POSTER_TEMPLATES: PosterTemplate[] = [
         swatches: ["#1D4ED8", "#FBBF24"],
       },
     ],
-    hero: "explosive starburst shapes and dynamic sale graphics radiating behind a giant discount numeral, high-energy retail poster",
+    hero: "dynamic starburst shapes and bold sale graphics radiating behind a giant discount numeral, high-energy retail poster",
     style:
       "The discount numeral IS the hero — enormous, dominating the center. Starburst badge shapes. Urgent, loud, unmissable sale energy. CTA bar along the bottom.",
   },
@@ -451,12 +451,12 @@ export const POSTER_TEMPLATES: PosterTemplate[] = [
       {
         id: "iron",
         name: "Iron",
-        prompt: "dark gunmetal-grey background with fiery orange accents",
+        prompt: "dark gunmetal-grey background with vivid orange accents",
         swatches: ["#1C1C1E", "#F97316"],
       },
       {
-        id: "blood",
-        name: "Blood",
+        id: "crimson",
+        name: "Crimson",
         prompt: "black background with intense red accents",
         swatches: ["#000000", "#DC2626"],
       },
