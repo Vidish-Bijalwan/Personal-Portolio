@@ -152,20 +152,33 @@ describe('interpretCreative — genre/style/platform detection', () => {
 });
 
 describe('interpretCreative — enhancedPrompt shape', () => {
-  it('appends the detail suffix to a plain prompt', () => {
+  it('appends the cinema-grade bank foundation to a plain prompt', () => {
     const spec = interpretCreative({ prompt: 'a fox in snow' });
-    expect(spec.enhancedPrompt).toBe(
-      'a fox in snow, high detail, professional composition, balanced lighting'
-    );
+    // User's words lead verbatim; the prompt bank adds craft around them.
+    expect(spec.enhancedPrompt.startsWith('a fox in snow, ')).toBe(true);
+    expect(spec.enhancedPrompt).toContain('cinematic film still');
+    expect(spec.enhancedPrompt).toContain('professional composition');
+    expect(spec.enhancedPrompt).toContain('balanced cinematic lighting');
+    expect(spec.enhancedPrompt).toContain('ultra-detailed');
+    expect(spec.enhancedPrompt).toContain('sharp focus');
   });
 
   it('prefixes style and genre when detected', () => {
     const spec = interpretCreative({ prompt: 'cyberpunk poster of a fox' });
-    // Template: "<style>, <genre> <raw prompt>, <detail suffix>"
+    // Template: "<style>, <genre> <raw prompt>, <bank fragments>"
     expect(spec.enhancedPrompt.startsWith('cyberpunk, poster ')).toBe(true);
-    expect(spec.enhancedPrompt).toContain(
-      'high detail, professional composition, balanced lighting'
-    );
+    expect(spec.enhancedPrompt).toContain('cyberpunk poster of a fox');
+    // No doubled "cyberpunk": the bank fragment dedups against the prefix.
+    expect(spec.enhancedPrompt.match(/cyberpunk/g)?.length).toBe(2);
+    expect(spec.enhancedPrompt).toContain('neon glow');
+    expect(spec.enhancedPrompt).toContain('ultra-detailed');
+  });
+
+  it('sets a bank negative prompt on the spec', () => {
+    const spec = interpretCreative({ prompt: 'a fox in snow' });
+    expect(typeof spec.negativePrompt).toBe('string');
+    expect(spec.negativePrompt).toContain('watermark');
+    expect(spec.negativePrompt).toContain('low quality');
   });
 
   it('caps enhancedPrompt at 1000 chars', () => {
