@@ -178,7 +178,7 @@ describe("watch page wiring (source gates)", () => {
     expect(watchSrc).toContain("progress={progress}");
     expect(watchSrc).toContain("stageText={stageText}");
     // progress still comes from the real backend mapping, not a fake
-    expect(watchSrc).toContain("progressForStage(data.stage, data.status, data.created_at)");
+    expect(watchSrc).toContain("progressForStage(data.stage, data.status)");
     expect(watchSrc).toContain("/api/video-jobs/${encodeURIComponent(id)}/status");
   });
 
