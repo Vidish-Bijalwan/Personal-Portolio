@@ -92,7 +92,9 @@ describe("/create wiring", () => {
 describe("Composer handover prop", () => {
   it("accepts optional initialFiles and validates them on init", () => {
     expect(composerSrc).toContain("initialFiles?: File[]");
-    expect(composerSrc).toContain("validateUploads");
+    // Combined gate: legacy validateUploads for direct files, chunked
+    // policy for files over the threshold.
+    expect(composerSrc).toContain("validateAttachableFiles");
   });
 });
 

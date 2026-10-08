@@ -27,6 +27,22 @@ function localRoot(): string {
   );
 }
 
+/**
+ * Root dir of the local storage driver (additive export — lets route
+ * handlers read back files the provider wrote, e.g. PWA share bundles).
+ */
+export function localStorageRoot(): string {
+  return localRoot();
+}
+
+/**
+ * Resolve a storage key to its on-disk path (additive export).
+ * Throws on path traversal, same as the provider itself.
+ */
+export function localStorageKeyPath(key: string): string {
+  return resolveLocalKey(localRoot(), key);
+}
+
 function resolveLocalKey(root: string, key: string): string {
   const resolved = path.resolve(root, key);
   if (resolved !== path.resolve(root) && !resolved.startsWith(path.resolve(root) + path.sep)) {

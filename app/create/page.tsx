@@ -62,7 +62,17 @@ function Eyebrow({ children }: { children: string }) {
 export default async function CreatePage({
   searchParams,
 }: {
-  searchParams: Promise<{ media?: string; service?: string; template?: string; prompt?: string }>;
+  searchParams: Promise<{
+    media?: string;
+    service?: string;
+    template?: string;
+    prompt?: string;
+    /** PWA share-target handoff: bundle token stored by /share-target. */
+    shared?: string;
+    /** Share receipt rejection code + human message (see src/lib/pwa/share-target.ts). */
+    shareError?: string;
+    shareMsg?: string;
+  }>;
 }) {
   const sp = await searchParams;
   // Trend-template deep link, e.g. /create?service=pack-4&template=diwali-night.
@@ -146,7 +156,11 @@ export default async function CreatePage({
             {/* The unified intake — the default way to start a creation.
                 Drop assets, add references, describe in plain words. */}
             <Reveal delay={0.25} className="mt-10 text-left">
-              <UnifiedIntake />
+              <UnifiedIntake
+                sharedToken={sp?.shared}
+                shareError={sp?.shareError}
+                shareMsg={sp?.shareMsg}
+              />
             </Reveal>
 
             {/* The classic composer, kept as the explicit manual override */}
