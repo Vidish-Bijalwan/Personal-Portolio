@@ -5,6 +5,7 @@
 import { eq, and, sql } from 'drizzle-orm';
 import { getDb } from './client';
 import { providers, modelCatalog, adminConfig } from './schema';
+import { priceOf } from '../pricing/catalog';
 
 const PROVIDER_SEEDS = [
   {
@@ -56,7 +57,10 @@ const ADMIN_CONFIG_SEEDS: Record<string, unknown> = {
     singleImage: 1900,
     fourPack: 6900,
     productPhoto: 3900,
-    clip5s: 8900,
+    // Legacy seeded ladder — nothing reads it (runtime ladder derives from
+    // the canonical price catalog). Kept in sync with the clip-5s catalog
+    // price anyway so no stale number lives in the DB.
+    clip5s: priceOf('clip-5s'),
     remake: 900,
   },
   'usd:inr': 88,

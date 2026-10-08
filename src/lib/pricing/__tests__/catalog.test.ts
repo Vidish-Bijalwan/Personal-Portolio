@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   PRICE_CATALOG,
+  VIDEO_CLIP_5S_PRICE_RUPEES,
   priceOf,
   COMPOSER_SERVICES,
   composerServiceById,
@@ -15,6 +16,9 @@ import {
   videoClipPricePaise,
 } from "@/lib/pricing/engine";
 import { formatINR } from "@/lib/vilish/types";
+
+/** Canonical 5s clip price in paise — derived from the single constant. */
+const CLIP_5S_PAISE = VIDEO_CLIP_5S_PRICE_RUPEES * 100;
 
 /**
  * Pricing consistency guard: every product the business sells must appear
@@ -42,19 +46,29 @@ describe("price catalog", () => {
     expect(priceOf("single-image")).toBe(1500);
     expect(priceOf("pack-4")).toBe(4900);
     expect(priceOf("product-photo")).toBe(2900);
-    expect(priceOf("clip-5s")).toBe(4500);
+    expect(priceOf("clip-5s")).toBe(CLIP_5S_PAISE);
     expect(priceOf("video-studio")).toBe(2900);
     expect(priceOf("remake")).toBe(500);
     expect(priceOf("tool-basic")).toBe(500);
     expect(priceOf("tool-plus")).toBe(1000);
   });
 
-  it("equals exactly the October 2026 price-drop catalog", () => {
+  it("prices the 5s clip at the canonical ₹19 constant (no hardcoded 45)", () => {
+    // Vidish's decision (2026-10-08): the 5s clip costs ₹19. This test pins
+    // the decided value AND the structural invariant — the catalog entry is
+    // the constant in paise, so a future price change touches exactly one
+    // line and every surface follows.
+    expect(VIDEO_CLIP_5S_PRICE_RUPEES).toBe(19);
+    expect(priceOf("clip-5s")).toBe(VIDEO_CLIP_5S_PRICE_RUPEES * 100);
+    expect(formatINR(priceOf("clip-5s"))).toBe("₹19");
+  });
+
+  it("equals exactly the current price catalog", () => {
     expect(PRICE_CATALOG.map((p) => [p.id, p.paise])).toEqual([
       ["single-image", 1500],
       ["pack-4", 4900],
       ["product-photo", 2900],
-      ["clip-5s", 4500],
+      ["clip-5s", CLIP_5S_PAISE],
       ["video-studio", 2900],
       ["remake", 500],
       ["tool-basic", 500],
@@ -77,20 +91,20 @@ describe("video clip duration pricing", () => {
 
   it("derives the block price from the live clip-5s catalog price", () => {
     expect(videoBlockPricePaise()).toBe(priceOf("clip-5s"));
-    expect(videoBlockPricePaise()).toBe(4500);
+    expect(videoBlockPricePaise()).toBe(CLIP_5S_PAISE);
   });
 
   it("prices exact 5s blocks at one block price each", () => {
-    expect(videoClipPricePaise(5)).toBe(4500); // ₹45
-    expect(videoClipPricePaise(10)).toBe(9000); // ₹90
-    expect(videoClipPricePaise(30)).toBe(27000); // ₹270
-    expect(videoClipPricePaise(60)).toBe(54000); // ₹540
+    expect(videoClipPricePaise(5)).toBe(CLIP_5S_PAISE); // ₹19
+    expect(videoClipPricePaise(10)).toBe(CLIP_5S_PAISE * 2); // ₹38
+    expect(videoClipPricePaise(30)).toBe(CLIP_5S_PAISE * 6); // ₹114
+    expect(videoClipPricePaise(60)).toBe(CLIP_5S_PAISE * 12); // ₹228
   });
 
   it("rounds partial blocks UP to the next whole block", () => {
-    expect(videoClipPricePaise(6)).toBe(9000); // 2 blocks
-    expect(videoClipPricePaise(7)).toBe(9000);
-    expect(videoClipPricePaise(59)).toBe(54000); // 12 blocks
+    expect(videoClipPricePaise(6)).toBe(CLIP_5S_PAISE * 2); // 2 blocks
+    expect(videoClipPricePaise(7)).toBe(CLIP_5S_PAISE * 2);
+    expect(videoClipPricePaise(59)).toBe(CLIP_5S_PAISE * 12); // 12 blocks
   });
 
   it("returns whole-rupee integer paise", () => {

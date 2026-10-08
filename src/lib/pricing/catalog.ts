@@ -8,6 +8,19 @@
  * or an amount drifts.
  */
 
+/**
+ * Canonical price of a 5-second AI video clip, in whole rupees.
+ *
+ * SINGLE SOURCE OF TRUTH (Vidish's decision, 2026-10-08): ₹19.
+ * Every surface that shows or charges the clip price must derive from
+ * this constant — the `clip-5s` catalog entry is
+ * VIDEO_CLIP_5S_PRICE_RUPEES × 100 paise, longer clips are priced by the
+ * duration formula in pricing/engine.ts (ceil(duration / 5) blocks), and
+ * all copy/metadata renders from the catalog. Never hardcode 19, ₹19,
+ * 1900 or the old ₹45 anywhere else.
+ */
+export const VIDEO_CLIP_5S_PRICE_RUPEES = 19;
+
 export interface PriceEntry {
   /** Stable id, used as the key for per-page metadata. */
   id:
@@ -28,7 +41,7 @@ export const PRICE_CATALOG: readonly PriceEntry[] = [
   { id: "single-image", label: "Single image", paise: 1500 },
   { id: "pack-4", label: "4-pack", paise: 4900 },
   { id: "product-photo", label: "Product photo", paise: 2900 },
-  { id: "clip-5s", label: "5s clip", paise: 4500 },
+  { id: "clip-5s", label: "5s clip", paise: VIDEO_CLIP_5S_PRICE_RUPEES * 100 },
   { id: "video-studio", label: "Video Studio", paise: 2900 },
   { id: "remake", label: "Remake", paise: 500 },
   // Utility tool tiers (Video Studio "Real processing" tools, Oct 2026
