@@ -51,3 +51,31 @@ describe("progressForStage", () => {
     }
   });
 });
+
+describe("progressForStage — real pipeline stages, never time-based", () => {
+  it("tracks the queue → claim → generate → watermark → deliver pipeline", () => {
+    expect(progressForStage("Waiting in the queue", "queued")).toBe(8);
+    expect(progressForStage("Claimed by a worker", "generating")).toBe(15);
+    expect(progressForStage("Warming up the grill", "generating")).toBe(20);
+    expect(progressForStage("Cooking your creation", "generating")).toBe(55);
+    expect(progressForStage("Plating it up", "generating")).toBe(80);
+    expect(progressForStage("Watermarking your file", "generating")).toBe(92);
+    expect(progressForStage("Delivering your file", "generating")).toBe(95);
+    expect(progressForStage("Delivering your file", "done")).toBe(100);
+  });
+
+  it("is a pure function of stage + status — no clock involved", () => {
+    // The signature no longer accepts a timestamp at all: the bar can only
+    // move when the pipeline reports a new stage or status.
+    expect(progressForStage.length).toBe(2);
+    expect(progressForStage("Warming up the grill", "generating")).toBe(20);
+  });
+
+  it("never exceeds 99 before done", () => {
+    expect(progressForStage("Delivering your file", "generating")).toBeLessThanOrEqual(99);
+  });
+
+  it("done still returns 100", () => {
+    expect(progressForStage("anything", "done")).toBe(100);
+  });
+});

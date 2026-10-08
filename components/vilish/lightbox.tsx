@@ -31,8 +31,11 @@ export interface LightboxProps {
 }
 
 function ExampleBadge() {
+  // pro-dark-zone: the light-theme remap must not touch these pills — they
+  // sit over the media stage, so they keep light text on a dark scrim in
+  // both themes.
   return (
-    <span className="rounded-full border border-white/[0.14] bg-black/70 px-2.5 py-1 text-[11px] font-medium uppercase tracking-[0.08em] text-[#F5F5F3] backdrop-blur-sm">
+    <span className="pro-dark-zone rounded-full border border-white/[0.14] bg-black/70 px-2.5 py-1 text-[11px] font-medium uppercase tracking-[0.08em] text-[#F5F5F3] backdrop-blur-sm">
       Example
     </span>
   );
@@ -40,7 +43,7 @@ function ExampleBadge() {
 
 function BadgeChip({ label }: { label: string }) {
   return (
-    <span className="rounded-full bg-black/60 px-2.5 py-1 text-[11px] font-medium uppercase tracking-[0.08em] text-white/[0.75] backdrop-blur-sm">
+    <span className="pro-dark-zone rounded-full bg-black/60 px-2.5 py-1 text-[11px] font-medium uppercase tracking-[0.08em] text-white/[0.75] backdrop-blur-sm">
       {label}
     </span>
   );
@@ -92,7 +95,10 @@ export default function Lightbox({ items, index, onClose, onIndex }: LightboxPro
         className="flex max-h-full w-full max-w-4xl flex-col overflow-hidden outline-none sm:mx-6 sm:rounded-[20px] sm:border sm:border-white/[0.10]"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="relative bg-[#080808]">
+        {/* pro-dark-zone: the media stage stays dark in both themes — the
+            light-theme remap must not turn it (or the pills/buttons over it)
+            light, which made badges unreadable and letterbox bars white. */}
+        <div className="pro-dark-zone relative bg-[#080808]">
           {item.kind === "video" ? (
             <video
               src={item.src}
@@ -112,7 +118,7 @@ export default function Lightbox({ items, index, onClose, onIndex }: LightboxPro
               alt={item.alt ?? item.caption}
               width={1280}
               height={960}
-              className="max-h-[62vh] w-full object-contain"
+              className="mx-auto max-h-[62vh] w-auto max-w-full object-contain"
               priority
             />
           )}

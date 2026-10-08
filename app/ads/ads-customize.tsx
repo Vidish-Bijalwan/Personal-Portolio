@@ -13,7 +13,7 @@
  * shows the own-description state and offers a way back to the bank.
  */
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ArrowLeft, ArrowRight, Check, Sparkles } from "lucide-react";
 import {
   type Concept,
@@ -74,6 +74,9 @@ export default function AdsCustomize(props: AdsCustomizeProps) {
   } = props;
 
   const [openId, setOpenId] = useState<string | null>(initialOpenId);
+  useEffect(() => {
+    if (initialOpenId) setOpenId(initialOpenId);
+  }, [initialOpenId]);
   const mediaConcepts = concepts.filter((c) => c.media === media);
 
   /* ------------------------- concept section ------------------------- */
@@ -106,7 +109,10 @@ export default function AdsCustomize(props: AdsCustomizeProps) {
             <button
               key={c.id}
               type="button"
-              onClick={() => onConceptChange(c.id)}
+              onClick={() => {
+                onConceptChange(c.id);
+                setOpenId("palette");
+              }}
               aria-pressed={selected}
               className={cn("overflow-hidden rounded-[10px] border text-left")}
               style={{
@@ -163,7 +169,10 @@ export default function AdsCustomize(props: AdsCustomizeProps) {
           <button
             key={p.name}
             type="button"
-            onClick={() => onPaletteChange(p.name)}
+            onClick={() => {
+              onPaletteChange(p.name);
+              setOpenId("typography");
+            }}
             aria-pressed={active}
             className="rounded-[10px] border p-3 text-left"
             style={{
@@ -202,7 +211,10 @@ export default function AdsCustomize(props: AdsCustomizeProps) {
           <button
             key={t.name}
             type="button"
-            onClick={() => onTypographyChange(t.name)}
+            onClick={() => {
+              onTypographyChange(t.name);
+              setOpenId("layout");
+            }}
             aria-pressed={active}
             className="w-full rounded-[10px] border p-3.5 text-left"
             style={{
@@ -234,7 +246,10 @@ export default function AdsCustomize(props: AdsCustomizeProps) {
           <button
             key={l.name}
             type="button"
-            onClick={() => onLayoutChange(l.name)}
+            onClick={() => {
+              onLayoutChange(l.name);
+              setOpenId(null);
+            }}
             aria-pressed={active}
             className="w-full rounded-[10px] border p-3.5 text-left"
             style={{

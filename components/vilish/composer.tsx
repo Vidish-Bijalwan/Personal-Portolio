@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowRight, Clapperboard, Loader2, Paperclip, Sparkles, X } from "lucide-react";
@@ -35,6 +35,11 @@ import {
   countPromptChars,
   formatPromptCount,
 } from "@/src/lib/vilish/prompt-limits";
+import {
+  MISSING_REFERENCE_MESSAGE,
+  needsReferencePhoto,
+  referenceFieldState,
+} from "@/lib/person-reference";
 import {
   UPLOAD_EDGE_LIMIT_BYTES,
   type ManualPayment,
@@ -102,6 +107,8 @@ function formatBytes(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
+const VideoStudioPanel = lazy(() => import("./video-studio-panel"));
+
 export default function Composer({ variant = "hero", className, initialMedia = "image", initialService, initialTemplate, initialPrompt }: ComposerProps) {
   const router = useRouter();
   const [prompt, setPrompt] = useState(initialTemplate?.prompt ?? initialPrompt ?? "");
@@ -135,9 +142,15 @@ export default function Composer({ variant = "hero", className, initialMedia = "
   // Clip length for paid video clips: 5..60s. The unlock price scales with
   // it (engine videoClipPricePaise); the API validates the same range.
   const [videoDuration, setVideoDuration] = useState(VIDEO_DURATION_MIN_S);
+  // Inline Video Studio: renders the edit-video tools here instead of
+  // navigating away.
+  const [showVideoStudio, setShowVideoStudio] = useState(false);
 
   // reference attachments (stored with the order, shown to the operator)
   const [files, setFiles] = useState<File[]>([]);
+  // Live reference-photo requirement: the label and the pre-submit guard
+  // share this state, so they can never contradict each other.
+  const refField = referenceFieldState(prompt, files.length > 0);
   const [fileError, setFileError] = useState("");
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
 
@@ -286,6 +299,10 @@ export default function Composer({ variant = "hero", className, initialMedia = "
       );
       return;
     }
+    if (needsReferencePhoto(prompt) && files.length === 0) {
+      setStatus(MISSING_REFERENCE_MESSAGE);
+      return;
+    }
     setStarting(true);
     setStatus("");
     setAuthNeeded(false);
@@ -394,6 +411,10 @@ export default function Composer({ variant = "hero", className, initialMedia = "
       );
       return;
     }
+    if (needsReferencePhoto(prompt) && files.length === 0) {
+      setStatus(MISSING_REFERENCE_MESSAGE);
+      return;
+    }
     // Pre-flight: the serverless edge rejects bodies over
     // UPLOAD_EDGE_LIMIT_BYTES before our route runs.
     if (files.length > 0) {
@@ -471,6 +492,12 @@ export default function Composer({ variant = "hero", className, initialMedia = "
       payment unlocks the clean HD file after. */
   const handleVideoGenerate = async () => {
     if (videoSending || !promptOk) return;
+    if (needsReferencePhoto(prompt)) {
+      setStatus(
+        "This prompt asks for a specific person, but video clips cannot use a reference photo yet — describe the person instead."
+      );
+      return;
+    }
     setVideoSending(true);
     setStatus("");
     setAuthNeeded(false);
@@ -581,15 +608,30 @@ export default function Composer({ variant = "hero", className, initialMedia = "
             </button>
           ))}
         </div>
-        <Link
-          href="/video-studio"
+        <button
+          type="button"
+          onClick={() => setShowVideoStudio((v) => !v)}
+          aria-expanded={showVideoStudio}
           title={`Voice-over & TTS, auto-captioning, trim + text overlay — ${formatINR(priceOf("video-studio"))} per finished video`}
           className="inline-flex min-h-[44px] items-center gap-1.5 rounded-[12px] border border-dashed border-[var(--pro-border)] px-4 py-2 text-[13px] font-semibold text-[var(--pro-muted)] transition-colors hover:border-[var(--pro-accent)]/50 hover:text-[var(--pro-fg)]"
         >
           <Clapperboard className="h-3.5 w-3.5" aria-hidden />
           Edit video
           <span className="text-[11px] font-medium text-[var(--pro-faint)]">{formatINR(priceOf("video-studio"))}</span>
-        </Link>
+        </button>
+        {showVideoStudio && (
+          <div className="mt-4 rounded-[16px] border border-[var(--pro-border)] bg-[var(--pro-bg-elev)] p-4 sm:p-6">
+            <Suspense
+              fallback={
+                <p className="py-8 text-center text-[13px] text-[var(--pro-muted)]">
+                  Loading Video Studio…
+                </p>
+              }
+            >
+              <VideoStudioPanel chrome={false} />
+            </Suspense>
+          </div>
+        )}
         {mediaMode === "image" && (
           <div
             role="group"
@@ -806,6 +848,25 @@ export default function Composer({ variant = "hero", className, initialMedia = "
                 </li>
               ))}
             </ul>
+          )}
+          <div className="mb-2 flex items-center gap-2">
+            <span className="text-[12px] font-semibold uppercase tracking-[0.08em] text-[var(--pro-muted)]">
+              Reference photo{" "}
+              <span
+                className={
+                  refField.required
+                    ? "text-amber-500"
+                    : "font-medium normal-case tracking-normal text-[var(--pro-faint)]"
+                }
+              >
+                {refField.labelSuffix}
+              </span>
+            </span>
+          </div>
+          {refField.warning && (
+            <p className="mb-2 text-[13px] font-medium text-amber-500" role="alert">
+              {refField.warning}
+            </p>
           )}
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
             <button

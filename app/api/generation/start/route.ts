@@ -11,6 +11,8 @@ import {
 } from '@/lib/vilish/attachments';
 import { getFulfillmentConfig } from '@/lib/fulfillment/config';
 import { isAdminOverride } from '@/lib/fulfillment/guards';
+import { MISSING_REFERENCE_MESSAGE, needsReferencePhoto } from '@/lib/person-reference';
+import { isAdminEmail } from '@/lib/admin';
 
 /** Start of the current day in Asia/Kolkata, as a UTC Date. */
 function istDayStart(now: Date): Date {
@@ -171,11 +173,29 @@ export async function POST(req: NextRequest) {
       .where(eq(schema.generationJobs.id, job.id));
   }
 
+  // Pre-generation reference-photo check: a prompt that asks for a specific
+  // person needs their photo attached — fail fast here instead of after the
+  // queue wait. Runs before the capacity gates so it never consumes the cap.
+  if (needsReferencePhoto(job.enhancedPrompt ?? job.prompt) && files.length === 0) {
+    return NextResponse.json(
+      {
+        code: 'MISSING_REFERENCE',
+        error: MISSING_REFERENCE_MESSAGE,
+      },
+      { status: 400 }
+    );
+  }
+
   // Phase 2 contract §5: capacity gates BEFORE generation starts.
-  // Valid x-admin-token bypasses both.
+  // Valid x-admin-token bypasses both, as does the signed-in admin's
+  // session (isAdminEmail) — the admin's browser never sends x-admin-token.
   const fulfillmentCfg = await getFulfillmentConfig();
   const fulfillmentMode = fulfillmentCfg.FULFILLMENT_MODE;
-  if (fulfillmentMode === 'operator' && !isAdminOverride(req)) {
+  if (
+    fulfillmentMode === 'operator' &&
+    !isAdminOverride(req) &&
+    !isAdminEmail(user.email)
+  ) {
     if (!fulfillmentCfg.ORDERS_ACCEPTING) {
       return NextResponse.json({ error: 'ORDERS_PAUSED' }, { status: 403 });
     }

@@ -24,7 +24,8 @@ import {
 import { cn } from "@/lib/utils";
 import VilishNav from "@/components/vilish/nav";
 import VilishFooter from "@/components/vilish/footer";
-import PopcornReel, { reelFrameForStage } from "@/components/vilish/popcorn-reel";
+import VideoEditMotion from "@/components/vilish/video-edit-motion";
+import { displayStage } from "@/src/lib/vilish/stage-copy";
 import { progressForStage } from "@/src/lib/vilish/progress";
 import { formatINR } from "@/src/lib/vilish/types";
 import { priceOf } from "@/lib/pricing/catalog";
@@ -43,6 +44,7 @@ interface JobStatus {
   unlocked: boolean;
   pricePaise: number;
   error?: string;
+  created_at?: string;
 }
 
 const TOOL_META: Record<
@@ -259,10 +261,9 @@ export default function VideoStudioWatchPage() {
   const cleanUrl = `/api/video-jobs/${encodeURIComponent(id)}/clean`;
 
   const meta = data ? TOOL_META[data.tool] ?? TOOL_META.tts : TOOL_META.tts;
-  const ToolIcon = meta.icon;
   const captions = meta.captions;
   const caption = captions[captionIdx % captions.length];
-  const stageText = data?.stage ?? "Getting your video ready…";
+  const stageText = displayStage(data?.stage);
   // Real progress from the watcher's stage + status — the bar below
   // reflects actual pipeline position, not a fixed indeterminate width.
   const progress = data ? progressForStage(data.stage, data.status) : 8;
@@ -270,7 +271,7 @@ export default function VideoStudioWatchPage() {
   return (
     <div className="flex min-h-screen flex-col bg-[#080808] font-sans text-[#F5F5F3] antialiased">
       <VilishNav />
-      <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col px-4 pb-16 pt-8 sm:pt-12">
+      <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col px-4 pb-16 pt-8 sm:pt-12">
         <Link
           href="/video-studio"
           className="inline-flex w-fit items-center gap-1.5 text-[13px] text-white/50 hover:text-white/85"
@@ -326,46 +327,43 @@ export default function VideoStudioWatchPage() {
           </section>
         )}
 
-        {/* processing / queued */}
-        {data && data.status !== "failed" && data.status !== "done" && (
-          <section className="flex flex-1 flex-col items-center py-8 text-center" aria-live="polite">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--pro-accent)]">
-              {meta.label} · {JOB_PRICE} · {meta.badge}
-            </p>
-            <h1 className="font-display mt-2 text-[26px] font-semibold tracking-[-0.02em] sm:text-[32px]">
-              Your video is in the studio
+        {/* failed */}
+        {data && data.status === "failed" && (
+          <section className="flex flex-1 flex-col items-center py-12 text-center">
+            <h1 className="font-display text-[26px] font-semibold tracking-[-0.02em] sm:text-[32px]">
+              The studio couldn&apos;t finish this one
             </h1>
-
-            <div className="mt-6 w-full max-w-[420px]">
-              <PopcornReel frame={reelFrameForStage(data.stage)} />
-            </div>
-
-            <p className="font-display mt-4 flex items-center gap-2 text-[16px] font-medium text-[#F5F5F3]">
-              <ToolIcon className="h-4 w-4 text-[var(--pro-accent)]" />
-              {stageText}
+            <p className="mt-3 max-w-md text-[14px] leading-6 text-white/60">
+              Your {meta.label.toLowerCase()} job didn&apos;t make it — nothing
+              was charged.
             </p>
-            <p key={captionIdx} className="fg-caption mt-1.5 h-6 text-[13px] text-white/45">
-              {caption}
-            </p>
-
-            <div
-              className="mt-6 w-full max-w-[320px]"
-              role="progressbar"
-              aria-label="Video progress"
-              aria-valuenow={progress}
-              aria-valuemin={0}
-              aria-valuemax={100}
+            {data.error && (
+              <p className="mt-3 max-w-md text-[13px] text-white/40">{data.error}</p>
+            )}
+            <Link
+              href="/video-studio"
+              className="mt-7 inline-flex items-center gap-2 min-h-[44px] rounded-[10px] bg-[var(--pro-btn)] px-5 py-2.5 text-[14px] font-semibold text-[var(--pro-btn-ink)] hover:opacity-95"
             >
-              <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/[0.08]">
-                <div
-                  className="h-full rounded-full bg-[var(--pro-accent)] transition-[width] duration-700 ease-out motion-reduce:transition-none"
-                  style={{ width: `${progress}%` }}
-                />
-              </div>
-              <p className="mt-2 text-[12px] font-medium tabular-nums text-white/45">
-                {progress}% · {stageText}
-              </p>
-            </div>
+              <RefreshCcw className="h-4 w-4" />
+              Try again
+            </Link>
+          </section>
+        )}
+
+        {/* processing / queued — the "Editing your video" motion experience.
+            Progress % and stage are driven by the REAL backend job status
+            (polls /api/video-jobs/[id]/status every 3s); the motion piece
+            clamps display to 99% and keeps it monotonic. Never fake-timed. */}
+        {data && data.status !== "failed" && data.status !== "done" && (
+          <section className="flex w-full flex-col items-center py-8" aria-live="polite">
+            <VideoEditMotion
+              progress={progress}
+              status={data.status}
+              stageText={stageText}
+              toolLabel={meta.label}
+              badge={meta.badge}
+              caption={caption}
+            />
 
             {/* pay-ping: payment can be completed while the job runs */}
             <div className="mt-8 w-full max-w-md rounded-[14px] border border-white/[0.08] bg-white/[0.02] p-4 text-left">
@@ -399,9 +397,10 @@ export default function VideoStudioWatchPage() {
           </section>
         )}
 
-        {/* done + locked: watermarked preview with unlock CTA */}
+        {/* done + locked: watermarked preview with unlock CTA.
+            Restrained ready reveal — only renders on backend status "done". */}
         {data && data.status === "done" && !data.unlocked && (
-          <section className="flex flex-1 flex-col items-center py-8 text-center">
+          <section className="vse-ready flex flex-1 flex-col items-center py-8 text-center">
             <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--pro-accent)]/40 bg-[var(--pro-accent)]/[0.08] px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.1em] text-[var(--pro-accent)]">
               <Sparkles className="h-3.5 w-3.5" />
               Your {meta.label.toLowerCase()} preview — {meta.badge}
@@ -470,9 +469,9 @@ export default function VideoStudioWatchPage() {
           </section>
         )}
 
-        {/* done + unlocked: clean download */}
+        {/* done + unlocked: clean download (restrained ready reveal) */}
         {data && data.status === "done" && data.unlocked && (
-          <section className="flex flex-1 flex-col items-center py-8 text-center">
+          <section className="vse-ready flex flex-1 flex-col items-center py-8 text-center">
             <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-300/40 bg-emerald-300/[0.08] px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.1em] text-emerald-300">
               <Check className="h-3.5 w-3.5" />
               Unlocked!

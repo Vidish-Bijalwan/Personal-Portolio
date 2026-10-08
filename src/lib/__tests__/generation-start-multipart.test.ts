@@ -52,7 +52,7 @@ beforeAll(async () => {
   await client.runMigrations();
 }, 180_000);
 
-async function seedJobAndQuote(userId: string) {
+async function seedJobAndQuote(userId: string, prompt = 'a test image') {
   const db = client.getDb();
   await db
     .insert(schema.users)
@@ -60,7 +60,7 @@ async function seedJobAndQuote(userId: string) {
     .onConflictDoNothing();
   const [job] = await db
     .insert(schema.generationJobs)
-    .values({ userId, state: 'QUOTED', prompt: 'a test image' })
+    .values({ userId, state: 'QUOTED', prompt })
     .returning({ id: schema.generationJobs.id });
   const [quote] = await db
     .insert(schema.quotes)
@@ -146,5 +146,35 @@ describe('POST /api/generation/start multipart (paid reference upload)', () => {
     const body = (await res.json().catch(() => null)) as any;
     expect(res.status).toBe(400);
     expect(body?.code).toBe('INVALID_ATTACHMENTS');
+  });
+
+  it('400s MISSING_REFERENCE when the prompt needs a person but no photo is attached', async () => {
+    const { quoteId, jobId } = await seedJobAndQuote(
+      'uploader-1',
+      'Put the person in the reference on a beach at sunset'
+    );
+    const res = await POST(multipartReq(quoteId, []));
+    const body = (await res.json().catch(() => null)) as any;
+    expect(res.status).toBe(400);
+    expect(body?.code).toBe('MISSING_REFERENCE');
+    expect(typeof body?.error).toBe('string');
+    // no generations row queued for the job
+    const db = client.getDb();
+    const genRows = await db
+      .select({ id: schema.generations.id })
+      .from(schema.generations)
+      .where(eq(schema.generations.jobId, jobId));
+    expect(genRows).toHaveLength(0);
+  });
+
+  it('passes the reference check when a photo IS attached', async () => {
+    const { quoteId } = await seedJobAndQuote(
+      'uploader-1',
+      'Put the person in the reference on a beach at sunset'
+    );
+    const bytes = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0xde, 0xad, 0xbe, 0xef]);
+    const file = new File([bytes], 'ref.png', { type: 'image/png' });
+    const res = await POST(multipartReq(quoteId, [file]));
+    expect(res.status).toBe(201);
   });
 });

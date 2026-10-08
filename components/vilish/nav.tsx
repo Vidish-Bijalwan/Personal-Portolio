@@ -3,8 +3,9 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X } from "lucide-react";
+import { ChevronDown, Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { TOOL_DIRECTORY, type ToolGroup } from "@/src/lib/tools/directory";
 import AuthButton from "./auth-button";
 import ProThemeToggle from "./pro-theme-toggle";
 
@@ -17,7 +18,7 @@ import ProThemeToggle from "./pro-theme-toggle";
 const LINKS = [
   { href: "/create", label: "Create" },
   { href: "/ads", label: "Ad Studio" },
-  { href: "/#tools", label: "Tools" },
+  // Tools renders as a dropdown (see ToolsDropdown) — not a plain link.
   { href: "/examples", label: "Examples" },
   { href: "/pricing", label: "Pricing" },
   { href: "/about", label: "About" },
@@ -73,6 +74,157 @@ function Wordmark() {
   );
 }
 
+/**
+ * Tools dropdown — every working tool, grouped, with direct links.
+ * Desktop: hover/click opens the panel. Mobile: rendered as an expandable
+ * section in the mobile menu.
+ */
+function ToolsDropdown({ onNavigate }: { onNavigate?: () => void }) {
+  const [open, setOpen] = useState(false);
+  const groups: { label: string; group: ToolGroup }[] = [
+    { label: "Create", group: "create" },
+    { label: "Video Studio", group: "video-studio" },
+  ];
+  return (
+    <div
+      className="relative"
+      onMouseEnter={() => setOpen(true)}
+      onMouseLeave={() => setOpen(false)}
+    >
+      <button
+        type="button"
+        aria-expanded={open}
+        aria-haspopup="true"
+        onClick={() => setOpen((o) => !o)}
+        className="flex items-center gap-1 rounded-[8px] px-3.5 py-2 text-[14.5px] font-medium transition-colors"
+        style={{ color: open ? "var(--pro-fg)" : "var(--pro-muted)" }}
+      >
+        Tools
+        <ChevronDown
+          className={cn("h-3.5 w-3.5 transition-transform", open && "rotate-180")}
+        />
+      </button>
+      {open && (
+        <div
+          className="absolute left-1/2 top-full z-50 w-[560px] -translate-x-1/2 pt-2"
+          role="menu"
+          aria-label="All tools"
+        >
+          <div
+            className="grid grid-cols-2 gap-x-2 overflow-hidden rounded-[16px] border p-3 shadow-xl"
+            style={{
+              background: "var(--pro-bg-elev)",
+              borderColor: "var(--pro-border)",
+              boxShadow: "var(--pro-card-shadow)",
+            }}
+          >
+            {groups.map(({ label, group }) => (
+              <div key={group}>
+                <p
+                  className="px-3 pb-1.5 pt-2 text-[11px] font-semibold uppercase tracking-[0.1em]"
+                  style={{ color: "var(--pro-faint)" }}
+                >
+                  {label}
+                </p>
+                {TOOL_DIRECTORY.filter((t) => t.group === group).map((t) => (
+                  <Link
+                    key={t.id}
+                    href={t.href}
+                    role="menuitem"
+                    onClick={() => {
+                      setOpen(false);
+                      onNavigate?.();
+                    }}
+                    className="flex items-center gap-3 rounded-[10px] px-3 py-2.5 transition-colors hover:bg-[var(--pro-bg-sunken)]"
+                  >
+                    <t.icon
+                      className="h-[18px] w-[18px] shrink-0"
+                      style={{ color: "var(--pro-accent)" }}
+                    />
+                    <span className="min-w-0 flex-1">
+                      <span
+                        className="block truncate text-[13.5px] font-medium"
+                        style={{ color: "var(--pro-fg)" }}
+                      >
+                        {t.name}
+                      </span>
+                      <span
+                        className="block truncate text-[12px]"
+                        style={{ color: "var(--pro-muted)" }}
+                      >
+                        {t.tagline}
+                      </span>
+                    </span>
+                    <span
+                      className="shrink-0 text-[12px] font-semibold tabular-nums"
+                      style={{ color: "var(--pro-fg)" }}
+                    >
+                      {t.price}
+                    </span>
+                  </Link>
+                ))}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/**
+ * Mobile tools list — every tool with a direct link, grouped.
+ */
+function MobileToolsSection({ onNavigate }: { onNavigate: () => void }) {
+  const [expanded, setExpanded] = useState(false);
+  return (
+    <div>
+      <button
+        type="button"
+        aria-expanded={expanded}
+        onClick={() => setExpanded((e) => !e)}
+        className="flex min-h-[48px] w-full items-center justify-between rounded-[8px] px-2 text-[16px] font-medium"
+        style={{ color: "var(--pro-fg)" }}
+      >
+        Tools
+        <ChevronDown
+          className={cn("h-4 w-4 transition-transform", expanded && "rotate-180")}
+          style={{ color: "var(--pro-muted)" }}
+        />
+      </button>
+      {expanded && (
+        <div className="pb-2 pl-2">
+          {TOOL_DIRECTORY.map((t) => (
+            <Link
+              key={t.id}
+              href={t.href}
+              onClick={onNavigate}
+              className="flex min-h-[44px] items-center gap-3 rounded-[8px] px-2"
+            >
+              <t.icon
+                className="h-[16px] w-[16px] shrink-0"
+                style={{ color: "var(--pro-accent)" }}
+              />
+              <span
+                className="flex-1 text-[14.5px]"
+                style={{ color: "var(--pro-fg)" }}
+              >
+                {t.name}
+              </span>
+              <span
+                className="text-[13px] font-medium tabular-nums"
+                style={{ color: "var(--pro-muted)" }}
+              >
+                {t.price}
+              </span>
+            </Link>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function VilishNav() {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
@@ -105,7 +257,35 @@ export default function VilishNav() {
 
         {/* desktop links */}
         <nav aria-label="Primary" className="hidden items-center gap-1 md:flex">
-          {LINKS.map((l) => {
+          {LINKS.slice(0, 2).map((l) => {
+            const active =
+              pathname === l.href || pathname.startsWith(l.href + "/");
+            return (
+              <Link
+                key={l.href}
+                href={l.href}
+                aria-current={active ? "page" : undefined}
+                className={cn(
+                  "rounded-[8px] px-3.5 py-2 text-[14.5px] font-medium transition-colors",
+                )}
+                style={{
+                  color: active ? "var(--pro-fg)" : "var(--pro-muted)",
+                }}
+                onMouseEnter={(e) =>
+                  (e.currentTarget.style.color = "var(--pro-fg)")
+                }
+                onMouseLeave={(e) =>
+                  (e.currentTarget.style.color = active
+                    ? "var(--pro-fg)"
+                    : "var(--pro-muted)")
+                }
+              >
+                {l.label}
+              </Link>
+            );
+          })}
+          <ToolsDropdown />
+          {LINKS.slice(2).map((l) => {
             const active =
               pathname === l.href || pathname.startsWith(l.href + "/");
             return (
@@ -172,7 +352,19 @@ export default function VilishNav() {
           }}
         >
           <nav aria-label="Mobile" className="mx-auto max-w-6xl px-4 py-3">
-            {LINKS.map((l) => (
+            {LINKS.slice(0, 2).map((l) => (
+              <Link
+                key={l.href}
+                href={l.href}
+                onClick={() => setOpen(false)}
+                className="flex min-h-[48px] items-center rounded-[8px] px-2 text-[16px] font-medium"
+                style={{ color: "var(--pro-fg)" }}
+              >
+                {l.label}
+              </Link>
+            ))}
+            <MobileToolsSection onNavigate={() => setOpen(false)} />
+            {LINKS.slice(2).map((l) => (
               <Link
                 key={l.href}
                 href={l.href}
