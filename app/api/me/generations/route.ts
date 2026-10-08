@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic';
 
 import { NextResponse, type NextRequest } from 'next/server';
-import { and, desc, eq, gte, inArray, lt } from 'drizzle-orm';
+import { and, desc, eq, gte, inArray, lt, ne } from 'drizzle-orm';
 import { requireSession } from '@/lib/auth';
 import { db } from '@/lib/db/client';
 import { generationJobs, generations } from '@/lib/db/schema';
@@ -57,6 +57,9 @@ export async function GET(req: NextRequest) {
   const conditions = [
     eq(generations.userId, user.id),
     gte(generations.createdAt, cutoff),
+    // Fast-gen (c): speculative pre-generations are non-charging scratch
+    // rows — never shown in the user's gallery.
+    ne(generations.tier, 'speculative'),
     ...(cursorValid ? [lt(generations.createdAt, cursorValid)] : []),
   ];
 

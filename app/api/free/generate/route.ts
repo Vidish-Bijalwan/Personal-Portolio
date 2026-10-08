@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic';
 
 import { NextResponse, type NextRequest } from 'next/server';
-import { eq } from 'drizzle-orm';
+import { and, desc, eq, inArray } from 'drizzle-orm';
 import { db } from '@/lib/db/client';
 import { freeGenerationAttachments, generations } from '@/lib/db/schema';
 import { requireSession } from '@/lib/auth';
@@ -17,6 +17,8 @@ import {
   validateUploads,
 } from '@/lib/vilish/attachments';
 import { MISSING_REFERENCE_MESSAGE, needsReferencePhoto } from '@/lib/person-reference';
+import { queueGenerationTrigger } from '@/lib/fast-gen/trigger';
+import { specIsExpired, speculativeHash } from '@/lib/fast-gen/spec';
 
 /**
  * POST /api/free/generate
@@ -44,6 +46,9 @@ export async function POST(req: NextRequest) {
   let aspectRatio = '1:1';
   let mediaType = 'image';
   let files: File[] = [];
+  // Fast-gen (c): speculative hit token from the composer (JSON path only —
+  // speculative rows are never created for prompts with attachments).
+  let clientSpecHash: string | null = null;
   const contentType = req.headers.get('content-type') ?? '';
   if (contentType.includes('multipart/form-data')) {
     const form = await req.formData().catch(() => null);
@@ -75,6 +80,9 @@ export async function POST(req: NextRequest) {
       aspectRatio = body.aspectRatio;
     }
     mediaType = body?.media_type ?? body?.mediaType ?? 'image';
+    if (typeof body?.specHash === 'string' && body.specHash.length > 0) {
+      clientSpecHash = body.specHash;
+    }
   }
 
   if (!isValidPrompt(prompt)) {
@@ -127,6 +135,68 @@ export async function POST(req: NextRequest) {
       },
       { status: 400 }
     );
+  }
+
+  // Fast-gen (c): speculative hit — the composer pre-rendered this exact
+  // prompt+options while the user was typing (tier='speculative', never
+  // charged, never counted). The server recomputes the hash from the real
+  // inputs and only converts on an exact match; anything else (edited
+  // prompt, expired row, someone else's row) falls through to the normal
+  // flow below. The free-cap check runs BEFORE conversion, so the cap is
+  // charged exactly once, at Generate time — speculative work itself is
+  // always free.
+  if (clientSpecHash) {
+    const expected = speculativeHash({
+      prompt: prompt.trim(),
+      quality,
+      aspectRatio,
+      mediaType: 'image',
+    });
+    if (expected === clientSpecHash) {
+      const specRows = await db
+        .select()
+        .from(generations)
+        .where(
+          and(
+            eq(generations.userId, user.id),
+            eq(generations.tier, 'speculative'),
+            eq(generations.specHash, clientSpecHash),
+            inArray(generations.status, ['queued', 'generating', 'done'])
+          )
+        )
+        .orderBy(desc(generations.createdAt))
+        .limit(1);
+      const spec = specRows[0];
+      if (spec && !specIsExpired(spec.specExpiresAt)) {
+        const used = await countFreeImagesToday(user.id);
+        const admin = isAdminEmail(user.email);
+        if (admin) console.info(`[admin] cap bypass: speculative convert for ${user.id}`);
+        if (!admin && used >= FREE_DAILY_CAP) {
+          return NextResponse.json(
+            {
+              code: 'FREE_CAP_REACHED',
+              error: `Daily free limit reached (${FREE_DAILY_CAP} images/day). Try again tomorrow.`,
+            },
+            { status: 429 }
+          );
+        }
+        await db
+          .update(generations)
+          .set({
+            tier: 'free',
+            specHash: null,
+            specExpiresAt: null,
+            updatedAt: new Date(),
+          })
+          .where(eq(generations.id, spec.id));
+        // If the worker hasn't picked it up yet, wake it immediately.
+        if (spec.status === 'queued') {
+          await queueGenerationTrigger(spec.id);
+        }
+        return NextResponse.json({ id: spec.id, speculative: true });
+      }
+    }
+    // Hash mismatch / expired / missing: fall through to the normal flow.
   }
 
   const used = await countFreeImagesToday(user.id);
@@ -189,6 +259,10 @@ export async function POST(req: NextRequest) {
       );
     }
   }
+
+  // Fast-gen (b): wake the fulfillment worker immediately — the 1-minute
+  // claim poll stays as the fallback if the fast path misses.
+  await queueGenerationTrigger(row.id);
 
   return NextResponse.json({ id: row.id }, { status: 201 });
 }
