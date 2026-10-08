@@ -47,6 +47,14 @@ import {
 } from "@/src/lib/trends/templates";
 import { toolsByGroup } from "@/src/lib/tools/directory";
 import { BLOG_POSTS } from "@/src/lib/blog/index";
+import type { Metadata } from "next";
+
+/* Homepage canonical: the single preferred URL for the root. Title and
+   description are inherited from the root layout; only the canonical
+   needs declaring here so / never emits without one. */
+export const metadata: Metadata = {
+  alternates: { canonical: "/" },
+};
 
 /* The "why pay-per-creation" pillars. Copy must stay digit-free —
    no invented numbers of any kind (homepage redesign gate). */
@@ -111,14 +119,14 @@ const JSON_LD = {
     {
       "@type": "Organization",
       name: "Etch",
-      url: "https://vidish.me",
+      url: "https://tryetch.online",
       description:
         "Pay-per-creation AI studio. Studio-quality AI images and video, priced per creation — no subscriptions.",
     },
     {
       "@type": "WebSite",
       name: "Etch",
-      url: "https://vidish.me",
+      url: "https://tryetch.online",
     },
   ],
 };

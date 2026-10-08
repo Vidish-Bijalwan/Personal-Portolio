@@ -1,7 +1,7 @@
 import { BLOG_POSTS } from "@/lib/blog";
 import { richTextToPlain } from "@/lib/blog/types";
 
-const base = process.env.NEXT_PUBLIC_SITE_URL ?? "https://vidish.me";
+const base = process.env.NEXT_PUBLIC_SITE_URL ?? "https://tryetch.online";
 
 function escapeXml(s: string): string {
   return s
