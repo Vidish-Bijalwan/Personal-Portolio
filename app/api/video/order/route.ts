@@ -11,6 +11,11 @@ import {
   VIDEO_DURATION_MAX_S,
   VIDEO_DURATION_MIN_S,
 } from '@/lib/pricing/engine';
+import {
+  effectivePrompt,
+  parseMuseBody,
+  resolveProjectRef,
+} from '@/lib/muse/wiring';
 
 /**
  * POST /api/video/order
@@ -97,13 +102,35 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  // Madam Muse: optional brief + compiledPrompt + projectId thread through.
+  const { fields: muse, error: museError } = parseMuseBody(body);
+  if (museError) {
+    return NextResponse.json(
+      { code: 'INVALID_MUSE_FIELDS', error: museError },
+      { status: 400 }
+    );
+  }
+  const projectRef = await resolveProjectRef(db, muse.projectId, user.id);
+  if (!projectRef.ok) {
+    return NextResponse.json(
+      { code: projectRef.code, error: projectRef.error },
+      { status: projectRef.status }
+    );
+  }
+
   // Cinema-grade foundation: the operator prompt is the user's description
   // plus additive prompt-bank craft (dedup-safe, user's words lead
   // verbatim — matching the /create image path through interpretCreative).
-  const enhancedVideoPrompt = enhancePrompt(prompt.trim(), {
-    media: 'video',
-    maxLength: PROMPT_MAX,
-  }).enhanced;
+  // Madam Muse: when the composer supplies a compiled prompt, it replaces
+  // the bank-enhanced one — the worker receives the smarter text; the
+  // worker/fulfillment path itself is untouched.
+  const enhancedVideoPrompt = effectivePrompt(
+    muse.compiledPrompt,
+    enhancePrompt(prompt.trim(), {
+      media: 'video',
+      maxLength: PROMPT_MAX,
+    }).enhanced
+  );
 
   // Queue immediately — no order is minted here. The unlock order comes
   // later from POST /api/gen/[id]/unlock when the user clicks the CTA.
@@ -120,6 +147,8 @@ export async function POST(req: NextRequest) {
       mime: 'video/mp4',
       unlocked: false,
       durationSeconds,
+      brief: muse.brief as unknown as Record<string, unknown> | null,
+      projectId: projectRef.projectId,
     })
     .returning({ id: generations.id });
 

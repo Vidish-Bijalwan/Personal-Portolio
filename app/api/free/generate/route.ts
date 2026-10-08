@@ -16,6 +16,13 @@ import {
   canonicalMimeFor,
   validateUploads,
 } from '@/lib/vilish/attachments';
+import { verifyUploadContents } from '@/lib/muse/uploads';
+import {
+  effectivePrompt,
+  parseMuseBody,
+  parseMuseForm,
+  resolveProjectRef,
+} from '@/lib/muse/wiring';
 import { MISSING_REFERENCE_MESSAGE, needsReferencePhoto } from '@/lib/person-reference';
 import { queueGenerationTrigger } from '@/lib/fast-gen/trigger';
 import { specIsExpired, speculativeHash } from '@/lib/fast-gen/spec';
@@ -49,6 +56,8 @@ export async function POST(req: NextRequest) {
   // Fast-gen (c): speculative hit token from the composer (JSON path only —
   // speculative rows are never created for prompts with attachments).
   let clientSpecHash: string | null = null;
+  // Madam Muse: optional brief + compiledPrompt + projectId thread through.
+  let museBody: ReturnType<typeof parseMuseBody> | null = null;
   const contentType = req.headers.get('content-type') ?? '';
   if (contentType.includes('multipart/form-data')) {
     const form = await req.formData().catch(() => null);
@@ -70,6 +79,7 @@ export async function POST(req: NextRequest) {
     files = form
       .getAll('files')
       .filter((v): v is File => v instanceof File && v.size > 0);
+    museBody = parseMuseForm(form);
   } else {
     const body = await req.json().catch(() => null);
     prompt = body?.prompt;
@@ -83,7 +93,16 @@ export async function POST(req: NextRequest) {
     if (typeof body?.specHash === 'string' && body.specHash.length > 0) {
       clientSpecHash = body.specHash;
     }
+    museBody = parseMuseBody(body);
   }
+
+  if (museBody?.error) {
+    return NextResponse.json(
+      { code: 'INVALID_MUSE_FIELDS', error: museBody.error },
+      { status: 400 }
+    );
+  }
+  const muse = museBody?.fields ?? { brief: null, compiledPrompt: null, projectId: null };
 
   if (!isValidPrompt(prompt)) {
     return NextResponse.json(
@@ -122,6 +141,16 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
+    // Madam Muse: magic-byte sniffing — reject files whose bytes don't
+    // match their claimed type (e.g. an .exe renamed to .png). Additive:
+    // never widens what the extension gate accepts.
+    const contentError = await verifyUploadContents(files);
+    if (contentError) {
+      return NextResponse.json(
+        { code: 'INVALID_ATTACHMENTS', error: contentError },
+        { status: 400 }
+      );
+    }
   }
 
   // Pre-generation reference-photo check: a prompt that asks for a specific
@@ -137,6 +166,14 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  // The effective prompt: the compiled Madam Muse prompt when the
+  // composer supplied one — this is the only thing about the worker's
+  // input that changes. The speculative hash is computed over the same
+  // effective prompt, so the UI must hash the compiled prompt too when
+  // it uses one (hash over the raw prompt simply misses and falls
+  // through to the normal flow — safe, never wrong).
+  const finalPrompt = effectivePrompt(muse.compiledPrompt, (prompt as string).trim());
+
   // Fast-gen (c): speculative hit — the composer pre-rendered this exact
   // prompt+options while the user was typing (tier='speculative', never
   // charged, never counted). The server recomputes the hash from the real
@@ -147,7 +184,7 @@ export async function POST(req: NextRequest) {
   // always free.
   if (clientSpecHash) {
     const expected = speculativeHash({
-      prompt: prompt.trim(),
+      prompt: finalPrompt,
       quality,
       aspectRatio,
       mediaType: 'image',
@@ -180,12 +217,25 @@ export async function POST(req: NextRequest) {
             { status: 429 }
           );
         }
+        const museProjectRef = await resolveProjectRef(db, muse.projectId, user.id);
+        if (!museProjectRef.ok) {
+          return NextResponse.json(
+            { code: museProjectRef.code, error: museProjectRef.error },
+            { status: museProjectRef.status }
+          );
+        }
+        const museProjectId = museProjectRef.projectId;
         await db
           .update(generations)
           .set({
             tier: 'free',
             specHash: null,
             specExpiresAt: null,
+            // Madam Muse: the converted row carries the effective prompt
+            // (compiled when supplied), brief, and project link.
+            prompt: finalPrompt,
+            brief: muse.brief as unknown as Record<string, unknown> | null,
+            projectId: museProjectId,
             updatedAt: new Date(),
           })
           .where(eq(generations.id, spec.id));
@@ -214,16 +264,27 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  // Madam Muse: verify/claim the project link before queueing.
+  const projectRef = await resolveProjectRef(db, muse.projectId, user.id);
+  if (!projectRef.ok) {
+    return NextResponse.json(
+      { code: projectRef.code, error: projectRef.error },
+      { status: projectRef.status }
+    );
+  }
+
   const [row] = await db
     .insert(generations)
     .values({
       userId: user.id,
-      prompt: prompt.trim(),
+      prompt: finalPrompt,
       quality,
       aspectRatio,
       mediaType: 'image',
       tier: 'free',
       status: 'queued',
+      brief: muse.brief as unknown as Record<string, unknown> | null,
+      projectId: projectRef.projectId,
     })
     .returning({ id: generations.id });
 

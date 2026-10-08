@@ -35,7 +35,7 @@ describe('db roundtrip', () => {
 
     const [project] = await db
       .insert(projects)
-      .values({ userId: user.id, title: 'Test project' })
+      .values({ userId: user.id, name: 'Test project' })
       .returning();
 
     const [job] = await db

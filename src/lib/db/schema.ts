@@ -87,10 +87,29 @@ export const verificationTokens = pgTable(
 
 /* ---------------- core product tables ---------------- */
 
+/**
+ * Madam Muse project persistence (backend workstream). A project holds one
+ * CreativeBrief plus its revision history: `revisions` increments every
+ * time a result is delivered via PATCH /api/projects/[id] (`lastResult`),
+ * and `lastResult` carries the latest delivered asset URLs + prompt used.
+ * `brief` is the contract §1 CreativeBrief JSON (see src/lib/muse/projects.ts
+ * for the local shape copy — reconcile with src/lib/muse/brief.ts at
+ * integration; the compiler workstream owns that file).
+ */
 export const projects = pgTable('projects', {
   id: id(),
   userId: text('user_id').references(() => users.id, { onDelete: 'cascade' }),
-  title: text('title').notNull().default('Untitled project'),
+  name: text('name').notNull().default('Untitled project'),
+  /** Madam Muse: the full CreativeBrief JSON for this project. */
+  brief: jsonb('brief'),
+  /** Madam Muse: primary asset meta ({ refId } | AssetMeta), nullable. */
+  primaryAsset: jsonb('primary_asset'),
+  /** Madam Muse: reference attachment ids (JSON array of strings). */
+  referenceIds: jsonb('reference_ids'),
+  /** Madam Muse: incremented each time a result is delivered. */
+  revisions: integer('revisions').notNull().default(0),
+  /** Madam Muse: last delivered result { imageUrl?, videoUrl?, promptUsed }. */
+  lastResult: jsonb('last_result'),
   createdAt: createdAt(),
   updatedAt: updatedAt(),
 });
@@ -151,6 +170,14 @@ export const generationJobs = pgTable('generation_jobs', {
    *  Written at quote time from the composer service selector; the operator
    *  uses it to know what was sold (4-pack = 4 takes, product-photo = studio brief). */
   product: text('product').notNull().default('single-image'),
+  /** Madam Muse: the full CreativeBrief JSON, attached at quote time
+   *  (POST /api/generation/quote). Copied onto the generations queue row at
+   *  /api/generation/start so the operator/watcher can see it. */
+  brief: jsonb('brief'),
+  /** Madam Muse: compiled prompt from compilePrompt() (contract §3).
+   *  /api/generation/start queues the generations row with this prompt when
+   *  present — the only thing about the worker's input that changes. */
+  compiledPrompt: text('compiled_prompt'),
   /** Internal operator notes; COPIED to child jobs on remake/edit. */
   operatorNotes: text('operator_notes'),
   /** Customer-visible clarification thread. */
@@ -334,6 +361,14 @@ export const generations = pgTable('generations', {
    *  still-queued speculative rows so abandoned typing never clogs the
    *  worker. Null for non-speculative rows. */
   specExpiresAt: timestamp('spec_expires_at', { withTimezone: true }),
+  /** Madam Muse: the full CreativeBrief JSON, copied from the job at queue
+   *  time (paid image) or sent with the request (free image / paid video).
+   *  The operator/watcher reads it from the row; the worker path is untouched. */
+  brief: jsonb('brief'),
+  /** Madam Muse: project this generation belongs to (set null on delete). */
+  projectId: uuid('project_id').references(() => projects.id, {
+    onDelete: 'set null',
+  }),
   createdAt: createdAt(),
   updatedAt: updatedAt(),
   deliveredAt: timestamp('delivered_at', { withTimezone: true }),

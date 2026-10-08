@@ -9,6 +9,11 @@ import {
   canonicalMimeFor,
   validateUploads,
 } from '@/lib/vilish/attachments';
+import { verifyUploadContents } from '@/lib/muse/uploads';
+import {
+  effectivePrompt,
+  resolveProjectRef,
+} from '@/lib/muse/wiring';
 import { getFulfillmentConfig } from '@/lib/fulfillment/config';
 import { isAdminOverride } from '@/lib/fulfillment/guards';
 import { MISSING_REFERENCE_MESSAGE, needsReferencePhoto } from '@/lib/person-reference';
@@ -105,6 +110,16 @@ export async function POST(req: NextRequest) {
     if (!check.ok) {
       return NextResponse.json(
         { code: 'INVALID_ATTACHMENTS', error: check.message },
+        { status: 400 }
+      );
+    }
+    // Madam Muse: magic-byte sniffing — reject files whose bytes don't
+    // match their claimed type (e.g. an .exe renamed to .png). Additive:
+    // never widens what the extension gate accepts.
+    const contentError = await verifyUploadContents(files);
+    if (contentError) {
+      return NextResponse.json(
+        { code: 'INVALID_ATTACHMENTS', error: contentError },
         { status: 400 }
       );
     }
@@ -214,11 +229,25 @@ export async function POST(req: NextRequest) {
   // later via POST /api/generation/unlock. No payment order is created.
   // The job stays QUOTED as the pricing record (customerPrice/product were
   // set server-side at quote time).
+  //
+  // Madam Muse wiring: the project link stamped at quote time is verified
+  // against this user here (unowned projects are claimed; another user's
+  // project is 403). The generations row carries the compiled prompt when
+  // the composer supplied one — that is the ONLY thing about the worker's
+  // input that changes; the worker/fulfillment path is untouched.
+  const projectRef = await resolveProjectRef(db, job.projectId, user.id);
+  if (!projectRef.ok) {
+    return NextResponse.json(
+      { code: projectRef.code, error: projectRef.error },
+      { status: projectRef.status }
+    );
+  }
+
   const [genRow] = await db
     .insert(schema.generations)
     .values({
       userId: user.id,
-      prompt: job.enhancedPrompt ?? job.prompt,
+      prompt: effectivePrompt(job.compiledPrompt, job.enhancedPrompt ?? job.prompt),
       quality: job.quality,
       aspectRatio: job.aspectRatio,
       mediaType: 'image',
@@ -227,6 +256,8 @@ export async function POST(req: NextRequest) {
       mime: 'image/jpeg',
       jobId: job.id,
       unlocked: false,
+      brief: job.brief,
+      projectId: projectRef.projectId,
     })
     .returning({ id: schema.generations.id });
 

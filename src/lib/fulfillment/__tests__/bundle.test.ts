@@ -66,7 +66,7 @@ describe.runIf(HAS_ROUTE)('fulfillment bundle ZIP — contract §5', () => {
       .returning();
     const [project] = await db
       .insert(schema.projects)
-      .values({ userId: user.id, title: 'Bundle project' })
+      .values({ userId: user.id, name: 'Bundle project' })
       .returning();
 
     const [job] = await db
