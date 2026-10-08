@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import type { PromptInsight } from "@/src/lib/vilish/prompt-insight";
 import {
   examplePrice,
+  exampleThumbSrc,
   isExampleItem,
   type ExampleItem,
 } from "@/components/vilish/examples";
@@ -172,8 +173,10 @@ export function MoreFromGrill() {
             )}
           >
             <div className="aspect-[4/3] w-full overflow-hidden bg-black">
+              {/* Video entries carry an .mp4 src, which never decodes in an
+                  image element — the poster frame is the render-safe thumb. */}
               <img
-                src={item.src}
+                src={exampleThumbSrc(item)}
                 alt={item.alt ?? `${item.prompt.slice(0, 80)} — AI-generated example`}
                 loading="lazy"
                 className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03] motion-reduce:transition-none motion-reduce:group-hover:scale-100"

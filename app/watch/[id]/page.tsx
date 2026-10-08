@@ -18,6 +18,7 @@ import { cssAspectRatio } from "@/src/lib/media/aspect";
 import VilishNav from "@/components/vilish/nav";
 import VilishFooter from "@/components/vilish/footer";
 import BurgerGrill, { burgerFrameForStage } from "@/components/vilish/burger-grill";
+import ImageDevelopMotion from "@/components/vilish/image-develop-motion";
 import { displayStage } from "@/src/lib/vilish/stage-copy";
 import WaitingPanel from "@/components/vilish/waiting-panel";
 import { REMIX_PRESETS } from "@/components/vilish/waiting-panel";
@@ -542,36 +543,57 @@ export default function WatchRoomPage() {
                     </p>
                   )}
 
-                  <div className="mt-6 w-full max-w-[420px]">
-                    <BurgerGrill frame={burgerFrameForStage(data?.stage)} />
-                  </div>
-
-                  <p className="font-display mt-4 text-[16px] font-medium text-[#F5F5F3]">
-                    {stageText}
-                  </p>
-                  <p key={captionIdx} className="fg-caption mt-1.5 h-6 text-[13px] text-white/45">
-                    {caption}
-                  </p>
-
-                  {/* real progress: reflects the pipeline stage, not a fixed width */}
-                  <div
-                    className="mt-6 w-full max-w-[320px]"
-                    role="progressbar"
-                    aria-label="Generation progress"
-                    aria-valuenow={progress}
-                    aria-valuemin={0}
-                    aria-valuemax={100}
-                  >
-                    <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/[0.08]">
-                      <div
-                        className="h-full rounded-full bg-[var(--pro-accent)] transition-[width] duration-700 ease-out motion-reduce:transition-none"
-                        style={{ width: `${progress}%` }}
+                  {isVideo ? (
+                    <div className="mt-6 w-full max-w-[420px]">
+                      <BurgerGrill frame={burgerFrameForStage(data?.stage)} />
+                    </div>
+                  ) : (
+                    /* image waiting room: the darkroom motion experience —
+                       live web animation synced to real backend progress. */
+                    <div className="mt-6 w-full">
+                      <ImageDevelopMotion
+                        progress={progress}
+                        status={data.status}
+                        stageText={stageText}
+                        caption={caption}
+                        kicker="Etch darkroom · AI-generated"
                       />
                     </div>
-                    <p className="mt-2 text-[12px] font-medium tabular-nums text-white/45">
-                      {progress}% · {stageText}
+                  )}
+
+                  {isVideo && (
+                    <p className="font-display mt-4 text-[16px] font-medium text-[#F5F5F3]">
+                      {stageText}
                     </p>
-                  </div>
+                  )}
+                  {isVideo && (
+                    <p key={captionIdx} className="fg-caption mt-1.5 h-6 text-[13px] text-white/45">
+                      {caption}
+                    </p>
+                  )}
+
+                  {/* real progress: reflects the pipeline stage, not a fixed width.
+                      Images carry their own progress rail inside ImageDevelopMotion. */}
+                  {isVideo && (
+                    <div
+                      className="mt-6 w-full max-w-[320px]"
+                      role="progressbar"
+                      aria-label="Generation progress"
+                      aria-valuenow={progress}
+                      aria-valuemin={0}
+                      aria-valuemax={100}
+                    >
+                      <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/[0.08]">
+                        <div
+                          className="h-full rounded-full bg-[var(--pro-accent)] transition-[width] duration-700 ease-out motion-reduce:transition-none"
+                          style={{ width: `${progress}%` }}
+                        />
+                      </div>
+                      <p className="mt-2 text-[12px] font-medium tabular-nums text-white/45">
+                        {progress}% · {stageText}
+                      </p>
+                    </div>
+                  )}
 
                   {/* honest transparency: elapsed time + queue position */}
                   {data.created_at && (

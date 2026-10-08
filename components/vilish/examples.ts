@@ -52,26 +52,45 @@ export function exampleHref(item: Pick<ExampleItem, "service">): string {
 }
 
 /**
+ * Render-safe thumbnail source for cards that can only show images
+ * (the "Keep creating" rail, social previews).
+ *
+ * Root cause of the black/broken rail thumbnails: category "video" items
+ * carry an .mp4 `src`, and an <img> pointing at a video file never
+ * decodes — the card renders black. Every video entry ships a real
+ * `poster` frame; use it.
+ */
+export function exampleThumbSrc(item: Pick<ExampleItem, "category" | "src" | "poster">): string {
+  if (item.category === "video") return item.poster ?? item.src;
+  return item.src;
+}
+
+/**
  * Runtime guard for manifest.json entries: every example must resolve to a
  * real catalog product. Used by app/examples/page.tsx when loading the
  * manifest — items with unknown/missing services are dropped, never rendered
  * with a guessed price.
+ *
+ * Video entries MUST carry a poster: card grids render <img>, and an .mp4
+ * src never decodes there (black/broken thumbnails). A video entry without
+ * a poster is dropped rather than rendered broken.
  */
 export function isExampleItem(data: unknown): data is ExampleItem {
   if (!data || typeof data !== "object") return false;
   const d = data as Record<string, unknown>;
+  const category = d.category;
+  const validCategory =
+    category === "image" || category === "video" || category === "edit" || category === "ad";
   return (
     typeof d.src === "string" &&
     typeof d.prompt === "string" &&
     typeof d.service === "string" &&
     VALID_SERVICES.has(d.service) &&
     typeof d.model === "string" &&
-    (d.category === "image" ||
-      d.category === "video" ||
-      d.category === "edit" ||
-      d.category === "ad") &&
+    validCategory &&
     (d.alt === undefined || typeof d.alt === "string") &&
-    (d.poster === undefined || typeof d.poster === "string")
+    (d.poster === undefined || typeof d.poster === "string") &&
+    (category !== "video" || typeof d.poster === "string")
   );
 }
 
