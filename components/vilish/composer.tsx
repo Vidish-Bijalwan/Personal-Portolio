@@ -81,7 +81,7 @@ interface QuoteResult {
   expiresAt: string;
 }
 
-type MediaMode = "image" | "video";
+type MediaMode = "image" | "video" | "edit";
 type BillingMode = "free" | "paid";
 
 interface ComposerProps {
@@ -143,9 +143,6 @@ export default function Composer({ variant = "hero", className, initialMedia = "
   // Clip length for paid video clips: 5..60s. The unlock price scales with
   // it (engine videoClipPricePaise); the API validates the same range.
   const [videoDuration, setVideoDuration] = useState(VIDEO_DURATION_MIN_S);
-  // Inline Video Studio: renders the edit-video tools here instead of
-  // navigating away.
-  const [showVideoStudio, setShowVideoStudio] = useState(false);
 
   // reference attachments (stored with the order, shown to the operator)
   const [files, setFiles] = useState<File[]>([]);
@@ -656,6 +653,12 @@ export default function Composer({ variant = "hero", className, initialMedia = "
             [
               { id: "image", label: "Image" },
               { id: "video", label: "Video clip" },
+              {
+                id: "edit",
+                label: "Edit video",
+                hint: `Voice-over & TTS, auto-captioning, trim + text overlay — ${formatINR(priceOf("video-studio"))} per finished video`,
+                suffix: formatINR(priceOf("video-studio")),
+              },
             ] as const
           ).map((m) => (
             <button
@@ -663,41 +666,30 @@ export default function Composer({ variant = "hero", className, initialMedia = "
               type="button"
               onClick={() => selectMedia(m.id)}
               aria-pressed={mediaMode === m.id}
+              title={"hint" in m ? m.hint : undefined}
               className={cn(
-                "min-h-[44px] rounded-[9px] px-4 py-2 text-[13px] font-semibold transition-colors",
+                "inline-flex min-h-[44px] items-center gap-1.5 rounded-[9px] px-4 py-2 text-[13px] font-semibold transition-colors",
                 mediaMode === m.id
                   ? "bg-[var(--pro-btn)] text-[var(--pro-btn-ink)]"
                   : "text-[var(--pro-muted)] hover:text-[var(--pro-fg)]",
               )}
             >
+              {m.id === "edit" && <Clapperboard className="h-3.5 w-3.5" aria-hidden />}
               {m.label}
+              {"suffix" in m && (
+                <span
+                  className={cn(
+                    "text-[11px] font-medium",
+                    mediaMode === m.id ? "opacity-80" : "text-[var(--pro-faint)]",
+                  )}
+                >
+                  {m.suffix}
+                </span>
+              )}
             </button>
           ))}
         </div>
-        <button
-          type="button"
-          onClick={() => setShowVideoStudio((v) => !v)}
-          aria-expanded={showVideoStudio}
-          title={`Voice-over & TTS, auto-captioning, trim + text overlay — ${formatINR(priceOf("video-studio"))} per finished video`}
-          className="inline-flex min-h-[44px] items-center gap-1.5 rounded-[12px] border border-dashed border-[var(--pro-border)] px-4 py-2 text-[13px] font-semibold text-[var(--pro-muted)] transition-colors hover:border-[var(--pro-accent)]/50 hover:text-[var(--pro-fg)]"
-        >
-          <Clapperboard className="h-3.5 w-3.5" aria-hidden />
-          Edit video
-          <span className="text-[11px] font-medium text-[var(--pro-faint)]">{formatINR(priceOf("video-studio"))}</span>
-        </button>
-        {showVideoStudio && (
-          <div className="mt-4 rounded-[16px] border border-[var(--pro-border)] bg-[var(--pro-bg-elev)] p-4 sm:p-6">
-            <Suspense
-              fallback={
-                <p className="py-8 text-center text-[13px] text-[var(--pro-muted)]">
-                  Loading Video Studio…
-                </p>
-              }
-            >
-              <VideoStudioPanel chrome={false} />
-            </Suspense>
-          </div>
-        )}
+        
         {mediaMode === "image" && (
           <div
             role="group"
@@ -737,94 +729,29 @@ export default function Composer({ variant = "hero", className, initialMedia = "
           </div>
         )}
       </div>
+      {mediaMode === "edit" ? (
+        <div className="rounded-[16px] border border-[var(--pro-border)] bg-[var(--pro-bg-elev)] p-4 sm:p-6">
+          <Suspense
+            fallback={
+              <p className="py-8 text-center text-[13px] text-[var(--pro-muted)]">
+                Loading Video Studio…
+              </p>
+            }
+          >
+            <VideoStudioPanel chrome={false} />
+          </Suspense>
+        </div>
+      ) : (
+        <div className="grid gap-x-8 gap-y-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+          <div className="min-w-0">
       {mediaMode === "image" && billingMode === "free" && (
         <p className="mb-4 text-[12px] leading-5 text-[var(--pro-faint)]">
           Free previews carry a Etch watermark. Unlock the clean HD file
           for {formatINR(priceOf("single-image"))}.
         </p>
       )}
-      {/* service selector: which paid product to create — prices live from the catalog */}
-      {mediaMode === "image" && billingMode === "paid" && (
-        <div className="mb-4">
-          <div
-            role="group"
-            aria-label="Choose a service"
-            className="grid grid-cols-1 gap-2 min-[420px]:grid-cols-3"
-          >
-            {COMPOSER_SERVICES.map((s) => {
-              const active = service === s.id;
-              return (
-                <button
-                  key={s.id}
-                  type="button"
-                  onClick={() => selectService(s.id)}
-                  aria-pressed={active}
-                  title={s.blurb}
-                  className={cn(
-                    "rounded-[12px] border px-3 py-2.5 text-left transition-colors min-h-[44px]",
-                    active
-                      ? "border-[var(--pro-accent)]/60 bg-[var(--pro-accent)]/[0.07]"
-                      : "border-[var(--pro-border)] bg-[var(--pro-bg-elev)] hover:border-[var(--pro-border)]",
-                  )}
-                >
-                  <span className={cn(
-                    "block text-[13px] font-semibold",
-                    active ? "text-[var(--pro-fg)]" : "text-[var(--pro-fg)]",
-                  )}>
-                    {s.label}
-                  </span>
-                  <span className={cn(
-                    "mt-0.5 block text-[13px] font-semibold tabular-nums",
-                    active ? "text-[var(--pro-accent)]" : "text-[var(--pro-muted)]",
-                  )}>
-                    {formatINR(servicePricePaise(s.id))}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-          <p className="mt-2 text-[12px] leading-5 text-[var(--pro-faint)]">
-            {COMPOSER_SERVICES.find((s) => s.id === service)?.blurb}
-          </p>
-        </div>
-      )}
-      {mediaMode === "video" && (
-        <div className="mb-4">
-          <div className="flex items-center justify-between gap-3">
-            <label
-              htmlFor="video-duration"
-              className="text-[13px] font-semibold text-[var(--pro-fg)]"
-            >
-              Clip length
-            </label>
-            <p className="text-[13px] tabular-nums text-[var(--pro-muted)]">
-              <span className="font-semibold text-[var(--pro-fg)]">{videoDuration}s</span>
-              {" · "}
-              {formatINR(videoClipPricePaise(videoDuration))}
-            </p>
-          </div>
-          <input
-            id="video-duration"
-            type="range"
-            min={VIDEO_DURATION_MIN_S}
-            max={VIDEO_DURATION_MAX_S}
-            step={1}
-            value={videoDuration}
-            onChange={(e) => setVideoDuration(Number(e.target.value))}
-            className="mt-2 w-full accent-[var(--pro-accent)]"
-            aria-valuetext={`${videoDuration} seconds, ${formatINR(videoClipPricePaise(videoDuration))}`}
-          />
-          <div className="mt-1 flex justify-between text-[11px] tabular-nums text-[var(--pro-faint)]">
-            <span>5s · {formatINR(priceOf("clip-5s"))}</span>
-            <span>60s · {formatINR(videoClipPricePaise(VIDEO_DURATION_MAX_S))}</span>
-          </div>
-          <p className="mt-2 text-[12px] leading-5 text-[var(--pro-faint)]">
-            {formatINR(priceOf("clip-5s"))} per 5-second block (or part of one) —
-            fulfilled by an operator with human QC. A watermarked preview shows
-            until you unlock the clean HD file.
-          </p>
-        </div>
-      )}
+
+
       {initialTemplate && (
         <div className="mb-4 flex items-center gap-2.5 rounded-[10px] border border-[var(--pro-accent)]/25 bg-[var(--pro-accent)]/[0.06] px-3.5 py-2.5">
           <Sparkles className="h-4 w-4 shrink-0 text-[var(--pro-accent)]" />
@@ -959,7 +886,89 @@ export default function Composer({ variant = "hero", className, initialMedia = "
         </div>
       )}
 
-      {/* controls row */}
+          </div>
+          <div className="min-w-0">
+      {/* service selector: which paid product to create — prices live from the catalog */}
+      {mediaMode === "image" && billingMode === "paid" && (
+        <div className="mb-4">
+          <div
+            role="group"
+            aria-label="Choose a service"
+            className="grid grid-cols-1 gap-2"
+          >
+            {COMPOSER_SERVICES.map((s) => {
+              const active = service === s.id;
+              return (
+                <button
+                  key={s.id}
+                  type="button"
+                  onClick={() => selectService(s.id)}
+                  aria-pressed={active}
+                  title={s.blurb}
+                  className={cn(
+                    "rounded-[12px] border px-3 py-2.5 text-left transition-colors min-h-[44px]",
+                    active
+                      ? "border-[var(--pro-accent)]/60 bg-[var(--pro-accent)]/[0.07]"
+                      : "border-[var(--pro-border)] bg-[var(--pro-bg-elev)] hover:border-[var(--pro-border)]",
+                  )}
+                >
+                  <span className={cn(
+                    "block text-[13px] font-semibold",
+                    active ? "text-[var(--pro-fg)]" : "text-[var(--pro-fg)]",
+                  )}>
+                    {s.label}
+                  </span>
+                  <span className={cn(
+                    "mt-0.5 block text-[13px] font-semibold tabular-nums",
+                    active ? "text-[var(--pro-accent)]" : "text-[var(--pro-muted)]",
+                  )}>
+                    {formatINR(servicePricePaise(s.id))}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+          <p className="mt-2 text-[12px] leading-5 text-[var(--pro-faint)]">
+            {COMPOSER_SERVICES.find((s) => s.id === service)?.blurb}
+          </p>
+        </div>
+      )}      {mediaMode === "video" && (
+        <div className="mb-4">
+          <div className="flex items-center justify-between gap-3">
+            <label
+              htmlFor="video-duration"
+              className="text-[13px] font-semibold text-[var(--pro-fg)]"
+            >
+              Clip length
+            </label>
+            <p className="text-[13px] tabular-nums text-[var(--pro-muted)]">
+              <span className="font-semibold text-[var(--pro-fg)]">{videoDuration}s</span>
+              {" · "}
+              {formatINR(videoClipPricePaise(videoDuration))}
+            </p>
+          </div>
+          <input
+            id="video-duration"
+            type="range"
+            min={VIDEO_DURATION_MIN_S}
+            max={VIDEO_DURATION_MAX_S}
+            step={1}
+            value={videoDuration}
+            onChange={(e) => setVideoDuration(Number(e.target.value))}
+            className="mt-2 w-full accent-[var(--pro-accent)]"
+            aria-valuetext={`${videoDuration} seconds, ${formatINR(videoClipPricePaise(videoDuration))}`}
+          />
+          <div className="mt-1 flex justify-between text-[11px] tabular-nums text-[var(--pro-faint)]">
+            <span>5s · {formatINR(priceOf("clip-5s"))}</span>
+            <span>60s · {formatINR(videoClipPricePaise(VIDEO_DURATION_MAX_S))}</span>
+          </div>
+          <p className="mt-2 text-[12px] leading-5 text-[var(--pro-faint)]">
+            {formatINR(priceOf("clip-5s"))} per 5-second block (or part of one) —
+            fulfilled by an operator with human QC. A watermarked preview shows
+            until you unlock the clean HD file.
+          </p>
+        </div>
+      )}      {/* controls row */}
       <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-3">
         {/* quality segmented control — image modes only */}
         {mediaMode === "image" && (
@@ -1010,7 +1019,7 @@ export default function Composer({ variant = "hero", className, initialMedia = "
       </div>
 
       {/* price + generate row */}
-      <div className="mt-5 flex items-center justify-between gap-4 border-t border-[var(--pro-border)] pt-4">
+      <div className="mt-5 flex flex-col gap-3 border-t border-[var(--pro-border)] pt-4">
         <div className="min-w-0">
           {mediaMode === "video" && (
             <p className="text-[13px] text-[var(--pro-faint)] tabular-nums">
@@ -1063,7 +1072,7 @@ export default function Composer({ variant = "hero", className, initialMedia = "
             onClick={handleVideoGenerate}
             disabled={!canVideoGenerate}
             className={cn(
-              "inline-flex shrink-0 items-center gap-2 rounded-[10px] bg-[var(--pro-btn)] px-5 py-2.5",
+              "inline-flex w-full items-center justify-center gap-2 rounded-[10px] bg-[var(--pro-btn)] px-5 py-2.5",
               "text-[14px] font-semibold text-[var(--pro-btn-ink)] transition-opacity",
               canVideoGenerate ? "hover:opacity-95 active:opacity-90" : "cursor-not-allowed opacity-40",
             )}
@@ -1078,7 +1087,7 @@ export default function Composer({ variant = "hero", className, initialMedia = "
             onClick={handleFreeGenerate}
             disabled={!canFreeGenerate}
             className={cn(
-              "inline-flex shrink-0 items-center gap-2 rounded-[10px] bg-[var(--pro-btn)] px-5 py-2.5",
+              "inline-flex w-full items-center justify-center gap-2 rounded-[10px] bg-[var(--pro-btn)] px-5 py-2.5",
               "text-[14px] font-semibold text-[var(--pro-btn-ink)] transition-opacity",
               canFreeGenerate ? "hover:opacity-95 active:opacity-90" : "cursor-not-allowed opacity-40",
             )}
@@ -1093,7 +1102,7 @@ export default function Composer({ variant = "hero", className, initialMedia = "
             onClick={handleGenerate}
             disabled={!canGenerate}
             className={cn(
-              "inline-flex shrink-0 items-center gap-2 rounded-[10px] bg-[var(--pro-btn)] px-5 py-2.5",
+              "inline-flex w-full items-center justify-center gap-2 rounded-[10px] bg-[var(--pro-btn)] px-5 py-2.5",
               "text-[14px] font-semibold text-[var(--pro-btn-ink)] transition-opacity",
               canGenerate ? "hover:opacity-95 active:opacity-90" : "cursor-not-allowed opacity-40",
             )}
@@ -1104,6 +1113,9 @@ export default function Composer({ variant = "hero", className, initialMedia = "
           </button>
         )}
       </div>
+          </div>
+        </div>
+      )}
       {uploadProgress !== null && (
         <div className="mt-4" role="status" aria-label="Uploading reference files">
           <div className="flex items-center justify-between text-[12px] text-[var(--pro-muted)] tabular-nums">
