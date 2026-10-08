@@ -16,11 +16,36 @@ import {
 import { priceOf } from "@/lib/pricing/catalog";
 import { formatINR } from "@/lib/vilish/types";
 
+const SITE_BASE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://tryetch.online";
+
+const TOOLS_DESCRIPTION =
+  "The complete Etch tool directory: AI image generation, product photos, 5s video clips, and eight Video Studio utilities. Real tools, exact prices, no dead buttons.";
+
 export const metadata: Metadata = {
   title: "Tools — every working tool | Etch",
-  description:
-    "The complete Etch tool directory: AI image generation, product photos, 5s video clips, and eight Video Studio utilities. Real tools, exact prices, no dead buttons.",
+  description: TOOLS_DESCRIPTION,
   alternates: { canonical: "/tools" },
+  openGraph: {
+    title: "Tools — every working tool | Etch",
+    description: TOOLS_DESCRIPTION,
+    url: `${SITE_BASE}/tools`,
+    siteName: "Etch",
+    type: "website",
+    images: [
+      {
+        url: `${SITE_BASE}/og-image.png`,
+        width: 1200,
+        height: 630,
+        alt: "Etch — one creation, one price. AI images and video tools with no subscription.",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Tools — every working tool | Etch",
+    description: TOOLS_DESCRIPTION,
+    images: [`${SITE_BASE}/og-image.png`],
+  },
 };
 
 const GROUPS: { id: ToolGroup; kicker: string; title: string; subtitle: string }[] = [
@@ -164,6 +189,18 @@ export default function ToolsPage() {
                 >
                   {group.subtitle}
                 </p>
+                {group.id === "create" && (
+                  <p className="mt-3">
+                    <Link
+                      href="/create#how-it-works"
+                      className="inline-flex items-center gap-1.5 text-[13px] font-semibold underline underline-offset-4"
+                      style={{ color: "var(--pro-accent)" }}
+                    >
+                      How the creation flow works{" "}
+                      <ArrowRight className="h-3.5 w-3.5" strokeWidth={2} />
+                    </Link>
+                  </p>
+                )}
               </Reveal>
               <Stagger className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 {toolsByGroup(group.id).map((tool) => (

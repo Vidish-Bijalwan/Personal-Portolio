@@ -581,6 +581,18 @@ export default function VideoStudioPanel({
               </>
             )}
           </p>
+          {chrome && (
+            <p className="mt-2.5 text-[13px] leading-6 text-white/45">
+              Creating from scratch instead?{" "}
+              <Link
+                href="/create#how-it-works"
+                className="font-medium text-white/70 underline underline-offset-4 transition-colors hover:text-white"
+              >
+                See how the creation flow works
+              </Link>
+              .
+            </p>
+          )}
         </Reveal>
 
         {step === 1 ? (
