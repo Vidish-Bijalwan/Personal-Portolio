@@ -16,7 +16,6 @@ import {
   composePosterPrompt,
   composePromptPreview,
   paletteFor,
-  sanitizeFieldValue,
 } from "@/lib/posters/compose";
 import { priceOf, type ComposerServiceId } from "@/src/lib/pricing/catalog";
 import { formatINR } from "@/src/lib/vilish/types";
@@ -42,8 +41,11 @@ export default function PosterCustomizer({ template }: { template: PosterTemplat
     [template, fields, paletteId, freeText],
   );
 
+  // Store the raw keystroke value (length-clamped only). Sanitization happens
+  // at prompt-compose time in composePosterPrompt — sanitizing here would
+  // trim trailing spaces on every keystroke and make multi-word input impossible.
   const setField = (key: string, maxLength: number) => (value: string) => {
-    setFields((prev) => ({ ...prev, [key]: sanitizeFieldValue(value, maxLength) }));
+    setFields((prev) => ({ ...prev, [key]: value.slice(0, maxLength) }));
   };
 
   const handleGenerate = () => {
