@@ -84,7 +84,7 @@ export default async function CreatePage({
       <main>
         {/* ── composer hero ─────────────────────────────────── */}
         <section className="relative overflow-hidden">
-          <div className="relative mx-auto w-full max-w-3xl px-4 pb-8 pt-16 text-center sm:pt-24">
+          <div className="relative mx-auto w-full max-w-5xl px-4 pb-8 pt-16 sm:pt-24">
             <Stagger className="flex flex-col items-center">
               <StaggerItem>
                 <Eyebrow>Ads for your business — pay per creation</Eyebrow>
