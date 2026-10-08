@@ -37,6 +37,9 @@ export function HeroCarousel({ slides }: { slides: CarouselSlide[] }) {
   const [pos, setPos] = useState(1);
   const [anim, setAnim] = useState(true);
   const [paused, setPaused] = useState(false);
+  // Touch interactions pause autoplay separately from hover so a swipe
+  // doesn't restart the timer mid-gesture on mobile.
+  const [touchPaused, setTouchPaused] = useState(false);
   const [dialog, setDialog] = useState<CarouselSlide | null>(null);
   const [dragX, setDragX] = useState(0);
   const dragging = useRef(false);
@@ -80,15 +83,15 @@ export function HeroCarousel({ slides }: { slides: CarouselSlide[] }) {
     }
   }, [anim]);
 
-  // Autoplay — paused on hover/focus, while the dialog is open, or with
-  // reduced motion.
+  // Autoplay — paused on hover/focus, while touching, while the dialog
+  // is open, or with reduced motion.
   useEffect(() => {
-    if (paused || dialog || reduceMotion.current || n < 2) return;
+    if (paused || touchPaused || dialog || reduceMotion.current || n < 2) return;
     const id = window.setInterval(() => {
       setPos((p) => p + 1);
     }, AUTOPLAY_MS);
     return () => window.clearInterval(id);
-  }, [paused, dialog, n]);
+  }, [paused, touchPaused, dialog, n]);
 
   const activeIdx = ((pos - 1) % n + n) % n;
   const active = slides[activeIdx];
@@ -97,6 +100,7 @@ export function HeroCarousel({ slides }: { slides: CarouselSlide[] }) {
   const onPointerDown = (e: React.PointerEvent) => {
     if (e.pointerType === "mouse" && e.button !== 0) return;
     if ((e.target as HTMLElement).closest("button, a")) return;
+    if (e.pointerType === "touch") setTouchPaused(true);
     dragging.current = true;
     dragStartX.current = e.clientX;
     setAnim(false);
@@ -107,6 +111,7 @@ export function HeroCarousel({ slides }: { slides: CarouselSlide[] }) {
     setDragX(e.clientX - dragStartX.current);
   };
   const onPointerUp = (e: React.PointerEvent) => {
+    if (e.pointerType === "touch") setTouchPaused(false);
     if (!dragging.current) return;
     dragging.current = false;
     const dx = e.clientX - dragStartX.current;

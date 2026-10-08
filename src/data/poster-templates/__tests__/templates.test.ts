@@ -14,9 +14,8 @@ import {
 } from "@/data/poster-templates/templates";
 
 describe("poster template catalog", () => {
-  it("has 12-16 templates", () => {
-    expect(POSTER_TEMPLATES.length).toBeGreaterThanOrEqual(12);
-    expect(POSTER_TEMPLATES.length).toBeLessThanOrEqual(16);
+  it("has the expanded catalog (base 14 + batches A–D = 164 templates)", () => {
+    expect(POSTER_TEMPLATES.length).toBeGreaterThanOrEqual(160);
   });
 
   it("has unique ids", () => {

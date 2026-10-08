@@ -16,6 +16,7 @@ import { Reveal, Parallax, Section } from "./reveal";
 import type { GalleryItem } from "./gallery";
 import { Gallery } from "./gallery";
 import { HeroCarousel, type CarouselSlide } from "./carousel";
+import PetalDrift from "./petal-drift";
 import type { FaqItem } from "./faq";
 import { FaqSection } from "./faq";
 import type { ToolEntry } from "@/src/lib/tools/directory";
@@ -31,7 +32,9 @@ export function Hero({
 }) {
   return (
     <section className="relative overflow-hidden">
-      <div className="mx-auto w-full max-w-6xl px-4 pb-16 pt-16 sm:px-6 sm:pb-24 sm:pt-24">
+      {/* Gold petal drift — canvas background, behind all hero content */}
+      <PetalDrift />
+      <div className="relative z-10 mx-auto w-full max-w-6xl px-4 pb-16 pt-16 sm:px-6 sm:pb-24 sm:pt-24">
         <Parallax amount={44}>
           <Reveal className="mx-auto max-w-3xl text-center">
             <p className="pro-eyebrow">Pay-per-creation AI studio</p>

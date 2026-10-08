@@ -164,6 +164,8 @@ function loadGallery(): GalleryItem[] {
     price: examplePrice(it),
     href: exampleHref(it),
     badge: CATEGORY_LABEL[it.category],
+    scenario: it.scenario,
+    deliverable: it.deliverable,
   }));
 }
 
@@ -172,27 +174,27 @@ function loadHeroSlides(): CarouselSlide[] {
   const slides: { src: string; alt: string; prompt: string }[] = [
     {
       src: "/pro/hero-watch-exploded.jpg",
-      alt: "Exploded view of a luxury chronograph — every component floating in layers",
+      alt: "Meridian Chrono 41 by Meridian Horology — fictional luxury chronograph, exploded component view",
       prompt:
-        "Luxury chronograph watch exploded view: disassembled components — dial, gears, hands, crown, sapphire crystal, steel case — floating in precise vertical layers above a dark reflective studio surface, dramatic rim lighting, deep charcoal background with a soft spotlight glow, premium advertising photography, photorealistic, ultra detailed",
+        "Exploded view of the fictional Meridian Chrono 41 chronograph by Meridian Horology: disassembled components — dial, gears, hands, crown, sapphire crystal, steel case — floating in precise vertical layers above a dark reflective studio surface, dramatic rim lighting, deep charcoal background with a soft spotlight glow, premium advertising photography, photorealistic, ultra detailed",
     },
     {
       src: "/pro/hero-watch-box.jpg",
-      alt: "Luxury chronograph resting in an open presentation box",
+      alt: "Meridian Chrono 41 by Meridian Horology — chronograph resting in an open velvet-lined presentation box",
       prompt:
-        "Luxury chronograph watch resting inside an open dark presentation box lined with black velvet, elegant warm spotlight from above, dark premium studio background with soft golden bokeh, refined product advertising photography, photorealistic, ultra detailed",
+        "The fictional Meridian Chrono 41 chronograph by Meridian Horology resting inside an open dark presentation box lined with black velvet, elegant warm spotlight from above, dark premium studio background with soft golden bokeh, refined product advertising photography, photorealistic, ultra detailed",
     },
     {
       src: "/pro/hero-headphones.jpg",
-      alt: "Matte black wireless headphones floating above a dark stone pedestal",
+      alt: "Sonara Studio One by Sonara — cognac leather and brass wireless headphones on a walnut desk in warm window light",
       prompt:
-        "Premium matte black wireless over-ear headphones floating above a dark stone pedestal, dramatic studio lighting with subtle blue rim light, deep dark premium background, luxury tech advertisement photography, photorealistic, ultra detailed",
+        "The fictional Sonara Studio One wireless headphones by Sonara: cognac-brown leather earcups, brass yokes, charcoal knit headband, resting on a walnut desk beside a linen-covered notebook and a vintage 35mm film camera, warm late-afternoon window light raking from the left, plaster wall softly out of focus behind, shallow depth of field, honest lived-in creative studio scene, premium product photography, photorealistic",
     },
     {
       src: "/pro/hero-perfume.jpg",
-      alt: "Glass perfume bottle with gold cap on marble in golden backlight",
+      alt: "Aurelle Ambre Nuit by Aurelle — amber glass flacon with brushed-gold cap on a travertine vanity in morning light",
       prompt:
-        "Elegant glass perfume bottle with gold cap on a marble surface, dark moody premium background with soft golden backlight and gentle mist, luxury fragrance advertisement photography, photorealistic, ultra detailed",
+        "The fictional Aurelle Ambre Nuit perfume by Aurelle: heavy rectangular glass flacon with amber liquid and a brushed-gold cap, standing on a travertine marble vanity in real morning window light, fresh jasmine sprig and folded natural-linen cloth beside it, soft sheer-curtain glow, out-of-focus bedroom greenery behind, calm luxurious morning scene, premium product photography, photorealistic",
     },
   ];
   return slides.map((s) => ({

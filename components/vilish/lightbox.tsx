@@ -156,7 +156,29 @@ export default function Lightbox({ items, index, onClose, onIndex }: LightboxPro
           )}
         </div>
         <div className="border-t border-white/[0.08] bg-[#101012] px-6 py-5 sm:px-8">
-          <p className="text-[15px] leading-7 text-white/[0.85]">{item.caption}</p>
+          {item.scenario && (
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/[0.4]">
+                The brief
+              </p>
+              <p className="mt-1.5 text-[15px] leading-7 text-white/[0.9]">
+                {item.scenario}
+              </p>
+            </div>
+          )}
+          {item.deliverable && (
+            <div className={item.scenario ? "mt-4" : ""}>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/[0.4]">
+                Made on Etch
+              </p>
+              <p className="mt-1.5 text-[14px] font-medium leading-6 text-white/[0.75]">
+                {item.deliverable}
+              </p>
+            </div>
+          )}
+          <p className="mt-4 text-[13.5px] leading-6 text-white/[0.55]">
+            {item.caption}
+          </p>
           <div className="mt-4 flex flex-wrap items-center gap-3">
             <span className="rounded-full bg-white/[0.08] px-3 py-1 text-[13px] font-semibold tabular-nums text-[#F5F5F3]">
               {item.price}

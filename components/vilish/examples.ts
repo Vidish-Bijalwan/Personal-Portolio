@@ -28,6 +28,17 @@ export interface ExampleItem {
   alt?: string;
   /** Poster frame for category "video" items. */
   poster?: string;
+  /**
+   * Story-first (2026-10-08): the fictional-but-believable client scenario —
+   * who needed it and why. Rendered above the image on cards/detail views.
+   */
+  scenario?: string;
+  /**
+   * Story-first (2026-10-08): what was actually created on Etch for that
+   * scenario (e.g. "4:5 promo poster, 3 palette variants"). Price stays
+   * catalog-derived via examplePrice() — never invented here.
+   */
+  deliverable?: string;
 }
 
 export const CATEGORY_LABEL: Record<ExampleCategory, string> = {
@@ -90,6 +101,8 @@ export function isExampleItem(data: unknown): data is ExampleItem {
     validCategory &&
     (d.alt === undefined || typeof d.alt === "string") &&
     (d.poster === undefined || typeof d.poster === "string") &&
+    (d.scenario === undefined || typeof d.scenario === "string") &&
+    (d.deliverable === undefined || typeof d.deliverable === "string") &&
     (category !== "video" || typeof d.poster === "string")
   );
 }
@@ -109,6 +122,8 @@ export function toLightboxItem(item: ExampleItem): LightboxItem {
     alt: item.alt ?? item.prompt,
     kind: item.category === "video" ? "video" : "image",
     poster: item.poster,
+    scenario: item.scenario,
+    deliverable: item.deliverable,
   };
 }
 

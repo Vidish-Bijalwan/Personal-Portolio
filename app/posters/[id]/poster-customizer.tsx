@@ -19,6 +19,7 @@ import {
 } from "@/lib/posters/compose";
 import { priceOf, type ComposerServiceId } from "@/src/lib/pricing/catalog";
 import { formatINR } from "@/src/lib/vilish/types";
+import SampleOutput from "../sample-output";
 
 const SERVICE: ComposerServiceId = "single-image";
 
@@ -95,6 +96,35 @@ export default function PosterCustomizer({ template }: { template: PosterTemplat
             This is the template&apos;s sample. Your words and colors replace
             the sample text when you generate.
           </p>
+
+          {/* live sample-output mock — updates as fields/palette change */}
+          <div className="mt-6">
+            <p
+              className="pro-body mb-2.5 text-[13px] font-semibold"
+              style={{ color: "var(--pro-fg)" }}
+            >
+              Sample output{" "}
+              <span
+                className="font-normal"
+                style={{ color: "var(--pro-faint)" }}
+              >
+                — updates live as you edit
+              </span>
+            </p>
+            <SampleOutput
+              template={template}
+              fields={fields}
+              paletteId={paletteId}
+            />
+            <p
+              className="pro-body mt-3 text-[12.5px] leading-5"
+              style={{ color: "var(--pro-faint)" }}
+            >
+              Styled mock of your words and palette. The generated poster
+              follows this layout, with AI-rendered artwork in place of the
+              flat background.
+            </p>
+          </div>
         </div>
 
         {/* customizer */}
