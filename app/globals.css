@@ -629,3 +629,15 @@
     animation: none !important;
   }
 }
+
+/* ── video-edit motion: restrained ready reveal ──────────────────────
+   Used by the video-studio watch page's done sections. Only rendered on
+   backend status "done" — never during processing, never early. */
+.vse-ready { animation: vse-ready-up 0.9s cubic-bezier(0.16, 0.8, 0.24, 1) backwards; }
+@keyframes vse-ready-up {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .vse-ready { animation: none !important; }
+}
