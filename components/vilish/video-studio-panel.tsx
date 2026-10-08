@@ -42,6 +42,12 @@ import {
   TTS_VOICES,
   type VideoTool,
 } from "@/lib/video/constants";
+import {
+  DEFAULT_TOOL_FOR_CLIP,
+  sourceReady,
+  toolSupportsClipSource,
+  type EditSourceKind,
+} from "@/src/lib/video/edit-flow";
 
 const MAX_FILE_BYTES = 50 * 1024 * 1024;
 const MAX_AUDIO_BYTES = 20 * 1024 * 1024;
@@ -71,7 +77,7 @@ const TOOLS: ToolMeta[] = [
     label: "Voice-over",
     icon: Mic,
     tagline: "AI narration, ducked under your audio",
-    desc: "Upload a video — or pick one of your AI-generated clips — paste a script and choose a voice vibe.",
+    desc: "Paste a script and choose a voice vibe — spoken over your video with the music ducked underneath.",
     accent: "text-[var(--pro-accent)]",
     border: "border-[var(--pro-accent)]/40",
   },
@@ -257,62 +263,53 @@ export default function VideoStudioPanel({
   const [authNeeded, setAuthNeeded] = useState(false);
   const [pendingSubmit, setPendingSubmit] = useState(false);
 
-  // tts
-  const [ttsSource, setTtsSource] = useState<"upload" | "clip">("upload");
-  const [ttsFile, setTtsFile] = useState<File | null>(null);
-  const [ttsFileError, setTtsFileError] = useState("");
+  // ── edit-video flow (Oct 2026 rework) ──────────────────────────────
+  // Step 1 (the landing): pick the source — upload an MP4 or choose one
+  // of your AI-generated clips. Step 2: the 8 tools become secondary
+  // choices, then straight into processing on submit.
+  const [step, setStep] = useState<1 | 2>(1);
+  const [sourceKind, setSourceKind] = useState<EditSourceKind>("upload");
+  const [sourceFile, setSourceFile] = useState<File | null>(null);
+  const [sourceFileError, setSourceFileError] = useState("");
   const [clips, setClips] = useState<Clip[]>([]);
   const [clipId, setClipId] = useState("");
   const [clipsLoading, setClipsLoading] = useState(false);
+
+  // tts
   const [script, setScript] = useState("");
   const [voice, setVoice] = useState("warm");
 
   // caption
-  const [capFile, setCapFile] = useState<File | null>(null);
-  const [capFileError, setCapFileError] = useState("");
   const [capMode, setCapMode] = useState<"auto" | "script">("auto");
   const [capText, setCapText] = useState("");
 
   // trim
-  const [trimFile, setTrimFile] = useState<File | null>(null);
-  const [trimFileError, setTrimFileError] = useState("");
   const [trimStart, setTrimStart] = useState("");
   const [trimEnd, setTrimEnd] = useState("");
   const [trimText, setTrimText] = useState("");
   const [trimPos, setTrimPos] = useState("bottom");
 
   // compress
-  const [compFile, setCompFile] = useState<File | null>(null);
-  const [compFileError, setCompFileError] = useState("");
   const [compQuality, setCompQuality] = useState("balanced");
 
-  // convert
-  const [convFile, setConvFile] = useState<File | null>(null);
-  const [convFileError, setConvFileError] = useState("");
-
   // gif
-  const [gifFile, setGifFile] = useState<File | null>(null);
-  const [gifFileError, setGifFileError] = useState("");
   const [gifStart, setGifStart] = useState("");
   const [gifEnd, setGifEnd] = useState("");
   const [gifFps, setGifFps] = useState("12");
   const [gifWidth, setGifWidth] = useState("480");
 
-  // add-audio
-  const [aaFile, setAaFile] = useState<File | null>(null);
-  const [aaFileError, setAaFileError] = useState("");
+  // add-audio (the source video is shared; the audio track is its own upload)
   const [aaAudio, setAaAudio] = useState<File | null>(null);
   const [aaAudioError, setAaAudioError] = useState("");
   const [aaMode, setAaMode] = useState("mix");
 
   // denoise
-  const [dnFile, setDnFile] = useState<File | null>(null);
-  const [dnFileError, setDnFileError] = useState("");
   const [dnStrength, setDnStrength] = useState("medium");
 
   useEffect(() => {
-    if (tool !== "tts" || ttsSource !== "clip" || clips.length > 0 || clipsLoading)
-      return;
+    // Generated-clip picker is shared across the flow — fetch once the
+    // user opens the clip tab, regardless of the selected tool.
+    if (sourceKind !== "clip" || clips.length > 0 || clipsLoading) return;
     let alive = true;
     setClipsLoading(true);
     fetch("/api/video-jobs/clips", { cache: "no-store" })
@@ -328,7 +325,7 @@ export default function VideoStudioPanel({
       alive = false;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tool, ttsSource]);
+  }, [sourceKind]);
 
   const pickFile =
     (setFile: (f: File | null) => void, setErr: (s: string) => void) =>
@@ -376,6 +373,18 @@ export default function VideoStudioPanel({
 
   const activeMeta = TOOLS.find((t) => t.id === tool)!;
 
+  /** Step-1 source tab switch — a generated clip only supports voice-over. */
+  const selectSourceKind = (kind: EditSourceKind) => {
+    setSourceKind(kind);
+    setSubmitError("");
+    if (kind === "clip" && !toolSupportsClipSource(tool)) {
+      setTool(DEFAULT_TOOL_FOR_CLIP);
+    }
+  };
+
+  /** The shared source video — one upload (or clip pick) serves every tool. */
+  const onPickSourceFile = pickFile(setSourceFile, setSourceFileError);
+
   const buildPayload = (): {
     params: unknown;
     file: File | null;
@@ -386,14 +395,14 @@ export default function VideoStudioPanel({
         setSubmitError(`Script must be 1–${SCRIPT_MAX} characters.`);
         return null;
       }
-      if (ttsSource === "upload") {
-        if (!ttsFile) {
-          setSubmitError("Upload a video, or pick one of your clips.");
+      if (sourceKind === "upload") {
+        if (!sourceFile) {
+          setSubmitError("Add your video first.");
           return null;
         }
         return {
           params: { script: script.trim(), voice, sourceKind: "upload" },
-          file: ttsFile,
+          file: sourceFile,
           audioFile: null,
         };
       }
@@ -412,11 +421,12 @@ export default function VideoStudioPanel({
         audioFile: null,
       };
     }
+    // Every other tool needs the shared uploaded video.
+    if (!sourceFile) {
+      setSubmitError("Add your video first.");
+      return null;
+    }
     if (tool === "caption") {
-      if (!capFile) {
-        setSubmitError("Upload a video to caption.");
-        return null;
-      }
       if (capMode === "script" && (!capText.trim() || capText.trim().length > SCRIPT_MAX)) {
         setSubmitError(`Caption text must be 1–${SCRIPT_MAX} characters.`);
         return null;
@@ -426,15 +436,11 @@ export default function VideoStudioPanel({
           capMode === "auto"
             ? { mode: "auto" }
             : { mode: "script", text: capText.trim() },
-        file: capFile,
+        file: sourceFile,
         audioFile: null,
       };
     }
     if (tool === "trim") {
-      if (!trimFile) {
-        setSubmitError("Upload a video to trim.");
-        return null;
-      }
       const start = Number(trimStart);
       const end = Number(trimEnd);
       if (!Number.isFinite(start) || start < 0 || !Number.isFinite(end) || end <= 0) {
@@ -453,29 +459,17 @@ export default function VideoStudioPanel({
             ? { text: trimText.trim(), position: trimPos }
             : {}),
         },
-        file: trimFile,
+        file: sourceFile,
         audioFile: null,
       };
     }
     if (tool === "compress") {
-      if (!compFile) {
-        setSubmitError("Upload a video to compress.");
-        return null;
-      }
-      return { params: { quality: compQuality }, file: compFile, audioFile: null };
+      return { params: { quality: compQuality }, file: sourceFile, audioFile: null };
     }
     if (tool === "convert") {
-      if (!convFile) {
-        setSubmitError("Upload a video to convert.");
-        return null;
-      }
-      return { params: {}, file: convFile, audioFile: null };
+      return { params: {}, file: sourceFile, audioFile: null };
     }
     if (tool === "gif") {
-      if (!gifFile) {
-        setSubmitError("Upload a video to make a GIF from.");
-        return null;
-      }
       const start = Number(gifStart);
       const end = Number(gifEnd);
       if (!Number.isFinite(start) || start < 0 || !Number.isFinite(end) || end <= 0) {
@@ -492,31 +486,23 @@ export default function VideoStudioPanel({
       }
       return {
         params: { start, end, fps: Number(gifFps), width: Number(gifWidth) },
-        file: gifFile,
+        file: sourceFile,
         audioFile: null,
       };
     }
     if (tool === "add-audio") {
-      if (!aaFile) {
-        setSubmitError("Upload the video first.");
-        return null;
-      }
       if (!aaAudio) {
         setSubmitError("Upload the audio track to add.");
         return null;
       }
       return {
         params: { mode: aaMode },
-        file: aaFile,
+        file: sourceFile,
         audioFile: aaAudio,
       };
     }
     // denoise
-    if (!dnFile) {
-      setSubmitError("Upload a video to clean up.");
-      return null;
-    }
-    return { params: { strength: dnStrength }, file: dnFile, audioFile: null };
+    return { params: { strength: dnStrength }, file: sourceFile, audioFile: null };
   };
 
   const submit = async () => {
@@ -564,6 +550,9 @@ export default function VideoStudioPanel({
     }
   };
 
+  // Step-1 gate: Continue is enabled once the chosen source has a video.
+  const ready = sourceReady(sourceKind, sourceFile, clipId);
+
   const content = (
     <>
       {chrome && <VilishNav />}
@@ -576,59 +565,231 @@ export default function VideoStudioPanel({
             Give your video a <span className="pro-accent-text">studio finish</span>
           </h1>
           <p className="mt-3 max-w-xl text-[14px] leading-6 text-white/60">
-            Eight real video tools, queue-backed like everything else in
-            Etch. <span className="text-white/85">from {formatINR(priceOf("tool-basic"))} per job</span> —
-            one UPI payment, no subscription. A watermarked preview plays while
-            you wait; the clean file unlocks after payment.
+            {step === 1 ? (
+              <>
+                Add your video first — upload a raw MP4 or pick one of your
+                AI-generated clips — then choose the edit.{" "}
+                <span className="text-white/85">from {formatINR(priceOf("tool-basic"))} per job</span> —
+                one UPI payment, no subscription.
+              </>
+            ) : (
+              <>
+                A watermarked preview plays while you wait; the clean file
+                unlocks after payment.{" "}
+                <span className="text-white/85">from {formatINR(priceOf("tool-basic"))} per job</span> —
+                one UPI payment, no subscription.
+              </>
+            )}
           </p>
         </Reveal>
 
-        {/* tool picker */}
-        <Stagger className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          {TOOLS.map((t) => {
-            const Icon = t.icon;
-            const active = tool === t.id;
-            return (
-              <StaggerItem key={t.id}>
+        {step === 1 ? (
+          /* ── step 1: the source (primary landing) ──────────────────── */
+          <Reveal className="mt-8" delay={0.05}>
+            <section
+              aria-label="Add your video"
+              className="rounded-[16px] border border-white/[0.08] bg-white/[0.02] p-5 sm:p-6"
+            >
+              <h2 className="font-display text-[18px] font-semibold">
+                Add your video
+              </h2>
+              <p className="mt-1.5 text-[13px] leading-6 text-white/55">
+                Upload a raw video, or pick one of your AI-generated clips —
+                then choose what to do with it.
+              </p>
+              <div
+                className="mt-5 grid grid-cols-2 gap-2"
+                role="group"
+                aria-label="Video source"
+              >
+                {(["upload", "clip"] as const).map((s) => (
+                  <button
+                    key={s}
+                    type="button"
+                    onClick={() => selectSourceKind(s)}
+                    aria-pressed={sourceKind === s}
+                    className={cn(
+                      "rounded-[10px] border px-3 py-3 text-[13px] font-semibold transition-colors",
+                      sourceKind === s
+                        ? "border-[var(--pro-accent)]/50 bg-[var(--pro-accent)]/[0.08] text-[#F5F5F3]"
+                        : "border-white/[0.1] text-white/55 hover:border-white/25",
+                    )}
+                  >
+                    {s === "upload" ? "Upload video" : "My generated clip"}
+                  </button>
+                ))}
+              </div>
+              <div className="mt-4">
+                {sourceKind === "upload" ? (
+                  <FilePicker
+                    file={sourceFile}
+                    onPick={onPickSourceFile}
+                    error={sourceFileError}
+                  />
+                ) : clipsLoading ? (
+                  <p className="flex items-center gap-2 text-[13px] text-white/45">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Loading your clips…
+                  </p>
+                ) : clips.length === 0 ? (
+                  <p className="rounded-[10px] border border-white/[0.08] bg-white/[0.02] px-4 py-3 text-[13px] text-white/50">
+                    No finished AI clips yet — generate one from the composer
+                    first, or upload a video instead.
+                  </p>
+                ) : (
+                  <div className="grid gap-2">
+                    {clips.map((c) => (
+                      <button
+                        key={c.id}
+                        type="button"
+                        onClick={() => setClipId(c.id)}
+                        aria-pressed={clipId === c.id}
+                        className={cn(
+                          "flex items-center gap-3 rounded-[10px] border px-3.5 py-2.5 text-left transition-colors",
+                          clipId === c.id
+                            ? "border-[var(--pro-accent)]/50 bg-[var(--pro-accent)]/[0.08]"
+                            : "border-white/[0.1] hover:border-white/25",
+                        )}
+                      >
+                        <FileVideo className="h-4 w-4 shrink-0 text-[var(--pro-accent)]" />
+                        <span className="min-w-0">
+                          <span className="block truncate font-mono text-[12px] text-white/80">
+                            {c.id.slice(0, 8)}…
+                          </span>
+                          <span className="block text-[11px] text-white/40">
+                            AI-generated clip
+                            {c.createdAt
+                              ? ` · ${new Date(c.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}`
+                              : ""}
+                          </span>
+                        </span>
+                        {clipId === c.id && (
+                          <Check className="ml-auto h-4 w-4 shrink-0 text-[var(--pro-accent)]" />
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+              {sourceKind === "clip" && (
+                <p className="mt-3 text-[12px] text-white/40">
+                  Generated clips work with voice-over — upload a video to
+                  unlock all eight tools.
+                </p>
+              )}
+              <button
+                type="button"
+                disabled={!ready}
+                onClick={() => {
+                  setStep(2);
+                  setSubmitError("");
+                }}
+                className={cn(
+                  "pro-cta mt-5 flex w-full items-center justify-center gap-2 rounded-[10px] px-5 py-3 text-[15px] font-semibold text-[var(--pro-btn-ink)]",
+                  ready ? "hover:opacity-95" : "cursor-not-allowed opacity-40",
+                )}
+              >
+                Continue — pick your edit
+                <ChevronRight className="h-4 w-4" />
+              </button>
+            </section>
+          </Reveal>
+        ) : (
+          /* ── step 2: the tools (secondary — the edit choices) ──────── */
+          <>
+            <Reveal className="mt-8" delay={0.03}>
+              <div className="flex items-center gap-3 rounded-[12px] border border-white/[0.08] bg-white/[0.02] px-4 py-3">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] bg-white/[0.06]">
+                  <FileVideo className="h-4 w-4 text-[var(--pro-accent)]" />
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-[13px] font-medium text-[#F5F5F3]">
+                    {sourceKind === "upload"
+                      ? sourceFile?.name
+                      : `AI-generated clip ${clipId.slice(0, 8)}…`}
+                  </span>
+                  <span className="block text-[11px] text-white/40">
+                    {sourceKind === "upload"
+                      ? `${((sourceFile?.size ?? 0) / (1024 * 1024)).toFixed(1)} MB`
+                      : "Generated clip"}
+                  </span>
+                </span>
                 <button
                   type="button"
                   onClick={() => {
-                    setTool(t.id);
+                    setStep(1);
                     setSubmitError("");
                   }}
-                  aria-pressed={active}
-                  className={cn(
-                    "flex w-full items-start gap-3 rounded-[14px] border bg-white/[0.02] p-4 text-left transition-all",
-                    active ? t.border : "border-white/[0.08] hover:border-white/25",
-                  )}
+                  className="inline-flex shrink-0 items-center gap-1.5 rounded-[8px] border border-white/[0.12] px-3 py-1.5 text-[12px] font-medium text-white/60 transition-colors hover:border-white/25 hover:text-white/90"
                 >
-                  <span
-                    className={cn(
-                      "flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px] bg-white/[0.06]",
-                      t.accent,
-                    )}
-                  >
-                    <Icon className="h-5 w-5" />
-                  </span>
-                  <span className="min-w-0">
-                    <span className="flex items-center gap-1.5 text-[14px] font-semibold">
-                      {t.label}
-                      {active && <Check className="h-4 w-4 text-[var(--pro-accent)]" />}
-                    </span>
-                    <span className="mt-0.5 block text-[12px] leading-5 text-white/50">
-                      {t.tagline}
-                    </span>
-                    <span className="mt-1 inline-block rounded-full border border-white/[0.12] px-2 py-0.5 text-[11px] font-semibold tabular-nums text-white/80">
-                      {toolPrice(t.id)}/job
-                    </span>
-                  </span>
+                  <ArrowLeft className="h-3.5 w-3.5" />
+                  Change
                 </button>
-              </StaggerItem>
-            );
-          })}
-        </Stagger>
+              </div>
+            </Reveal>
+
+            <p className="mt-8 text-[11px] font-semibold uppercase tracking-[0.14em] text-white/45">
+              What should we do with it?
+            </p>
+            <Stagger className="mt-3 grid grid-cols-2 gap-2.5 sm:grid-cols-4">
+              {TOOLS.map((t) => {
+                const Icon = t.icon;
+                const active = tool === t.id;
+                const disabled =
+                  sourceKind === "clip" && !toolSupportsClipSource(t.id);
+                return (
+                  <StaggerItem key={t.id}>
+                    <button
+                      type="button"
+                      disabled={disabled}
+                      title={
+                        disabled
+                          ? "Upload a video to use this tool"
+                          : t.tagline
+                      }
+                      onClick={() => {
+                        setTool(t.id);
+                        setSubmitError("");
+                      }}
+                      aria-pressed={active}
+                      className={cn(
+                        "flex w-full items-center gap-2.5 rounded-[12px] border bg-white/[0.02] p-3 text-left transition-all",
+                        disabled && "cursor-not-allowed opacity-35",
+                        !disabled &&
+                          (active
+                            ? t.border
+                            : "border-white/[0.08] hover:border-white/25"),
+                      )}
+                    >
+                      <span
+                        className={cn(
+                          "flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] bg-white/[0.06]",
+                          t.accent,
+                        )}
+                      >
+                        <Icon className="h-4 w-4" />
+                      </span>
+                      <span className="min-w-0">
+                        <span className="flex items-center gap-1 text-[13px] font-semibold">
+                          {t.label}
+                          {active && (
+                            <Check className="h-3.5 w-3.5 text-[var(--pro-accent)]" />
+                          )}
+                        </span>
+                        <span className="mt-0.5 block text-[11px] font-medium tabular-nums text-white/50">
+                          {toolPrice(t.id)}/job
+                        </span>
+                      </span>
+                    </button>
+                  </StaggerItem>
+                );
+              })}
+            </Stagger>
+          </>
+        )}
 
         {/* tool form */}
+        {step === 2 && (
         <Reveal className="mt-6" delay={0.05}>
           <section
             aria-label={`${activeMeta.label} tool`}
@@ -651,85 +812,6 @@ export default function VideoStudioPanel({
             <div className="mt-5 space-y-5">
               {tool === "tts" && (
                 <>
-                  <div>
-                    <p className="mb-2 text-[12px] font-semibold uppercase tracking-[0.1em] text-white/50">
-                      Video source
-                    </p>
-                    <div className="grid grid-cols-2 gap-2">
-                      {(["upload", "clip"] as const).map((s) => (
-                        <button
-                          key={s}
-                          type="button"
-                          onClick={() => setTtsSource(s)}
-                          aria-pressed={ttsSource === s}
-                          className={cn(
-                            "rounded-[10px] border px-3 py-2.5 text-[13px] font-medium transition-colors",
-                            ttsSource === s
-                              ? "border-[var(--pro-accent)]/50 bg-[var(--pro-accent)]/[0.08] text-[#F5F5F3]"
-                              : "border-white/[0.1] text-white/55 hover:border-white/25",
-                          )}
-                        >
-                          {s === "upload" ? "Upload video" : "My generated clip"}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {ttsSource === "upload" ? (
-                    <FilePicker
-                      file={ttsFile}
-                      onPick={pickFile(setTtsFile, setTtsFileError)}
-                      error={ttsFileError}
-                    />
-                  ) : (
-                    <div>
-                      {clipsLoading ? (
-                        <p className="flex items-center gap-2 text-[13px] text-white/45">
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                          Loading your clips…
-                        </p>
-                      ) : clips.length === 0 ? (
-                        <p className="rounded-[10px] border border-white/[0.08] bg-white/[0.02] px-4 py-3 text-[13px] text-white/50">
-                          No finished AI clips yet — generate one from the
-                          composer first, or upload a video instead.
-                        </p>
-                      ) : (
-                        <div className="grid gap-2">
-                          {clips.map((c) => (
-                            <button
-                              key={c.id}
-                              type="button"
-                              onClick={() => setClipId(c.id)}
-                              aria-pressed={clipId === c.id}
-                              className={cn(
-                                "flex items-center gap-3 rounded-[10px] border px-3.5 py-2.5 text-left transition-colors",
-                                clipId === c.id
-                                  ? "border-[var(--pro-accent)]/50 bg-[var(--pro-accent)]/[0.08]"
-                                  : "border-white/[0.1] hover:border-white/25",
-                              )}
-                            >
-                              <FileVideo className="h-4 w-4 shrink-0 text-[var(--pro-accent)]" />
-                              <span className="min-w-0">
-                                <span className="block truncate font-mono text-[12px] text-white/80">
-                                  {c.id.slice(0, 8)}…
-                                </span>
-                                <span className="block text-[11px] text-white/40">
-                                  AI-generated clip
-                                  {c.createdAt
-                                    ? ` · ${new Date(c.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}`
-                                    : ""}
-                                </span>
-                              </span>
-                              {clipId === c.id && (
-                                <Check className="ml-auto h-4 w-4 shrink-0 text-[var(--pro-accent)]" />
-                              )}
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  )}
-
                   <div>
                     <label
                       htmlFor="tts-script"
@@ -785,11 +867,6 @@ export default function VideoStudioPanel({
 
               {tool === "caption" && (
                 <>
-                  <FilePicker
-                    file={capFile}
-                    onPick={pickFile(setCapFile, setCapFileError)}
-                    error={capFileError}
-                  />
                   <div>
                     <p className="mb-2 text-[12px] font-semibold uppercase tracking-[0.1em] text-white/50">
                       Caption source
@@ -844,11 +921,6 @@ export default function VideoStudioPanel({
 
               {tool === "trim" && (
                 <>
-                  <FilePicker
-                    file={trimFile}
-                    onPick={pickFile(setTrimFile, setTrimFileError)}
-                    error={trimFileError}
-                  />
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <label
@@ -924,11 +996,6 @@ export default function VideoStudioPanel({
 
               {tool === "compress" && (
                 <>
-                  <FilePicker
-                    file={compFile}
-                    onPick={pickFile(setCompFile, setCompFileError)}
-                    error={compFileError}
-                  />
                   <div>
                     <p className="mb-2 text-[12px] font-semibold uppercase tracking-[0.1em] text-white/50">
                       Compression strength
@@ -962,11 +1029,6 @@ export default function VideoStudioPanel({
 
               {tool === "convert" && (
                 <>
-                  <FilePicker
-                    file={convFile}
-                    onPick={pickFile(setConvFile, setConvFileError)}
-                    error={convFileError}
-                  />
                   <p className="rounded-[10px] border border-[var(--pro-accent)]/20 bg-[var(--pro-accent)]/[0.04] px-4 py-3 text-[12px] leading-5 text-white/55">
                     Extracts the full audio track as a 128kbps MP3 — same
                     length as your video. The preview streams the audio;
@@ -977,11 +1039,6 @@ export default function VideoStudioPanel({
 
               {tool === "gif" && (
                 <>
-                  <FilePicker
-                    file={gifFile}
-                    onPick={pickFile(setGifFile, setGifFileError)}
-                    error={gifFileError}
-                  />
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <label
@@ -1074,17 +1131,7 @@ export default function VideoStudioPanel({
                 <>
                   <div>
                     <p className="mb-2 text-[12px] font-semibold uppercase tracking-[0.1em] text-white/50">
-                      1 · Your video
-                    </p>
-                    <FilePicker
-                      file={aaFile}
-                      onPick={pickFile(setAaFile, setAaFileError)}
-                      error={aaFileError}
-                    />
-                  </div>
-                  <div>
-                    <p className="mb-2 text-[12px] font-semibold uppercase tracking-[0.1em] text-white/50">
-                      2 · Audio track
+                      Audio track
                     </p>
                     <FilePicker
                       file={aaAudio}
@@ -1128,11 +1175,6 @@ export default function VideoStudioPanel({
 
               {tool === "denoise" && (
                 <>
-                  <FilePicker
-                    file={dnFile}
-                    onPick={pickFile(setDnFile, setDnFileError)}
-                    error={dnFileError}
-                  />
                   <div>
                     <p className="mb-2 text-[12px] font-semibold uppercase tracking-[0.1em] text-white/50">
                       Cleanup strength
@@ -1211,6 +1253,7 @@ export default function VideoStudioPanel({
             </div>
           </section>
         </Reveal>
+        )}
 
         <Reveal delay={0.08} className="mt-6">
           <Link

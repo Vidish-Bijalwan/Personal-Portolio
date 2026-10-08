@@ -8,6 +8,7 @@ import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { NextRequest } from 'next/server';
 import { eq, sql } from 'drizzle-orm';
+import { VIDEO_CLIP_5S_PRICE_RUPEES } from '@/lib/pricing/catalog';
 
 const mockAuth = vi.hoisted(() => ({ userId: 'user-1' as string | null }));
 
@@ -773,7 +774,7 @@ describe('paid video generate-first: queue → preview → unlock → clean', ()
     expect(locked.status).toBe(402);
 
     // 4. unlock mints the order at the server-side duration price —
-    //    20s = ceil(20/5)=4 blocks × ₹45 = ₹180
+    //    20s = ceil(20/5)=4 blocks × ₹19 = ₹76
     const unlockCall = () =>
       h('POST', UNLOCK)(req('POST', `/api/gen/${id}/unlock`), {
         params: Promise.resolve({ id }),
@@ -781,7 +782,10 @@ describe('paid video generate-first: queue → preview → unlock → clean', ()
     const unlocked = await json(await unlockCall());
     expect(unlocked.status).toBe(201);
     expect(unlocked.body.payment.amountPaise).toBe(videoClipPricePaise(20));
-    expect(unlocked.body.payment.amountPaise).toBe(18000);
+    // 20s = 4 blocks × ₹19 (VIDEO_CLIP_5S_PRICE_RUPEES) = ₹76
+    expect(unlocked.body.payment.amountPaise).toBe(
+      VIDEO_CLIP_5S_PRICE_RUPEES * 100 * 4,
+    );
     expect(unlocked.body.payment.code).toBeTruthy();
     const orderCode = unlocked.body.payment.code as string;
 
@@ -832,7 +836,7 @@ describe('paid video generate-first: queue → preview → unlock → clean', ()
     expect(done.body.code).toBe('ALREADY_UNLOCKED');
   });
 
-  it('prices the longest clip: 60s → ₹540 at unlock', async () => {
+  it('prices the longest clip: 60s → ₹228 at unlock', async () => {
     mockAuth.userId = 'user-1';
     const { videoClipPricePaise } = await import('@/lib/pricing/engine');
     const queued = await json(
@@ -857,7 +861,10 @@ describe('paid video generate-first: queue → preview → unlock → clean', ()
     );
     expect(unlocked.status).toBe(201);
     expect(unlocked.body.payment.amountPaise).toBe(videoClipPricePaise(60));
-    expect(unlocked.body.payment.amountPaise).toBe(54000);
+    // 60s = 12 blocks × ₹19 (VIDEO_CLIP_5S_PRICE_RUPEES) = ₹228
+    expect(unlocked.body.payment.amountPaise).toBe(
+      VIDEO_CLIP_5S_PRICE_RUPEES * 100 * 12,
+    );
   });
 
   it('status exposes the server-side unlock price and duration', async () => {
@@ -877,8 +884,10 @@ describe('paid video generate-first: queue → preview → unlock → clean', ()
     );
     expect(status.status).toBe(200);
     expect(status.body.duration_seconds).toBe(15);
-    // 15s = 3 blocks × ₹45 = ₹135
-    expect(status.body.unlock_price_paise).toBe(13500);
+    // 15s = 3 blocks × ₹19 = ₹57
+    expect(status.body.unlock_price_paise).toBe(
+      VIDEO_CLIP_5S_PRICE_RUPEES * 100 * 3,
+    );
   });
 });
 

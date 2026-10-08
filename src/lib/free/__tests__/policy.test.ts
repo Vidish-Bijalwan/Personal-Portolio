@@ -3,6 +3,7 @@
  * Pure logic: no DB, no network.
  */
 import { describe, it, expect } from 'vitest';
+import { VIDEO_CLIP_5S_PRICE_RUPEES } from '@/lib/pricing/catalog';
 import {
   FREE_DAILY_CAP,
   PROMPT_MAX,
@@ -34,7 +35,7 @@ describe('constants', () => {
     expect(PROMPT_MAX).toBe(2000);
     expect(PROMPT_MIN).toBe(1);
     expect(UNLOCK_PRICE_PAISE).toBe(1500); // ₹15
-    expect(VIDEO_PRICE_PAISE).toBe(4500); // ₹45 (5s base; longer clips are duration-priced)
+    expect(VIDEO_PRICE_PAISE).toBe(VIDEO_CLIP_5S_PRICE_RUPEES * 100); // ₹19 (5s base; longer clips are duration-priced)
     expect(IMAGE_MAX_BYTES).toBe(8 * 1024 * 1024);
     expect(VIDEO_MAX_BYTES).toBe(32 * 1024 * 1024);
   });
