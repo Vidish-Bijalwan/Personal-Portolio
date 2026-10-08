@@ -76,13 +76,13 @@ export default async function ToolDetailPage({
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Home", item: "https://vidish.me/" },
-      { "@type": "ListItem", position: 2, name: "Tools", item: "https://vidish.me/tools" },
+      { "@type": "ListItem", position: 1, name: "Home", item: "https://tryetch.online/" },
+      { "@type": "ListItem", position: 2, name: "Tools", item: "https://tryetch.online/tools" },
       {
         "@type": "ListItem",
         position: 3,
         name: tool.name,
-        item: `https://vidish.me/tools/${tool.id}`,
+        item: `https://tryetch.online/tools/${tool.id}`,
       },
     ],
   };

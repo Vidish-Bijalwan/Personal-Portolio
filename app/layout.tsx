@@ -51,8 +51,11 @@ export const viewport = {
 };
 
 export const metadata = {
+  // Canonical host: the GSC-verified production domain. Every relative
+  // `alternates.canonical` below resolves against this, so the fallback
+  // must be the preferred host (not a mirror alias).
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_SITE_URL ?? "https://vidish.me",
+    process.env.NEXT_PUBLIC_SITE_URL ?? "https://tryetch.online",
   ),
   title: "AI Image Generator India — ₹19 per Creation | Etch",
   description:
