@@ -28,7 +28,6 @@ import {
   ATTACH_MAX_FILES,
   ATTACH_MAX_FILE_BYTES,
   ATTACH_MAX_TOTAL_BYTES,
-  validateUploads,
 } from "@/src/lib/vilish/attachments";
 import {
   PROMPT_MAX_LENGTH,
@@ -45,6 +44,11 @@ import {
   UPLOAD_EDGE_LIMIT_BYTES,
   type ManualPayment,
 } from "./payment";
+import {
+  CHUNK_UPLOAD_THRESHOLD_BYTES,
+  chunkUploadFiles,
+  validateAttachableFiles,
+} from "@/components/muse/chunk-uploader";
 import PaymentModal from "./payment-modal";
 import AuthModal from "./auth-modal";
 
@@ -149,11 +153,12 @@ export default function Composer({ variant = "hero", className, initialMedia = "
 
   // reference attachments (stored with the order, shown to the operator)
   // Madam Muse handover may pre-attach validated files on first mount.
+  // Files over the chunk threshold are validated for the chunked pipeline
+  // (image/video, images ≤8MB, videos ≤100MB); smaller files keep the
+  // existing legacy policy.
   const [files, setFiles] = useState<File[]>(() => {
     if (!initialFiles || initialFiles.length === 0) return [];
-    const check = validateUploads(
-      initialFiles.map((f) => ({ name: f.name, size: f.size, type: f.type })),
-    );
+    const check = validateAttachableFiles(initialFiles);
     return check.ok ? initialFiles : [];
   });
   // Live reference-photo requirement: the label and the pre-submit guard
@@ -322,9 +327,7 @@ export default function Composer({ variant = "hero", className, initialMedia = "
     if (picked.length === 0) return;
     setFiles((prev) => {
       const next = [...prev, ...picked];
-      const check = validateUploads(
-        next.map((f) => ({ name: f.name, size: f.size, type: f.type }))
-      );
+      const check = validateAttachableFiles(next);
       if (!check.ok) {
         setFileError(check.message ?? "Those files couldn't be attached.");
         return prev;
@@ -337,13 +340,46 @@ export default function Composer({ variant = "hero", className, initialMedia = "
   const removeFile = useCallback((index: number) => {
     setFiles((prev) => {
       const next = prev.filter((_, i) => i !== index);
-      const check = validateUploads(
-        next.map((f) => ({ name: f.name, size: f.size, type: f.type }))
-      );
+      const check = validateAttachableFiles(next);
       setFileError(check.ok ? "" : (check.message ?? ""));
       return next;
     });
   }, []);
+
+  /**
+   * Madam Muse chunked-upload phase: files over the 4 MB threshold are
+   * uploaded in ≤2 MB chunks (resumable, with retries) before the order
+   * POST. Returns the finalized uploadIds, or null on failure — the
+   * status message is already set in that case.
+   */
+  const uploadLargeFiles = useCallback(
+    async (picked: File[]): Promise<string[] | null> => {
+      const big = picked.filter((f) => f.size > CHUNK_UPLOAD_THRESHOLD_BYTES);
+      if (big.length === 0) return [];
+      setStatus(
+        "Uploading your large file — this can take a minute on slow connections…"
+      );
+      try {
+        const ids = await chunkUploadFiles(big, {
+          onProgress: (p) =>
+            setUploadProgress(
+              p.total > 0 ? Math.min(0.9, (p.loaded / p.total) * 0.9) : 0
+            ),
+        });
+        setStatus("");
+        return ids;
+      } catch (e) {
+        setUploadProgress(null);
+        setStatus(
+          e instanceof Error && e.message
+            ? e.message
+            : "Couldn't upload your large files. Please try again."
+        );
+        return null;
+      }
+    },
+    []
+  );
 
   /**
    * Paid image generation — generate-first: the generation starts
@@ -373,18 +409,28 @@ export default function Composer({ variant = "hero", className, initialMedia = "
         setStatus("New generation orders are temporarily paused.");
         return;
       }
+      const directFiles = files.filter(
+        (f) => f.size <= CHUNK_UPLOAD_THRESHOLD_BYTES
+      );
       if (files.length > 0) setUploadProgress(0);
       // Pre-flight: the serverless edge rejects bodies over
-      // UPLOAD_EDGE_LIMIT_BYTES before our route runs. Fail fast with a
-      // truthful message instead of attempting a doomed upload.
-      const totalBytes = files.reduce((sum, f) => sum + f.size, 0);
-      if (totalBytes > UPLOAD_EDGE_LIMIT_BYTES) {
+      // UPLOAD_EDGE_LIMIT_BYTES before our route runs. Direct multipart
+      // bytes stay under it — fail fast with a truthful message instead
+      // of attempting a doomed upload. Larger files travel the chunked
+      // pipeline, which never puts more than ~2 MB in one request.
+      const directBytes = directFiles.reduce((sum, f) => sum + f.size, 0);
+      if (directBytes > UPLOAD_EDGE_LIMIT_BYTES) {
         setUploadProgress(null);
         setStatus(
           "Those files are too large to upload in one go — try fewer or smaller files (keep the total under 4 MB)."
         );
         return;
       }
+      // Chunked phase: big files upload first; the order POST then
+      // carries their finalized uploadIds alongside the direct files.
+      const uploadIds = await uploadLargeFiles(files);
+      if (uploadIds === null) return;
+      const progressBase = uploadIds.length > 0 ? 0.9 : 0;
       let res: Response;
       try {
         if (files.length > 0) {
@@ -393,13 +439,19 @@ export default function Composer({ variant = "hero", className, initialMedia = "
           const form = new FormData();
           form.append("quoteId", quote.quoteId);
           form.append("country", "IN");
-          for (const f of files) form.append("files", f);
+          for (const f of directFiles) form.append("files", f);
+          for (const id of uploadIds) form.append("uploadIds", id);
           res = await new Promise<Response>((resolvePromise, reject) => {
             const xhr = new XMLHttpRequest();
             xhr.open("POST", "/api/generation/start");
             xhr.upload.onprogress = (e) => {
               if (e.lengthComputable && e.total > 0) {
-                setUploadProgress(Math.min(1, e.loaded / e.total));
+                setUploadProgress(
+                  Math.min(
+                    1,
+                    progressBase + (1 - progressBase) * (e.loaded / e.total)
+                  )
+                );
               }
             };
             xhr.onload = () =>
@@ -478,10 +530,14 @@ export default function Composer({ variant = "hero", className, initialMedia = "
       return;
     }
     // Pre-flight: the serverless edge rejects bodies over
-    // UPLOAD_EDGE_LIMIT_BYTES before our route runs.
+    // UPLOAD_EDGE_LIMIT_BYTES before our route runs. Direct multipart
+    // bytes stay under it; larger files travel the chunked pipeline.
+    const directFiles = files.filter(
+      (f) => f.size <= CHUNK_UPLOAD_THRESHOLD_BYTES
+    );
     if (files.length > 0) {
-      const totalBytes = files.reduce((sum, f) => sum + f.size, 0);
-      if (totalBytes > UPLOAD_EDGE_LIMIT_BYTES) {
+      const directBytes = directFiles.reduce((sum, f) => sum + f.size, 0);
+      if (directBytes > UPLOAD_EDGE_LIMIT_BYTES) {
         setStatus(
           "Those files are too large to upload in one go — try fewer or smaller files (keep the total under 4 MB)."
         );
@@ -492,13 +548,21 @@ export default function Composer({ variant = "hero", className, initialMedia = "
     setStatus("");
     setAuthNeeded(false);
     try {
+      // Chunked phase for large files (progress on the bar).
+      if (files.length > 0) setUploadProgress(0);
+      const uploadIds = await uploadLargeFiles(files);
+      if (uploadIds === null) {
+        setFreeSending(false);
+        return;
+      }
       let res: Response;
       if (files.length > 0) {
         const form = new FormData();
         form.append("prompt", prompt.trim());
         form.append("quality", quality);
         form.append("aspectRatio", aspectRatio);
-        for (const f of files) form.append("files", f);
+        for (const f of directFiles) form.append("files", f);
+        for (const id of uploadIds) form.append("uploadIds", id);
         res = await fetch("/api/free/generate", { method: "POST", body: form });
       } else {
         // Fast-gen (c): hand the speculative hash over only when it still
@@ -557,6 +621,7 @@ export default function Composer({ variant = "hero", className, initialMedia = "
       router.push(`/watch/${body.id}`);
     } finally {
       setFreeSending(false);
+      setUploadProgress(null);
     }
   };
 

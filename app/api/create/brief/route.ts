@@ -3,6 +3,9 @@ export const dynamic = 'force-dynamic';
 import { NextResponse, type NextRequest } from 'next/server';
 import { compileBrief } from '@/lib/muse/intent-compiler';
 import type { AssetMeta, RefMeta } from '@/lib/muse/brief';
+import { getSessionUser } from '@/lib/auth';
+import { db } from '@/lib/db/client';
+import { listStyleMemory, type StyleFingerprint } from '@/lib/muse/style-memory';
 
 /**
  * POST /api/create/brief
@@ -71,10 +74,25 @@ export async function POST(req: NextRequest) {
     references = referencesRaw;
   }
 
+  // Approved-style memory (Phase 2): signed-in users get their style
+  // defaults as classification bias. Best-effort — the route stays public
+  // and a memory failure never breaks brief compilation.
+  let styleMemory: StyleFingerprint[] | undefined;
+  try {
+    const sessionUser = await getSessionUser();
+    if (sessionUser) {
+      const stored = await listStyleMemory(db, sessionUser.id);
+      if (stored.length > 0) styleMemory = stored.map((s) => s.fingerprint);
+    }
+  } catch {
+    styleMemory = undefined;
+  }
+
   const brief = compileBrief({
     instruction: instruction.trim(),
     primary: (primaryRaw as AssetMeta | null) ?? null,
     references,
+    styleMemory,
   });
   return NextResponse.json({ brief });
 }

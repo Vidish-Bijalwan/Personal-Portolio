@@ -18,6 +18,10 @@ import {
 } from '@/lib/vilish/attachments';
 import { verifyUploadContents } from '@/lib/muse/uploads';
 import {
+  attachChunkedUploads,
+  releaseChunkedUploads,
+} from '@/lib/muse/chunked-route';
+import {
   effectivePrompt,
   parseMuseBody,
   parseMuseForm,
@@ -31,7 +35,8 @@ import { specIsExpired, speculativeHash } from '@/lib/fast-gen/spec';
  * POST /api/free/generate
  * Body (JSON): { prompt, quality?, aspectRatio?, media_type? }
  * Body (multipart/form-data): prompt, quality?, aspectRatio?,
- *   media_type?/mediaType?, files (0-5 reference files)
+ *   media_type?/mediaType?, files (0-5 reference files),
+ *   uploadIds? (finalized chunked-upload file ids for files over 4 MB)
  * Free-tier IMAGES only — media_type=video is rejected (use /api/video/order).
  * Auth required. Prompt 1..2000 chars. 3 free images / user / IST day
  * (failed rows don't consume cap) → 429 FREE_CAP_REACHED beyond that.
@@ -53,6 +58,10 @@ export async function POST(req: NextRequest) {
   let aspectRatio = '1:1';
   let mediaType = 'image';
   let files: File[] = [];
+  /** Direct multipart files (legacy validation gate applies to these). */
+  let directFiles: File[] = [];
+  /** Finalized chunked-upload ids, released after the order persists. */
+  let chunkedFileIds: string[] = [];
   // Fast-gen (c): speculative hit token from the composer (JSON path only —
   // speculative rows are never created for prompts with attachments).
   let clientSpecHash: string | null = null;
@@ -79,6 +88,19 @@ export async function POST(req: NextRequest) {
     files = form
       .getAll('files')
       .filter((v): v is File => v instanceof File && v.size > 0);
+    // Madam Muse chunked uploads: files over 4 MB travel the chunked
+    // pipeline and arrive as `uploadIds`. Resolve them into File objects
+    // so they feed the same attachment persistence below.
+    const chunked = await attachChunkedUploads(form, user.id, files);
+    if (!chunked.ok) {
+      return NextResponse.json(
+        { code: 'INVALID_CHUNKED_UPLOAD', error: chunked.error },
+        { status: chunked.status ?? 400 }
+      );
+    }
+    chunkedFileIds = chunked.chunkedFileIds;
+    directFiles = files;
+    files = chunked.files;
     museBody = parseMuseForm(form);
   } else {
     const body = await req.json().catch(() => null);
@@ -130,10 +152,12 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // Server-side attachment policy: same rules as the paid flow.
-  if (files.length > 0) {
+  // Server-side attachment policy: same rules as the paid flow. The
+  // legacy gate applies to direct multipart files exactly as before;
+  // chunked files were validated by the chunk pipeline.
+  if (directFiles.length > 0) {
     const check = validateUploads(
-      files.map((f) => ({ name: f.name, size: f.size, type: f.type }))
+      directFiles.map((f) => ({ name: f.name, size: f.size, type: f.type }))
     );
     if (!check.ok) {
       return NextResponse.json(
@@ -144,7 +168,7 @@ export async function POST(req: NextRequest) {
     // Madam Muse: magic-byte sniffing — reject files whose bytes don't
     // match their claimed type (e.g. an .exe renamed to .png). Additive:
     // never widens what the extension gate accepts.
-    const contentError = await verifyUploadContents(files);
+    const contentError = await verifyUploadContents(directFiles);
     if (contentError) {
       return NextResponse.json(
         { code: 'INVALID_ATTACHMENTS', error: contentError },
@@ -324,6 +348,10 @@ export async function POST(req: NextRequest) {
   // Fast-gen (b): wake the fulfillment worker immediately — the 1-minute
   // claim poll stays as the fallback if the fast path misses.
   await queueGenerationTrigger(row.id);
+
+  // Chunked uploads are now persisted with the order — release the temp
+  // copies (best-effort; the TTL sweep is the backstop).
+  await releaseChunkedUploads(chunkedFileIds);
 
   return NextResponse.json({ id: row.id }, { status: 201 });
 }

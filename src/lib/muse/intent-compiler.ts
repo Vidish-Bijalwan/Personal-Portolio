@@ -16,11 +16,19 @@ import type {
   RefRole,
   TaskType,
 } from './brief';
+import type { StyleFingerprint } from './style-memory';
 
 export interface CompileBriefInput {
   instruction: string;
   primary: AssetMeta | null;
   references: RefMeta[];
+  /**
+   * Approved-style fingerprints, newest first (Phase 2). Consulted as a
+   * DEFAULT only: when the instruction names no family, the top memory
+   * family replaces the generic 'cinematic moody' fallback. Any explicit
+   * family keyword in the instruction always wins over memory.
+   */
+  styleMemory?: StyleFingerprint[];
 }
 
 // ---------------------------------------------------------------------------
@@ -224,12 +232,17 @@ const FAMILY_KEYWORDS: Array<{ family: VisualFamily; re: RegExp; weight: number 
 /**
  * Classify the instruction (+ lead style ref mood) into one of the 15
  * playbook families. Deterministic: highest weighted keyword score wins;
- * ties resolve to the earlier family in the taxonomy; zero hits default to
- * 'cinematic moody' per the brief.
+ * ties resolve to the earlier family in the taxonomy.
+ *
+ * Explicit instruction always overrides memory: any keyword hit (from the
+ * instruction or a style/mood ref) wins outright. Only on zero hits does
+ * approved-style memory act as the default — the top memory family
+ * replaces the generic 'cinematic moody' fallback.
  */
 export function classifyVisualFamily(
   instruction: string,
-  references: RefMeta[] = []
+  references: RefMeta[] = [],
+  styleMemory: StyleFingerprint[] = []
 ): VisualFamily {
   const scores = new Map<VisualFamily, number>();
   for (const { family, re, weight } of FAMILY_KEYWORDS) {
@@ -246,7 +259,18 @@ export function classifyVisualFamily(
       }
     }
   }
-  if (scores.size === 0) return 'cinematic moody';
+  if (scores.size === 0) {
+    for (const f of styleMemory) {
+      if (
+        f &&
+        typeof f.visualFamily === 'string' &&
+        (VISUAL_FAMILIES as readonly string[]).includes(f.visualFamily)
+      ) {
+        return f.visualFamily as VisualFamily;
+      }
+    }
+    return 'cinematic moody';
+  }
   let best: VisualFamily = 'cinematic moody';
   let bestScore = -1;
   // VISUAL_FAMILIES order is the tie-break priority.
@@ -419,7 +443,11 @@ export function compileBrief(input: CompileBriefInput): CreativeBrief {
   };
 
   if (!isVideo) {
-    brief.visualFamily = classifyVisualFamily(instruction, references);
+    brief.visualFamily = classifyVisualFamily(
+      instruction,
+      references,
+      input.styleMemory ?? []
+    );
   }
 
   if (taskType === 'video-edit') {

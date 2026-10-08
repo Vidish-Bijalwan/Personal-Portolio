@@ -21,6 +21,7 @@ import {
   Film,
   ImagePlus,
   Images,
+  Link2,
   Loader2,
   PencilLine,
   Sparkles,
@@ -48,10 +49,12 @@ import {
   compilePrompt,
   type CompiledPrompt,
 } from "@/src/lib/muse/prompt-compiler";
+import { composeSharedInstruction } from "@/src/lib/pwa/share-text";
 import Composer from "@/components/vilish/composer";
 
 const ACCEPT = "image/*,video/*";
-const MAX_FILE_BYTES = 8 * 1024 * 1024; // 8 MB per file (matches attachments)
+const MAX_FILE_BYTES = 8 * 1024 * 1024; // 8 MB per image (matches attachments)
+const MAX_VIDEO_BYTES = 100 * 1024 * 1024; // 100 MB per video — travels the chunked pipeline
 const MAX_REFS = 5;
 
 const INSTRUCTION_EXAMPLES = [
@@ -116,7 +119,19 @@ function refMetaForApi(det: DetectedRef): RefMeta {
   return rest;
 }
 
-export default function UnifiedIntake({ className }: { className?: string }) {
+export default function UnifiedIntake({
+  className,
+  sharedToken,
+  shareError,
+  shareMsg,
+}: {
+  className?: string;
+  /** PWA share-target handoff: bundle token stored by /share-target (?shared=). */
+  sharedToken?: string;
+  /** Share receipt rejection code (?shareError=) + human message (?shareMsg=). */
+  shareError?: string;
+  shareMsg?: string;
+}) {
   const [phase, setPhase] = useState<Phase>("intake");
   const [primary, setPrimary] = useState<PrimaryAsset | null>(null);
   const [refs, setRefs] = useState<RefAsset[]>([]);
@@ -127,6 +142,7 @@ export default function UnifiedIntake({ className }: { className?: string }) {
   const [brief, setBrief] = useState<CreativeBrief | null>(null);
   const [compiled, setCompiled] = useState<CompiledPrompt | null>(null);
   const [handoverKey, setHandoverKey] = useState(0);
+  const [sharedNotice, setSharedNotice] = useState("");
   const primaryInputRef = useRef<HTMLInputElement>(null);
   const refInputRef = useRef<HTMLInputElement>(null);
   const orderRef = useRef<HTMLDivElement>(null);
@@ -152,8 +168,12 @@ export default function UnifiedIntake({ className }: { className?: string }) {
     if (!f.type && !/\.(png|jpe?g|webp|gif|avif|mp4|mov|webm|m4v)$/i.test(f.name)) {
       return `"${f.name}" doesn't look like an image or video file.`;
     }
-    if (f.size > MAX_FILE_BYTES) {
-      return `"${f.name}" is ${formatBytes(f.size)} — keep each file under ${formatBytes(MAX_FILE_BYTES)}.`;
+    // Videos may be large — they travel the chunked, resumable pipeline.
+    const isVideo =
+      f.type.startsWith("video/") || /\.(mp4|mov|webm|m4v|mkv)$/i.test(f.name);
+    const cap = isVideo ? MAX_VIDEO_BYTES : MAX_FILE_BYTES;
+    if (f.size > cap) {
+      return `"${f.name}" is ${formatBytes(f.size)} — keep ${isVideo ? "videos" : "images"} under ${formatBytes(cap)}.`;
     }
     if (f.size <= 0) return `"${f.name}" is empty.`;
     return null;
@@ -261,6 +281,51 @@ export default function UnifiedIntake({ className }: { className?: string }) {
     setPrimary(null);
   }, [primary]);
 
+  /* ── import reference from a public link ───────────────────────────── */
+  const [linkOpen, setLinkOpen] = useState(false);
+  const [linkUrl, setLinkUrl] = useState("");
+  const [linkBusy, setLinkBusy] = useState(false);
+
+  const importFromLink = useCallback(async () => {
+    const url = linkUrl.trim();
+    if (!url || linkBusy) return;
+    setLinkBusy(true);
+    setError("");
+    try {
+      const res = await fetch("/api/import/social", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ url }),
+      });
+      if (!res.ok) {
+        // Honest server message (login walls, bad links, size caps…).
+        const data = await res.json().catch(() => null);
+        setError(
+          (data && typeof data.message === "string" && data.message) ||
+            "Couldn't import that link. Try downloading the file and uploading it directly.",
+        );
+        return;
+      }
+      const blob = await res.blob();
+      const name =
+        decodeURIComponent(res.headers.get("x-muse-import-name") ?? "") ||
+        "imported-media";
+      const file = new File([blob], name, {
+        type: res.headers.get("x-muse-import-mime") || blob.type,
+      });
+      // Same path as a manual upload: validation, role detection, strip.
+      await addRefFiles([file]);
+      setLinkUrl("");
+      setLinkOpen(false);
+    } catch {
+      setError(
+        "Couldn't import that link — check your connection, or download the file and upload it directly.",
+      );
+    } finally {
+      setLinkBusy(false);
+    }
+  }, [linkUrl, linkBusy, addRefFiles]);
+
   const removeRef = useCallback(
     (url: string) => {
       setRefs((prev) => {
@@ -333,6 +398,83 @@ export default function UnifiedIntake({ className }: { className?: string }) {
     window.addEventListener("paste", handler);
     return () => window.removeEventListener("paste", handler);
   }, [onPaste]);
+
+  // ── PWA share-target handoff ──────────────────────────────────
+  // /share-target validates a share, stores it, and redirects here with
+  // ?shared=<token> (or ?shareError=<code>&shareMsg=<msg> when the share
+  // was rejected — the share sheet gives the OS no error surface, so the
+  // notice below is the feedback channel).
+  // Bundle files go through the EXISTING ingestFiles path — same client
+  // validation, same role detection as drop/paste — and shared text
+  // prefills the instruction box. Runs once per mount.
+  const ingestFilesRef = useRef(ingestFiles);
+  ingestFilesRef.current = ingestFiles;
+  const shareHandledRef = useRef(false);
+  useEffect(() => {
+    if (shareHandledRef.current) return;
+    if (!sharedToken && !shareError) return;
+    shareHandledRef.current = true;
+    if (shareError) {
+      setError(
+        shareMsg ||
+          "Shared files couldn't be attached — please try sharing again.",
+      );
+      return;
+    }
+    (async () => {
+      try {
+        const res = await fetch(
+          `/api/share-bundle?token=${encodeURIComponent(sharedToken ?? "")}`,
+        );
+        if (!res.ok) throw new Error(`bundle ${res.status}`);
+        const bundle = (await res.json()) as {
+          title: string;
+          text: string;
+          url: string;
+          files: { name: string; mime: string; size: number; url: string }[];
+        };
+        const files: File[] = [];
+        for (const f of bundle.files ?? []) {
+          try {
+            const r = await fetch(f.url);
+            if (!r.ok) continue;
+            const blob = await r.blob();
+            files.push(
+              new File([blob], f.name || "shared-file", {
+                type: f.mime || blob.type || "application/octet-stream",
+              }),
+            );
+          } catch {
+            /* skip the unreadable file, keep the rest */
+          }
+        }
+        if (files.length > 0) {
+          ingestFilesRef.current(files);
+          setSharedNotice(
+            files.length === 1
+              ? "1 shared file attached — review it below, then describe what you want."
+              : `${files.length} shared files attached — review them below, then describe what you want.`,
+          );
+        }
+        const prefill = composeSharedInstruction({
+          title: bundle.title ?? "",
+          text: bundle.text ?? "",
+          url: bundle.url ?? "",
+        });
+        if (prefill) setInstruction(prefill);
+        if (files.length === 0 && !prefill) {
+          setError(
+            "The shared content couldn't be loaded — it may have expired. Please share again.",
+          );
+        }
+      } catch {
+        setError(
+          "The shared content couldn't be loaded — please try sharing again.",
+        );
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sharedToken, shareError]);
 
   const instructionOk = instruction.trim().length >= 3;
 
@@ -430,6 +572,16 @@ export default function UnifiedIntake({ className }: { className?: string }) {
                 references, and build the brief.
               </p>
             </div>
+          {sharedNotice && (
+            <div
+              role="status"
+              className="pro-body mt-4 flex w-full items-center gap-2.5 rounded-[12px] border border-[var(--pro-border)] px-4 py-2.5 text-[13px]"
+              style={{ color: "var(--pro-fg)", background: "var(--pro-bg)" }}
+            >
+              <Check className="h-4 w-4 shrink-0" style={{ color: "var(--pro-accent)" }} aria-hidden />
+              {sharedNotice}
+            </div>
+          )}
             <div
               className="inline-flex items-center gap-2 rounded-[10px] border border-[var(--pro-border)] px-3 py-2"
               title="Derived automatically from your assets and instruction — not a setting you need to pick."
@@ -476,7 +628,7 @@ export default function UnifiedIntake({ className }: { className?: string }) {
                   Drop your image or video here, or click to upload
                 </span>
                 <span className="text-[12px]" style={{ color: "var(--pro-faint)" }}>
-                  You can also paste from your clipboard · up to {formatBytes(MAX_FILE_BYTES)} · optional — leave empty to generate from text alone
+                  You can also paste from your clipboard · images up to {formatBytes(MAX_FILE_BYTES)}, videos up to {formatBytes(MAX_VIDEO_BYTES)} · optional — leave empty to generate from text alone
                 </span>
               </button>
             ) : (
@@ -503,6 +655,12 @@ export default function UnifiedIntake({ className }: { className?: string }) {
                     {formatBytes(primary.file.size)}
                     {primary.meta.durationSec !== undefined && ` · ${primary.meta.durationSec}s`}
                   </p>
+                  {primary.meta.kind === "video" && (
+                    <p className="mt-1 text-[12px]" style={{ color: "var(--pro-faint)" }}>
+                      Auto transcript &amp; shot detection aren&apos;t available yet — describe
+                      key moments in your instruction instead.
+                    </p>
+                  )}
                 </div>
                 <button
                   type="button"
@@ -538,17 +696,83 @@ export default function UnifiedIntake({ className }: { className?: string }) {
                   ({refs.length}/{MAX_REFS}) — roles are auto-detected, override freely
                 </span>
               </p>
-              <button
-                type="button"
-                onClick={() => refInputRef.current?.click()}
-                disabled={refs.length >= MAX_REFS}
-                className="inline-flex min-h-[40px] items-center gap-1.5 rounded-[8px] border border-[var(--pro-border)] px-3 text-[12.5px] font-medium transition-colors hover:text-[var(--pro-fg)] disabled:cursor-not-allowed disabled:opacity-40"
-                style={{ color: "var(--pro-muted)" }}
-              >
-                <Images className="h-4 w-4" aria-hidden />
-                Add reference
-              </button>
+              <div className="flex shrink-0 items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setLinkOpen((v) => !v)}
+                  disabled={refs.length >= MAX_REFS}
+                  aria-expanded={linkOpen}
+                  className="inline-flex min-h-[40px] items-center gap-1.5 rounded-[8px] px-2.5 text-[12.5px] font-medium transition-colors hover:text-[var(--pro-fg)] disabled:cursor-not-allowed disabled:opacity-40"
+                  style={{ color: "var(--pro-muted)" }}
+                >
+                  <Link2 className="h-4 w-4" aria-hidden />
+                  From link
+                </button>
+                <button
+                  type="button"
+                  onClick={() => refInputRef.current?.click()}
+                  disabled={refs.length >= MAX_REFS}
+                  className="inline-flex min-h-[40px] items-center gap-1.5 rounded-[8px] border border-[var(--pro-border)] px-3 text-[12.5px] font-medium transition-colors hover:text-[var(--pro-fg)] disabled:cursor-not-allowed disabled:opacity-40"
+                  style={{ color: "var(--pro-muted)" }}
+                >
+                  <Images className="h-4 w-4" aria-hidden />
+                  Add reference
+                </button>
+              </div>
             </div>
+            {linkOpen && (
+              <div className="mt-3 rounded-[12px] border border-[var(--pro-border)] p-3">
+                <label
+                  htmlFor="muse-import-link"
+                  className="text-[12.5px] font-medium"
+                  style={{ color: "var(--pro-fg)" }}
+                >
+                  Paste a link to an image or video
+                </label>
+                <div className="mt-2 flex flex-col gap-2 sm:flex-row">
+                  <input
+                    id="muse-import-link"
+                    type="url"
+                    value={linkUrl}
+                    onChange={(e) => setLinkUrl(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        void importFromLink();
+                      }
+                    }}
+                    placeholder="https://…"
+                    inputMode="url"
+                    autoComplete="off"
+                    disabled={linkBusy}
+                    className="min-h-[40px] flex-1 rounded-[8px] border border-[var(--pro-border)] bg-transparent px-3 text-[13px] outline-none placeholder:text-[var(--pro-faint)] focus:border-[var(--pro-accent)] disabled:opacity-50"
+                    style={{ color: "var(--pro-fg)" }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => void importFromLink()}
+                    disabled={linkBusy || !linkUrl.trim() || refs.length >= MAX_REFS}
+                    className="inline-flex min-h-[40px] items-center justify-center gap-1.5 rounded-[8px] border border-[var(--pro-border)] px-4 text-[12.5px] font-medium transition-colors hover:text-[var(--pro-fg)] disabled:cursor-not-allowed disabled:opacity-40"
+                    style={{ color: "var(--pro-muted)" }}
+                  >
+                    {linkBusy ? (
+                      <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+                    ) : (
+                      <Link2 className="h-4 w-4" aria-hidden />
+                    )}
+                    {linkBusy ? "Importing…" : "Import"}
+                  </button>
+                </div>
+                <p
+                  className="mt-2 text-[12px] leading-relaxed"
+                  style={{ color: "var(--pro-faint)" }}
+                >
+                  We download it once to our server and attach it like a normal
+                  upload. If the site blocks us (many social sites need a login),
+                  we&apos;ll say so — just save the file and upload it directly.
+                </p>
+              </div>
+            )}
             <input
               ref={refInputRef}
               type="file"
@@ -643,6 +867,12 @@ export default function UnifiedIntake({ className }: { className?: string }) {
             ) : (
               <p className="mt-2 text-[12.5px]" style={{ color: "var(--pro-faint)" }}>
                 Optional — a style you like, a layout to borrow, a palette to match. Nothing to label; we guess the role.
+              </p>
+            )}
+            {refs.some((r) => r.meta.kind === "video") && (
+              <p className="mt-2 text-[12px]" style={{ color: "var(--pro-faint)" }}>
+                Auto transcript &amp; shot detection aren&apos;t available yet — describe
+                key moments in your instruction instead.
               </p>
             )}
           </div>

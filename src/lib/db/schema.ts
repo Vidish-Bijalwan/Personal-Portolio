@@ -114,6 +114,22 @@ export const projects = pgTable('projects', {
   updatedAt: updatedAt(),
 });
 
+/**
+ * Madam Muse approved-style memory (Phase 2). One row per approved style
+ * per user: a small structured fingerprint (visual family, palette,
+ * texture, typography hints — see src/lib/muse/style-memory.ts), never a
+ * blob. The prompt compiler consults it as DEFAULTS only; the canonical
+ * playbooks always win. Capped at the last 20 rows per user (trimmed in
+ * the service, not by the DB).
+ */
+export const museStyleMemory = pgTable('muse_style_memory', {
+  id: id(),
+  userId: text('user_id').references(() => users.id, { onDelete: 'cascade' }),
+  /** The StyleFingerprint JSON. */
+  fingerprint: jsonb('fingerprint').notNull(),
+  createdAt: createdAt(),
+});
+
 export const assets = pgTable('assets', {
   id: id(),
   userId: text('user_id').references(() => users.id, { onDelete: 'set null' }),

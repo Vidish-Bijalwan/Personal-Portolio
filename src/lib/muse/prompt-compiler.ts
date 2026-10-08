@@ -15,6 +15,7 @@
  */
 
 import type { CreativeBrief, RefMeta, RefRole } from './brief';
+import type { StyleFingerprint } from './style-memory';
 import {
   resolveReferenceRoles,
   summarizeSubject,
@@ -167,6 +168,81 @@ function recipeFor(family: string | undefined): FamilyRecipe {
   return (family && FAMILY_RECIPES[family]) || FALLBACK_RECIPE;
 }
 
+/**
+ * Public accessor for a playbook family recipe. Used by style-memory to
+ * derive fingerprints from approved projects — the recipe itself stays
+ * canonical here (memory never replaces it, only selects it).
+ */
+export interface FamilyRecipeSummary {
+  family: string;
+  palette: string[];
+  accentRole: string;
+  texture: string;
+  typography: string;
+}
+
+export function familyRecipeFor(family: string | undefined): FamilyRecipeSummary {
+  const key = family && FAMILY_RECIPES[family] ? family : 'cinematic moody';
+  const r = FAMILY_RECIPES[key];
+  return {
+    family: key,
+    palette: [...r.palette],
+    accentRole: r.accentRole,
+    texture: r.texture,
+    typography: r.typography,
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Style-memory defaults (Phase 2)
+// ---------------------------------------------------------------------------
+
+/**
+ * Consulted as DEFAULTS only. Explicit instruction always wins:
+ * brief.visualFamily / palette refs / modifiers override memory, and the
+ * playbook recipes above are never replaced — memory only selects which
+ * family default and which palette defaults the compiler starts from.
+ */
+export interface CompilePromptOptions {
+  /** Approved-style fingerprints, newest first. */
+  styleMemory?: StyleFingerprint[];
+}
+
+/** Most recent valid family in memory, else null. */
+function memoryFamilyDefault(
+  memory: StyleFingerprint[] | undefined
+): string | null {
+  if (!memory) return null;
+  for (const f of memory) {
+    if (
+      f &&
+      typeof f.visualFamily === 'string' &&
+      FAMILY_RECIPES[f.visualFamily]
+    ) {
+      return f.visualFamily;
+    }
+  }
+  return null;
+}
+
+/** Most recent non-empty palette in memory, else null. */
+function memoryPaletteDefault(
+  memory: StyleFingerprint[] | undefined
+): string[] | null {
+  if (!memory) return null;
+  for (const f of memory) {
+    if (
+      f &&
+      Array.isArray(f.palette) &&
+      f.palette.length > 0 &&
+      f.palette.every((p) => typeof p === 'string' && p.trim().length > 0)
+    ) {
+      return f.palette.map((p) => p.trim()).slice(0, 5);
+    }
+  }
+  return null;
+}
+
 // ---------------------------------------------------------------------------
 // Reference directives — one per ref, role spelled out, never averaged
 // ---------------------------------------------------------------------------
@@ -238,21 +314,38 @@ function detectObjective(instruction: string): string {
   return 'inspire — create a striking, save-worthy visual with a clear focal point';
 }
 
-function buildImagePrompt(brief: CreativeBrief): string {
-  const recipe = recipeFor(brief.visualFamily);
+function buildImagePrompt(
+  brief: CreativeBrief,
+  memory?: StyleFingerprint[]
+): string {
+  // Family: an explicit brief family always wins. Approved-style memory is
+  // only a default when the brief carries none (the intent compiler applies
+  // the same rule at classification time; this is the safety net for
+  // hand-built briefs).
+  const explicitFamily =
+    brief.visualFamily && FAMILY_RECIPES[brief.visualFamily]
+      ? brief.visualFamily
+      : null;
+  const memFamily = memoryFamilyDefault(memory);
+  const family = explicitFamily ?? memFamily ?? 'cinematic moody';
+  const familyFromMemory = !explicitFamily && memFamily !== null;
+  const recipe = recipeFor(family);
   const subject = summarizeSubject(brief.instruction);
   const deliverable = detectDeliverable(brief.instruction);
   const objective = detectObjective(brief.instruction);
-  const family = brief.visualFamily ?? 'cinematic moody';
   const quoted = extractQuotedText(brief.instruction);
 
-  // Palette: a palette-role ref's hexes win; otherwise the family recipe.
+  // Palette: a palette-role ref's hexes win; then approved-style memory;
+  // otherwise the playbook family recipe.
   const paletteRef = brief.references.find(
     (r) => r.role === 'palette' && r.palette && r.palette.length > 0
   );
+  const memPalette = memoryPaletteDefault(memory);
   const paletteLine = paletteRef
     ? `${paletteRef.palette!.slice(0, 5).join(', ')} (from ${paletteRef.id}). Accent role: ${recipe.accentRole}.`
-    : `${recipe.palette.join(', ')}. Accent role: ${recipe.accentRole}.`;
+    : memPalette
+      ? `${memPalette.join(', ')} (learned default from your approved styles — say the word to change it). Accent role: ${recipe.accentRole}.`
+      : `${recipe.palette.join(', ')}. Accent role: ${recipe.accentRole}.`;
 
   const preserveLine =
     brief.preserve.length > 0
@@ -291,7 +384,9 @@ function buildImagePrompt(brief: CreativeBrief): string {
       : `Newly generated image depicting: ${subject}.`,
     ``,
     `### 4. Visual family`,
-    `${family}. ${refLine}`,
+    familyFromMemory
+      ? `${family} (your approved-style default — mention a different style any time to override it). ${refLine}`
+      : `${family}. ${refLine}`,
     ``,
     `### 5. Composition plan`,
     brief.taskType === 'image-edit' && brief.preserve.includes('geometry')
@@ -378,12 +473,15 @@ function buildVideoPrompt(brief: CreativeBrief): string {
 // compilePrompt
 // ---------------------------------------------------------------------------
 
-export function compilePrompt(brief: CreativeBrief): CompiledPrompt {
+export function compilePrompt(
+  brief: CreativeBrief,
+  options: CompilePromptOptions = {}
+): CompiledPrompt {
   const referenceDirectives = buildReferenceDirectives(brief.references);
   const isVideo = brief.outputSpec.media === 'video';
   const prompt =
     brief.taskType === 'video-edit' || brief.taskType === 'video-generate'
       ? buildVideoPrompt(brief)
-      : buildImagePrompt(brief);
+      : buildImagePrompt(brief, options.styleMemory);
   return { prompt, referenceDirectives };
 }
