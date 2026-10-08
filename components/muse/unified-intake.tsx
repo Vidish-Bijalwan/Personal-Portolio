@@ -869,6 +869,12 @@ export default function UnifiedIntake({
                 Optional — a style you like, a layout to borrow, a palette to match. Nothing to label; we guess the role.
               </p>
             )}
+            {refs.some((r) => r.meta.kind === "video") && (
+              <p className="mt-2 text-[12px]" style={{ color: "var(--pro-faint)" }}>
+                Auto transcript &amp; shot detection aren&apos;t available yet — describe
+                key moments in your instruction instead.
+              </p>
+            )}
           </div>
 
           {/* ── instruction ────────────────────────────────── */}

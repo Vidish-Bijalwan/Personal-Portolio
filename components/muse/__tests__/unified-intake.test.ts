@@ -57,6 +57,14 @@ describe("unified-intake source gates", () => {
     expect(src).not.toMatch(/setDerivedMode|setTaskType/);
   });
 
+  it("honest unavailable note for auto transcript/shot detection on any video asset", () => {
+    expect(src).toContain("Auto transcript &amp; shot detection aren&apos;t available yet");
+    // primary video asset…
+    expect(src).toMatch(/primary\.meta\.kind === "video"/);
+    // …and video reference assets, not just the primary
+    expect(src).toMatch(/refs\.some\(\(r\) => r\.meta\.kind === "video"\)/);
+  });
+
   it("submits to POST /api/create/brief and renders Looks right / Edit instruction", () => {
     expect(src).toContain('"/api/create/brief"');
     expect(src).toContain("Looks right");
