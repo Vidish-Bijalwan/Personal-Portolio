@@ -83,6 +83,13 @@ describe("structured data", () => {
     expect(home).toContain('"@type": "WebSite"');
   });
 
+  it("homepage FAQ uses FAQPage JSON-LD built from the rendered FAQ copy", () => {
+    const home = read("app/page.tsx");
+    expect(home).toContain('"@type": "FAQPage"');
+    // Schema must map over the faqs array — no duplicated hardcoded Q&A that can drift.
+    expect(home).toContain("mainEntity: faqs.map");
+  });
+
   it("tool pages have BreadcrumbList JSON-LD", () => {
     expect(read("app/tools/[tool]/page.tsx")).toContain('"@type": "BreadcrumbList"');
   });
