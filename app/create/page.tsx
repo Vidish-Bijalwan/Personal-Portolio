@@ -10,6 +10,7 @@ import { ArrowRight, BadgeCheck, ShieldCheck, Wallet } from "lucide-react";
 import VilishNav from "@/components/vilish/nav";
 import VilishFooter from "@/components/vilish/footer";
 import Composer from "@/components/vilish/composer";
+import UnifiedIntake from "@/components/muse/unified-intake";
 import FulfillmentNotices from "@/components/vilish/fulfillment-notices";
 import Reveal from "@/components/motion/Reveal";
 import { Stagger, StaggerItem } from "@/components/motion/Stagger";
@@ -142,8 +143,21 @@ export default async function CreatePage({
               </StaggerItem>
             </Stagger>
 
-            {/* The composer, presented as the hero element */}
-            <Reveal delay={0.3} className="mt-10 text-left">
+            {/* The unified intake — the default way to start a creation.
+                Drop assets, add references, describe in plain words. */}
+            <Reveal delay={0.25} className="mt-10 text-left">
+              <UnifiedIntake />
+            </Reveal>
+
+            {/* The classic composer, kept as the explicit manual override */}
+            <Reveal delay={0.1} className="mt-8 text-left">
+              <p
+                className="pro-body mb-3 text-[13px]"
+                style={{ color: "var(--pro-faint)" }}
+              >
+                Prefer the classic step-by-step flow? The Image / Video clip /
+                Edit video options are right here.
+              </p>
               <div
                 className="pro-card p-4 sm:p-7"
                 style={{ boxShadow: "var(--pro-card-shadow)" }}

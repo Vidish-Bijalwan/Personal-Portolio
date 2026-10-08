@@ -11,6 +11,7 @@ import {
 import { getGenerationService } from '@/lib/providers/registry';
 import { PROMPT_MAX_LENGTH } from '@/lib/vilish/prompt-limits';
 import type { CreativeSpec } from '@/lib/vilish/types';
+import { parseMuseBody } from '@/lib/muse/wiring';
 
 const TASKS = ['text_to_image', 'image_to_image'];
 const ASPECTS = ['1:1', '4:5', '9:16', '16:9'];
@@ -46,11 +47,18 @@ function validateSpec(body: any): { spec?: CreativeSpec; error?: string } {
 
 /**
  * POST /api/generation/quote
- * Body: { spec: CreativeSpec, product?: 'single-image' | 'pack-4' | 'product-photo' }
+ * Body: { spec: CreativeSpec, product?: 'single-image' | 'pack-4' | 'product-photo',
+ *         brief?: CreativeBrief, compiledPrompt?: string, projectId?: string }
  * Plans via the provider registry, prices via the pricing engine,
  * persists a QUOTED job + 15-minute quote. Provider errors -> 502.
  * The product selects the retail ladder (default 'single-image') and is
  * stamped on the job so the operator knows what was sold.
+ *
+ * Madam Muse wiring: the optional `brief` (contract §1 CreativeBrief),
+ * `compiledPrompt` (contract §3 output) and `projectId` are validated and
+ * stamped on the job row. POST /api/generation/start copies them onto the
+ * generations queue row — the worker reads the compiled prompt from there.
+ * No auth here (lazy login): project ownership is verified at /start time.
  */
 export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => null);
@@ -78,6 +86,15 @@ export async function POST(req: NextRequest) {
   if (!(ladderKey in PRICE_LADDER)) {
     return NextResponse.json(
       { code: 'INVALID_PRODUCT', error: 'Unknown product ladder' },
+      { status: 400 }
+    );
+  }
+
+  // Madam Muse: optional brief + compiledPrompt + projectId thread through.
+  const { fields: muse, error: museError } = parseMuseBody(body);
+  if (museError) {
+    return NextResponse.json(
+      { code: 'INVALID_MUSE_FIELDS', error: museError },
       { status: 400 }
     );
   }
@@ -122,6 +139,11 @@ export async function POST(req: NextRequest) {
         customerPrice: retailPaise,
         idempotencyKey: crypto.randomUUID(),
         product,
+        // Madam Muse: thread the brief + compiled prompt + project link.
+        // Ownership of projectId is verified at /api/generation/start.
+        brief: muse.brief as unknown as Record<string, unknown> | null,
+        compiledPrompt: muse.compiledPrompt,
+        projectId: muse.projectId,
       })
       .returning();
 
