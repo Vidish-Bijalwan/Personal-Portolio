@@ -78,11 +78,12 @@ const FORBIDDEN_CLAIMS = [
 
 /** Canonical prices (paise) — must match src/lib/pricing/catalog.ts. */
 const KNOWN_PRICES: Record<string, number> = {
+  "₹15": 1500,
+  "₹49": 4900,
+  "₹29": 2900,
   "₹19": 1900,
-  "₹69": 6900,
-  "₹39": 3900,
-  "₹89": 8900,
-  "₹9": 900,
+  "₹5": 500,
+  "₹10": 1000,
 };
 
 export function richTextToPlain(rt: RichText): string {
