@@ -24,7 +24,8 @@ import {
 import { cn } from "@/lib/utils";
 import VilishNav from "@/components/vilish/nav";
 import VilishFooter from "@/components/vilish/footer";
-import PopcornReel, { reelFrameForStage } from "@/components/vilish/popcorn-reel";
+import CreationProgress, { phaseForStage } from "@/components/vilish/creation-progress";
+import { displayStage } from "@/src/lib/vilish/stage-copy";
 import { progressForStage } from "@/src/lib/vilish/progress";
 import { formatINR } from "@/src/lib/vilish/types";
 import { priceOf } from "@/lib/pricing/catalog";
@@ -262,7 +263,7 @@ export default function VideoStudioWatchPage() {
   const ToolIcon = meta.icon;
   const captions = meta.captions;
   const caption = captions[captionIdx % captions.length];
-  const stageText = data?.stage ?? "Getting your video ready…";
+  const stageText = displayStage(data?.stage);
   // Real progress from the watcher's stage + status — the bar below
   // reflects actual pipeline position, not a fixed indeterminate width.
   const progress = data ? progressForStage(data.stage, data.status) : 8;
@@ -337,7 +338,10 @@ export default function VideoStudioWatchPage() {
             </h1>
 
             <div className="mt-6 w-full max-w-[420px]">
-              <PopcornReel frame={reelFrameForStage(data.stage)} />
+              <CreationProgress
+                aspectRatio="16 / 9"
+                phase={phaseForStage(data?.stage)}
+              />
             </div>
 
             <p className="font-display mt-4 flex items-center gap-2 text-[16px] font-medium text-[#F5F5F3]">

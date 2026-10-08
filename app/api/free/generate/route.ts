@@ -16,6 +16,7 @@ import {
   canonicalMimeFor,
   validateUploads,
 } from '@/lib/vilish/attachments';
+import { needsReferencePhoto } from '@/lib/person-reference';
 
 /**
  * POST /api/free/generate
@@ -113,6 +114,19 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
+  }
+
+  // Pre-generation reference-photo check: a prompt that asks for a specific
+  // person needs their photo attached — fail fast here instead of after the
+  // queue wait. Runs before the cap check so it never consumes the cap.
+  if (needsReferencePhoto(prompt) && files.length === 0) {
+    return NextResponse.json(
+      {
+        code: 'MISSING_REFERENCE',
+        error: 'This prompt asks for a specific person — attach their photo first.',
+      },
+      { status: 400 }
+    );
   }
 
   const used = await countFreeImagesToday(user.id);

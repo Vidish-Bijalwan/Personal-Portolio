@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { ArrowRight, Check, Copy, Loader2, RefreshCcw, X, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatINR } from "@/src/lib/vilish/types";
-import BurgerGrill from "./burger-grill";
+import CreationProgress from "./creation-progress";
 import {
   checkManualPayment,
   claimPaymentPaid,
@@ -421,7 +421,7 @@ export default function PaymentModal({ jobId, initialPayment, onClose, navigate,
         {phase === "processing" && (
           <div className="mt-6 text-center">
             <div className="mx-auto max-w-[280px]">
-              <BurgerGrill frame={2} />
+              <CreationProgress aspectRatio="16 / 10" phase={2} />
             </div>
             {/* indeterminate progress */}
             <div

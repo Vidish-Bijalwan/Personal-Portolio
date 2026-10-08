@@ -25,7 +25,7 @@ export default function SiteBackdrop({ className }: SiteBackdropProps) {
     <div
       aria-hidden="true"
       className={`pointer-events-none fixed inset-0 -z-10 overflow-hidden ${className ?? ""}`}
-      style={{ backgroundColor: "#080808" }}
+      style={{ backgroundColor: "var(--pro-bg)" }}
     >
       {/* top ambient glow */}
       <div

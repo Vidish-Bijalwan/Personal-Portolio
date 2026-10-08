@@ -226,10 +226,10 @@ function TierCard({ tier }: { tier: Tier }) {
         <Link
           href={tier.action.href}
           className={
-            "mt-5 inline-flex items-center justify-center gap-1.5 rounded-[10px] border px-4 py-2.5 text-[13px] font-medium text-[#F5F5F3] transition-all " +
+            "mt-5 inline-flex items-center justify-center gap-1.5 rounded-[10px] border px-4 py-2.5 text-[13px] font-medium transition-all " +
             (popular
               ? "pro-cta border-transparent text-[var(--pro-btn-ink)] hover:brightness-110"
-              : "border-white/[0.12] bg-[#18181B] hover:border-white/30 hover:bg-[#1E1E22]")
+              : "border-white/[0.12] bg-[#18181B] text-[#F5F5F3] hover:border-white/30 hover:bg-[#1E1E22]")
           }
         >
           {tier.action.label} <ArrowRight className="h-3.5 w-3.5" />

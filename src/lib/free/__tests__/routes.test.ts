@@ -195,6 +195,29 @@ describe('POST /api/free/generate', () => {
     }
   });
 
+  it('400s MISSING_REFERENCE when the prompt needs a person but no photo is attached', async () => {
+    mockAuth.userId = 'ref-user';
+    const post = h('POST', FILE);
+    const { status, body } = await json(
+      await post(
+        req('POST', '/api/free/generate', {
+          prompt: 'Use my photo, cinematic portrait in neon light',
+        }),
+        { params: Promise.resolve({}) }
+      )
+    );
+    expect(status).toBe(400);
+    expect(body.code).toBe('MISSING_REFERENCE');
+    expect(typeof body.error).toBe('string');
+    // no row queued and the free cap untouched
+    const db = client.getDb();
+    const rows = await db
+      .select()
+      .from(schema.generations)
+      .where(eq(schema.generations.userId, 'ref-user'));
+    expect(rows).toHaveLength(0);
+  });
+
   it('429s after 3 non-failed free images; failed rows do not count', async () => {
     mockAuth.userId = 'cap-user';
     const post = h('POST', FILE);

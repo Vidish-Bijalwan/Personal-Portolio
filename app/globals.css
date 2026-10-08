@@ -607,3 +607,25 @@
   content-visibility: auto;
   contain-intrinsic-size: auto 640px;
 }
+
+/* ── creation-progress showpiece: slow sheen sweep + soft pulse ring ── */
+.fg-sheen {
+  animation: fg-sheen-sweep 3.2s ease-in-out infinite;
+}
+@keyframes fg-sheen-sweep {
+  0% { background-position: 120% 0; }
+  100% { background-position: -120% 0; }
+}
+.fg-pulse-ring {
+  animation: fg-pulse-ring 2.6s ease-in-out infinite;
+}
+@keyframes fg-pulse-ring {
+  0%, 100% { transform: scale(1); opacity: 0.92; }
+  50% { transform: scale(1.07); opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fg-sheen,
+  .fg-pulse-ring {
+    animation: none !important;
+  }
+}

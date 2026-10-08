@@ -11,6 +11,7 @@ import {
 } from '@/lib/vilish/attachments';
 import { getFulfillmentConfig } from '@/lib/fulfillment/config';
 import { isAdminOverride } from '@/lib/fulfillment/guards';
+import { needsReferencePhoto } from '@/lib/person-reference';
 import { isAdminEmail } from '@/lib/admin';
 
 /** Start of the current day in Asia/Kolkata, as a UTC Date. */
@@ -170,6 +171,19 @@ export async function POST(req: NextRequest) {
       .update(schema.generationJobs)
       .set({ userId: user.id, updatedAt: new Date() })
       .where(eq(schema.generationJobs.id, job.id));
+  }
+
+  // Pre-generation reference-photo check: a prompt that asks for a specific
+  // person needs their photo attached — fail fast here instead of after the
+  // queue wait. Runs before the capacity gates so it never consumes the cap.
+  if (needsReferencePhoto(job.enhancedPrompt ?? job.prompt) && files.length === 0) {
+    return NextResponse.json(
+      {
+        code: 'MISSING_REFERENCE',
+        error: 'This prompt asks for a specific person — attach their photo first.',
+      },
+      { status: 400 }
+    );
   }
 
   // Phase 2 contract §5: capacity gates BEFORE generation starts.

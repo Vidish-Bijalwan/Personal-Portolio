@@ -35,6 +35,7 @@ import {
   countPromptChars,
   formatPromptCount,
 } from "@/src/lib/vilish/prompt-limits";
+import { needsReferencePhoto } from "@/lib/person-reference";
 import {
   UPLOAD_EDGE_LIMIT_BYTES,
   type ManualPayment,
@@ -286,6 +287,10 @@ export default function Composer({ variant = "hero", className, initialMedia = "
       );
       return;
     }
+    if (needsReferencePhoto(prompt) && files.length === 0) {
+      setStatus("This prompt asks for a specific person — attach their photo first.");
+      return;
+    }
     setStarting(true);
     setStatus("");
     setAuthNeeded(false);
@@ -392,6 +397,10 @@ export default function Composer({ variant = "hero", className, initialMedia = "
       setStatus(
         `That's all ${freeCap} free previews for today — back tomorrow. The paid route is open whenever you want it.`
       );
+      return;
+    }
+    if (needsReferencePhoto(prompt) && files.length === 0) {
+      setStatus("This prompt asks for a specific person — attach their photo first.");
       return;
     }
     // Pre-flight: the serverless edge rejects bodies over
