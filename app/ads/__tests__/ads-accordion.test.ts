@@ -138,6 +138,14 @@ describe("ads-flow.tsx — step 3 wiring", () => {
   it("freeform skip path still clears the concept and jumps to styling", () => {
     expect(src).toContain("setConceptId(null); setStep(3)");
   });
+
+  it("freeform path lets the accordion default to the first section open", () => {
+    // customizeOpenId is null until a concept is picked; passing it through
+    // as-is would force the accordion fully closed on the freeform path.
+    // `?? undefined` lets AdsCustomize fall back to its documented default
+    // (the Concept section), so step 3 never lands on four closed panels.
+    expect(src).toContain("initialOpenId={customizeOpenId ?? undefined}");
+  });
 });
 
 describe("concept-art fallbacks", () => {

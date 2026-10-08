@@ -355,7 +355,7 @@ export default function WatchRoomPage() {
   const caption = captions[captionIdx % captions.length];
   const stageText = displayStage(data?.stage);
   // Real progress from the pipeline stage + status.
-  const progress = data ? progressForStage(data.stage, data.status, data.created_at) : 8;
+  const progress = data ? progressForStage(data.stage, data.status) : 8;
   // Paid videos are generate-first: the unlock price comes from the
   // server (videoClipPricePaise(durationSeconds)); images stay flat.
   const unlockPrice =
