@@ -503,7 +503,7 @@ export default function AdsFlow() {
             // Changing the concept collapses it and opens Colors.
             setCustomizeOpenId("palette");
           }}
-          initialOpenId={customizeOpenId}
+          initialOpenId={customizeOpenId ?? undefined}
           finalPrompt={finalPrompt}
           onBack={() => setStep(2)}
           onNext={() => setStep(4)}

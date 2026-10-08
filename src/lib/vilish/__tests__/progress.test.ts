@@ -52,24 +52,30 @@ describe("progressForStage", () => {
   });
 });
 
-describe("progressForStage time-aware creep", () => {
-  it("adds elapsed-time creep on top of the stage base", () => {
-    const twoMinAgo = new Date(Date.now() - 120_000).toISOString();
-    // "Preparing" base is 20; 120s / 6 = 20, capped at +12 → 32
-    expect(progressForStage("Warming up", "processing", twoMinAgo)).toBe(32);
+describe("progressForStage — real pipeline stages, never time-based", () => {
+  it("tracks the queue → claim → generate → watermark → deliver pipeline", () => {
+    expect(progressForStage("Waiting in the queue", "queued")).toBe(8);
+    expect(progressForStage("Claimed by a worker", "generating")).toBe(15);
+    expect(progressForStage("Warming up the grill", "generating")).toBe(20);
+    expect(progressForStage("Cooking your creation", "generating")).toBe(55);
+    expect(progressForStage("Plating it up", "generating")).toBe(80);
+    expect(progressForStage("Watermarking your file", "generating")).toBe(92);
+    expect(progressForStage("Delivering your file", "generating")).toBe(95);
+    expect(progressForStage("Delivering your file", "done")).toBe(100);
   });
 
-  it("does not creep without a createdAt", () => {
-    expect(progressForStage("Warming up", "processing")).toBe(20);
+  it("is a pure function of stage + status — no clock involved", () => {
+    // The signature no longer accepts a timestamp at all: the bar can only
+    // move when the pipeline reports a new stage or status.
+    expect(progressForStage.length).toBe(2);
+    expect(progressForStage("Warming up the grill", "generating")).toBe(20);
   });
 
-  it("never exceeds 97 before done", () => {
-    const longAgo = new Date(Date.now() - 3600_000).toISOString();
-    expect(progressForStage("Polishing the final cut", "processing", longAgo)).toBeLessThanOrEqual(97);
+  it("never exceeds 99 before done", () => {
+    expect(progressForStage("Delivering your file", "generating")).toBeLessThanOrEqual(99);
   });
 
-  it("done still returns 100 regardless of time", () => {
-    const longAgo = new Date(Date.now() - 3600_000).toISOString();
-    expect(progressForStage("anything", "done", longAgo)).toBe(100);
+  it("done still returns 100", () => {
+    expect(progressForStage("anything", "done")).toBe(100);
   });
 });

@@ -267,7 +267,7 @@ export default function VideoStudioWatchPage() {
   const stageText = displayStage(data?.stage);
   // Real progress from the watcher's stage + status — the bar below
   // reflects actual pipeline position, not a fixed indeterminate width.
-  const progress = data ? progressForStage(data.stage, data.status, data.created_at) : 8;
+  const progress = data ? progressForStage(data.stage, data.status) : 8;
 
   return (
     <div className="flex min-h-screen flex-col bg-[#080808] font-sans text-[#F5F5F3] antialiased">
