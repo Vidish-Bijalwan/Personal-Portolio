@@ -6,6 +6,7 @@ import { generations } from '@/lib/db/schema';
 import { requireSession } from '@/lib/auth';
 import { needsReferencePhoto } from '@/lib/person-reference';
 import { PROMPT_MAX, isValidPrompt } from '@/lib/free/policy';
+import { enhancePrompt } from '@/data/prompt-bank/builder';
 import {
   VIDEO_DURATION_MAX_S,
   VIDEO_DURATION_MIN_S,
@@ -96,13 +97,21 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  // Cinema-grade foundation: the operator prompt is the user's description
+  // plus additive prompt-bank craft (dedup-safe, user's words lead
+  // verbatim — matching the /create image path through interpretCreative).
+  const enhancedVideoPrompt = enhancePrompt(prompt.trim(), {
+    media: 'video',
+    maxLength: PROMPT_MAX,
+  }).enhanced;
+
   // Queue immediately — no order is minted here. The unlock order comes
   // later from POST /api/gen/[id]/unlock when the user clicks the CTA.
   const [gen] = await db
     .insert(generations)
     .values({
       userId: user.id,
-      prompt: prompt.trim(),
+      prompt: enhancedVideoPrompt,
       quality: 'studio',
       aspectRatio,
       mediaType: 'video',
