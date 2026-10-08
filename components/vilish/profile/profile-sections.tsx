@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatINR } from "@/src/lib/vilish/types";
+import { displaySrcFor } from "@/src/lib/me/profile";
 import type { MyGenerationItem } from "@/app/api/me/generations/route";
 import type { MyOrderItem } from "@/app/api/me/orders/route";
 
@@ -204,13 +205,20 @@ export function CreationsGrid({
             const isVideo = g.mediaType === "video";
             const locked = g.status === "done" && !g.unlocked;
             const busy = unlockBusyId === g.id;
+            // Unlocked rows render the clean file inline (no watermark);
+            // locked rows keep the watermarked preview.
+            const cardSrc = displaySrcFor({
+              unlocked: g.unlocked,
+              downloadUrl: g.downloadUrl,
+              thumbnailUrl: g.thumbnailUrl,
+            });
             return (
               <div key={g.id} className="pro-card group overflow-hidden">
                 <div className="relative aspect-square overflow-hidden bg-black/20">
                   {g.status === "done" ? (
                     isVideo ? (
                       <video
-                        src={g.thumbnailUrl}
+                        src={cardSrc}
                         className="h-full w-full object-cover"
                         muted
                         playsInline
@@ -219,7 +227,7 @@ export function CreationsGrid({
                     ) : (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
-                        src={g.thumbnailUrl}
+                        src={cardSrc}
                         alt={g.prompt}
                         loading="lazy"
                         className="h-full w-full object-cover"

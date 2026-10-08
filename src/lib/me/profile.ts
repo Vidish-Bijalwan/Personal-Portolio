@@ -209,3 +209,24 @@ export function promptPreview(prompt: string): string {
   if (clean.length <= PROMPT_PREVIEW_CHARS) return clean;
   return clean.slice(0, PROMPT_PREVIEW_CHARS - 1).trimEnd() + '…';
 }
+
+/* ---------------- card display src ---------------- */
+
+export interface DisplaySrcInput {
+  unlocked: boolean;
+  /** clean download URL; only present when unlocked */
+  downloadUrl: string | null;
+  /** watermarked preview URL */
+  thumbnailUrl: string;
+}
+
+/**
+ * Which image/video src the profile CreationsGrid should render.
+ * Unlocked rows with a clean download show the clean file inline
+ * (no watermark); everything else keeps the watermarked preview so
+ * locked work is never shown clean.
+ */
+export function displaySrcFor(g: DisplaySrcInput): string {
+  if (g.unlocked && g.downloadUrl) return `${g.downloadUrl}?inline=1`;
+  return g.thumbnailUrl;
+}

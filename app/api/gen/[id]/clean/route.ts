@@ -14,10 +14,12 @@ function extFor(mime: string): string {
  * GET /api/gen/[id]/clean
  * Owner-gated. 402 {code:'LOCKED'} unless unlocked=true (payment
  * verified). 404 unless status=done with clean bytes stored.
- * Serves the clean deliverable as an attachment download.
+ * Default serves the clean deliverable as an attachment download;
+ * ?inline=1 serves it inline (for unlocked card display on /profile).
+ * The unlocked gate is identical for both — inline never bypasses it.
  */
 export async function GET(
-  _req: NextRequest,
+  req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { user, response: authResponse } = await requireSession();
@@ -45,12 +47,15 @@ export async function GET(
     );
   }
 
+  const inline = req.nextUrl.searchParams.get('inline') === '1';
+  const disposition = inline ? 'inline' : 'attachment';
+
   return new NextResponse(new Uint8Array(bytes), {
     status: 200,
     headers: {
       'content-type': gen.mime,
       'content-length': String(bytes.byteLength),
-      'content-disposition': `attachment; filename="vidish-${gen.id}.${extFor(gen.mime)}"`,
+      'content-disposition': `${disposition}; filename="vidish-${gen.id}.${extFor(gen.mime)}"`,
       'x-content-type-options': 'nosniff',
       'cache-control': 'private, max-age=3600',
     },
