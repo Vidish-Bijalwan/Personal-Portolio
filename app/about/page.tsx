@@ -63,8 +63,11 @@ const TRUST = [
 ];
 
 export default function AboutPage() {
+  // pro-surface on the root div: theme-token background + ink
+  // (var(--pro-bg)/var(--pro-fg)) instead of hardcoded dark values, so the
+  // user's light/dark choice is honored directly.
   return (
-    <div className="flex min-h-screen flex-col bg-[#080808] font-sans text-[#F5F5F3] antialiased">
+    <div className="pro-surface flex min-h-screen flex-col font-sans antialiased">
       <VilishNav />
       <main className="mx-auto w-full max-w-5xl flex-1 px-4 pb-20 pt-10 sm:pt-16">
         <Reveal>

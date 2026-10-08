@@ -106,8 +106,11 @@ function ExampleVideo({ item }: { item: ExampleItem }) {
 }
 
 function ExampleBadge() {
+  // pro-dark-zone: the light-theme remap must not touch this pill — it sits
+  // over photography, so it keeps light text on a dark scrim in both themes
+  // (same pattern as CategoryChip below).
   return (
-    <span className="rounded-full border border-white/[0.14] bg-black/70 px-2.5 py-1 text-[11px] font-medium uppercase tracking-[0.08em] text-[#F5F5F3] backdrop-blur-sm">
+    <span className="pro-dark-zone rounded-full border border-white/[0.14] bg-black/70 px-2.5 py-1 text-[11px] font-medium uppercase tracking-[0.08em] text-[#F5F5F3] backdrop-blur-sm">
       Example
     </span>
   );
