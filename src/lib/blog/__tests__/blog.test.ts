@@ -5,6 +5,8 @@
  * (seeded or cron-generated) passes validatePost() or it doesn't ship.
  */
 import { describe, it, expect } from "vitest";
+import { readdirSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import {
   validatePost,
   postWordCount,
@@ -198,6 +200,35 @@ describe("seeded posts", () => {
       const w = postWordCount(post);
       expect(w, `post ${post.slug}`).toBeGreaterThanOrEqual(900);
       expect(w, `post ${post.slug}`).toBeLessThanOrEqual(1600);
+    }
+  });
+});
+
+describe("blog registry completeness", () => {
+  it("every post file in posts/ is registered in BLOG_SLUGS", async () => {
+    // Post files are the .ts modules directly under ../posts whose name does
+    // not start with "_" (underscore prefix = shared authoring helpers, not
+    // posts — see _helpers.ts). A new post file that is not imported in
+    // index.ts would silently miss /blog, the sitemap and the blog index, so
+    // this fails loudly instead.
+    const postsDir = fileURLToPath(new URL("../posts", import.meta.url));
+    const names = readdirSync(postsDir)
+      .filter((f) => f.endsWith(".ts") && !f.startsWith("_"))
+      .map((f) => f.slice(0, -".ts".length));
+    expect(names.length).toBeGreaterThan(0);
+    for (const name of names) {
+      const mod = (await import(`../posts/${name}.ts`)) as {
+        default?: BlogPost;
+      };
+      const slug = mod.default?.slug;
+      expect(
+        slug,
+        `post file ${name}.ts does not default-export a BlogPost`
+      ).toBeDefined();
+      expect(
+        getPost(slug!),
+        `post file ${name}.ts (slug "${slug}") is not registered in BLOG_SLUGS — add the import + entry in src/lib/blog/index.ts`
+      ).toBeDefined();
     }
   });
 });
