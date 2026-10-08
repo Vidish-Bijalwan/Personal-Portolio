@@ -25,7 +25,7 @@
  */
 
 import { createHmac, timingSafeEqual } from 'node:crypto';
-import { eq } from 'drizzle-orm';
+import { and, desc, eq, gt } from 'drizzle-orm';
 import { db } from '@/lib/db/client';
 import {
   auditLogs,
@@ -387,6 +387,100 @@ export async function markCashfreeOrderPaid(
   });
   await runUnlockHooks(order.id);
   return { ok: true, orderId: order.id, already: false };
+}
+
+/**
+ * Session-aware fallback for the return URL: Cashfree's `_self` redirect
+ * appends `?order_id=` per the docs, but the redirect does not reliably
+ * carry it (seen in production: paid order, no usable query params). When
+ * the primary lookup fails, the logged-in user's most recent
+ * PAYMENT_PENDING cashfree order within the window is the order they were
+ * just paying for. It is still VERIFIED against Cashfree's API before any
+ * fulfilment — never trusted from the session alone.
+ */
+export async function findRecentPendingCashfreeOrder(
+  userId: string,
+  windowMinutes = 60
+): Promise<typeof orders.$inferSelect | undefined> {
+  const cutoff = new Date(Date.now() - windowMinutes * 60_000);
+  const rows = await db
+    .select()
+    .from(orders)
+    .where(
+      and(
+        eq(orders.userId, userId),
+        eq(orders.provider, 'cashfree'),
+        eq(orders.status, 'PAYMENT_PENDING'),
+        gt(orders.createdAt, cutoff)
+      )
+    )
+    .orderBy(desc(orders.createdAt))
+    .limit(1);
+  return rows[0];
+}
+
+/** Recent cashfree orders for the payment-status page (newest first). */
+export async function listRecentCashfreeOrders(
+  userId: string,
+  windowMinutes = 90
+): Promise<(typeof orders.$inferSelect)[]> {
+  const cutoff = new Date(Date.now() - windowMinutes * 60_000);
+  return db
+    .select()
+    .from(orders)
+    .where(
+      and(
+        eq(orders.userId, userId),
+        eq(orders.provider, 'cashfree'),
+        gt(orders.createdAt, cutoff)
+      )
+    )
+    .orderBy(desc(orders.createdAt))
+    .limit(5);
+}
+
+export interface PaymentStatusOrderLite {
+  code: string;
+  status: string;
+  createdAt: string;
+  destination: string;
+}
+
+export type PaymentStatusKind =
+  | 'verified'
+  | 'confirming'
+  | 'stale'
+  | 'failed'
+  | 'empty';
+
+/**
+ * Pure derivation of the payment-status page state from the user's recent
+ * cashfree orders. Unit-tested; the page itself just renders the result.
+ * - verified: money moved (or the unlock pipeline already queued) -> download link
+ * - confirming: pending and fresh -> "Confirming your payment…" + auto-retry
+ * - stale: pending but past the webhook window -> honest "not confirmed" state
+ * - failed: terminal rejection/expiry/mismatch -> genuine error
+ */
+export function derivePaymentStatus(
+  lite: PaymentStatusOrderLite[],
+  nowMs: number,
+  confirmingWindowMs = 10 * 60_000
+): { kind: PaymentStatusKind; order: PaymentStatusOrderLite | null } {
+  const [latest] = lite;
+  if (!latest) return { kind: 'empty', order: null };
+  if (latest.status === 'PAYMENT_VERIFIED' || latest.status === 'GENERATION_QUEUED') {
+    return { kind: 'verified', order: latest };
+  }
+  if (
+    latest.status === 'PAYMENT_REJECTED' ||
+    latest.status === 'PAYMENT_EXPIRED' ||
+    latest.status === 'AMOUNT_MISMATCH'
+  ) {
+    return { kind: 'failed', order: latest };
+  }
+  const age = nowMs - new Date(latest.createdAt).getTime();
+  if (age >= confirmingWindowMs) return { kind: 'stale', order: latest };
+  return { kind: 'confirming', order: latest };
 }
 
 /**
