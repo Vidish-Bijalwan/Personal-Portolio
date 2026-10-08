@@ -6,6 +6,8 @@ import { AuthSessionProvider } from "@/components/vilish/session-provider"
 import { ThemeProvider } from "@/components/theme-provider"
 import SiteBackdrop from "@/components/motion/SiteBackdrop"
 import StickyMobileCTA from "@/components/vilish/sticky-mobile-cta"
+import SwRegister from "@/components/pwa/sw-register"
+import InstallPrompt from "@/components/pwa/install-prompt"
 
 const chakraPetch = Chakra_Petch({
   subsets: ["latin"],
@@ -58,6 +60,8 @@ export const metadata = {
   icons: {
     icon: "/icon.svg",
   },
+  // Web app manifest (app/manifest.ts): PWA installability + share_target.
+  manifest: "/manifest.webmanifest",
   openGraph: {
     title: "AI Image Generator India — ₹19 per Creation | Etch",
     description:
@@ -99,6 +103,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <SiteBackdrop />
           <AuthSessionProvider>{children}</AuthSessionProvider>
           <StickyMobileCTA />
+          <SwRegister />
+          <InstallPrompt />
         </ThemeProvider>
       </body>
     </html>

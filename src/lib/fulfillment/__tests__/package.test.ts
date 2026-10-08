@@ -221,7 +221,7 @@ describe.runIf(existsSync(PACKAGE_ROUTE))(
         .returning();
       const [project] = await db
         .insert(schema.projects)
-        .values({ userId: user.id, title: 'Package project' })
+        .values({ userId: user.id, name: 'Package project' })
         .returning();
       const [job] = await db
         .insert(schema.generationJobs)

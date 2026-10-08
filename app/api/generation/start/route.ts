@@ -9,8 +9,20 @@ import {
   canonicalMimeFor,
   validateUploads,
 } from '@/lib/vilish/attachments';
+import { verifyUploadContents } from '@/lib/muse/uploads';
+import {
+  attachChunkedUploads,
+  releaseChunkedUploads,
+} from '@/lib/muse/chunked-route';
+import {
+  effectivePrompt,
+  resolveProjectRef,
+} from '@/lib/muse/wiring';
 import { getFulfillmentConfig } from '@/lib/fulfillment/config';
 import { isAdminOverride } from '@/lib/fulfillment/guards';
+import { MISSING_REFERENCE_MESSAGE, needsReferencePhoto } from '@/lib/person-reference';
+import { isAdminEmail } from '@/lib/admin';
+import { queueGenerationTrigger } from '@/lib/fast-gen/trigger';
 
 /** Start of the current day in Asia/Kolkata, as a UTC Date. */
 function istDayStart(now: Date): Date {
@@ -37,7 +49,8 @@ async function countOperatorJobsToday(): Promise<number> {
 /**
  * POST /api/generation/start
  * Body (JSON): { quoteId: string, country?: string }
- * Body (multipart/form-data): quoteId, country?, files (0-5 reference files)
+ * Body (multipart/form-data): quoteId, country?, files (0-5 reference files),
+ *   uploadIds? (finalized chunked-upload file ids for files over 4 MB)
  * Auth required. India (UPI) only: any other country -> 400
  * INTL_PAYMENTS_COMING_SOON.
  *
@@ -62,6 +75,10 @@ export async function POST(req: NextRequest) {
   let quoteId: string | null = null;
   let country = 'IN';
   let files: File[] = [];
+  /** Direct multipart files (legacy validation gate applies to these). */
+  let directFiles: File[] = [];
+  /** Finalized chunked-upload ids, released after the order persists. */
+  let chunkedFileIds: string[] = [];
   const contentType = req.headers.get('content-type') ?? '';
   if (contentType.includes('multipart/form-data')) {
     const form = await req.formData().catch(() => null);
@@ -78,6 +95,22 @@ export async function POST(req: NextRequest) {
     files = form
       .getAll('files')
       .filter((v): v is File => v instanceof File && v.size > 0);
+    // Madam Muse chunked uploads: files over 4 MB travel the chunked
+    // pipeline and arrive as `uploadIds`. Resolve them into File objects
+    // so they feed the same attachment persistence below.
+    const chunked = await attachChunkedUploads(form, user.id, files);
+    if (!chunked.ok) {
+      return NextResponse.json(
+        { code: 'INVALID_CHUNKED_UPLOAD', error: chunked.error },
+        { status: chunked.status ?? 400 }
+      );
+    }
+    chunkedFileIds = chunked.chunkedFileIds;
+    // Direct multipart files keep the legacy gate byte-for-byte; chunked
+    // files were validated by the chunk pipeline (allowlist + per-file
+    // totals at initiate, magic bytes on the assembled file).
+    directFiles = files;
+    files = chunked.files;
   } else {
     const body = await req.json().catch(() => null);
     quoteId = typeof body?.quoteId === 'string' ? body.quoteId : null;
@@ -94,14 +127,27 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // Server-side attachment policy: same rules as the composer UI.
-  if (files.length > 0) {
+  // Server-side attachment policy: same rules as the composer UI. The
+  // legacy gate applies to direct multipart files exactly as before;
+  // chunked files were validated by the chunk pipeline (allowlist +
+  // per-file totals at initiate, magic bytes on the assembled file).
+  if (directFiles.length > 0) {
     const check = validateUploads(
-      files.map((f) => ({ name: f.name, size: f.size, type: f.type }))
+      directFiles.map((f) => ({ name: f.name, size: f.size, type: f.type }))
     );
     if (!check.ok) {
       return NextResponse.json(
         { code: 'INVALID_ATTACHMENTS', error: check.message },
+        { status: 400 }
+      );
+    }
+    // Madam Muse: magic-byte sniffing — reject files whose bytes don't
+    // match their claimed type (e.g. an .exe renamed to .png). Additive:
+    // never widens what the extension gate accepts.
+    const contentError = await verifyUploadContents(directFiles);
+    if (contentError) {
+      return NextResponse.json(
+        { code: 'INVALID_ATTACHMENTS', error: contentError },
         { status: 400 }
       );
     }
@@ -171,11 +217,29 @@ export async function POST(req: NextRequest) {
       .where(eq(schema.generationJobs.id, job.id));
   }
 
+  // Pre-generation reference-photo check: a prompt that asks for a specific
+  // person needs their photo attached — fail fast here instead of after the
+  // queue wait. Runs before the capacity gates so it never consumes the cap.
+  if (needsReferencePhoto(job.enhancedPrompt ?? job.prompt) && files.length === 0) {
+    return NextResponse.json(
+      {
+        code: 'MISSING_REFERENCE',
+        error: MISSING_REFERENCE_MESSAGE,
+      },
+      { status: 400 }
+    );
+  }
+
   // Phase 2 contract §5: capacity gates BEFORE generation starts.
-  // Valid x-admin-token bypasses both.
+  // Valid x-admin-token bypasses both, as does the signed-in admin's
+  // session (isAdminEmail) — the admin's browser never sends x-admin-token.
   const fulfillmentCfg = await getFulfillmentConfig();
   const fulfillmentMode = fulfillmentCfg.FULFILLMENT_MODE;
-  if (fulfillmentMode === 'operator' && !isAdminOverride(req)) {
+  if (
+    fulfillmentMode === 'operator' &&
+    !isAdminOverride(req) &&
+    !isAdminEmail(user.email)
+  ) {
     if (!fulfillmentCfg.ORDERS_ACCEPTING) {
       return NextResponse.json({ error: 'ORDERS_PAUSED' }, { status: 403 });
     }
@@ -193,11 +257,25 @@ export async function POST(req: NextRequest) {
   // later via POST /api/generation/unlock. No payment order is created.
   // The job stays QUOTED as the pricing record (customerPrice/product were
   // set server-side at quote time).
+  //
+  // Madam Muse wiring: the project link stamped at quote time is verified
+  // against this user here (unowned projects are claimed; another user's
+  // project is 403). The generations row carries the compiled prompt when
+  // the composer supplied one — that is the ONLY thing about the worker's
+  // input that changes; the worker/fulfillment path is untouched.
+  const projectRef = await resolveProjectRef(db, job.projectId, user.id);
+  if (!projectRef.ok) {
+    return NextResponse.json(
+      { code: projectRef.code, error: projectRef.error },
+      { status: projectRef.status }
+    );
+  }
+
   const [genRow] = await db
     .insert(schema.generations)
     .values({
       userId: user.id,
-      prompt: job.enhancedPrompt ?? job.prompt,
+      prompt: effectivePrompt(job.compiledPrompt, job.enhancedPrompt ?? job.prompt),
       quality: job.quality,
       aspectRatio: job.aspectRatio,
       mediaType: 'image',
@@ -206,6 +284,8 @@ export async function POST(req: NextRequest) {
       mime: 'image/jpeg',
       jobId: job.id,
       unlocked: false,
+      brief: job.brief,
+      projectId: projectRef.projectId,
     })
     .returning({ id: schema.generations.id });
 
@@ -241,6 +321,14 @@ export async function POST(req: NextRequest) {
       );
     }
   }
+
+  // Fast-gen (b): wake the fulfillment worker immediately — the 1-minute
+  // claim poll stays as the fallback if the fast path misses.
+  await queueGenerationTrigger(genRow.id);
+
+  // Chunked uploads are now persisted with the order — release the temp
+  // copies (best-effort; the TTL sweep is the backstop).
+  await releaseChunkedUploads(chunkedFileIds);
 
   return NextResponse.json(
     {

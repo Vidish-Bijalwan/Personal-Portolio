@@ -184,7 +184,10 @@ describe("buildFinalPrompt", () => {
 
   it("silently skips unknown option names", () => {
     const out = buildFinalPrompt(concept, "mug", "nope", "nope", "nope");
-    expect(out).toBe("Studio shot of mug, soft light");
+    // The assembled ad prompt leads verbatim; the prompt bank appends
+    // cinema-grade craft after it.
+    expect(out.startsWith("Studio shot of mug, soft light")).toBe(true);
+    expect(out).toContain("ultra-detailed");
   });
 
   it("freeform path: builds a prompt from the product when concept is null", () => {

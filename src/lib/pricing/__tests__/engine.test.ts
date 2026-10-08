@@ -4,6 +4,10 @@
  */
 import { describe, expect, it } from 'vitest';
 import {
+  VIDEO_CLIP_5S_PRICE_RUPEES,
+  priceOf,
+} from '@/lib/pricing/catalog';
+import {
   DEFAULT_FEE_BPS,
   PRICE_LADDER,
   ladderPrice,
@@ -12,13 +16,16 @@ import {
   remakePrice,
 } from '../engine';
 
+/** The canonical 5s clip price in paise — always the constant, never a literal. */
+const CLIP_5S_PAISE = VIDEO_CLIP_5S_PRICE_RUPEES * 100;
+
 describe('PRICE_LADDER', () => {
   it('matches the October 2026 price-drop ladder (paise)', () => {
     expect(PRICE_LADDER).toEqual({
       singleImage: 1500,
       fourPack: 4900,
       productPhoto: 2900,
-      clip5s: 4500,
+      clip5s: CLIP_5S_PAISE,
       remake: 500,
     });
   });
@@ -158,7 +165,7 @@ describe('ladderPrice', () => {
     expect(ladderPrice('singleImage', 25)).toBe(1500);
     expect(ladderPrice('fourPack', 100)).toBe(4900);
     expect(ladderPrice('remake', 25)).toBe(500);
-    expect(ladderPrice('clip5s', 25, 0)).toBe(4500);
+    expect(ladderPrice('clip5s', 25, 0)).toBe(CLIP_5S_PAISE);
   });
 
   it('never returns below the floor even when provider cost dwarfs the ladder', () => {

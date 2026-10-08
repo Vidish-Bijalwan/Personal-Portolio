@@ -30,11 +30,12 @@ export const PRICE_LADDER = {
 /*                                                                     */
 /*   price_paise = ceil(duration_seconds / 5) × BLOCK_PRICE_PAISE      */
 /*                                                                     */
-/* where BLOCK_PRICE_PAISE is the "clip-5s" catalog price (₹45). Every  */
-/* 5-second block — or part of one — costs one block. So:              */
-/*   5s  → 1 block → ₹45                                              */
-/*   6s  → 2 blocks → ₹90                                             */
-/*   60s → 12 blocks → ₹540                                           */
+/* where BLOCK_PRICE_PAISE is the "clip-5s" catalog price
+ * (VIDEO_CLIP_5S_PRICE_RUPEES = ₹19). Every 5-second block — or part of
+ * one — costs one block. So:
+ *   5s  → 1 block → ₹19
+ *   6s  → 2 blocks → ₹38
+ *   60s → 12 blocks → ₹228
 /* The result is rounded UP to whole rupees per engine rules (a no-op  */
 /* today since the block price is already whole rupees, but it keeps   */
 /* the invariant if the catalog price ever changes).                   */

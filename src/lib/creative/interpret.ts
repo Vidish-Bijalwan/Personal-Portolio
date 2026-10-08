@@ -10,6 +10,7 @@ import type {
   QualityTier,
 } from '../vilish/types';
 import { PROMPT_MAX_LENGTH } from '../vilish/prompt-limits';
+import { enhancePrompt } from '@/data/prompt-bank/builder';
 
 export interface InterpretInput {
   prompt: string;
@@ -177,12 +178,15 @@ export function interpretCreative(input: InterpretInput): CreativeSpec {
   const genre = detectGenre(raw);
   const platform = detectPlatform(raw);
 
-  const enhancedPrompt = (
-    `${style ? style + ', ' : ''}${genre ? genre + ' ' : ''}${raw}` +
-    ', high detail, professional composition, balanced lighting'
-  )
-    .trim()
-    .slice(0, 1000);
+  const stylePrefix = `${style ? style + ', ' : ''}${genre ? genre + ' ' : ''}`;
+  // Cinema-grade enhancement: the user's words stay verbatim and lead;
+  // the prompt bank appends cinematic craft (style, lighting, optics,
+  // composition, quality) with dedup against the user's own words.
+  const { enhanced, negativePrompt } = enhancePrompt(raw, {
+    context: stylePrefix,
+    maxLength: Math.max(200, 1000 - stylePrefix.length),
+  });
+  const enhancedPrompt = `${stylePrefix}${enhanced}`.trim().slice(0, 1000);
 
   const spec: CreativeSpec = {
     task: 'text_to_image',
@@ -190,6 +194,7 @@ export function interpretCreative(input: InterpretInput): CreativeSpec {
     aspectRatio,
     quality,
     enhancedPrompt,
+    negativePrompt,
   };
   if (genre) spec.genre = genre;
   if (style) spec.style = style;

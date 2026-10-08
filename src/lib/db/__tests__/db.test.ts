@@ -3,6 +3,7 @@
  */
 import { describe, it, expect, beforeAll } from 'vitest';
 import { eq } from 'drizzle-orm';
+import { VIDEO_CLIP_5S_PRICE_RUPEES } from '@/lib/pricing/catalog';
 
 let schema: typeof import('../schema');
 let client: typeof import('../client');
@@ -34,7 +35,7 @@ describe('db roundtrip', () => {
 
     const [project] = await db
       .insert(projects)
-      .values({ userId: user.id, title: 'Test project' })
+      .values({ userId: user.id, name: 'Test project' })
       .returning();
 
     const [job] = await db
@@ -204,7 +205,8 @@ describe('seed idempotency', () => {
       singleImage: 1900,
       fourPack: 6900,
       productPhoto: 3900,
-      clip5s: 8900,
+      // Legacy seeded ladder — routed through the canonical 5s clip price.
+      clip5s: VIDEO_CLIP_5S_PRICE_RUPEES * 100,
       remake: 900,
     });
   });

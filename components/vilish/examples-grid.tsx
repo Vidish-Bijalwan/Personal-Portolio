@@ -106,8 +106,11 @@ function ExampleVideo({ item }: { item: ExampleItem }) {
 }
 
 function ExampleBadge() {
+  // pro-dark-zone: the light-theme remap must not touch this pill — it sits
+  // over photography, so it keeps light text on a dark scrim in both themes
+  // (same pattern as CategoryChip below).
   return (
-    <span className="rounded-full border border-white/[0.14] bg-black/70 px-2.5 py-1 text-[11px] font-medium uppercase tracking-[0.08em] text-[#F5F5F3] backdrop-blur-sm">
+    <span className="pro-dark-zone rounded-full border border-white/[0.14] bg-black/70 px-2.5 py-1 text-[11px] font-medium uppercase tracking-[0.08em] text-[#F5F5F3] backdrop-blur-sm">
       Example
     </span>
   );
@@ -115,7 +118,7 @@ function ExampleBadge() {
 
 function CategoryChip({ category }: { category: ExampleCategory }) {
   return (
-    <span className="rounded-full bg-black/60 px-2.5 py-1 text-[11px] font-medium uppercase tracking-[0.08em] text-white/[0.75] backdrop-blur-sm">
+    <span className="pro-dark-zone rounded-full bg-black/70 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-white backdrop-blur-sm">
       {CATEGORY_LABEL[category]}
     </span>
   );
@@ -230,7 +233,7 @@ export default function ExamplesGrid({ items }: { items: ExampleItem[] }) {
                     <span className="absolute right-3 top-3">
                       <CategoryChip category={item.category} />
                     </span>
-                    <span className="pointer-events-none absolute inset-x-0 bottom-0 translate-y-3 bg-gradient-to-t from-black/90 via-black/55 to-transparent px-4 pb-4 pt-10 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100 motion-reduce:transition-none">
+                    <span className="pro-dark-zone pointer-events-none absolute inset-x-0 bottom-0 translate-y-3 bg-gradient-to-t from-black/90 via-black/55 to-transparent px-4 pb-4 pt-10 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100 motion-reduce:transition-none">
                       <span className="line-clamp-2 text-[13px] leading-5 text-white/[0.92]">
                         {item.prompt}
                       </span>

@@ -1,14 +1,20 @@
 /**
  * Real progress for the watch pages' progress bars.
  *
- * The video-studio watcher (and the generation pipeline) report a free-text
- * `stage` ("Recording your voice-over", "Polishing the final cut", …) plus a
- * machine `status` ("queued" | "processing" | "done" | "failed"). This maps
- * those to an honest 0–100 percentage so the bar reflects actual progress
- * instead of sitting at a fixed indeterminate width.
+ * The watcher (and the generation pipeline) report a free-text `stage`
+ * ("Recording your voice-over", "Polishing the final cut", …) plus a
+ * machine `status` ("queued" | "generating" | "done" | "failed"). This maps
+ * those to an honest 0–100 percentage so the bar reflects actual pipeline
+ * position: queued → claimed → generating → watermarking → delivering.
  *
  * The percentages are coarse by design — they communicate "where in the
  * pipeline" rather than pretending to measure exact completion.
+ *
+ * Deliberately NOT time-based: a percentage that creeps forward with the
+ * clock looks fake when the queue is slow (it suggested progress that
+ * never arrived). Elapsed wait is shown separately as honest
+ * "Waiting Xm Ys" copy with the queue position, so the number on the
+ * bar only ever moves when the pipeline itself moves.
  */
 export function progressForStage(
   stage: string | null | undefined,
@@ -23,6 +29,9 @@ export function progressForStage(
 
   // Still waiting for a worker / operator.
   if (s === "queued" || t.includes("queue") || t.includes("waiting")) return 8;
+
+  // Claimed by a worker, about to start.
+  if (t.includes("claim")) return 15;
 
   // Video-studio pipeline stages (set by the watcher). Order matters:
   // "Polishing the final cut" contains "cut", so check polish/final first.
@@ -39,9 +48,27 @@ export function progressForStage(
   if (t.includes("noise")) return 55; // "Cleaning background noise"
 
   // Image-generation pipeline stages (keyword-tolerant).
-  if (t.includes("warm") || t.includes("grill") || t.includes("setup")) return 20;
-  if (t.includes("generat") || t.includes("render") || t.includes("creat")) return 55;
-  if (t.includes("review") || t.includes("quality") || t.includes("qc")) return 80;
+  if (t.includes("watermark")) return 92; // "Watermarking your file"
+  if (t.includes("deliver")) return 95; // "Delivering your file"
+  if (t.includes("warm") || t.includes("grill") || t.includes("setup") || t.includes("prepar")) {
+    return 20; // "Warming up the grill" → preparing
+  }
+  if (
+    t.includes("generat") ||
+    t.includes("render") ||
+    t.includes("creat") ||
+    t.includes("cook")
+  ) {
+    return 55; // "Cooking your creation" → generating
+  }
+  if (
+    t.includes("review") ||
+    t.includes("quality") ||
+    t.includes("qc") ||
+    t.includes("plat")
+  ) {
+    return 80; // "Plating it up" → quality check
+  }
 
   // Processing, but the stage text is unrecognized — an honest midpoint
   // beats a stuck-looking bar.

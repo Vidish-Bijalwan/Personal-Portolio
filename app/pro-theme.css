@@ -198,3 +198,144 @@
     transform: none;
   }
 }
+
+/* ─────────────────────────────────────────────
+   LIGHT-THEME REMAP for legacy hardcoded-dark surfaces
+   Pages built before the dual-theme pro system hardcode dark
+   colors (bg-[#080808], text-white/60, …). Under .light these
+   remap to theme tokens so the user's theme choice is honored
+   everywhere. Elements that must stay dark (media overlays,
+   video stages) opt out via .pro-dark-zone on themselves or
+   an ancestor. Unlayered, so it beats Tailwind's utilities.
+   ───────────────────────────────────────────── */
+.pro-dark-zone { /* opt-out marker for intentional dark areas */ }
+
+/* Base elements: the global stylesheet hardcodes dark body + ivory headings.
+   Under .light these follow the theme tokens instead. */
+.light body {
+  background-color: var(--pro-bg);
+  color: var(--pro-fg);
+}
+.light html {
+  color-scheme: light;
+}
+.light h1:not(.pro-dark-zone):not(.pro-dark-zone *),
+.light h2:not(.pro-dark-zone):not(.pro-dark-zone *),
+.light h3:not(.pro-dark-zone):not(.pro-dark-zone *),
+.light h4:not(.pro-dark-zone):not(.pro-dark-zone *),
+.light h5:not(.pro-dark-zone):not(.pro-dark-zone *),
+.light h6:not(.pro-dark-zone):not(.pro-dark-zone *) {
+  color: var(--pro-fg);
+}
+
+.light .bg-\[\#080808\]:not(.pro-dark-zone):not(.pro-dark-zone *),
+.light .bg-\[\#0c0c0e\]:not(.pro-dark-zone):not(.pro-dark-zone *),
+.light .bg-\[\#0D0D0F\]:not(.pro-dark-zone):not(.pro-dark-zone *),
+.light .bg-\[\#0E0E10\]:not(.pro-dark-zone):not(.pro-dark-zone *) {
+  background-color: var(--pro-bg);
+}
+
+.light .bg-\[\#101012\]:not(.pro-dark-zone):not(.pro-dark-zone *),
+.light .bg-\[\#121214\]:not(.pro-dark-zone):not(.pro-dark-zone *),
+.light .bg-\[\#18181B\]:not(.pro-dark-zone):not(.pro-dark-zone *),
+.light .bg-\[\#1E1E22\]:not(.pro-dark-zone):not(.pro-dark-zone *) {
+  background-color: var(--pro-bg-elev);
+}
+
+.light .bg-white\/\[0\.015\]:not(.pro-dark-zone):not(.pro-dark-zone *),
+.light .bg-white\/\[0\.02\]:not(.pro-dark-zone):not(.pro-dark-zone *),
+.light .bg-white\/\[0\.025\]:not(.pro-dark-zone):not(.pro-dark-zone *),
+.light .bg-white\/\[0\.03\]:not(.pro-dark-zone):not(.pro-dark-zone *),
+.light .bg-white\/\[0\.035\]:not(.pro-dark-zone):not(.pro-dark-zone *),
+.light .bg-white\/\[0\.04\]:not(.pro-dark-zone):not(.pro-dark-zone *),
+.light .bg-white\/5:not(.pro-dark-zone):not(.pro-dark-zone *),
+.light .bg-white\/\[0\.06\]:not(.pro-dark-zone):not(.pro-dark-zone *),
+.light .bg-white\/\[0\.08\]:not(.pro-dark-zone):not(.pro-dark-zone *) {
+  background-color: color-mix(in srgb, var(--pro-fg) 5%, transparent);
+}
+
+.light .bg-white\/10:not(.pro-dark-zone):not(.pro-dark-zone *),
+.light .bg-white\/\[0\.14\]:not(.pro-dark-zone):not(.pro-dark-zone *) {
+  background-color: color-mix(in srgb, var(--pro-fg) 9%, transparent);
+}
+
+.light .text-\[\#F5F5F3\]:not(.pro-dark-zone):not(.pro-dark-zone *):not(.pro-cta):not(.pro-btn-primary):not(.pro-btn-secondary):not(.pro-display):not(.pro-body):not(.pro-eyebrow):not(.pro-accent-text),
+.light .text-white:not(.pro-dark-zone):not(.pro-dark-zone *):not(.pro-cta):not(.pro-btn-primary):not(.pro-btn-secondary):not(.pro-display):not(.pro-body):not(.pro-eyebrow):not(.pro-accent-text) {
+  color: var(--pro-fg);
+}
+
+.light .text-white\/25:not(.pro-dark-zone):not(.pro-dark-zone *),
+.light .text-white\/30:not(.pro-dark-zone):not(.pro-dark-zone *),
+.light .text-white\/35:not(.pro-dark-zone):not(.pro-dark-zone *),
+.light .text-white\/40:not(.pro-dark-zone):not(.pro-dark-zone *):not(.pro-cta):not(.pro-btn-primary):not(.pro-btn-secondary):not(.pro-display):not(.pro-body):not(.pro-eyebrow):not(.pro-accent-text),
+.light .text-white\/\[0\.4\]:not(.pro-dark-zone):not(.pro-dark-zone *):not(.pro-cta):not(.pro-btn-primary):not(.pro-btn-secondary):not(.pro-display):not(.pro-body):not(.pro-eyebrow):not(.pro-accent-text),
+.light .text-white\/\[0\.45\]:not(.pro-dark-zone):not(.pro-dark-zone *):not(.pro-cta):not(.pro-btn-primary):not(.pro-btn-secondary):not(.pro-display):not(.pro-body):not(.pro-eyebrow):not(.pro-accent-text) {
+  color: var(--pro-faint);
+}
+
+.light .text-white\/45:not(.pro-dark-zone):not(.pro-dark-zone *),
+.light .text-white\/50:not(.pro-dark-zone):not(.pro-dark-zone *),
+.light .text-white\/55:not(.pro-dark-zone):not(.pro-dark-zone *),
+.light .text-white\/\[0\.5\]:not(.pro-dark-zone):not(.pro-dark-zone *),
+.light .text-white\/\[0\.55\]:not(.pro-dark-zone):not(.pro-dark-zone *),
+.light .text-white\/\[0\.58\]:not(.pro-dark-zone):not(.pro-dark-zone *),
+.light .text-white\/60:not(.pro-dark-zone):not(.pro-dark-zone *),
+.light .text-white\/\[0\.6\]:not(.pro-dark-zone):not(.pro-dark-zone *),
+.light .text-white\/\[0\.60\]:not(.pro-dark-zone):not(.pro-dark-zone *):not(.pro-cta):not(.pro-btn-primary):not(.pro-btn-secondary):not(.pro-display):not(.pro-body):not(.pro-eyebrow):not(.pro-accent-text),
+.light .text-white\/\[0\.62\]:not(.pro-dark-zone):not(.pro-dark-zone *):not(.pro-cta):not(.pro-btn-primary):not(.pro-btn-secondary):not(.pro-display):not(.pro-body):not(.pro-eyebrow):not(.pro-accent-text),
+.light .text-white\/65:not(.pro-dark-zone):not(.pro-dark-zone *):not(.pro-cta):not(.pro-btn-primary):not(.pro-btn-secondary):not(.pro-display):not(.pro-body):not(.pro-eyebrow):not(.pro-accent-text) {
+  color: var(--pro-muted);
+}
+
+.light .text-white\/70:not(.pro-dark-zone):not(.pro-dark-zone *),
+.light .text-white\/\[0\.7\]:not(.pro-dark-zone):not(.pro-dark-zone *),
+.light .text-white\/75:not(.pro-dark-zone):not(.pro-dark-zone *),
+.light .text-white\/\[0\.75\]:not(.pro-dark-zone):not(.pro-dark-zone *),
+.light .text-white\/80:not(.pro-dark-zone):not(.pro-dark-zone *),
+.light .text-white\/85:not(.pro-dark-zone):not(.pro-dark-zone *),
+.light .text-white\/\[0\.85\]:not(.pro-dark-zone):not(.pro-dark-zone *):not(.pro-cta):not(.pro-btn-primary):not(.pro-btn-secondary):not(.pro-display):not(.pro-body):not(.pro-eyebrow):not(.pro-accent-text),
+.light .text-white\/90:not(.pro-dark-zone):not(.pro-dark-zone *):not(.pro-cta):not(.pro-btn-primary):not(.pro-btn-secondary):not(.pro-display):not(.pro-body):not(.pro-eyebrow):not(.pro-accent-text),
+.light .text-white\/\[0\.92\]:not(.pro-dark-zone):not(.pro-dark-zone *):not(.pro-cta):not(.pro-btn-primary):not(.pro-btn-secondary):not(.pro-display):not(.pro-body):not(.pro-eyebrow):not(.pro-accent-text) {
+  color: var(--pro-fg);
+}
+
+.light .border-white\/\[0\.04\]:not(.pro-dark-zone):not(.pro-dark-zone *),
+.light .border-white\/\[0\.06\]:not(.pro-dark-zone):not(.pro-dark-zone *),
+.light .border-white\/\[0\.08\]:not(.pro-dark-zone):not(.pro-dark-zone *),
+.light .border-white\/\[0\.09\]:not(.pro-dark-zone):not(.pro-dark-zone *),
+.light .border-white\/\[0\.10\]:not(.pro-dark-zone):not(.pro-dark-zone *),
+.light .border-white\/\[0\.1\]:not(.pro-dark-zone):not(.pro-dark-zone *),
+.light .border-white\/10:not(.pro-dark-zone):not(.pro-dark-zone *) {
+  border-color: var(--pro-border-soft);
+}
+
+.light .border-white\/\[0\.12\]:not(.pro-dark-zone):not(.pro-dark-zone *),
+.light .border-white\/\[0\.14\]:not(.pro-dark-zone):not(.pro-dark-zone *),
+.light .border-white\/\[0\.15\]:not(.pro-dark-zone):not(.pro-dark-zone *),
+.light .border-white\/\[0\.16\]:not(.pro-dark-zone):not(.pro-dark-zone *),
+.light .border-white\/15:not(.pro-dark-zone):not(.pro-dark-zone *),
+.light .border-white\/20:not(.pro-dark-zone):not(.pro-dark-zone *),
+.light .border-white\/25:not(.pro-dark-zone):not(.pro-dark-zone *),
+.light .border-white\/30:not(.pro-dark-zone):not(.pro-dark-zone *),
+.light .border-white\/35:not(.pro-dark-zone):not(.pro-dark-zone *) {
+  border-color: var(--pro-border);
+}
+
+.light .hover:text-white:not(.pro-dark-zone):not(.pro-dark-zone *):hover,
+.light .hover:text-white\/70:not(.pro-dark-zone):not(.pro-dark-zone *):hover,
+.light .hover:text-white\/80:not(.pro-dark-zone):not(.pro-dark-zone *):hover:not(.pro-cta):not(.pro-btn-primary):not(.pro-btn-secondary):not(.pro-display):not(.pro-body):not(.pro-eyebrow):not(.pro-accent-text),
+.light .hover:text-white\/85:not(.pro-dark-zone):not(.pro-dark-zone *):hover:not(.pro-cta):not(.pro-btn-primary):not(.pro-btn-secondary):not(.pro-display):not(.pro-body):not(.pro-eyebrow):not(.pro-accent-text),
+.light .hover:text-white\/90:not(.pro-dark-zone):not(.pro-dark-zone *):hover:not(.pro-cta):not(.pro-btn-primary):not(.pro-btn-secondary):not(.pro-display):not(.pro-body):not(.pro-eyebrow):not(.pro-accent-text) {
+  color: var(--pro-fg);
+}
+.light .hover:border-white\/20:not(.pro-dark-zone):not(.pro-dark-zone *):hover,
+.light .hover:border-white\/25:not(.pro-dark-zone):not(.pro-dark-zone *):hover,
+.light .hover:border-white\/30:not(.pro-dark-zone):not(.pro-dark-zone *):hover {
+  border-color: var(--pro-border);
+}
+.light .hover:bg-white\/10:not(.pro-dark-zone):not(.pro-dark-zone *):hover {
+  background-color: color-mix(in srgb, var(--pro-fg) 9%, transparent);
+}
+.light .hover:bg-\[\#1E1E22\]:not(.pro-dark-zone):not(.pro-dark-zone *):hover {
+  background-color: var(--pro-bg-elev);
+}

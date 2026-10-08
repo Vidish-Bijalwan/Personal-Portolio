@@ -16,6 +16,7 @@ import rawPalettes from "@/data/ad-concepts/palettes.json";
 import rawTypography from "@/data/ad-concepts/typography.json";
 import rawLayouts from "@/data/ad-concepts/layouts.json";
 import { composerServiceById, type ComposerServiceId } from "@/lib/pricing/catalog";
+import { enhancePrompt } from "@/data/prompt-bank/builder";
 
 /* ------------------------------------------------------------------ */
 /* Types                                                               */
@@ -350,7 +351,11 @@ export function buildFinalPrompt(
   }
 
   if (tokens.length > 0) prompt += ". " + tokens.join(". ");
-  return prompt;
+  // Cinema-grade foundation: the assembled ad prompt stays verbatim and
+  // leads; the prompt bank appends cinematic craft (lighting, optics,
+  // composition, quality). Dedup keeps the deep-link into /create from
+  // stacking terms twice when the prompt is interpreted again there.
+  return enhancePrompt(prompt, { maxLength: 2000 }).enhanced;
 }
 
 /* ------------------------------------------------------------------ */

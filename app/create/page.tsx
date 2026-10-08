@@ -10,6 +10,7 @@ import { ArrowRight, BadgeCheck, ShieldCheck, Wallet } from "lucide-react";
 import VilishNav from "@/components/vilish/nav";
 import VilishFooter from "@/components/vilish/footer";
 import Composer from "@/components/vilish/composer";
+import UnifiedIntake from "@/components/muse/unified-intake";
 import FulfillmentNotices from "@/components/vilish/fulfillment-notices";
 import Reveal from "@/components/motion/Reveal";
 import { Stagger, StaggerItem } from "@/components/motion/Stagger";
@@ -61,7 +62,17 @@ function Eyebrow({ children }: { children: string }) {
 export default async function CreatePage({
   searchParams,
 }: {
-  searchParams: Promise<{ media?: string; service?: string; template?: string; prompt?: string }>;
+  searchParams: Promise<{
+    media?: string;
+    service?: string;
+    template?: string;
+    prompt?: string;
+    /** PWA share-target handoff: bundle token stored by /share-target. */
+    shared?: string;
+    /** Share receipt rejection code + human message (see src/lib/pwa/share-target.ts). */
+    shareError?: string;
+    shareMsg?: string;
+  }>;
 }) {
   const sp = await searchParams;
   // Trend-template deep link, e.g. /create?service=pack-4&template=diwali-night.
@@ -84,7 +95,7 @@ export default async function CreatePage({
       <main>
         {/* ── composer hero ─────────────────────────────────── */}
         <section className="relative overflow-hidden">
-          <div className="relative mx-auto w-full max-w-3xl px-4 pb-8 pt-16 text-center sm:pt-24">
+          <div className="relative mx-auto w-full max-w-5xl px-4 pb-8 pt-16 sm:pt-24">
             <Stagger className="flex flex-col items-center">
               <StaggerItem>
                 <Eyebrow>Ads for your business — pay per creation</Eyebrow>
@@ -142,8 +153,25 @@ export default async function CreatePage({
               </StaggerItem>
             </Stagger>
 
-            {/* The composer, presented as the hero element */}
-            <Reveal delay={0.3} className="mt-10 text-left">
+            {/* The unified intake — the default way to start a creation.
+                Drop assets, add references, describe in plain words. */}
+            <Reveal delay={0.25} className="mt-10 text-left">
+              <UnifiedIntake
+                sharedToken={sp?.shared}
+                shareError={sp?.shareError}
+                shareMsg={sp?.shareMsg}
+              />
+            </Reveal>
+
+            {/* The classic composer, kept as the explicit manual override */}
+            <Reveal delay={0.1} className="mt-8 text-left">
+              <p
+                className="pro-body mb-3 text-[13px]"
+                style={{ color: "var(--pro-faint)" }}
+              >
+                Prefer the classic step-by-step flow? The Image / Video clip /
+                Edit video options are right here.
+              </p>
               <div
                 className="pro-card p-4 sm:p-7"
                 style={{ boxShadow: "var(--pro-card-shadow)" }}

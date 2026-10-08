@@ -124,7 +124,9 @@ describe("ads-flow.tsx — step 3 wiring", () => {
     expect(src).toContain('import AdsCustomize from "./ads-customize"');
     expect(src).toContain("<AdsCustomize");
     expect(src).toContain("concept={concept}");
-    expect(src).toContain("onConceptChange={setConceptId}");
+    expect(src).toContain("onConceptChange={");
+    // Concept changes auto-advance the accordion to Colors.
+    expect(src).toContain('setCustomizeOpenId("palette")');
     expect(src).toContain("onPaletteChange={setPaletteName}");
     expect(src).toContain("onTypographyChange={setTypographyName}");
     expect(src).toContain("onLayoutChange={setLayoutName}");
@@ -135,6 +137,14 @@ describe("ads-flow.tsx — step 3 wiring", () => {
 
   it("freeform skip path still clears the concept and jumps to styling", () => {
     expect(src).toContain("setConceptId(null); setStep(3)");
+  });
+
+  it("freeform path lets the accordion default to the first section open", () => {
+    // customizeOpenId is null until a concept is picked; passing it through
+    // as-is would force the accordion fully closed on the freeform path.
+    // `?? undefined` lets AdsCustomize fall back to its documented default
+    // (the Concept section), so step 3 never lands on four closed panels.
+    expect(src).toContain("initialOpenId={customizeOpenId ?? undefined}");
   });
 });
 

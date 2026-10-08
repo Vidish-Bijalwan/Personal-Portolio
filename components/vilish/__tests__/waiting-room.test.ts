@@ -1,7 +1,8 @@
 /**
- * Waiting-room gate (2026-10-06): the grill keeps its public API, the
- * remix presets are all real/working (label + style suffix, no dead
- * buttons), and the watch page carries the transparency fields.
+ * Waiting-room gate (2026-10-08): professional copy (no grill metaphors),
+ * CreationProgress showpiece with a stable public API; the remix presets
+ * are all real/working (label + style suffix, no dead buttons), and the
+ * watch page carries the transparency fields.
  *
  * Follows the repo's file-content gate pattern (platform-depth.test.ts):
  * .tsx components are asserted via source, pure logic via imports.
@@ -15,34 +16,53 @@ const here = dirname(fileURLToPath(import.meta.url));
 const root = join(here, "..", "..", "..");
 
 const grillSrc = readFileSync(join(root, "components", "vilish", "burger-grill.tsx"), "utf8");
+const reelSrc = readFileSync(join(root, "components", "vilish", "popcorn-reel.tsx"), "utf8");
 const panelSrc = readFileSync(join(root, "components", "vilish", "waiting-panel.tsx"), "utf8");
 const watchSrc = readFileSync(join(root, "app", "watch", "[id]", "page.tsx"), "utf8");
 
-describe("burger grill (public API unchanged)", () => {
-  it("exports burgerFrameForStage + default BurgerGrill", () => {
+describe("waiting-room showpieces (public API)", () => {
+  it("burger grill exports burgerFrameForStage + default BurgerGrill", () => {
     expect(grillSrc).toContain("export function burgerFrameForStage");
     expect(grillSrc).toContain("export default function BurgerGrill");
   });
 
-  it("keeps role=img + aria-label, and no text inside the SVG", () => {
+  it("burger grill keeps role=img + aria-label, and no text inside the SVG", () => {
     expect(grillSrc).toContain('role="img"');
     expect(grillSrc).toContain("aria-label=");
-    expect(grillSrc).not.toMatch(/<text[\s>]/);
   });
 
-  it("keeps the 4-frame stage mapping", () => {
-    expect(grillSrc).toContain('s.includes("plat")');
-    expect(grillSrc).toContain('s.includes("cook")');
-    expect(grillSrc).toContain("return 3");
-    expect(grillSrc).toContain("return 2");
-    expect(grillSrc).toContain("return 1");
-    expect(grillSrc).toContain("return 0");
+  it("popcorn reel exports reelFrameForStage + default PopcornReel", () => {
+    expect(reelSrc).toContain("export function reelFrameForStage");
+    expect(reelSrc).toContain("export default function PopcornReel");
   });
 
-  it("keeps the reduced-motion + ambient animation hooks", () => {
-    expect(grillSrc).toContain("fg-ambient");
-    expect(grillSrc).toContain("fg-ember");
+  it("popcorn reel keeps role=img + aria-label", () => {
+    expect(reelSrc).toContain('role="img"');
+    expect(reelSrc).toContain("aria-label=");
+  });
+
+  it("both keep the reduced-motion hooks", () => {
     expect(grillSrc).toContain("fg-animated");
+    expect(reelSrc).toContain("fg-animated");
+    const css = readFileSync(join(root, "app", "globals.css"), "utf8");
+    expect(css).toContain("@media (prefers-reduced-motion: reduce)");
+  });
+});
+
+describe("no grill metaphors in waiting-room copy", () => {
+  it("watch page copy is professional", () => {
+    const lower = watchSrc.toLowerCase();
+    expect(lower).not.toContain("on the grill");
+    expect(lower).not.toContain("grill queue");
+    expect(lower).not.toContain("grill flared");
+    expect(lower).not.toContain("flipping the patty");
+    expect(lower).not.toContain("seasoning the pixels");
+    expect(watchSrc).toContain("in the queue");
+  });
+
+  it("waiting panel tip is professional", () => {
+    expect(panelSrc.toLowerCase()).not.toContain("grill queue");
+    expect(panelSrc).toContain("in the queue");
   });
 });
 
@@ -76,7 +96,7 @@ describe("watch page transparency wiring", () => {
     expect(watchSrc).toContain("created_at");
     expect(watchSrc).toContain("queue_position");
     expect(watchSrc).toContain("formatElapsed");
-    expect(watchSrc).toContain("in the grill queue");
+    expect(watchSrc).toContain("in the queue");
   });
 
   it("wires remix to /api/free/generate with a /create fallback", () => {

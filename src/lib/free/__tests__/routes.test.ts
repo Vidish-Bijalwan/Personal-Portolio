@@ -8,6 +8,7 @@ import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { NextRequest } from 'next/server';
 import { eq, sql } from 'drizzle-orm';
+import { VIDEO_CLIP_5S_PRICE_RUPEES } from '@/lib/pricing/catalog';
 
 const mockAuth = vi.hoisted(() => ({ userId: 'user-1' as string | null }));
 
@@ -193,6 +194,29 @@ describe('POST /api/free/generate', () => {
       expect(status).toBe(400);
       expect(b.code).toBeTruthy();
     }
+  });
+
+  it('400s MISSING_REFERENCE when the prompt needs a person but no photo is attached', async () => {
+    mockAuth.userId = 'ref-user';
+    const post = h('POST', FILE);
+    const { status, body } = await json(
+      await post(
+        req('POST', '/api/free/generate', {
+          prompt: 'Use my photo, cinematic portrait in neon light',
+        }),
+        { params: Promise.resolve({}) }
+      )
+    );
+    expect(status).toBe(400);
+    expect(body.code).toBe('MISSING_REFERENCE');
+    expect(typeof body.error).toBe('string');
+    // no row queued and the free cap untouched
+    const db = client.getDb();
+    const rows = await db
+      .select()
+      .from(schema.generations)
+      .where(eq(schema.generations.userId, 'ref-user'));
+    expect(rows).toHaveLength(0);
   });
 
   it('429s after 3 non-failed free images; failed rows do not count', async () => {
@@ -617,6 +641,27 @@ describe('POST /api/video/order', () => {
     expect(after.length).toBe(before.length);
   });
 
+  it('400s MISSING_REFERENCE when a video prompt asks for a person (no reference mechanism)', async () => {
+    mockAuth.userId = 'user-1';
+    const { status, body } = await json(
+      await h('POST', FILE)(
+        req('POST', '/api/video/order', {
+          prompt: 'Animate the person in the reference waving at the camera',
+        }),
+        { params: Promise.resolve({}) }
+      )
+    );
+    expect(status).toBe(400);
+    expect(body.code).toBe('MISSING_REFERENCE');
+    // no row queued
+    const db = client.getDb();
+    const rows = await db
+      .select()
+      .from(schema.generations)
+      .where(eq(schema.generations.prompt, 'Animate the person in the reference waving at the camera'));
+    expect(rows).toHaveLength(0);
+  });
+
   it('stores custom durations on the row (unlock prices them later)', async () => {
     mockAuth.userId = 'user-1';
     const db = client.getDb();
@@ -729,7 +774,7 @@ describe('paid video generate-first: queue → preview → unlock → clean', ()
     expect(locked.status).toBe(402);
 
     // 4. unlock mints the order at the server-side duration price —
-    //    20s = ceil(20/5)=4 blocks × ₹45 = ₹180
+    //    20s = ceil(20/5)=4 blocks × ₹19 = ₹76
     const unlockCall = () =>
       h('POST', UNLOCK)(req('POST', `/api/gen/${id}/unlock`), {
         params: Promise.resolve({ id }),
@@ -737,7 +782,10 @@ describe('paid video generate-first: queue → preview → unlock → clean', ()
     const unlocked = await json(await unlockCall());
     expect(unlocked.status).toBe(201);
     expect(unlocked.body.payment.amountPaise).toBe(videoClipPricePaise(20));
-    expect(unlocked.body.payment.amountPaise).toBe(18000);
+    // 20s = 4 blocks × ₹19 (VIDEO_CLIP_5S_PRICE_RUPEES) = ₹76
+    expect(unlocked.body.payment.amountPaise).toBe(
+      VIDEO_CLIP_5S_PRICE_RUPEES * 100 * 4,
+    );
     expect(unlocked.body.payment.code).toBeTruthy();
     const orderCode = unlocked.body.payment.code as string;
 
@@ -788,7 +836,7 @@ describe('paid video generate-first: queue → preview → unlock → clean', ()
     expect(done.body.code).toBe('ALREADY_UNLOCKED');
   });
 
-  it('prices the longest clip: 60s → ₹540 at unlock', async () => {
+  it('prices the longest clip: 60s → ₹228 at unlock', async () => {
     mockAuth.userId = 'user-1';
     const { videoClipPricePaise } = await import('@/lib/pricing/engine');
     const queued = await json(
@@ -813,7 +861,10 @@ describe('paid video generate-first: queue → preview → unlock → clean', ()
     );
     expect(unlocked.status).toBe(201);
     expect(unlocked.body.payment.amountPaise).toBe(videoClipPricePaise(60));
-    expect(unlocked.body.payment.amountPaise).toBe(54000);
+    // 60s = 12 blocks × ₹19 (VIDEO_CLIP_5S_PRICE_RUPEES) = ₹228
+    expect(unlocked.body.payment.amountPaise).toBe(
+      VIDEO_CLIP_5S_PRICE_RUPEES * 100 * 12,
+    );
   });
 
   it('status exposes the server-side unlock price and duration', async () => {
@@ -833,8 +884,10 @@ describe('paid video generate-first: queue → preview → unlock → clean', ()
     );
     expect(status.status).toBe(200);
     expect(status.body.duration_seconds).toBe(15);
-    // 15s = 3 blocks × ₹45 = ₹135
-    expect(status.body.unlock_price_paise).toBe(13500);
+    // 15s = 3 blocks × ₹19 = ₹57
+    expect(status.body.unlock_price_paise).toBe(
+      VIDEO_CLIP_5S_PRICE_RUPEES * 100 * 3,
+    );
   });
 });
 
@@ -1117,6 +1170,45 @@ describe('POST /api/gen/[id]/retry', () => {
     expect(status).toBe(201);
     const fresh = await stored(body.id);
     expect(fresh.prompt).toBe(safer);
+  });
+
+  it('400s MISSING_REFERENCE when the prompt needs a person but the original has no photo', async () => {
+    mockAuth.userId = 'retry-user-5';
+    await seedUser('retry-user-5');
+    const row = await insertGeneration('retry-user-5', {
+      status: 'failed',
+      errorCode: 'missing_reference',
+      prompt: 'Put the person in the reference on a beach',
+    });
+    const { status, body } = await json(await call(row.id));
+    expect(status).toBe(400);
+    expect(body.code).toBe('MISSING_REFERENCE');
+  });
+
+  it('carries the original photo to the new row when retrying a photo-based generation', async () => {
+    mockAuth.userId = 'retry-user-6';
+    await seedUser('retry-user-6');
+    const row = await insertGeneration('retry-user-6', {
+      status: 'failed',
+      errorCode: 'technical',
+      prompt: 'Put the person in the reference on a beach',
+    });
+    const db = client.getDb();
+    await db.insert(schema.freeGenerationAttachments).values({
+      generationId: row.id,
+      filename: 'ref.png',
+      mimeType: 'image/png',
+      byteSize: 8,
+      data: Buffer.from([0x89, 0x50, 0x4e, 0x47, 0xde, 0xad, 0xbe, 0xef]),
+    });
+    const { status, body } = await json(await call(row.id));
+    expect(status).toBe(201);
+    const copied = await db
+      .select()
+      .from(schema.freeGenerationAttachments)
+      .where(eq(schema.freeGenerationAttachments.generationId, body.id));
+    expect(copied).toHaveLength(1);
+    expect(copied[0].filename).toBe('ref.png');
   });
 
   it('rejects invalid rephrase prompts and finished rows', async () => {

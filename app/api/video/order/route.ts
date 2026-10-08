@@ -4,11 +4,18 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { db } from '@/lib/db/client';
 import { generations } from '@/lib/db/schema';
 import { requireSession } from '@/lib/auth';
+import { needsReferencePhoto } from '@/lib/person-reference';
 import { PROMPT_MAX, isValidPrompt } from '@/lib/free/policy';
+import { enhancePrompt } from '@/data/prompt-bank/builder';
 import {
   VIDEO_DURATION_MAX_S,
   VIDEO_DURATION_MIN_S,
 } from '@/lib/pricing/engine';
+import {
+  effectivePrompt,
+  parseMuseBody,
+  resolveProjectRef,
+} from '@/lib/muse/wiring';
 
 /**
  * POST /api/video/order
@@ -54,6 +61,20 @@ export async function POST(req: NextRequest) {
       { status: 400 }
     );
   }
+  // Pre-generation reference-photo check: video orders take no reference
+  // files, so a prompt that asks for a specific person can never be
+  // fulfilled — fail fast instead of queueing a doomed row.
+  if (needsReferencePhoto(prompt)) {
+    return NextResponse.json(
+      {
+        code: 'MISSING_REFERENCE',
+        error:
+          'This prompt asks for a specific person, but video clips cannot use a reference photo yet — describe the person instead.',
+      },
+      { status: 400 }
+    );
+  }
+
   const aspectRatio =
     typeof body?.aspectRatio === 'string' && body.aspectRatio.length <= 16
       ? body.aspectRatio
@@ -81,13 +102,43 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  // Madam Muse: optional brief + compiledPrompt + projectId thread through.
+  const { fields: muse, error: museError } = parseMuseBody(body);
+  if (museError) {
+    return NextResponse.json(
+      { code: 'INVALID_MUSE_FIELDS', error: museError },
+      { status: 400 }
+    );
+  }
+  const projectRef = await resolveProjectRef(db, muse.projectId, user.id);
+  if (!projectRef.ok) {
+    return NextResponse.json(
+      { code: projectRef.code, error: projectRef.error },
+      { status: projectRef.status }
+    );
+  }
+
+  // Cinema-grade foundation: the operator prompt is the user's description
+  // plus additive prompt-bank craft (dedup-safe, user's words lead
+  // verbatim — matching the /create image path through interpretCreative).
+  // Madam Muse: when the composer supplies a compiled prompt, it replaces
+  // the bank-enhanced one — the worker receives the smarter text; the
+  // worker/fulfillment path itself is untouched.
+  const enhancedVideoPrompt = effectivePrompt(
+    muse.compiledPrompt,
+    enhancePrompt(prompt.trim(), {
+      media: 'video',
+      maxLength: PROMPT_MAX,
+    }).enhanced
+  );
+
   // Queue immediately — no order is minted here. The unlock order comes
   // later from POST /api/gen/[id]/unlock when the user clicks the CTA.
   const [gen] = await db
     .insert(generations)
     .values({
       userId: user.id,
-      prompt: prompt.trim(),
+      prompt: enhancedVideoPrompt,
       quality: 'studio',
       aspectRatio,
       mediaType: 'video',
@@ -96,6 +147,8 @@ export async function POST(req: NextRequest) {
       mime: 'video/mp4',
       unlocked: false,
       durationSeconds,
+      brief: muse.brief as unknown as Record<string, unknown> | null,
+      projectId: projectRef.projectId,
     })
     .returning({ id: generations.id });
 

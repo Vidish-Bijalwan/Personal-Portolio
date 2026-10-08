@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, type ReactNode, type MouseEvent } from "react"
+import { useEffect, useRef, useState, type ReactNode, type MouseEvent } from "react"
 import { motion, useMotionValue, useSpring } from "framer-motion"
 import { MOTION, usePrefersReducedMotion } from "@/src/lib/motion/theme"
 
@@ -27,8 +27,16 @@ export default function MagneticButton({
   const y = useMotionValue(0)
   const sx = useSpring(x, MOTION.springs.lively)
   const sy = useSpring(y, MOTION.springs.lively)
+  // Mounted gate: the server (and the first client render) must render the
+  // plain <div> branch — reading window.matchMedia during render would
+  // hydrate-mismatch (server renders div, client renders motion.div).
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const canMagnet =
+    mounted &&
     !reduced &&
     typeof window !== "undefined" &&
     typeof window.matchMedia === "function" &&
