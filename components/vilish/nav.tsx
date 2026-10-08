@@ -17,6 +17,7 @@ import ProThemeToggle from "./pro-theme-toggle";
 const LINKS = [
   { href: "/create", label: "Create" },
   { href: "/ads", label: "Ad Studio" },
+  { href: "/posters", label: "Posters" },
   { href: "/#tools", label: "Tools" },
   { href: "/examples", label: "Examples" },
   { href: "/pricing", label: "Pricing" },
