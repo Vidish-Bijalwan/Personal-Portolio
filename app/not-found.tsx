@@ -2,11 +2,13 @@ import Link from "next/link";
 import { ArrowRight, Home } from "lucide-react";
 import VilishNav from "@/components/vilish/nav";
 import VilishFooter from "@/components/vilish/footer";
+import NotFoundSearch from "./not-found-search";
+import { buildSearchIndex } from "@/src/lib/not-found-search";
 
 const LINKS = [
   { href: "/create", label: "Start creating", desc: "Describe it, see the price, pay per piece." },
-  { href: "/examples", label: "Examples", desc: "Real creations made with Etch." },
   { href: "/pricing", label: "Pricing", desc: "One creation, one price — no subscription." },
+  { href: "/blog", label: "Blog", desc: "Guides on AI creation and pay-per-creation." },
   { href: "/tools", label: "All tools", desc: "Every working tool in one place." },
 ];
 
@@ -17,6 +19,7 @@ export const metadata = {
 };
 
 export default function NotFound() {
+  const searchIndex = buildSearchIndex();
   return (
     <div className="flex min-h-screen flex-col bg-[#080808] font-sans text-[#F5F5F3] antialiased">
       <VilishNav />
@@ -37,7 +40,8 @@ export default function NotFound() {
         >
           <Home className="h-4 w-4" strokeWidth={2.2} /> Back home
         </Link>
-        <div className="mt-14 grid w-full gap-3 text-left sm:grid-cols-2">
+        <NotFoundSearch index={searchIndex} />
+        <div className="mt-8 grid w-full gap-3 text-left sm:grid-cols-2">
           {LINKS.map((l) => (
             <Link
               key={l.href}

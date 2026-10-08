@@ -198,6 +198,7 @@ export default async function CreatePage({
 
         {/* ── what happens next ─────────────────────────────── */}
         <section
+          id="how-it-works"
           aria-label="What happens next"
           className="border-t"
           style={{ borderColor: "var(--pro-border-soft)" }}
