@@ -54,14 +54,14 @@ const ADMIN_CONFIG_SEEDS: Record<string, unknown> = {
   'payments:provider': 'manual_upi',
   'region:multiplier:IN': 0.55,
   ladder: {
-    singleImage: 1500,
-    fourPack: 4900,
-    productPhoto: 2900,
+    singleImage: 1900,
+    fourPack: 6900,
+    productPhoto: 3900,
     // Legacy seeded ladder — nothing reads it (runtime ladder derives from
     // the canonical price catalog). Kept in sync with the clip-5s catalog
     // price anyway so no stale number lives in the DB.
     clip5s: priceOf('clip-5s'),
-    remake: 500,
+    remake: 900,
   },
   'usd:inr': 88,
   /* ---- phase 2: operator fulfillment (§4) ---- */
