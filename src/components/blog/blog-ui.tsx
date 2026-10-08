@@ -1,17 +1,9 @@
 import Link from "next/link";
 import type { BlogBlock, BlogPost, RichText } from "@/lib/blog/types";
+import { formatBlogDate, postAuthor } from "@/lib/blog/types";
 
 /* Shared server-rendered blog UI in the Etch cyberpunk language.
  * No client JS — pure static markup for SEO and speed. */
-
-function formatDate(iso: string): string {
-  const d = new Date(iso + "T00:00:00");
-  return d.toLocaleDateString("en-IN", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
-}
 
 export function RichText({ text }: { text: RichText }) {
   return (
@@ -219,15 +211,27 @@ export function SourcesSection({ post }: { post: BlogPost }) {
   );
 }
 
+/** Byline: author + published date (+ updated date when present) + reading time. */
 export function PostMeta({ post }: { post: BlogPost }) {
   return (
     <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[12.5px] text-white/45">
+      <span className="font-medium text-white/75">By {postAuthor(post)}</span>
+      <span aria-hidden>·</span>
+      <time dateTime={post.date}>{formatBlogDate(post.date)}</time>
+      {post.updated ? (
+        <>
+          <span aria-hidden>·</span>
+          <span>
+            Updated{" "}
+            <time dateTime={post.updated}>{formatBlogDate(post.updated)}</time>
+          </span>
+        </>
+      ) : null}
+      <span aria-hidden>·</span>
+      <span>{post.readingMinutes} min read</span>
       <span className="rounded-full border border-[var(--pro-accent)]/30 bg-[var(--pro-accent)]/[0.07] px-2.5 py-0.5 font-medium text-[var(--pro-accent)]">
         {post.category}
       </span>
-      <time dateTime={post.date}>{formatDate(post.date)}</time>
-      <span aria-hidden>·</span>
-      <span>{post.readingMinutes} min read</span>
     </div>
   );
 }

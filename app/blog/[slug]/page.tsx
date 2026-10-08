@@ -12,7 +12,7 @@ import {
   SourcesSection,
 } from "@/src/components/blog/blog-ui";
 import { BLOG_SLUGS, getPost, getRelated } from "@/lib/blog";
-import { richTextToPlain } from "@/lib/blog/types";
+import { postAuthor, richTextToPlain } from "@/lib/blog/types";
 
 const base = process.env.NEXT_PUBLIC_SITE_URL ?? "https://vidish.me";
 
@@ -69,7 +69,7 @@ export default async function BlogPostPage({
     description: post.description,
     datePublished: post.date,
     ...(post.updated ? { dateModified: post.updated } : {}),
-    author: { "@type": "Organization", name: "Etch", url: base },
+    author: { "@type": "Person", name: postAuthor(post) },
     publisher: { "@type": "Organization", name: "Etch", url: base },
     mainEntityOfPage: { "@type": "WebPage", "@id": url },
     keywords: post.tags.join(", "),

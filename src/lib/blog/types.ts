@@ -46,6 +46,11 @@ export interface BlogPost {
   /** ISO date, e.g. "2026-10-06". */
   date: string;
   updated?: string;
+  /**
+   * Byline author name. Optional: when absent the post is credited to the
+   * site author. Set explicitly for guest posts.
+   */
+  author?: string;
   category: string;
   tags: string[];
   readingMinutes: number;
@@ -87,6 +92,36 @@ const KNOWN_PRICES: Record<string, number> = {
 
 export function richTextToPlain(rt: RichText): string {
   return rt.map((s) => s.t).join("");
+}
+
+/** Default byline author for posts that don't name one. */
+export const SITE_AUTHOR = "Vidish Bijalwan";
+
+/** The display name for a post's byline: explicit metadata wins, otherwise
+ * the site author. Never invent a name — a post with no recorded author is
+ * credited to the site author, not a fabricated person. */
+export function postAuthor(post: BlogPost): string {
+  return post.author ?? SITE_AUTHOR;
+}
+
+/** Human-readable date for bylines, e.g. "6 Oct 2026". */
+export function formatBlogDate(iso: string): string {
+  const d = new Date(iso + "T00:00:00");
+  return d.toLocaleDateString("en-IN", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+}
+
+/** Plain-text byline for a post, mirroring PostMeta's rendered line:
+ * "By Vidish Bijalwan · 6 Oct 2026 · 5 min read"
+ * (with "· Updated <date>" inserted when the post carries an update). */
+export function postByline(post: BlogPost): string {
+  const parts = [`By ${postAuthor(post)}`, formatBlogDate(post.date)];
+  if (post.updated) parts.push(`Updated ${formatBlogDate(post.updated)}`);
+  parts.push(`${post.readingMinutes} min read`);
+  return parts.join(" · ");
 }
 
 export function blockToPlain(b: BlogBlock): string {

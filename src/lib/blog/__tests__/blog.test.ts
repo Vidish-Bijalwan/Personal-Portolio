@@ -8,6 +8,10 @@ import { describe, it, expect } from "vitest";
 import {
   validatePost,
   postWordCount,
+  postAuthor,
+  postByline,
+  formatBlogDate,
+  SITE_AUTHOR,
   type BlogPost,
 } from "@/lib/blog/types";
 import { BLOG_POSTS, BLOG_SLUGS, getPost } from "@/lib/blog";
@@ -169,6 +173,44 @@ describe("blog quality gate", () => {
         (e) => e.includes("itself")
       )
     ).toBe(true);
+  });
+});
+
+describe("blog bylines", () => {
+  it("credits the site author when a post names none", () => {
+    expect(SITE_AUTHOR).toBe("Vidish Bijalwan");
+    expect(postAuthor(makePost())).toBe("Vidish Bijalwan");
+    expect(postAuthor(makePost({ author: "Guest Writer" }))).toBe(
+      "Guest Writer"
+    );
+  });
+
+  it("an explicit author still passes the quality gate", () => {
+    expect(
+      validatePost(makePost({ author: "Guest Writer" }), ["test-post-slug"])
+    ).toEqual([]);
+  });
+
+  it("PostMeta's byline carries author, published date, and reading time", () => {
+    expect(postByline(makePost())).toBe(
+      "By Vidish Bijalwan · 6 Oct 2026 · 5 min read"
+    );
+  });
+
+  it("PostMeta's byline shows an Updated date when the post carries one", () => {
+    expect(postByline(makePost({ updated: "2026-10-08" }))).toBe(
+      "By Vidish Bijalwan · 6 Oct 2026 · Updated 8 Oct 2026 · 5 min read"
+    );
+  });
+
+  it("every seeded post has a byline built from real recorded dates", () => {
+    expect(formatBlogDate("2026-10-06")).toBe("6 Oct 2026");
+    for (const post of BLOG_POSTS) {
+      const byline = postByline(post);
+      expect(byline, `post ${post.slug}`).toContain(`By ${postAuthor(post)}`);
+      expect(byline, `post ${post.slug}`).toContain(formatBlogDate(post.date));
+      expect(byline, `post ${post.slug}`).toContain("min read");
+    }
   });
 });
 
