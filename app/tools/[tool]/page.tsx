@@ -31,10 +31,37 @@ export async function generateMetadata({
   const { tool: toolId } = await params;
   const tool = toolById(toolId);
   if (!tool) return { title: "Tool not found | Etch" };
+  const base = process.env.NEXT_PUBLIC_SITE_URL ?? "https://tryetch.online";
+  const title = `${tool.name} — ${tool.price} per ${tool.group === "create" ? "creation" : "job"} | Etch`;
+  const description = `${tool.name}: ${tool.tagline}. ${tool.price}, no subscription. One creation, one price.`;
+  // Real page-specific share image: the explainer video's poster frame,
+  // already shipped with the page and served from the site's own /public.
+  const posterImage = `${base}/tools/explainers/${tool.id}-poster.jpg`;
   return {
-    title: `${tool.name} — ${tool.price} per ${tool.group === "create" ? "creation" : "job"} | Etch`,
-    description: `${tool.name}: ${tool.tagline}. ${tool.price}, no subscription. One creation, one price.`,
+    title,
+    description,
     alternates: { canonical: `/tools/${tool.id}` },
+    openGraph: {
+      title,
+      description,
+      url: `${base}/tools/${tool.id}`,
+      siteName: "Etch",
+      type: "website",
+      images: [
+        {
+          url: posterImage,
+          width: 960,
+          height: 540,
+          alt: `${tool.name} — how it works on Etch.`,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [posterImage],
+    },
   };
 }
 
