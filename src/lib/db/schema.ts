@@ -439,7 +439,7 @@ export const generationOrders = pgTable('generation_orders', {
  * Postgres directly) claims work over the HTTPS admin API, and
  * delivers watermarked + clean bytea via the deliver endpoint.
  * Money: integer PAISE everywhere (price_cents stores paise despite
- * the name — 3900 paise = ₹39).
+ * the name — 1900 paise = Rs 19, the canonical 5s-clip catalog price).
  */
 export const videoJobs = pgTable('video_jobs', {
   id: id(),
@@ -464,8 +464,8 @@ export const videoJobs = pgTable('video_jobs', {
   watermarked: bytea('watermarked'),
   clean: bytea('clean'),
   mime: text('mime').notNull().default('video/mp4'),
-  /** integer paise; 3900 = ₹39 */
-  priceCents: integer('price_cents').notNull().default(3900),
+  /** integer paise; 1900 = Rs 19 (canonical 5s-clip price) */
+  priceCents: integer('price_cents').notNull().default(1900),
   unlocked: boolean('unlocked').notNull().default(false),
   error: text('error'),
   createdAt: createdAt(),

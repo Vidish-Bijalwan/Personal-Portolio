@@ -39,10 +39,22 @@ describe("robots()", () => {
 describe("sitemap()", () => {
   it("covers every public surface: static routes + tools + use-cases + blog posts", () => {
     const entries = sitemap();
-    // 12 static routes + 12 tools + 3 use-cases + 10 blog posts
-    expect(entries).toHaveLength(12 + 12 + 3 + 10);
+    const urls = entries.map((e) => e.url);
+    // New pages from the reel program must be indexed.
+    for (const route of ["/terms", "/refunds", "/contact", "/reel"]) {
+      expect(urls).toContain(`${SITE_URL}${route}`);
+    }
+    // Total = static routes + tools + use-cases + blog posts (all dynamic).
     expect(entries).toHaveLength(
-      12 + TOOL_DIRECTORY.length + USE_CASES.length + BLOG_POSTS.length
+      urls.filter(
+        (u) =>
+          !u.includes("/tools/") &&
+          !u.includes("/blog/") &&
+          !USE_CASES.some((uc) => u.endsWith(`/${uc.slug}`))
+      ).length +
+        TOOL_DIRECTORY.length +
+        USE_CASES.length +
+        BLOG_POSTS.length
     );
   });
 

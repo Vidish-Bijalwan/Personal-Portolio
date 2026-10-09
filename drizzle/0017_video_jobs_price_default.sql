@@ -1,0 +1,13 @@
+-- Etch reel-driven website program (worker C): align the video_jobs
+-- price_cents backstop default with the canonical Oct 8 price catalog.
+--
+-- Canonical price: a 5s clip is Rs 19 = 1900 paise
+-- (src/lib/pricing/catalog.ts VIDEO_CLIP_5S_PRICE_RUPEES = 19).
+-- The video-jobs API already prices each job explicitly via toolPricePaise
+-- (app/api/video-jobs/route.ts), so this DEFAULT is only a backstop for
+-- rows inserted without an explicit price.
+--
+-- This migration only changes the column default (no existing rows are
+-- rewritten). src/lib/db/schema.ts is updated to .default(1900) to match.
+--> statement-breakpoint
+ALTER TABLE "video_jobs" ALTER COLUMN "price_cents" SET DEFAULT 1900;

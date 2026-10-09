@@ -30,7 +30,9 @@ const COLUMNS = [
       { href: "/#faq", label: "Questions, answered" },
       { href: "/pricing", label: "How pricing works" },
       { href: "/privacy", label: "Privacy policy" },
-      { href: "mailto:vidishbijalwan@gmail.com", label: "Contact us" },
+      { href: "/terms", label: "Terms of service" },
+      { href: "/refunds", label: "Refund policy" },
+      { href: "/contact", label: "Contact us" },
     ],
   },
 ];

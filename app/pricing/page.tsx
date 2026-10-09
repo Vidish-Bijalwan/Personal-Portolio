@@ -239,6 +239,101 @@ function TierCard({ tier }: { tier: Tier }) {
   );
 }
 
+const COMPARISON_ROWS: Array<{
+  label: string;
+  etch: string;
+  etchSub?: string;
+  typical: string;
+}> = [
+  {
+    label: "Monthly cost when you create nothing",
+    etch: formatINR(0),
+    etchSub: "nothing renews, nothing auto-charges",
+    typical: "₹1,500–2,500/mo",
+  },
+  {
+    label: "Cost per image",
+    etch: `from ${formatINR(priceOf("single-image"))}`,
+    etchSub: "pay per creation, nothing else",
+    typical: "bundled — but you pay every month regardless",
+  },
+  {
+    label: "Unused credits",
+    etch: "no credits, no expiry",
+    typical: "expire monthly on most plans",
+  },
+  {
+    label: "Price shown before you pay",
+    etch: "yes — every time",
+    typical: "varies",
+  },
+  {
+    label: "Keep your files forever",
+    etch: "yes",
+    typical: "yes",
+  },
+];
+
+function CompareSection() {
+  return (
+    <Reveal>
+      <h2 className="font-display text-[22px] font-semibold tracking-[-0.01em] sm:text-[26px]">
+        Etch vs the <span className="pro-accent-text">subscription habit</span>
+      </h2>
+      <div className="mt-6 overflow-x-auto rounded-[16px] border border-white/[0.08]">
+        <table className="w-full min-w-[560px] border-collapse bg-[#121214] text-left text-[13.5px]">
+          <thead>
+            <tr className="border-b border-white/[0.08]">
+              <th className="w-[34%] px-5 py-4 font-medium text-white/40">
+                <span className="sr-only">Feature</span>
+              </th>
+              <th className="w-[33%] px-5 py-4">
+                <span className="pro-accent-text font-display text-[16px] font-semibold">
+                  Etch
+                </span>
+              </th>
+              <th className="w-[33%] px-5 py-4 text-[15px] font-semibold text-white/80">
+                Typical AI subscription
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {COMPARISON_ROWS.map((r, i) => (
+              <tr
+                key={r.label}
+                className={i < COMPARISON_ROWS.length - 1 ? "border-b border-white/[0.06]" : ""}
+              >
+                <th
+                  scope="row"
+                  className="px-5 py-4 align-top text-[13px] font-medium leading-5 text-white/55"
+                >
+                  {r.label}
+                </th>
+                <td className="px-5 py-4 align-top">
+                  <span className="font-semibold text-[#F5F5F3]">{r.etch}</span>
+                  {r.etchSub && (
+                    <span className="mt-0.5 block text-[12px] leading-5 text-white/45">
+                      {r.etchSub}
+                    </span>
+                  )}
+                </td>
+                <td className="px-5 py-4 align-top leading-6 text-white/55">
+                  {r.typical}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <p className="mt-3 text-[12px] leading-5 text-white/40">
+        Subscription column shows a typical market range — not any specific
+        provider&apos;s price. Every Etch figure comes straight from our price
+        catalog.
+      </p>
+    </Reveal>
+  );
+}
+
 export default function PricingPage() {
   return (
     <div className="flex min-h-screen flex-col bg-[#080808] font-sans text-[#F5F5F3] antialiased">
@@ -312,6 +407,10 @@ export default function PricingPage() {
               </StaggerItem>
             ))}
           </Stagger>
+        </div>
+
+        <div className="mt-16">
+          <CompareSection />
         </div>
 
         <div className="mt-16">
