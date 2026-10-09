@@ -47,6 +47,8 @@ import {
 } from "@/src/lib/trends/templates";
 import { toolsByGroup } from "@/src/lib/tools/directory";
 import { BLOG_POSTS } from "@/src/lib/blog/index";
+import { DemoSection } from "@/components/vilish/home/demo";
+import { ChecklistSection } from "@/components/vilish/home/checklist";
 
 /* The "why pay-per-creation" pillars. Copy must stay digit-free —
    no invented numbers of any kind (homepage redesign gate). */
@@ -287,6 +289,8 @@ export default function HomePage() {
         <Hero singleImagePrice={singleImagePrice} slides={heroSlides} />
         <TrustStrip />
         <HowItWorks />
+        <DemoSection />
+        <ChecklistSection />
         <WhyPillars pillars={WHY_PILLARS} />
         <ExamplesGallery items={gallery} />
         <TemplatesShowcase templates={templates} />

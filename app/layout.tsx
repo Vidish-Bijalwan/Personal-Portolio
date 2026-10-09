@@ -6,6 +6,7 @@ import { AuthSessionProvider } from "@/components/vilish/session-provider"
 import { ThemeProvider } from "@/components/theme-provider"
 import SiteBackdrop from "@/components/motion/SiteBackdrop"
 import StickyMobileCTA from "@/components/vilish/sticky-mobile-cta"
+import ContactFab from "@/components/contact-fab"
 import SwRegister from "@/components/pwa/sw-register"
 import InstallPrompt from "@/components/pwa/install-prompt"
 
@@ -103,6 +104,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <SiteBackdrop />
           <AuthSessionProvider>{children}</AuthSessionProvider>
           <StickyMobileCTA />
+          <ContactFab />
           <SwRegister />
           <InstallPrompt />
         </ThemeProvider>
