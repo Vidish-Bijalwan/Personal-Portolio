@@ -17,6 +17,36 @@ import payPerCreationExplained from "./posts/what-is-pay-per-creation-ai";
 import aiVsPhotoshootIndia from "./posts/ai-photoshoot-cost-comparison-india";
 import productAdsWithAi from "./posts/make-product-ads-with-ai";
 import aiTrendTemplates from "./posts/ai-trends-templates-explained";
+import aiPortraitPrompts from "./posts/ai-portrait-prompts-indian-faces";
+import festiveCreativesAi from "./posts/festive-creatives-ai-playbook";
+import aiFoodPhotography from "./posts/ai-food-photography-restaurant-menus";
+import amazonListingImages from "./posts/amazon-listing-images-ai-india";
+import aiJewelleryPhotography from "./posts/ai-jewellery-photography-india";
+import remakeEconomics from "./posts/remake-economics-ai-revisions";
+import aiImagePricingModels from "./posts/ai-image-pricing-models-compared";
+import facelessYoutubeStack from "./posts/faceless-youtube-channels-ai-stack";
+import etchVsSubscription from "./posts/etch-vs-subscription-ai-tools";
+import afterYouPayLifecycle from "./posts/what-happens-after-you-pay";
+import aiRealEstatePhotos from "./posts/ai-real-estate-photos-honest-india";
+import aiWeddingCardDesign from "./posts/ai-wedding-card-invitation-design";
+import aiYoutubeThumbnails from "./posts/ai-youtube-thumbnails-india";
+import promptEngineeringFormula from "./posts/prompt-engineering-5-part-formula";
+import aspectRatiosExplained from "./posts/aspect-ratios-explained-platforms";
+import aiPitchDeckImages from "./posts/ai-images-pitch-decks-presentations";
+import backgroundRemovalVsAi from "./posts/background-removal-vs-ai-backgrounds";
+import flipkartCatalogRefresh from "./posts/flipkart-catalog-refresh-ai";
+import aiGhostMannequin from "./posts/ai-ghost-mannequin-fashion-shots";
+import aiHandmadeCraftPhotos from "./posts/ai-photos-handmade-craft-sellers";
+import aiSkincareBeautyShots from "./posts/ai-skincare-beauty-shots-india";
+import aiElectronicsProductShots from "./posts/ai-electronics-product-shots-india";
+import aiHomeDecorLifestyleScenes from "./posts/ai-home-decor-lifestyle-scenes-india";
+import aiContentBudgetWorksheet from "./posts/ai-content-budget-worksheet-small-business";
+import realCostOfFreeAiTools from "./posts/real-cost-of-free-ai-tools";
+import ai4PackVsSingleOrders from "./posts/ai-4-pack-vs-single-orders";
+import pricingTransparencyChecklist from "./posts/pricing-transparency-checklist-ai-tools";
+import aiVideoHooksTextOverlays from "./posts/ai-video-hooks-text-overlays";
+import repurposeVideoIntoShorts from "./posts/repurpose-video-into-shorts-ai-trim";
+import voiceOverScriptsForEar from "./posts/voice-over-scripts-for-ear";
 
 export const BLOG_POSTS: BlogPost[] = [
   aiImageGeneratorIndia,
@@ -29,6 +59,36 @@ export const BLOG_POSTS: BlogPost[] = [
   aiVsPhotoshootIndia,
   productAdsWithAi,
   aiTrendTemplates,
+  aiPortraitPrompts,
+  festiveCreativesAi,
+  aiFoodPhotography,
+  amazonListingImages,
+  aiJewelleryPhotography,
+  remakeEconomics,
+  aiImagePricingModels,
+  facelessYoutubeStack,
+  etchVsSubscription,
+  afterYouPayLifecycle,
+  aiRealEstatePhotos,
+  aiWeddingCardDesign,
+  aiYoutubeThumbnails,
+  promptEngineeringFormula,
+  aspectRatiosExplained,
+  aiPitchDeckImages,
+  backgroundRemovalVsAi,
+  flipkartCatalogRefresh,
+  aiGhostMannequin,
+  aiHandmadeCraftPhotos,
+  aiSkincareBeautyShots,
+  aiElectronicsProductShots,
+  aiHomeDecorLifestyleScenes,
+  aiContentBudgetWorksheet,
+  realCostOfFreeAiTools,
+  ai4PackVsSingleOrders,
+  pricingTransparencyChecklist,
+  aiVideoHooksTextOverlays,
+  repurposeVideoIntoShorts,
+  voiceOverScriptsForEar,
 ]
   .slice()
   .sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0));
