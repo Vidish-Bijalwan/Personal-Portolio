@@ -22,6 +22,19 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  // Canonical host: www.tryetch.online → tryetch.online (301, path + query
+  // preserved). This repo has no middleware/proxy.ts, so config redirects
+  // are the right place. Duplicates (www) would split index equity.
+  async redirects() {
+    return [
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "www.tryetch.online" }],
+        destination: "https://tryetch.online/:path*",
+        permanent: true,
+      },
+    ];
+  },
   experimental: {
     webpackBuildWorker: true,
     parallelServerBuildTraces: true,

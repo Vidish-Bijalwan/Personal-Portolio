@@ -51,40 +51,18 @@ export const viewport = {
   themeColor: "#080808",
 };
 
+/* Site-wide metadata defaults. Homepage SEO (title/description/OG +
+   canonical "/") lives in app/page.tsx — every public page carries its own
+   alternates.canonical so no page emits a bare-domain or duplicate canonical. */
 export const metadata = {
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_SITE_URL ?? "https://vidish.me",
+    process.env.NEXT_PUBLIC_SITE_URL ?? "https://tryetch.online",
   ),
-  title: "AI Image Generator India — ₹19 per Creation | Etch",
-  description:
-    "Generate custom AI images for a fixed ₹19 each. No subscription, pay with UPI, human-reviewed quality. Portraits, product photos, posters & more.",
   icons: {
     icon: "/icon.svg",
   },
   // Web app manifest (app/manifest.ts): PWA installability + share_target.
   manifest: "/manifest.webmanifest",
-  openGraph: {
-    title: "AI Image Generator India — ₹19 per Creation | Etch",
-    description:
-      "Generate custom AI images for a fixed ₹19 each. No subscription, pay with UPI, human-reviewed quality. Portraits, product photos, posters & more.",
-    siteName: "Etch",
-    type: "website",
-    images: [
-      {
-        url: "/og-image.png",
-        width: 1200,
-        height: 630,
-        alt: "Etch — one creation, one price. AI images and video tools with no subscription.",
-      },
-    ],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "AI Image Generator India — ₹19 per Creation | Etch",
-    description:
-      "Generate custom AI images for a fixed ₹19 each. No subscription, pay with UPI, human-reviewed quality. Portraits, product photos, posters & more.",
-    images: ["/og-image.png"],
-  },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

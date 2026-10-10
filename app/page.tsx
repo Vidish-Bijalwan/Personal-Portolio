@@ -50,6 +50,39 @@ import { BLOG_POSTS } from "@/src/lib/blog/index";
 import { DemoSection } from "@/components/vilish/home/demo";
 import { ChecklistSection } from "@/components/vilish/home/checklist";
 
+/* Homepage SEO — canonical "/" + Oct 8 catalog prices (single image ₹15).
+   Kept in page metadata (not root layout) so every page resolves its OWN
+   canonical via alternates.canonical. */
+export const metadata = {
+  title: "AI Image Generator India — ₹15 per Creation | Etch",
+  description:
+    "Generate custom AI images for a fixed ₹15 each. No subscription, pay with UPI, human-reviewed quality. Portraits, product photos, posters & more.",
+  alternates: { canonical: "/" },
+  openGraph: {
+    title: "AI Image Generator India — ₹15 per Creation | Etch",
+    description:
+      "Generate custom AI images for a fixed ₹15 each. No subscription, pay with UPI, human-reviewed quality. Portraits, product photos, posters & more.",
+    siteName: "Etch",
+    type: "website",
+    url: "/",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Etch — one creation, one price. AI images and video tools with no subscription.",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "AI Image Generator India — ₹15 per Creation | Etch",
+    description:
+      "Generate custom AI images for a fixed ₹15 each. No subscription, pay with UPI, human-reviewed quality. Portraits, product photos, posters & more.",
+    images: ["/og-image.png"],
+  },
+};
+
 /* The "why pay-per-creation" pillars. Copy must stay digit-free —
    no invented numbers of any kind (homepage redesign gate). */
 const WHY_PILLARS = [
@@ -113,14 +146,14 @@ const JSON_LD = {
     {
       "@type": "Organization",
       name: "Etch",
-      url: "https://vidish.me",
+      url: "https://tryetch.online",
       description:
         "Pay-per-creation AI studio. Studio-quality AI images and video, priced per creation — no subscriptions.",
     },
     {
       "@type": "WebSite",
       name: "Etch",
-      url: "https://vidish.me",
+      url: "https://tryetch.online",
     },
   ],
 };

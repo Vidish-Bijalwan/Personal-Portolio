@@ -5,7 +5,7 @@ import VilishFooter from "@/components/vilish/footer";
 import { PostCard } from "@/src/components/blog/blog-ui";
 import { BLOG_CATEGORIES, BLOG_POSTS } from "@/lib/blog";
 
-const base = process.env.NEXT_PUBLIC_SITE_URL ?? "https://vidish.me";
+const base = process.env.NEXT_PUBLIC_SITE_URL ?? "https://tryetch.online";
 
 export const metadata: Metadata = {
   title: "Blog — AI Creation Guides for India | Etch",
