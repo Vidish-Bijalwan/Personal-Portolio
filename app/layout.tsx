@@ -9,6 +9,8 @@ import StickyMobileCTA from "@/components/vilish/sticky-mobile-cta"
 import ContactFab from "@/components/contact-fab"
 import SwRegister from "@/components/pwa/sw-register"
 import InstallPrompt from "@/components/pwa/install-prompt"
+import { Analytics } from "@vercel/analytics/react"
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
 const chakraPetch = Chakra_Petch({
   subsets: ["latin"],
@@ -85,6 +87,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <ContactFab />
           <SwRegister />
           <InstallPrompt />
+          <Analytics />
+          <SpeedInsights />
         </ThemeProvider>
       </body>
     </html>
