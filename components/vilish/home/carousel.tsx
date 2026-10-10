@@ -14,6 +14,12 @@ export interface CarouselSlide {
   prompt: string;
   price: string;
   href: string;
+  /** Slide media kind — "video" slides render an autoplaying muted loop. */
+  kind: "image" | "video";
+  /** MP4 URL for video slides (public/hero/*.mp4). */
+  video?: string;
+  /** Poster frame for video slides (public/hero/*.jpg). */
+  poster?: string;
 }
 
 const AUTOPLAY_MS = 5000;
@@ -45,12 +51,29 @@ export function HeroCarousel({ slides }: { slides: CarouselSlide[] }) {
   const dragging = useRef(false);
   const dragStartX = useRef(0);
   const reduceMotion = useRef(false);
+  // One ref per extended slide index (ext includes the two wrap clones).
+  const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
 
   useEffect(() => {
     reduceMotion.current =
       typeof window !== "undefined" &&
       window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   }, []);
+
+  // Mobile perf: only the ACTIVE slide's video plays. Non-active videos
+  // stay paused (preload="metadata" only, so no bandwidth burn off-screen).
+  // Reduced-motion users get no autoplay at all.
+  useEffect(() => {
+    if (reduceMotion.current) {
+      videoRefs.current.forEach((v) => v?.pause());
+      return;
+    }
+    videoRefs.current.forEach((v, i) => {
+      if (!v) return;
+      if (i === pos) v.play().catch(() => {});
+      else v.pause();
+    });
+  }, [pos]);
 
   const go = useCallback((p: number) => {
     setAnim(true);
@@ -207,22 +230,38 @@ export function HeroCarousel({ slides }: { slides: CarouselSlide[] }) {
                     }}
                   >
                     <span className="relative block aspect-[16/10] w-full">
-                      <Image
-                        src={s.src}
-                        alt={s.alt}
-                        fill
-                        sizes="(max-width: 768px) 70vw, 840px"
-                        className="object-cover"
-                        // Static: the initially-active slide is the LCP hero
-                        // image. This must NEVER be dynamic (e.g.
-                        // priority={i === 1}): toggling priority flips the
-                        // loading/fetchpriority attributes on a live image
-                        // element every autoplay tick, which races the
-                        // browser's image pipeline and intermittently leaves
-                        // the frame black.
-                        priority={i === 1}
-                        draggable={false}
-                      />
+                      {s.kind === "video" && s.video ? (
+                        <video
+                          ref={(el) => {
+                            videoRefs.current[i] = el;
+                          }}
+                          src={s.video}
+                          poster={s.poster ?? s.src}
+                          aria-label={s.alt}
+                          muted
+                          loop
+                          playsInline
+                          preload="metadata"
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        <Image
+                          src={s.src}
+                          alt={s.alt}
+                          fill
+                          sizes="(max-width: 768px) 70vw, 840px"
+                          className="object-cover"
+                          // Static: the initially-active slide is the LCP hero
+                          // image. This must NEVER be dynamic (e.g.
+                          // priority={i === 1}): toggling priority flips the
+                          // loading/fetchpriority attributes on a live image
+                          // element every autoplay tick, which races the
+                          // browser's image pipeline and intermittently leaves
+                          // the frame black.
+                          priority={i === 1}
+                          draggable={false}
+                        />
+                      )}
                     </span>
                   </button>
                 </div>
@@ -289,7 +328,7 @@ export function HeroCarousel({ slides }: { slides: CarouselSlide[] }) {
                   border: "1px solid var(--pro-border-soft)",
                 }}
               >
-                {active.price} · one image
+                {active.price} · {active.kind === "video" ? "5s clip" : "one image"}
               </span>
               <Link
                 href={active.href}

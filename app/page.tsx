@@ -50,18 +50,19 @@ import { BLOG_POSTS } from "@/src/lib/blog/index";
 import { DemoSection } from "@/components/vilish/home/demo";
 import { ChecklistSection } from "@/components/vilish/home/checklist";
 
-/* Homepage SEO — canonical "/" + Oct 8 catalog prices (single image ₹15).
+/* Homepage SEO — video-first positioning (launch Oct 11): turn product
+   photos into 5-second video ads, ₹19 per clip, pay-per-creation over UPI.
    Kept in page metadata (not root layout) so every page resolves its OWN
    canonical via alternates.canonical. */
 export const metadata = {
-  title: "AI Image Generator India — ₹15 per Creation | Etch",
+  title: "Turn Product Photos into Video Ads — ₹19 per Clip | Etch",
   description:
-    "Generate custom AI images for a fixed ₹15 each. No subscription, pay with UPI, human-reviewed quality. Portraits, product photos, posters & more.",
+    "Turn product photos into scroll-stopping video ads. Finished 5-second clips from ₹19 each — pay per creation over UPI. No subscription, no expiring credits.",
   alternates: { canonical: "/" },
   openGraph: {
-    title: "AI Image Generator India — ₹15 per Creation | Etch",
+    title: "Turn Product Photos into Video Ads — ₹19 per Clip | Etch",
     description:
-      "Generate custom AI images for a fixed ₹15 each. No subscription, pay with UPI, human-reviewed quality. Portraits, product photos, posters & more.",
+      "Turn product photos into scroll-stopping video ads. Finished 5-second clips from ₹19 each — pay per creation over UPI. No subscription, no expiring credits.",
     siteName: "Etch",
     type: "website",
     url: "/",
@@ -76,9 +77,9 @@ export const metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "AI Image Generator India — ₹15 per Creation | Etch",
+    title: "Turn Product Photos into Video Ads — ₹19 per Clip | Etch",
     description:
-      "Generate custom AI images for a fixed ₹15 each. No subscription, pay with UPI, human-reviewed quality. Portraits, product photos, posters & more.",
+      "Turn product photos into scroll-stopping video ads. Finished 5-second clips from ₹19 each — pay per creation over UPI. No subscription, no expiring credits.",
     images: ["/og-image.png"],
   },
 };
@@ -204,9 +205,62 @@ function loadGallery(): GalleryItem[] {
   }));
 }
 
+/**
+ * Hero slides: the 4 finished 5-second video ad demos FIRST (video-first
+ * positioning), then the 4 existing product images. Video slides point at
+ * public/hero/*.mp4 (no audio, <700KB each) with a poster frame; `src` is
+ * the poster so the prompt dialog still shows an image for video slides.
+ */
 function loadHeroSlides(): CarouselSlide[] {
-  const price = formatINR(priceOf("single-image"));
-  const slides: { src: string; alt: string; prompt: string }[] = [
+  const clipPrice = formatINR(priceOf("clip-5s"));
+  const imagePrice = formatINR(priceOf("single-image"));
+  const videos: CarouselSlide[] = [
+    {
+      kind: "video",
+      video: "/hero/demo-watch.mp4",
+      poster: "/hero/demo-watch.jpg",
+      src: "/hero/demo-watch.jpg",
+      alt: "Luxury black chronograph in a leather presentation box — 5-second video ad demo",
+      prompt:
+        "Cinematic 5-second product ad: a luxury black chronograph resting in an open leather presentation box, dark studio with a gold spotlight and drifting dust, slow dolly-in. Finished video clip, no audio.",
+      price: clipPrice,
+      href: "/create?media=video",
+    },
+    {
+      kind: "video",
+      video: "/hero/demo-perfume.mp4",
+      poster: "/hero/demo-perfume.jpg",
+      src: "/hero/demo-perfume.jpg",
+      alt: "Square amber perfume bottle with jasmine in sunlit morning light — 5-second video ad demo",
+      prompt:
+        "Cinematic 5-second product ad: a square amber perfume bottle with a gold cap beside fresh jasmine on stone, warm morning light, slow left-to-right pan. Finished video clip, no audio.",
+      price: clipPrice,
+      href: "/create?media=video",
+    },
+    {
+      kind: "video",
+      video: "/hero/demo-skincare.mp4",
+      poster: "/hero/demo-skincare.jpg",
+      src: "/hero/demo-skincare.jpg",
+      alt: "Skincare cream jar with gold lid among dewy botanicals in golden backlight — 5-second video ad demo",
+      prompt:
+        "Cinematic 5-second product ad: a skincare cream jar with a gold lid among dewy botanicals, golden backlight and soft mist, slow push-in. Finished video clip, no audio.",
+      price: clipPrice,
+      href: "/create?media=video",
+    },
+    {
+      kind: "video",
+      video: "/hero/demo-headphones.mp4",
+      poster: "/hero/demo-headphones.jpg",
+      src: "/hero/demo-headphones.jpg",
+      alt: "Leather over-ear headphones on a desk with a vintage camera — 5-second video ad demo",
+      prompt:
+        "Cinematic 5-second product ad: leather over-ear headphones on a desk beside a vintage camera, warm window light with dust motes, slow lateral glide. Finished video clip, no audio.",
+      price: clipPrice,
+      href: "/create?media=video",
+    },
+  ];
+  const images = [
     {
       src: "/pro/hero-watch-exploded.jpg",
       alt: "Meridian Chrono 41 by Meridian Horology — fictional luxury chronograph, exploded component view",
@@ -232,11 +286,15 @@ function loadHeroSlides(): CarouselSlide[] {
         "The fictional Aurelle Ambre Nuit perfume by Aurelle: heavy rectangular glass flacon with amber liquid and a brushed-gold cap, standing on a travertine marble vanity in real morning window light, fresh jasmine sprig and folded natural-linen cloth beside it, soft sheer-curtain glow, out-of-focus bedroom greenery behind, calm luxurious morning scene, premium product photography, photorealistic",
     },
   ];
-  return slides.map((s) => ({
-    ...s,
-    price,
-    href: "/create?service=single-image",
-  }));
+  return [
+    ...videos,
+    ...images.map((s) => ({
+      ...s,
+      kind: "image" as const,
+      price: imagePrice,
+      href: "/create?service=single-image",
+    })),
+  ];
 }
 
 /** Restored sections: templates first by badge, then newest. */
