@@ -362,7 +362,7 @@ export default function WatchRoomPage() {
   const unlockPrice =
     isVideo && data?.unlock_price_paise != null
       ? formatINR(data.unlock_price_paise)
-      : "₹19";
+      : "₹15";
 
   return (
     <div className="flex min-h-screen flex-col bg-[#080808] font-sans text-[#F5F5F3] antialiased">

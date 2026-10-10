@@ -47,6 +47,16 @@ import pricingTransparencyChecklist from "./posts/pricing-transparency-checklist
 import aiVideoHooksTextOverlays from "./posts/ai-video-hooks-text-overlays";
 import repurposeVideoIntoShorts from "./posts/repurpose-video-into-shorts-ai-trim";
 import voiceOverScriptsForEar from "./posts/voice-over-scripts-for-ear";
+import diwaliPosterStepByStep from "./posts/diwali-poster-for-your-shop-step-by-step";
+import phoneProductPhotography from "./posts/phone-product-photography-basics";
+import fiveSecondPromoVideo from "./posts/five-second-promo-video-how-to";
+import freeDesignToolsRoundup from "./posts/free-design-tools-roundup-india";
+import festiveCampaignChecklist from "./posts/festive-campaign-checklist";
+import adCopyCtasConvert from "./posts/ad-copy-ctas-that-convert";
+import instagramAdCreativeSizes from "./posts/instagram-ad-creative-sizes-guide";
+import shootProductVideoPhone from "./posts/shoot-product-video-with-phone";
+import beforeAfterAdMakeover from "./posts/before-after-ad-makeover";
+import festivalMarketingCalendar from "./posts/festival-marketing-calendar-small-business";
 
 export const BLOG_POSTS: BlogPost[] = [
   aiImageGeneratorIndia,
@@ -89,6 +99,16 @@ export const BLOG_POSTS: BlogPost[] = [
   aiVideoHooksTextOverlays,
   repurposeVideoIntoShorts,
   voiceOverScriptsForEar,
+  diwaliPosterStepByStep,
+  phoneProductPhotography,
+  fiveSecondPromoVideo,
+  freeDesignToolsRoundup,
+  festiveCampaignChecklist,
+  adCopyCtasConvert,
+  instagramAdCreativeSizes,
+  shootProductVideoPhone,
+  beforeAfterAdMakeover,
+  festivalMarketingCalendar,
 ]
   .slice()
   .sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0));

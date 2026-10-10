@@ -15,7 +15,7 @@ import {
 import { formatINR } from "@/src/lib/vilish/types";
 import { cn } from "@/lib/utils";
 
-const base = process.env.NEXT_PUBLIC_SITE_URL ?? "https://vidish.me";
+const base = process.env.NEXT_PUBLIC_SITE_URL ?? "https://tryetch.online";
 
 export const metadata: Metadata = {
   title: "Trend Templates — Ready-Made AI Creations | Etch",

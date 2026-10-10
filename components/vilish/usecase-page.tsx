@@ -43,12 +43,12 @@ export default function UseCasePage({ usecase }: { usecase: UseCase }) {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Home", item: "https://vidish.me/" },
+      { "@type": "ListItem", position: 1, name: "Home", item: "https://tryetch.online/" },
       {
         "@type": "ListItem",
         position: 2,
         name: usecase.navLabel,
-        item: `https://vidish.me/${usecase.slug}`,
+        item: `https://tryetch.online/${usecase.slug}`,
       },
     ],
   };
