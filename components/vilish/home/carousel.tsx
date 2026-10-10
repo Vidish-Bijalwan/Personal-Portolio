@@ -3,9 +3,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { ArrowLeft, ArrowRight, RotateCcw } from "lucide-react";
 import { Reveal } from "./reveal";
 import { PromptDialog } from "./prompt-dialog";
+import { exampleHref } from "../examples";
 
 export interface CarouselSlide {
   src: string;
@@ -126,6 +127,13 @@ export function HeroCarousel({ slides }: { slides: CarouselSlide[] }) {
 
   const activeIdx = ((pos - 1) % n + n) % n;
   const active = slides[activeIdx];
+  // Fliki-style one-tap Recreate: opens /create with this slide's exact
+  // prompt pre-filled (video slides land in video mode, image slides keep
+  // the single-image service). Never a blank composer.
+  const recreate = exampleHref({
+    service: active.kind === "video" ? "clip-5s" : "single-image",
+    prompt: active.prompt,
+  });
 
   // Drag / swipe.
   const onPointerDown = (e: React.PointerEvent) => {
@@ -331,12 +339,13 @@ export function HeroCarousel({ slides }: { slides: CarouselSlide[] }) {
                 {active.price} · {active.kind === "video" ? "5s clip" : "one image"}
               </span>
               <Link
-                href={active.href}
-                className="pro-body inline-flex min-h-[40px] items-center gap-1.5 text-[13.5px] font-semibold"
-                style={{ color: "var(--pro-accent)" }}
+                href={recreate}
+                className="pro-btn-primary"
+                style={{ minHeight: 42, fontSize: 14, padding: "0 18px" }}
+                aria-label={`Recreate this ${active.kind === "video" ? "video ad" : "image"} in the creator: ${active.alt}`}
               >
-                Make one like this
-                <ArrowRight className="h-4 w-4" />
+                <RotateCcw className="h-4 w-4" />
+                Recreate
               </Link>
             </div>
           </figcaption>
