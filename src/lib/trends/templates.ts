@@ -73,7 +73,7 @@ export interface Template {
 }
 
 /** Honest "last updated" stamp shown on /trends. Bump when adding templates. */
-export const TRENDS_UPDATED = "2026-10-06";
+export const TRENDS_UPDATED = "2026-10-10";
 
 export const TEMPLATES: readonly Template[] = [
   /* ── Cinematic ─────────────────────────────────────────────── */
@@ -276,6 +276,77 @@ export const TEMPLATES: readonly Template[] = [
     photoSlots: ["Your photo"],
     addedOn: "2026-10-06",
     badge: "New",
+  },
+  /* ── Celebrations: festive beat-synced reel templates (2026-10-10) ──
+   * Kaiber Beat-Sync pattern: every prompt is music-driven — cuts, bursts
+   * and reveals land on the beat of a high-energy 5-second clip. Diwali
+   * sale ads and wedding teasers that move like reels, not slideshows. */
+  {
+    id: "diya-lit-product-reveal",
+    name: "Diya-Lit Product Reveal",
+    theme: "Celebrations",
+    description:
+      "Your product emerges from darkness as diyas ignite on the beat.",
+    service: "clip-5s",
+    prompt:
+      "High-energy 5-second festival ad synced to a driving beat: start in darkness, a ring of diyas ignites one per bass hit, camera whips in as the product is revealed in warm golden light, flower petals burst outward on the final beat, premium Diwali commercial",
+    aspect: "9:16",
+    photoSlots: [],
+    addedOn: "2026-10-10",
+    badge: "New",
+  },
+  {
+    id: "diwali-dhamaka-sale-burst",
+    name: "Diwali Dhamaka Sale Burst",
+    theme: "Celebrations",
+    description:
+      "Diwali Dhamaka energy — firework bursts cut to fresh product angles on every beat.",
+    service: "clip-5s",
+    prompt:
+      "Explosive 5-second Diwali sale teaser synced to a dhamaka drum rhythm: each firework burst cuts to a new product angle in time with the beat, gold and crimson sparks, rapid motion, high-energy festive offer clip",
+    aspect: "9:16",
+    photoSlots: [],
+    addedOn: "2026-10-10",
+    badge: "New",
+  },
+  {
+    id: "rangoli-colour-splash",
+    name: "Rangoli Colour Splash",
+    theme: "Celebrations",
+    description:
+      "Rangoli powder bursts in rhythm around your product — pure festive colour.",
+    service: "clip-5s",
+    prompt:
+      "Rhythmic 5-second festive product clip: bursts of rangoli powder — magenta, turmeric yellow, emerald — explode around the product on each beat of an upbeat track, slow-motion particles, joyful Diwali colour commercial",
+    aspect: "9:16",
+    photoSlots: [],
+    addedOn: "2026-10-10",
+  },
+  {
+    id: "shaadi-cinematic-teaser",
+    name: "Shaadi Cinematic Teaser",
+    theme: "Celebrations",
+    description:
+      "Slow-motion couple teaser — marigolds falling as the beat drops.",
+    service: "clip-5s",
+    prompt:
+      "Cinematic 5-second shaadi teaser: slow-motion couple portrait in wedding finery, marigold petals raining down exactly on the beat drop, warm golden-hour glow, dhol drums driving the rhythm, film-look wedding teaser",
+    aspect: "9:16",
+    photoSlots: [],
+    addedOn: "2026-10-10",
+  },
+  {
+    id: "shaadi-invitation-motion",
+    name: "Wedding Invitation in Motion",
+    theme: "Celebrations",
+    description:
+      "Your shaadi invitation, animated — gold foil, diyas and marigold flourishes.",
+    service: "clip-5s",
+    prompt:
+      "Elegant 5-second animated shaadi invitation: a gold-foil card blooms open in time with a soft tabla rhythm, diya flames and marigold flourishes sweep across the frame, celebratory wedding motion graphic",
+    aspect: "9:16",
+    photoSlots: [],
+    addedOn: "2026-10-10",
   },
   /* ── Fun ───────────────────────────────────────────────────── */
   {

@@ -86,10 +86,33 @@ describe("examples pricing transparency", () => {
     const files = [
       "../../../components/vilish/examples-grid.tsx",
       "../../../components/vilish/nav.tsx",
+      "../../../components/vilish/home/pricing-strip.tsx",
     ];
     for (const f of files) {
       const src = readFileSync(new URL(f, import.meta.url), "utf8");
       expect(src, f).not.toMatch(/₹\s?\d/);
     }
+  });
+
+  it("recreate deep links carry the exact prompt, encoded", () => {
+    const prompt =
+      "Cinematic 5-second product ad: a luxury watch, gold spotlight & drifting dust";
+    expect(exampleHref({ service: "clip-5s", prompt })).toBe(
+      `/create?media=video&prompt=${encodeURIComponent(prompt)}`,
+    );
+    expect(exampleHref({ service: "single-image", prompt })).toBe(
+      `/create?service=single-image&prompt=${encodeURIComponent(prompt)}`,
+    );
+    // The encoded prompt round-trips back to the exact original prompt.
+    const href = exampleHref({ service: "clip-5s", prompt });
+    const back = decodeURIComponent(href.split("&prompt=")[1]);
+    expect(back).toBe(prompt);
+  });
+
+  it("omits the prompt param when the prompt is empty or missing", () => {
+    expect(exampleHref({ service: "clip-5s" })).toBe("/create?media=video");
+    expect(exampleHref({ service: "single-image", prompt: "" })).toBe(
+      "/create?service=single-image",
+    );
   });
 });

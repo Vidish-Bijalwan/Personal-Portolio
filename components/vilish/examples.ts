@@ -54,12 +54,23 @@ export function examplePrice(item: Pick<ExampleItem, "service">): string {
 }
 
 /**
- * "Make one like this →" deep link. Image services open the composer with
+ * "Recreate →" deep link. Image services open the composer with
  * the service preselected; the 5s clip opens the composer in video mode.
+ * The example's exact prompt rides along as ?prompt= so the composer
+ * opens with the same brief prefilled (the /create page slices it to
+ * 2000 chars — the composer is the source of truth for the prompt).
  */
-export function exampleHref(item: Pick<ExampleItem, "service">): string {
-  if (item.service === "clip-5s") return "/create?media=video";
-  return `/create?service=${item.service}`;
+export function exampleHref(
+  item: Pick<ExampleItem, "service"> & { prompt?: string },
+): string {
+  const base =
+    item.service === "clip-5s"
+      ? "/create?media=video"
+      : `/create?service=${item.service}`;
+  if (item.prompt && item.prompt.length > 0) {
+    return `${base}&prompt=${encodeURIComponent(item.prompt)}`;
+  }
+  return base;
 }
 
 /**

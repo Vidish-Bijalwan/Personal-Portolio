@@ -49,6 +49,7 @@ import { toolsByGroup } from "@/src/lib/tools/directory";
 import { BLOG_POSTS } from "@/src/lib/blog/index";
 import { DemoSection } from "@/components/vilish/home/demo";
 import { ChecklistSection } from "@/components/vilish/home/checklist";
+import PricingStrip from "@/components/vilish/home/pricing-strip";
 
 /* Homepage SEO — video-first positioning (launch Oct 11): turn product
    photos into 5-second video ads, ₹19 per clip, pay-per-creation over UPI.
@@ -378,6 +379,7 @@ export default function HomePage() {
       <VilishNav />
       <main>
         <Hero singleImagePrice={singleImagePrice} slides={heroSlides} />
+        <PricingStrip />
         <TrustStrip />
         <HowItWorks />
         <DemoSection />
