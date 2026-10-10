@@ -11,8 +11,9 @@
  */
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { signIn } from "next-auth/react";
-import { Loader2, X } from "lucide-react";
+import { signIn, getProviders } from "next-auth/react";
+import type { ClientSafeProvider } from "next-auth/react";
+import { Loader2, X, Eye, EyeOff } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 /** Mirrors the server's generic message — identical for every login failure. */
@@ -33,13 +34,22 @@ export default function AuthModal({ open, onClose, onAuthenticated }: AuthModalP
   const [name, setName] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [providers, setProviders] = useState<Record<string, ClientSafeProvider> | null>(null);
 
   useEffect(() => {
     if (open) {
       setError("");
       setBusy(false);
+      setShowPassword(false);
+      // Ask the server which providers are configured (Google is inert
+      // until GOOGLE_CLIENT_ID/SECRET are set). No secrets leak: this is
+      // NextAuth's public /api/auth/providers endpoint.
+      getProviders()
+        .then((p) => setProviders(p))
+        .catch(() => setProviders(null));
     }
-  }, [open ]);
+  }, [open]);
 
   // Escape closes the modal (unless a sign-in request is in flight),
   // matching the payment modal and lightbox keyboard behavior.
@@ -53,6 +63,31 @@ export default function AuthModal({ open, onClose, onAuthenticated }: AuthModalP
   }, [open, busy, onClose]);
 
   if (!open) return null;
+
+  async function handleGoogle() {
+    if (busy) return;
+    setBusy(true);
+    setError("");
+    try {
+      // OAuth requires a full redirect. callbackUrl = this page: after
+      // Google returns, the user lands back here signed in and can retry
+      // their action with one tap.
+      await signIn("google", { callbackUrl: window.location.href });
+    } catch {
+      setError("Could not start Google sign-in. Please try again.");
+      setBusy(false);
+    }
+  }
+
+  function passwordStrength(pw: string): { score: number; label: string } {
+    let score = 0;
+    if (pw.length >= 8) score += 1;
+    if (pw.length >= 12) score += 1;
+    if (/[a-z]/.test(pw) && /[A-Z]/.test(pw)) score += 1;
+    if (/\d/.test(pw) || /[^a-zA-Z0-9]/.test(pw)) score += 1;
+    const label = ["Too short", "Weak", "Fair", "Good", "Strong"][score];
+    return { score, label };
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -166,6 +201,34 @@ export default function AuthModal({ open, onClose, onAuthenticated }: AuthModalP
           ))}
         </div>
 
+        {providers?.google && (
+          <>
+            <button
+              type="button"
+              onClick={handleGoogle}
+              disabled={busy}
+              className="mt-4 flex w-full items-center justify-center gap-2.5 rounded-[10px] bg-white px-4 py-3 text-[14px] font-semibold text-[#1a1a1a] transition-opacity hover:opacity-90 disabled:opacity-50"
+            >
+              {busy ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" aria-hidden="true">
+                  <path fill="#4285F4" d="M23.5 12.3c0-.9-.1-1.5-.3-2.3H12v4.5h6.5c-.1 1.1-.8 2.7-2.4 3.8l-.1.1 3.5 2.7.2.1c2.2-2 3.8-5 3.8-8.9z"/>
+                  <path fill="#34A853" d="M12 24c3.2 0 6-1.1 7.9-2.9l-3.8-2.9c-1 .7-2.4 1.2-4.1 1.2-3.2 0-5.9-2.1-6.8-5l-.1.1-3.7 2.9v.1C3.3 21.3 7.3 24 12 24z"/>
+                  <path fill="#FBBC05" d="M5.2 14.4c-.2-.7-.4-1.5-.4-2.4s.1-1.7.4-2.4l-.1-.1-3.7-2.9-.1.1C.5 8.2 0 10 0 12s.5 3.8 1.3 5.4l3.9-3z"/>
+                  <path fill="#EA4335" d="M12 4.7c1.8 0 3 .8 3.7 1.4l3.3-3.2C17.9 1.1 15.2 0 12 0 7.3 0 3.3 2.7 1.3 6.6l3.9 3c.9-2.8 3.6-4.9 6.8-4.9z"/>
+                </svg>
+              )}
+              Continue with Google
+            </button>
+            <div className="mt-4 flex items-center gap-3" aria-hidden="true">
+              <div className="h-px flex-1 bg-white/[0.08]" />
+              <span className="text-[11px] text-white/35">or</span>
+              <div className="h-px flex-1 bg-white/[0.08]" />
+            </div>
+          </>
+        )}
+
         <form onSubmit={handleSubmit} className="mt-4 space-y-3">
           {mode === "signup" && (
             <input
@@ -187,17 +250,54 @@ export default function AuthModal({ open, onClose, onAuthenticated }: AuthModalP
             required
             className={inputCls}
           />
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder={mode === "signup" ? "Password (min 8 characters)" : "Password"}
-            autoComplete={mode === "signup" ? "new-password" : "current-password"}
-            required
-            minLength={8}
-            maxLength={128}
-            className={inputCls}
-          />
+          <div className="relative">
+            <input
+              type={showPassword ? "text" : "password"}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder={mode === "signup" ? "Password (min 8 characters)" : "Password"}
+              autoComplete={mode === "signup" ? "new-password" : "current-password"}
+              required
+              minLength={8}
+              maxLength={128}
+              className={cn(inputCls, "pr-12")}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((v) => !v)}
+              className="absolute right-2 top-1/2 -translate-y-1/2 rounded-[8px] p-2 text-white/40 hover:text-white/75"
+              aria-label={showPassword ? "Hide password" : "Show password"}
+            >
+              {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            </button>
+          </div>
+          {mode === "signup" && password.length > 0 && (
+            <div className="flex items-center gap-2" aria-live="polite">
+              <div className="flex flex-1 gap-1">
+                {[0, 1, 2, 3].map((i) => {
+                  const { score } = passwordStrength(password);
+                  return (
+                    <div
+                      key={i}
+                      className={cn(
+                        "h-1 flex-1 rounded-full",
+                        i < score
+                          ? score <= 1
+                            ? "bg-red-400"
+                            : score === 2
+                              ? "bg-amber-400"
+                              : score === 3
+                                ? "bg-lime-400"
+                                : "bg-emerald-400"
+                          : "bg-white/[0.08]",
+                      )}
+                    />
+                  );
+                })}
+              </div>
+              <span className="text-[11px] text-white/40">{passwordStrength(password).label}</span>
+            </div>
+          )}
           {error && (
             <p className="text-[13px] text-red-400" role="alert">
               {error}
