@@ -87,6 +87,10 @@ export default async function CreatePage({
     ? ((template && template.service !== "clip-5s" ? template.service : undefined) ??
       composerServiceById(sp?.service)?.id ?? undefined)
     : undefined;
+  // Recreate deep link (?prompt=): pre-fills both the primary intake and the
+  // classic composer below, so "Recreate" never lands on a blank screen.
+  const initialPrompt =
+    typeof sp?.prompt === "string" ? sp.prompt.slice(0, 2000) : undefined;
 
   return (
     <div className="pro-surface pro-body min-h-screen">
@@ -157,6 +161,7 @@ export default async function CreatePage({
                 Drop assets, add references, describe in plain words. */}
             <Reveal delay={0.25} className="mt-10 text-left">
               <UnifiedIntake
+                initialPrompt={initialPrompt}
                 sharedToken={sp?.shared}
                 shareError={sp?.shareError}
                 shareMsg={sp?.shareMsg}
@@ -176,7 +181,7 @@ export default async function CreatePage({
                 className="pro-card p-4 sm:p-7"
                 style={{ boxShadow: "var(--pro-card-shadow)" }}
               >
-                <Composer variant="page" initialMedia={initialMedia} initialService={initialService} initialTemplate={template ?? undefined} initialPrompt={typeof sp?.prompt === "string" ? sp.prompt.slice(0, 2000) : undefined} />
+                <Composer variant="page" initialMedia={initialMedia} initialService={initialService} initialTemplate={template ?? undefined} initialPrompt={initialPrompt} />
               </div>
             </Reveal>
 

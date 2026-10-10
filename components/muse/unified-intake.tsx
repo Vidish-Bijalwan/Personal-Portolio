@@ -121,11 +121,17 @@ function refMetaForApi(det: DetectedRef): RefMeta {
 
 export default function UnifiedIntake({
   className,
+  initialPrompt,
   sharedToken,
   shareError,
   shareMsg,
 }: {
   className?: string;
+  /**
+   * Recreate deep link (?prompt=): pre-fills the instruction box so a
+   * tap on "Recreate" lands on a ready-to-edit brief, never a blank box.
+   */
+  initialPrompt?: string;
   /** PWA share-target handoff: bundle token stored by /share-target (?shared=). */
   sharedToken?: string;
   /** Share receipt rejection code (?shareError=) + human message (?shareMsg=). */
@@ -135,7 +141,7 @@ export default function UnifiedIntake({
   const [phase, setPhase] = useState<Phase>("intake");
   const [primary, setPrimary] = useState<PrimaryAsset | null>(null);
   const [refs, setRefs] = useState<RefAsset[]>([]);
-  const [instruction, setInstruction] = useState("");
+  const [instruction, setInstruction] = useState(initialPrompt ?? "");
   const [dragging, setDragging] = useState(false);
   const [error, setError] = useState("");
   const [briefLoading, setBriefLoading] = useState(false);
