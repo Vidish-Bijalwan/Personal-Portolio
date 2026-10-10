@@ -28,6 +28,7 @@ import VilishFooter from "@/components/vilish/footer";
 import AuthModal from "@/components/vilish/auth-modal";
 import Reveal from "@/components/motion/Reveal";
 import { Stagger, StaggerItem } from "@/components/motion/Stagger";
+import SeeItInAction from "@/components/tools/SeeItInAction";
 import { priceOf } from "@/lib/pricing/catalog";
 import { formatINR } from "@/src/lib/vilish/types";
 import {
@@ -585,7 +586,11 @@ export default function VideoStudioPanel({
 
         {step === 1 ? (
           /* ── step 1: the source (primary landing) ──────────────────── */
-          <Reveal className="mt-8" delay={0.05}>
+          <>
+            <Reveal className="mt-8" delay={0.05}>
+              <SeeItInAction key={tool} toolId={tool} />
+            </Reveal>
+            <Reveal className="mt-8" delay={0.1}>
             <section
               aria-label="Add your video"
               className="rounded-[16px] border border-white/[0.08] bg-white/[0.02] p-5 sm:p-6"
@@ -694,6 +699,7 @@ export default function VideoStudioPanel({
               </button>
             </section>
           </Reveal>
+          </>
         ) : (
           /* ── step 2: the tools (secondary — the edit choices) ──────── */
           <>

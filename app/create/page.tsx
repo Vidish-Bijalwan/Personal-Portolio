@@ -14,6 +14,7 @@ import UnifiedIntake from "@/components/muse/unified-intake";
 import FulfillmentNotices from "@/components/vilish/fulfillment-notices";
 import Reveal from "@/components/motion/Reveal";
 import { Stagger, StaggerItem } from "@/components/motion/Stagger";
+import SeeItInAction from "@/components/tools/SeeItInAction";
 import { PRICE_CATALOG, composerServiceById, priceOf, type ComposerServiceId } from "@/src/lib/pricing/catalog";
 import { VIDEO_DURATION_MAX_S, videoClipPricePaise } from "@/src/lib/pricing/engine";
 import { templateById } from "@/src/lib/trends/templates";
@@ -156,6 +157,12 @@ export default async function CreatePage({
                 </ul>
               </StaggerItem>
             </Stagger>
+
+            {/* See it in action — demo video + 3 honest steps, above the intake
+                so visitors see what the feature does before the composer box. */}
+            <Reveal delay={0.2} className="mt-10 text-left">
+              <SeeItInAction toolId={isVideo ? "clip-5s" : (initialService ?? "single-image")} />
+            </Reveal>
 
             {/* The unified intake — the default way to start a creation.
                 Drop assets, add references, describe in plain words. */}
