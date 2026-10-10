@@ -87,13 +87,14 @@ describe("unified-intake source gates", () => {
 });
 
 describe("/create wiring", () => {
-  it("mounts UnifiedIntake as the default view, Composer kept below", () => {
+  it("mounts UnifiedIntake as the single intake — no standalone classic Composer", () => {
     expect(pageSrc).toContain("UnifiedIntake");
     const intakePos = pageSrc.indexOf("<UnifiedIntake");
-    const composerPos = pageSrc.indexOf("<Composer");
     expect(intakePos).toBeGreaterThan(-1);
-    expect(composerPos).toBeGreaterThan(-1);
-    expect(intakePos).toBeLessThan(composerPos);
+    // The legacy standalone classic composer was removed from /create
+    // (the Composer component still lives inside UnifiedIntake's order phase).
+    expect(pageSrc).not.toContain("<Composer");
+    expect(pageSrc).not.toContain("Prefer the classic");
   });
 });
 

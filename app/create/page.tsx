@@ -9,7 +9,6 @@ import Link from "next/link";
 import { ArrowRight, BadgeCheck, ShieldCheck, Wallet } from "lucide-react";
 import VilishNav from "@/components/vilish/nav";
 import VilishFooter from "@/components/vilish/footer";
-import Composer from "@/components/vilish/composer";
 import UnifiedIntake from "@/components/muse/unified-intake";
 import FulfillmentNotices from "@/components/vilish/fulfillment-notices";
 import Reveal from "@/components/motion/Reveal";
@@ -88,10 +87,12 @@ export default async function CreatePage({
     ? ((template && template.service !== "clip-5s" ? template.service : undefined) ??
       composerServiceById(sp?.service)?.id ?? undefined)
     : undefined;
-  // Recreate deep link (?prompt=): pre-fills both the primary intake and the
-  // classic composer below, so "Recreate" never lands on a blank screen.
+  // Recreate deep link (?prompt=) pre-fills the unified intake; trend-template
+  // deep links (?template=) fall back to the template's prompt so they never
+  // land on a blank screen either.
   const initialPrompt =
-    typeof sp?.prompt === "string" ? sp.prompt.slice(0, 2000) : undefined;
+    (typeof sp?.prompt === "string" ? sp.prompt.slice(0, 2000) : undefined) ??
+    template?.prompt;
 
   return (
     <div className="pro-surface pro-body min-h-screen">
@@ -173,23 +174,6 @@ export default async function CreatePage({
                 shareError={sp?.shareError}
                 shareMsg={sp?.shareMsg}
               />
-            </Reveal>
-
-            {/* The classic composer, kept as the explicit manual override */}
-            <Reveal delay={0.1} className="mt-8 text-left">
-              <p
-                className="pro-body mb-3 text-[13px]"
-                style={{ color: "var(--pro-faint)" }}
-              >
-                Prefer the classic step-by-step flow? The Image / Video clip /
-                Edit video options are right here.
-              </p>
-              <div
-                className="pro-card p-4 sm:p-7"
-                style={{ boxShadow: "var(--pro-card-shadow)" }}
-              >
-                <Composer variant="page" initialMedia={initialMedia} initialService={initialService} initialTemplate={template ?? undefined} initialPrompt={initialPrompt} />
-              </div>
             </Reveal>
 
             <div className="mt-5 text-left">
