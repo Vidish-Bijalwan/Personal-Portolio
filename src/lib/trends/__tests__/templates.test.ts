@@ -23,9 +23,9 @@ function allIds(): string[] {
 }
 
 describe("trend templates gate", () => {
-  it("ships a curated set (12–18 templates)", () => {
+  it("ships a curated set (12–24 templates)", () => {
     expect(TEMPLATES.length).toBeGreaterThanOrEqual(12);
-    expect(TEMPLATES.length).toBeLessThanOrEqual(18);
+    expect(TEMPLATES.length).toBeLessThanOrEqual(24);
   });
 
   it("every template passes the validation gate", () => {

@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { RefreshCw } from "lucide-react";
 import { motion } from "framer-motion";
 import { Stagger, StaggerItem } from "@/components/motion/Stagger";
 import { usePrefersReducedMotion } from "@/src/lib/motion/theme";
@@ -264,10 +264,10 @@ export default function ExamplesGrid({ items }: { items: ExampleItem[] }) {
                   <Link
                     href={exampleHref(item)}
                     aria-label={`Make one like this: ${item.prompt.slice(0, 60)}`}
-                    className="inline-flex min-h-[44px] items-center gap-1 text-[13px] font-semibold text-[var(--pro-accent)] transition-opacity hover:opacity-80"
+                    className="inline-flex min-h-[44px] items-center gap-1.5 rounded-full bg-[var(--pro-accent)] px-4 text-[13px] font-bold text-[var(--pro-btn-ink)] transition-transform hover:scale-[1.03] active:scale-[0.98] motion-reduce:transition-none motion-reduce:hover:scale-100"
                   >
-                    Make one like this
-                    <ArrowRight className="h-3.5 w-3.5" strokeWidth={2.2} />
+                    <RefreshCw className="h-3.5 w-3.5" strokeWidth={2.4} aria-hidden />
+                    Recreate
                   </Link>
                 </div>
               </div>
