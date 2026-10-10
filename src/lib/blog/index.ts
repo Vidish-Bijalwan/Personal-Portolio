@@ -47,6 +47,16 @@ import pricingTransparencyChecklist from "./posts/pricing-transparency-checklist
 import aiVideoHooksTextOverlays from "./posts/ai-video-hooks-text-overlays";
 import repurposeVideoIntoShorts from "./posts/repurpose-video-into-shorts-ai-trim";
 import voiceOverScriptsForEar from "./posts/voice-over-scripts-for-ear";
+import phoneSnapListingPipeline from "./posts/phone-snap-to-listing-ready-ai-pipeline";
+import aiWhatsappCatalogsIndia from "./posts/ai-images-whatsapp-catalogs-india";
+import festiveSaleBannersWorkflow from "./posts/festive-sale-banners-ai-workflow";
+import aiFootwearShotsIndia from "./posts/ai-footwear-product-shots-india";
+import aiFmcgPackShotsIndia from "./posts/ai-fmcg-pack-shots-india";
+import aiFurnitureScenesIndia from "./posts/ai-furniture-scenes-india";
+import aiMobileAccessoriesMacro from "./posts/ai-mobile-accessories-macro-shots";
+import costPerListingImage from "./posts/cost-per-listing-image-sellers";
+import aiPhotoVsPhotographerMath from "./posts/ai-product-photo-vs-photographer-math";
+import thumbnailText120px from "./posts/thumbnail-text-120px-creators";
 
 export const BLOG_POSTS: BlogPost[] = [
   aiImageGeneratorIndia,
@@ -89,6 +99,16 @@ export const BLOG_POSTS: BlogPost[] = [
   aiVideoHooksTextOverlays,
   repurposeVideoIntoShorts,
   voiceOverScriptsForEar,
+  phoneSnapListingPipeline,
+  aiWhatsappCatalogsIndia,
+  festiveSaleBannersWorkflow,
+  aiFootwearShotsIndia,
+  aiFmcgPackShotsIndia,
+  aiFurnitureScenesIndia,
+  aiMobileAccessoriesMacro,
+  costPerListingImage,
+  aiPhotoVsPhotographerMath,
+  thumbnailText120px,
 ]
   .slice()
   .sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0));
