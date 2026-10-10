@@ -37,23 +37,24 @@ export function Hero({
       <div className="relative z-10 mx-auto w-full max-w-6xl px-4 pb-16 pt-16 sm:px-6 sm:pb-24 sm:pt-24">
         <Parallax amount={44}>
           <Reveal className="mx-auto max-w-3xl text-center">
-            <p className="pro-eyebrow">Pay-per-creation AI studio</p>
+            <p className="pro-eyebrow">Pay-per-creation video studio</p>
             <h1
               className="pro-display mt-5 text-[38px] font-bold leading-[1.06] sm:text-[60px]"
               style={{ color: "var(--pro-fg)" }}
             >
-              Studio-quality AI images and video, priced per creation.
+              Turn product photos into scroll-stopping video ads.
             </h1>
             <p
               className="pro-body mx-auto mt-6 max-w-[58ch] text-[16.5px] leading-[1.65] sm:text-[18px]"
               style={{ color: "var(--pro-muted)" }}
             >
-              No subscriptions. No expiring credits. See the exact price before
-              you pay — from {singleImagePrice} per image, payable over UPI.
+              Describe your product, see the exact price, get a finished
+              5-second ad clip — from ₹19, payable over UPI. No subscriptions.
+              No expiring credits.
             </p>
             <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
-              <Link href="/create" className="pro-btn-primary w-full sm:w-auto">
-                Start creating
+              <Link href="/create?media=video" className="pro-btn-primary w-full sm:w-auto">
+                Make my video ad
                 <ArrowRight className="h-4 w-4" />
               </Link>
               <Link href="/examples" className="pro-btn-secondary w-full sm:w-auto">
