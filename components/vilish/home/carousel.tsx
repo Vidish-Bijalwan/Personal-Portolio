@@ -66,15 +66,23 @@ export function HeroCarousel({ slides }: { slides: CarouselSlide[] }) {
   }, []);
 
   // Seamless wrap: after sliding onto a clone, jump to the real twin.
-  const onTransitionEnd = useCallback(() => {
-    if (pos === 0) {
-      setAnim(false);
-      setPos(n);
-    } else if (pos === n + 1) {
-      setAnim(false);
-      setPos(1);
-    }
-  }, [pos, n]);
+  // Guard on e.target: slide buttons have their own transitions
+  // (opacity/box-shadow) whose transitionend events bubble up here — only
+  // the track's own transform transition may trigger the wrap, otherwise
+  // it fires ~400ms early and the carousel visibly jumps mid-slide.
+  const onTransitionEnd = useCallback(
+    (e: React.TransitionEvent) => {
+      if (e.target !== e.currentTarget) return;
+      if (pos === 0) {
+        setAnim(false);
+        setPos(n);
+      } else if (pos === n + 1) {
+        setAnim(false);
+        setPos(1);
+      }
+    },
+    [pos, n]
+  );
 
   useEffect(() => {
     if (!anim) {
@@ -205,7 +213,14 @@ export function HeroCarousel({ slides }: { slides: CarouselSlide[] }) {
                         fill
                         sizes="(max-width: 768px) 70vw, 840px"
                         className="object-cover"
-                        priority={isActive}
+                        // Static: the initially-active slide is the LCP hero
+                        // image. This must NEVER be dynamic (e.g.
+                        // priority={i === 1}): toggling priority flips the
+                        // loading/fetchpriority attributes on a live image
+                        // element every autoplay tick, which races the
+                        // browser's image pipeline and intermittently leaves
+                        // the frame black.
+                        priority={i === 1}
                         draggable={false}
                       />
                     </span>
