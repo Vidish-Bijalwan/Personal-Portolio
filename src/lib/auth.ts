@@ -52,6 +52,10 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      // Google verifies email ownership, so linking a Google login to an
+      // existing same-email credentials account is safe and avoids the
+      // OAuthAccountNotLinked dead-end.
+      allowDangerousEmailAccountLinking: true,
     })
   );
 }
