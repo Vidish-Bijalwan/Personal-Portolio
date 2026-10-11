@@ -321,6 +321,17 @@
   border-color: var(--pro-border);
 }
 
+/* Placeholders: the placeholder: utilities style ::placeholder, not the
+   element, so the class remaps above never reach them — white/30 placeholder
+   text stayed white on the remapped white fields (auth modal, composer,
+   search) and vanished in light mode. Remap the pseudo-element itself to
+   the same faint tone the white/30–40 text remap uses. */
+.light input:not(.pro-dark-zone):not(.pro-dark-zone *)::placeholder,
+.light textarea:not(.pro-dark-zone):not(.pro-dark-zone *)::placeholder {
+  color: var(--pro-faint);
+  opacity: 1;
+}
+
 .light .hover:text-white:not(.pro-dark-zone):not(.pro-dark-zone *):hover,
 .light .hover:text-white\/70:not(.pro-dark-zone):not(.pro-dark-zone *):hover,
 .light .hover:text-white\/80:not(.pro-dark-zone):not(.pro-dark-zone *):hover:not(.pro-cta):not(.pro-btn-primary):not(.pro-btn-secondary):not(.pro-display):not(.pro-body):not(.pro-eyebrow):not(.pro-accent-text),
