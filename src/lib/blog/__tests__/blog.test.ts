@@ -173,8 +173,8 @@ describe("blog quality gate", () => {
 });
 
 describe("seeded posts", () => {
-  it("ships 50 posts", () => {
-    expect(BLOG_POSTS.length).toBe(50);
+  it("ships 60 posts", () => {
+    expect(BLOG_POSTS.length).toBe(60);
   });
 
   it("every seeded post passes the quality gate", () => {

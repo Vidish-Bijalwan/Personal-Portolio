@@ -57,6 +57,16 @@ import aiMobileAccessoriesMacro from "./posts/ai-mobile-accessories-macro-shots"
 import costPerListingImage from "./posts/cost-per-listing-image-sellers";
 import aiPhotoVsPhotographerMath from "./posts/ai-product-photo-vs-photographer-math";
 import thumbnailText120px from "./posts/thumbnail-text-120px-creators";
+import subscriptionVsPayPerCreation from "./posts/subscription-vs-pay-per-creation-12-month-model";
+import etchVsCanvaMagicStudio from "./posts/etch-vs-canva-magic-studio";
+import aiHandsTextBreak from "./posts/ai-hands-text-break-briefing-guide";
+import aiCommercialUseRightsIndia from "./posts/ai-images-commercial-use-rights-india";
+import aiBrollTalkingHead from "./posts/ai-broll-talking-head-videos";
+import imageFileFormatsMarketplaces from "./posts/image-file-formats-marketplaces-jpeg-png-webp";
+import commentToContentVisuals from "./posts/comment-to-content-viewer-questions-ai-visuals";
+import creditPacksVsFlatPricing from "./posts/credit-packs-vs-flat-pricing";
+import phoneReferencePhotosBriefs from "./posts/phone-reference-photos-ai-briefs";
+import humanQualityCheckArtifacts from "./posts/human-quality-check-ai-artifacts";
 
 export const BLOG_POSTS: BlogPost[] = [
   aiImageGeneratorIndia,
@@ -109,6 +119,16 @@ export const BLOG_POSTS: BlogPost[] = [
   costPerListingImage,
   aiPhotoVsPhotographerMath,
   thumbnailText120px,
+  subscriptionVsPayPerCreation,
+  etchVsCanvaMagicStudio,
+  aiHandsTextBreak,
+  aiCommercialUseRightsIndia,
+  aiBrollTalkingHead,
+  imageFileFormatsMarketplaces,
+  commentToContentVisuals,
+  creditPacksVsFlatPricing,
+  phoneReferencePhotosBriefs,
+  humanQualityCheckArtifacts,
 ]
   .slice()
   .sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0));
