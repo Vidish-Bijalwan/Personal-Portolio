@@ -67,6 +67,16 @@ import commentToContentVisuals from "./posts/comment-to-content-viewer-questions
 import creditPacksVsFlatPricing from "./posts/credit-packs-vs-flat-pricing";
 import phoneReferencePhotosBriefs from "./posts/phone-reference-photos-ai-briefs";
 import humanQualityCheckArtifacts from "./posts/human-quality-check-ai-artifacts";
+import productPhotoPromptsTemplate from "./posts/product-photo-prompts-template-library";
+import ayurvedicWellnessStyling from "./posts/ayurvedic-wellness-brands-ai-styling";
+import fourPackVsVideoStudio from "./posts/four-pack-vs-video-studio-decision-tree";
+import remakeBudgetsMissRate from "./posts/remake-budgets-miss-rate-planning";
+import facelessChannelBranding from "./posts/faceless-channel-branding-ai";
+import trendJackingAi from "./posts/trend-jacking-ai-same-day-creatives";
+import seriesBranding30 from "./posts/series-branding-30-videos-one-show";
+import captionStylingBrand from "./posts/caption-styling-matches-brand";
+import postingCadenceBurnout from "./posts/posting-cadence-without-burning-out";
+import payPerCreationVsCreditExpiry from "./posts/pay-per-creation-vs-credit-packs-expiry";
 
 export const BLOG_POSTS: BlogPost[] = [
   aiImageGeneratorIndia,
@@ -129,6 +139,16 @@ export const BLOG_POSTS: BlogPost[] = [
   creditPacksVsFlatPricing,
   phoneReferencePhotosBriefs,
   humanQualityCheckArtifacts,
+  productPhotoPromptsTemplate,
+  ayurvedicWellnessStyling,
+  fourPackVsVideoStudio,
+  remakeBudgetsMissRate,
+  facelessChannelBranding,
+  trendJackingAi,
+  seriesBranding30,
+  captionStylingBrand,
+  postingCadenceBurnout,
+  payPerCreationVsCreditExpiry,
 ]
   .slice()
   .sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0));
